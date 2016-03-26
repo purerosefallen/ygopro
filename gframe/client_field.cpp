@@ -1,5 +1,6 @@
 #include "client_field.h"
 #include "client_card.h"
+#include "duelclient.h"
 #include "data_manager.h"
 #include "image_manager.h"
 #include "game.h"
@@ -367,7 +368,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		else if(chain)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->chain_code));
 		else
-			mainGame->btnCardSelect[i]->setImage(imageManager.tCover);
+			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[0]);
 		mainGame->btnCardSelect[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
@@ -437,7 +438,7 @@ void ClientField::ShowChainCard() {
 		if(selectable_cards[i]->code)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->code));
 		else
-			mainGame->btnCardSelect[i]->setImage(imageManager.tCover);
+			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[0]);
 		mainGame->btnCardSelect[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
@@ -493,7 +494,7 @@ void ClientField::ShowLocationCard() {
 		if(display_cards[i]->code)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardDisplay[i], display_cards[i]->code));
 		else
-			mainGame->btnCardDisplay[i]->setImage(imageManager.tCover);
+			mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[0]);
 		mainGame->btnCardDisplay[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardDisplay[i]->setPressed(false);
 		mainGame->btnCardDisplay[i]->setVisible(true);
@@ -1099,6 +1100,47 @@ void ClientField::FadeCard(ClientCard * pcard, int alpha, int frame) {
 	pcard->is_fading = true;
 	pcard->aniFrame = frame;
 }
+bool ClientField::ShowSelectSum(bool panelmode) {
+	if(panelmode) {
+		if(CheckSelectSum()) {
+			if(selectsum_cards.size() == 0 || selectable_cards.size() == 0) {
+				SetResponseSelectedCards();
+				if(mainGame->wCardSelect->isVisible())
+					mainGame->HideElement(mainGame->wCardSelect, true);
+				else {
+					DuelClient::SendResponse();
+					return true;
+				}
+			} else {
+				select_ready = true;
+				mainGame->wCardSelect->setVisible(false);
+				mainGame->dField.ShowSelectCard(true);
+			}
+		} else {
+			select_ready = false;
+			mainGame->wCardSelect->setVisible(false);
+			mainGame->dField.ShowSelectCard();
+		}
+	} else {
+		if(CheckSelectSum()) {
+			if(selectsum_cards.size() == 0 || selectable_cards.size() == 0) {
+				SetResponseSelectedCards();
+				DuelClient::SendResponse();
+				return true;
+			} else {
+				select_ready = true;
+				wchar_t wbuf[256], *pwbuf = wbuf;
+				BufferIO::CopyWStrRef(dataManager.GetSysString(209), pwbuf, 256);
+				*pwbuf++ = L'\n';
+				BufferIO::CopyWStrRef(dataManager.GetSysString(210), pwbuf, 256);
+				mainGame->stQMessage->setText(wbuf);
+				mainGame->PopupElement(mainGame->wQuery);
+			}
+		} else
+			select_ready = false;
+	}
+	return false;
+}
 bool ClientField::CheckSelectSum() {
 	std::set<ClientCard*> selable;
 	std::set<ClientCard*>::iterator sit;
@@ -1116,9 +1158,8 @@ bool ClientField::CheckSelectSum() {
 		selable.erase(selected_cards[i]);
 	}
 	selectsum_cards.clear();
-	bool ret;
 	if (select_mode == 0) {
-		ret = check_sel_sum_s(selable, 0, select_sumval);
+		bool ret = check_sel_sum_s(selable, 0, select_sumval);
 		selectable_cards.clear();
 		for(sit = selectsum_cards.begin(); sit != selectsum_cards.end(); ++sit) {
 			(*sit)->is_selectable = true;
@@ -1127,7 +1168,7 @@ bool ClientField::CheckSelectSum() {
 		return ret;
 	} else {
 		int op1, op2, mm = -1, ms, m, max = 0, sumc = 0, sums;
-		ret = false;
+		bool ret = false;
 		for (size_t i = 0; i < selected_cards.size(); ++i) {
 			op1 = selected_cards[i]->opParam & 0xffff;
 			op2 = selected_cards[i]->opParam >> 16;
@@ -1198,9 +1239,13 @@ bool ClientField::check_min(std::set<ClientCard*>& left, std::set<ClientCard*>::
 	        || check_min(left, index, min, max);
 }
 bool ClientField::check_sel_sum_s(const std::set<ClientCard*>& left, int index, int acc) {
+	if (acc < 0)
+		return false;
 	if (index == (int)selected_cards.size()) {
-		if (acc == 0)
-			return true;
+		if (acc == 0) {
+			int count = selected_cards.size() - must_select_count;
+			return count >= select_min && count <= select_max;
+		}
 		check_sel_sum_t(left, acc);
 		return false;
 	}
