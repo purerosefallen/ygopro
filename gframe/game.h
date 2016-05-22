@@ -34,6 +34,7 @@ struct Config {
 	int chkHideSetname;
 	int control_mode;
 	int draw_field_spell;
+	int separate_clear_button;
 };
 
 struct DuelInfo {
@@ -53,7 +54,6 @@ struct DuelInfo {
 	wchar_t hostname_tag[20];
 	wchar_t clientname_tag[20];
 	wchar_t strLP[2][16];
-	wchar_t strTurn[8];
 	wchar_t* vic_string;
 	unsigned char player_type;
 	unsigned char time_player;
@@ -350,6 +350,7 @@ public:
 	irr::gui::IGUIButton* btnSortDeck;
 	irr::gui::IGUIButton* btnShuffleDeck;
 	irr::gui::IGUIButton* btnSaveDeck;
+	irr::gui::IGUIButton* btnDeleteDeck;
 	irr::gui::IGUIButton* btnSaveDeckAs;
 	irr::gui::IGUIButton* btnDBExit;
 	irr::gui::IGUIButton* btnSideOK;
@@ -363,11 +364,13 @@ public:
 	irr::gui::IGUIComboBox* cbAttribute;
 	irr::gui::IGUIComboBox* cbLimit;
 	irr::gui::IGUIEditBox* ebStar;
+	irr::gui::IGUIEditBox* ebScale;
 	irr::gui::IGUIEditBox* ebAttack;
 	irr::gui::IGUIEditBox* ebDefence;
 	irr::gui::IGUIEditBox* ebCardName;
 	irr::gui::IGUIButton* btnEffectFilter;
 	irr::gui::IGUIButton* btnStartFilter;
+	irr::gui::IGUIButton* btnClearFilter;
 	irr::gui::IGUIWindow* wCategories;
 	irr::gui::IGUICheckBox* chkCategory[32];
 	irr::gui::IGUIButton* btnCategoryOK;
@@ -381,6 +384,7 @@ public:
 	irr::gui::IGUIButton* btnReplayStart;
 	irr::gui::IGUIButton* btnReplayPause;
 	irr::gui::IGUIButton* btnReplayStep;
+	irr::gui::IGUIButton* btnReplayUndo;
 	irr::gui::IGUIButton* btnReplayExit;
 	irr::gui::IGUIButton* btnReplaySwap;
 	//surrender/leave
@@ -495,20 +499,23 @@ extern unsigned char draw_count;
 #define BUTTON_CLEAR_DECK			303
 #define BUTTON_SAVE_DECK			304
 #define BUTTON_SAVE_DECK_AS			305
-#define BUTTON_DBEXIT				306
-#define BUTTON_SORT_DECK			307
-#define BUTTON_SIDE_OK				308
-#define BUTTON_SHUFFLE_DECK			309
-#define COMBOBOX_MAINTYPE			310
-#define BUTTON_EFFECT_FILTER		311
-#define BUTTON_START_FILTER			312
+#define BUTTON_DELETE_DECK			306
+#define BUTTON_DBEXIT				307
+#define BUTTON_SORT_DECK			308
+#define BUTTON_SIDE_OK				309
+#define BUTTON_SHUFFLE_DECK			310
+#define COMBOBOX_MAINTYPE			311
+#define BUTTON_EFFECT_FILTER		312
+#define BUTTON_START_FILTER			313
 #define SCROLL_FILTER				314
 #define EDITBOX_KEYWORD				315
+#define BUTTON_CLEAR_FILTER			316
 #define BUTTON_REPLAY_START			320
 #define BUTTON_REPLAY_PAUSE			321
 #define BUTTON_REPLAY_STEP			322
-#define BUTTON_REPLAY_EXIT			323
-#define BUTTON_REPLAY_SWAP			324
+#define BUTTON_REPLAY_UNDO			323
+#define BUTTON_REPLAY_EXIT			324
+#define BUTTON_REPLAY_SWAP			325
 #define BUTTON_REPLAY_SAVE			330
 #define BUTTON_REPLAY_CANCEL		331
 #define LISTBOX_SINGLEPLAY_LIST		350

@@ -436,7 +436,8 @@ bool Game::Initialize() {
 	cbDBDecks = env->addComboBox(rect<s32>(80, 35, 220, 60), wDeckEdit, COMBOBOX_DBDECKS);
 	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
 		cbDBLFList->addItem(deckManager._lfList[i].listName);
-	btnSaveDeck = env->addButton(rect<s32>(225, 35, 290, 60), wDeckEdit, BUTTON_SAVE_DECK, dataManager.GetSysString(1302));
+	btnSaveDeck = env->addButton(rect<s32>(225, 5, 290, 30), wDeckEdit, BUTTON_SAVE_DECK, dataManager.GetSysString(1302));
+	btnDeleteDeck = env->addButton(rect<s32>(225, 35, 290, 60), wDeckEdit, BUTTON_DELETE_DECK, dataManager.GetSysString(1308));
 	ebDeckname = env->addEditBox(L"", rect<s32>(80, 65, 220, 90), true, wDeckEdit, -1);
 	ebDeckname->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	btnSaveDeckAs = env->addButton(rect<s32>(225, 65, 290, 90), wDeckEdit, BUTTON_SAVE_DECK_AS, dataManager.GetSysString(1303));
@@ -482,13 +483,20 @@ bool Game::Initialize() {
 	ebDefence = env->addEditBox(L"", rect<s32>(260, 49, 340, 69), true, wFilter);
 	ebDefence->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1324), rect<s32>(10, 74, 80, 94), false, false, wFilter);
-	ebStar = env->addEditBox(L"", rect<s32>(60, 72, 140, 92), true, wFilter);
+	ebStar = env->addEditBox(L"", rect<s32>(60, 72, 190, 92), true, wFilter);
 	ebStar->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	env->addStaticText(dataManager.GetSysString(1336), rect<s32>(10, 97, 80, 127), false, false, wFilter);
+	ebScale = env->addEditBox(L"", rect<s32>(60, 95, 190, 115), true, wFilter);
+	ebScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1325), rect<s32>(205, 74, 280, 94), false, false, wFilter);
 	ebCardName = env->addEditBox(L"", rect<s32>(260, 72, 390, 92), true, wFilter, EDITBOX_KEYWORD);
 	ebCardName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	btnEffectFilter = env->addButton(rect<s32>(345, 28, 390, 69), wFilter, BUTTON_EFFECT_FILTER, dataManager.GetSysString(1326));
-	btnStartFilter = env->addButton(rect<s32>(210, 96, 390, 118), wFilter, BUTTON_START_FILTER, dataManager.GetSysString(1327));
+	btnStartFilter = env->addButton(rect<s32>(205, 96, 390, 116), wFilter, BUTTON_START_FILTER, dataManager.GetSysString(1327));
+	if(mainGame->gameConf.separate_clear_button) {
+		btnStartFilter->setRelativePosition(rect<s32>(260, 96, 390, 116));
+		btnClearFilter = env->addButton(rect<s32>(205, 96, 255, 116), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
+	}
 	wCategories = env->addWindow(rect<s32>(630, 60, 1000, 270), false, dataManager.strBuffer);
 	wCategories->getCloseButton()->setVisible(false);
 	wCategories->setDrawTitlebar(false);
@@ -534,13 +542,14 @@ bool Game::Initialize() {
 	btnRSYes = env->addButton(rect<s32>(70, 80, 140, 105), wReplaySave, BUTTON_REPLAY_SAVE, dataManager.GetSysString(1341));
 	btnRSNo = env->addButton(rect<s32>(170, 80, 240, 105), wReplaySave, BUTTON_REPLAY_CANCEL, dataManager.GetSysString(1212));
 	//replay control
-	wReplayControl = env->addStaticText(L"", rect<s32>(205, 143, 295, 273), true, false, 0, -1, true);
+	wReplayControl = env->addStaticText(L"", rect<s32>(205, 118, 295, 273), true, false, 0, -1, true);
 	wReplayControl->setVisible(false);
 	btnReplayStart = env->addButton(rect<s32>(5, 5, 85, 25), wReplayControl, BUTTON_REPLAY_START, dataManager.GetSysString(1343));
 	btnReplayPause = env->addButton(rect<s32>(5, 30, 85, 50), wReplayControl, BUTTON_REPLAY_PAUSE, dataManager.GetSysString(1344));
 	btnReplayStep = env->addButton(rect<s32>(5, 55, 85, 75), wReplayControl, BUTTON_REPLAY_STEP, dataManager.GetSysString(1345));
-	btnReplaySwap = env->addButton(rect<s32>(5, 80, 85, 100), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
-	btnReplayExit = env->addButton(rect<s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
+	btnReplayUndo = env->addButton(rect<s32>(5, 80, 85, 100), wReplayControl, BUTTON_REPLAY_UNDO, dataManager.GetSysString(1360));
+	btnReplaySwap = env->addButton(rect<s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
+	btnReplayExit = env->addButton(rect<s32>(5, 130, 85, 150), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
 	//chat
 	wChat = env->addWindow(rect<s32>(305, 615, 1020, 640), false, L"");
 	wChat->getCloseButton()->setVisible(false);
@@ -874,6 +883,7 @@ void Game::LoadConfig() {
 	gameConf.chkHideSetname = 0;
 	gameConf.control_mode = 0;
 	gameConf.draw_field_spell = 1;
+	gameConf.separate_clear_button = 1;
 	fseek(fp, 0, SEEK_END);
 	int fsize = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
@@ -924,6 +934,8 @@ void Game::LoadConfig() {
 			gameConf.control_mode = atoi(valbuf);
 		} else if(!strcmp(strbuf, "draw_field_spell")) {
 			gameConf.draw_field_spell = atoi(valbuf);
+		} else if(!strcmp(strbuf, "separate_clear_button")) {
+			gameConf.separate_clear_button = atoi(valbuf);
 		} else {
 			// options allowing multiple words
 			sscanf(linebuf, "%s = %240[^\n]", strbuf, valbuf);
@@ -975,6 +987,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "#control_mode = 0: Key A/S/R. control_mode = 1: MouseLeft/MouseRight/F9\n");
 	fprintf(fp, "control_mode = %d\n", gameConf.control_mode);
 	fprintf(fp, "draw_field_spell = %d\n", gameConf.draw_field_spell);
+	fprintf(fp, "separate_clear_button = %d\n", gameConf.separate_clear_button);
 	fclose(fp);
 }
 void Game::ShowCardInfo(int code) {
