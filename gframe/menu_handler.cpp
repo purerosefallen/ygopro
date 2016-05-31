@@ -220,6 +220,9 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->wCardImg->setVisible(true);
 				mainGame->wDeckEdit->setVisible(true);
 				mainGame->wFilter->setVisible(true);
+				mainGame->wSort->setVisible(true);
+				mainGame->btnLeaveGame->setVisible(true);
+				mainGame->btnLeaveGame->setText(dataManager.GetSysString(1306));
 				mainGame->btnSideOK->setVisible(false);
 				mainGame->deckBuilder.filterList = deckManager._lfList[0].content;
 				mainGame->cbDBLFList->setSelected(0);
@@ -228,14 +231,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->cbAttribute->setSelected(0);
 				mainGame->cbRace->setSelected(0);
 				mainGame->ebAttack->setText(L"");
-				mainGame->ebDefence->setText(L"");
+				mainGame->ebDefense->setText(L"");
 				mainGame->ebStar->setText(L"");
 				mainGame->ebScale->setText(L"");
 				mainGame->cbCardType2->setEnabled(false);
 				mainGame->cbAttribute->setEnabled(false);
 				mainGame->cbRace->setEnabled(false);
 				mainGame->ebAttack->setEnabled(false);
-				mainGame->ebDefence->setEnabled(false);
+				mainGame->ebDefense->setEnabled(false);
 				mainGame->ebStar->setEnabled(false);
 				mainGame->ebScale->setEnabled(false);
 				mainGame->deckBuilder.filter_effect = 0;

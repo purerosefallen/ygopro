@@ -277,9 +277,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->dField.Clear();
 		mainGame->is_building = true;
 		mainGame->is_siding = true;
+		mainGame->wChat->setVisible(false);
 		mainGame->wPhase->setVisible(false);
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->wFilter->setVisible(false);
+		mainGame->wSort->setVisible(false);
 		mainGame->btnSideOK->setVisible(true);
 		if(mainGame->dInfo.player_type < 7)
 			mainGame->btnLeaveGame->setVisible(false);
@@ -2752,8 +2754,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			pcard->attack = aatk;
 			myswprintf(pcard->atkstring, L"%d", aatk);
 		}
-		if(adef != pcard->defence) {
-			pcard->defence = adef;
+		if(adef != pcard->defense) {
+			pcard->defense = adef;
 			myswprintf(pcard->defstring, L"%d", adef);
 		}
 		if(ld) {
@@ -2762,8 +2764,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				pcard->attack = datk;
 				myswprintf(pcard->atkstring, L"%d", datk);
 			}
-			if(ddef != pcard->defence) {
-				pcard->defence = ddef;
+			if(ddef != pcard->defense) {
+				pcard->defense = ddef;
 				myswprintf(pcard->defstring, L"%d", ddef);
 			}
 		}

@@ -352,7 +352,6 @@ public:
 	irr::gui::IGUIButton* btnSaveDeck;
 	irr::gui::IGUIButton* btnDeleteDeck;
 	irr::gui::IGUIButton* btnSaveDeckAs;
-	irr::gui::IGUIButton* btnDBExit;
 	irr::gui::IGUIButton* btnSideOK;
 	irr::gui::IGUIEditBox* ebDeckname;
 	//filter
@@ -366,7 +365,7 @@ public:
 	irr::gui::IGUIEditBox* ebStar;
 	irr::gui::IGUIEditBox* ebScale;
 	irr::gui::IGUIEditBox* ebAttack;
-	irr::gui::IGUIEditBox* ebDefence;
+	irr::gui::IGUIEditBox* ebDefense;
 	irr::gui::IGUIEditBox* ebCardName;
 	irr::gui::IGUIButton* btnEffectFilter;
 	irr::gui::IGUIButton* btnStartFilter;
@@ -374,6 +373,9 @@ public:
 	irr::gui::IGUIWindow* wCategories;
 	irr::gui::IGUICheckBox* chkCategory[32];
 	irr::gui::IGUIButton* btnCategoryOK;
+	//sort type
+	irr::gui::IGUIStaticText* wSort;
+	irr::gui::IGUIComboBox* cbSortType;
 	//replay save
 	irr::gui::IGUIWindow* wReplaySave;
 	irr::gui::IGUIEditBox* ebRSName;
@@ -521,4 +523,5 @@ extern unsigned char draw_count;
 #define LISTBOX_SINGLEPLAY_LIST		350
 #define BUTTON_LOAD_SINGLEPLAY		351
 #define BUTTON_CANCEL_SINGLEPLAY	352
+#define COMBOBOX_SORTTYPE			370
 #endif // GAME_H

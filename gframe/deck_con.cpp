@@ -105,13 +105,15 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->gMutex.Unlock();
 				break;
 			}
-			case BUTTON_DBEXIT: {
+			case BUTTON_LEAVE_GAME: {
 				mainGame->is_building = false;
 				mainGame->wDeckEdit->setVisible(false);
 				mainGame->wCategories->setVisible(false);
 				mainGame->wFilter->setVisible(false);
+				mainGame->wSort->setVisible(false);
 				mainGame->wCardImg->setVisible(false);
 				mainGame->wInfos->setVisible(false);
+				mainGame->btnLeaveGame->setVisible(false);
 				mainGame->PopupElement(mainGame->wMainMenu);
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				mainGame->wACMessage->setVisible(false);
@@ -136,7 +138,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					filter_attrib = mainGame->cbAttribute->getItemData(mainGame->cbAttribute->getSelected());
 					filter_race = mainGame->cbRace->getItemData(mainGame->cbRace->getSelected());
 					filter_atk = parse_filter(mainGame->ebAttack->getText(), &filter_atktype);
-					filter_def = parse_filter(mainGame->ebDefence->getText(), &filter_deftype);
+					filter_def = parse_filter(mainGame->ebDefense->getText(), &filter_deftype);
 					filter_lv = parse_filter(mainGame->ebStar->getText(), &filter_lvtype);
 					filter_scl = parse_filter(mainGame->ebScale->getText(), &filter_scltype);
 				}
@@ -239,7 +241,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->cbAttribute->setSelected(0);
 				mainGame->cbRace->setSelected(0);
 				mainGame->ebAttack->setText(L"");
-				mainGame->ebDefence->setText(L"");
+				mainGame->ebDefense->setText(L"");
 				mainGame->ebStar->setText(L"");
 				mainGame->ebScale->setText(L"");
 				switch(mainGame->cbCardType->getSelected()) {
@@ -249,7 +251,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
-					mainGame->ebDefence->setEnabled(false);
+					mainGame->ebDefense->setEnabled(false);
 					mainGame->ebStar->setEnabled(false);
 					mainGame->ebScale->setEnabled(false);
 					break;
@@ -262,7 +264,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbRace->setEnabled(true);
 					mainGame->cbAttribute->setEnabled(true);
 					mainGame->ebAttack->setEnabled(true);
-					mainGame->ebDefence->setEnabled(true);
+					mainGame->ebDefense->setEnabled(true);
 					mainGame->ebStar->setEnabled(true);
 					mainGame->ebScale->setEnabled(true);
 					mainGame->cbCardType2->clear();
@@ -293,7 +295,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
-					mainGame->ebDefence->setEnabled(false);
+					mainGame->ebDefense->setEnabled(false);
 					mainGame->ebStar->setEnabled(false);
 					mainGame->ebScale->setEnabled(false);
 					mainGame->cbCardType2->clear();
@@ -311,7 +313,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
-					mainGame->ebDefence->setEnabled(false);
+					mainGame->ebDefense->setEnabled(false);
 					mainGame->ebStar->setEnabled(false);
 					mainGame->ebScale->setEnabled(false);
 					mainGame->cbCardType2->clear();
@@ -322,6 +324,12 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				}
+				break;
+			}
+			case COMBOBOX_SORTTYPE: {
+				SortList();
+				mainGame->env->setFocus(0);
+				break;
 			}
 			}
 		}
@@ -332,6 +340,10 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 	case irr::EET_MOUSE_INPUT_EVENT: {
 		switch(event.MouseInput.Event) {
 		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
+			position2d<s32> mouse_pos = position2d<s32>(event.MouseInput.X, event.MouseInput.Y);
+			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			if(root->getElementFromPoint(mouse_pos) != root)
+				break;
 			if(mainGame->wCategories->isVisible() || mainGame->wQuery->isVisible())
 				break;
 			if(hovered_pos == 0 || hovered_seq == -1)
@@ -687,9 +699,9 @@ void DeckBuilder::FilterCards() {
 					continue;
 			}
 			if(filter_deftype) {
-				if((filter_deftype == 1 && data.defence != filter_def) || (filter_deftype == 2 && data.defence < filter_def)
-				        || (filter_deftype == 3 && data.defence <= filter_def) || (filter_deftype == 4 && (data.defence > filter_def || data.defence < 0))
-				        || (filter_deftype == 5 && (data.defence >= filter_def || data.defence < 0)) || (filter_deftype == 6 && data.defence != -2))
+				if((filter_deftype == 1 && data.defense != filter_def) || (filter_deftype == 2 && data.defense < filter_def)
+				        || (filter_deftype == 3 && data.defense <= filter_def) || (filter_deftype == 4 && (data.defense > filter_def || data.defense < 0))
+				        || (filter_deftype == 5 && (data.defense >= filter_def || data.defense < 0)) || (filter_deftype == 6 && data.defense != -2))
 					continue;
 			}
 			if(filter_lvtype) {
@@ -767,7 +779,7 @@ void DeckBuilder::FilterCards() {
 		mainGame->scrFilter->setVisible(false);
 		mainGame->scrFilter->setPos(0);
 	}
-	std::sort(results.begin(), results.end(), ClientCard::deck_sort_lv);
+	SortList();
 }
 void DeckBuilder::ClearSearch() {
 	mainGame->cbCardType->setSelected(0);
@@ -776,7 +788,7 @@ void DeckBuilder::ClearSearch() {
 	mainGame->cbRace->setEnabled(false);
 	mainGame->cbAttribute->setEnabled(false);
 	mainGame->ebAttack->setEnabled(false);
-	mainGame->ebDefence->setEnabled(false);
+	mainGame->ebDefense->setEnabled(false);
 	mainGame->ebStar->setEnabled(false);
 	mainGame->ebScale->setEnabled(false);
 	mainGame->ebCardName->setText(L"");
@@ -787,12 +799,28 @@ void DeckBuilder::ClearFilter() {
 	mainGame->cbRace->setSelected(0);
 	mainGame->cbLimit->setSelected(0);
 	mainGame->ebAttack->setText(L"");
-	mainGame->ebDefence->setText(L"");
+	mainGame->ebDefense->setText(L"");
 	mainGame->ebStar->setText(L"");
 	mainGame->ebScale->setText(L"");
 	filter_effect = 0;
 	for(int i = 0; i < 32; ++i)
 		mainGame->chkCategory[i]->setChecked(false);
+}
+void DeckBuilder::SortList() {
+	switch(mainGame->cbSortType->getSelected()) {
+	case 0:
+		std::sort(results.begin(), results.end(), ClientCard::deck_sort_lv);
+		break;
+	case 1:
+		std::sort(results.begin(), results.end(), ClientCard::deck_sort_atk);
+		break;
+	case 2:
+		std::sort(results.begin(), results.end(), ClientCard::deck_sort_def);
+		break;
+	case 3:
+		std::sort(results.begin(), results.end(), ClientCard::deck_sort_name);
+		break;
+	}
 }
 
 }
