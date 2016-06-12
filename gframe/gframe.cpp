@@ -3,7 +3,7 @@
 #include "data_manager.h"
 #include <event2/thread.h>
 
-int enable_log = 0;
+int enable_log = 1;
 bool exit_on_return = false;
 bool runasserver = true;
 
