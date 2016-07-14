@@ -1531,10 +1531,10 @@ void SingleDuel::EndDuel() {
 	memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
 	NetServer::SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof(ReplayHeader) + last_replay.comp_size);
 	NetServer::ReSendToPlayer(players[1]);
-	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
+	/*for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 		NetServer::ReSendToPlayer(*oit);
 	for(auto oit = recorders.begin(); oit != recorders.end(); ++oit)
-		NetServer::ReSendToPlayer(*oit);
+		NetServer::ReSendToPlayer(*oit);*/
 	end_duel(pduel);
 	pduel = 0;
 }

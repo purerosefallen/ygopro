@@ -1592,10 +1592,10 @@ void TagDuel::EndDuel() {
 	NetServer::ReSendToPlayer(players[1]);
 	NetServer::ReSendToPlayer(players[2]);
 	NetServer::ReSendToPlayer(players[3]);
-	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
+	/*for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 		NetServer::ReSendToPlayer(*oit);
 	for(auto oit = recorders.begin(); oit != recorders.end(); ++oit)
-		NetServer::ReSendToPlayer(*oit);
+		NetServer::ReSendToPlayer(*oit);*/
 	end_duel(pduel);
 	pduel = 0;
 }
