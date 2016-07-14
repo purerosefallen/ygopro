@@ -43,7 +43,7 @@ std::wstring SA2W(std::string& strA)
 
 void Replay::BeginRecord() {
 #ifdef _WIN32
-if(is_recording)
+	if(is_recording)
 		CloseHandle(recording_fp);
     std::stringstream ss;
     ss<<ygo::aServerPort;
@@ -60,8 +60,12 @@ if(is_recording)
 #else
 	if(is_recording)
 		fclose(fp);
-	char path[20];
-	sprintf(path, "./replay/%u.yrp", ygo::aServerPort);
+	time_t nowtime = time(NULL);
+	struct tm *localedtime = localtime(&nowtime);
+	char tmppath[40];
+	strftime(tmppath, 40, "./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
+	char path[40];
+	sprintf(path, tmppath, ygo::aServerPort);
 	fp = fopen(path, "wb");
 	if(!fp)
 		return;
