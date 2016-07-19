@@ -17,6 +17,7 @@ extern bool no_check_deck;
 extern bool no_shuffle_deck;
 extern unsigned int start_lp;
 extern unsigned short time_limit;
+extern unsigned short replay_mode;
 extern unsigned char start_hand;
 extern unsigned char draw_count;
 bool runasserver = true;
@@ -86,6 +87,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			host_info.enable_priority=false;
 			host_info.rule=0;
 			host_info.time_limit=180;
+			host_info.replay_mode=0;
 
 			if (ygo::start_hand !=0 ){
 		        host_info.start_hand=ygo::start_hand;
@@ -97,6 +99,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 		        host_info.enable_priority=ygo::enable_priority;
 		        host_info.rule=ygo::rule;
 		        host_info.time_limit=ygo::time_limit;
+		        host_info.replay_mode=ygo::replay_mode;
 			}
 		}else
 		{
@@ -1532,10 +1535,12 @@ void SingleDuel::EndDuel() {
 	memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
 	NetServer::SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof(ReplayHeader) + last_replay.comp_size);
 	NetServer::ReSendToPlayer(players[1]);
-	/*for(auto oit = observers.begin(); oit != observers.end(); ++oit)
-		NetServer::ReSendToPlayer(*oit);
-	for(auto oit = recorders.begin(); oit != recorders.end(); ++oit)
-		NetServer::ReSendToPlayer(*oit);*/
+	if (host_info.replay_mode == 0) {
+		for(auto oit = observers.begin(); oit != observers.end(); ++oit)
+			NetServer::ReSendToPlayer(*oit);
+		for(auto oit = recorders.begin(); oit != recorders.end(); ++oit)
+			NetServer::ReSendToPlayer(*oit);
+	}
 	end_duel(pduel);
 	pduel = 0;
 }
