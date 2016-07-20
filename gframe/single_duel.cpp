@@ -46,15 +46,15 @@ void SingleDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 		for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 			if((*pit) != dp)
 				NetServer::ReSendToPlayer(*pit);
-		for(auto pit = recorders.begin(); pit != recorders.end(); ++pit)
+		/*for(auto pit = recorders.begin(); pit != recorders.end(); ++pit)
 			if((*pit) != dp)
-				NetServer::ReSendToPlayer(*pit);
+				NetServer::ReSendToPlayer(*pit);*/
 	} else {
 		NetServer::SendBufferToPlayer(players[1 - dp->type], STOC_CHAT, &scc, 4 + msglen * 2);
 		for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 			NetServer::ReSendToPlayer(*pit);
-		for(auto pit = recorders.begin(); pit != recorders.end(); ++pit)
-			NetServer::ReSendToPlayer(*pit);
+		/*for(auto pit = recorders.begin(); pit != recorders.end(); ++pit)
+			NetServer::ReSendToPlayer(*pit);*/
 	}
 }
 void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
