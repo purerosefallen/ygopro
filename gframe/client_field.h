@@ -39,6 +39,7 @@ public:
 	std::vector<ClientCard*> attackable_cards;
 	std::vector<ClientCard*> conti_cards;
 	std::vector<int> activatable_descs;
+	std::set<int> reset_descs;
 	std::vector<int> select_options;
 	std::vector<ChainInfo> chains;
 	int extra_p_count[2];
@@ -72,6 +73,7 @@ public:
 	bool deck_act;
 	bool extra_act;
 	bool pzone_act[2];
+	bool conti_act;
 	bool chain_forced;
 	ChainInfo current_chain;
 	bool last_chain;
