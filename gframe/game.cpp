@@ -290,8 +290,8 @@ bool Game::Initialize() {
 	chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
 	chkHideSetname = env->addCheckBox(false, rect<s32>(20, 260, 280, 285), tabSystem, -1, dataManager.GetSysString(1354));
 	chkHideSetname->setChecked(gameConf.chkHideSetname != 0);
-	chkHideChainButton = env->addCheckBox(false, rect<s32>(20, 290, 280, 315), tabSystem, -1, dataManager.GetSysString(1355));
-	chkHideChainButton->setChecked(gameConf.chkHideChainButton != 0);
+	chkHideHintButton = env->addCheckBox(false, rect<s32>(20, 290, 280, 315), tabSystem, -1, dataManager.GetSysString(1355));
+	chkHideHintButton->setChecked(gameConf.chkHideHintButton != 0);
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -416,10 +416,6 @@ bool Game::Initialize() {
 	stHintMsg->setBackgroundColor(0xc0ffffff);
 	stHintMsg->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stHintMsg->setVisible(false);
-	stTip = env->addStaticText(L"", rect<s32>(0, 0, 150, 150), false, true, 0, -1, true);
-	stTip->setBackgroundColor(0xc0ffffff);
-	stTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	stTip->setVisible(false);
 	//cmd menu
 	wCmdMenu = env->addWindow(rect<s32>(10, 10, 110, 179), false, L"");
 	wCmdMenu->setDrawTitlebar(false);
@@ -590,9 +586,17 @@ bool Game::Initialize() {
 	btnChainIgnore->setVisible(false);
 	btnChainAlways->setVisible(false);
 	btnChainWhenAvail->setVisible(false);
+	//cancel or finish
+	btnCancelOrFinish = env->addButton(rect<s32>(205, 230, 295, 265), 0, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
+	btnCancelOrFinish->setVisible(false);
 	//leave/surrender/exit
 	btnLeaveGame = env->addButton(rect<s32>(205, 5, 295, 80), 0, BUTTON_LEAVE_GAME, L"");
 	btnLeaveGame->setVisible(false);
+	//tip
+	stTip = env->addStaticText(L"", rect<s32>(0, 0, 150, 150), false, true, 0, -1, true);
+	stTip->setBackgroundColor(0xc0ffffff);
+	stTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stTip->setVisible(false);
 	device->setEventReceiver(&menuHandler);
 	LoadConfig();
 	env->getSkin()->setFont(guiFont);
@@ -914,7 +918,7 @@ void Game::LoadConfig() {
 	gameConf.chkIgnore1 = 0;
 	gameConf.chkIgnore2 = 0;
 	gameConf.chkHideSetname = 0;
-	gameConf.chkHideChainButton = 0;
+	gameConf.chkHideHintButton = 0;
 	gameConf.control_mode = 0;
 	gameConf.draw_field_spell = 1;
 	gameConf.separate_clear_button = 1;
@@ -964,8 +968,8 @@ void Game::LoadConfig() {
 			gameConf.chkIgnore2 = atoi(valbuf);
 		} else if(!strcmp(strbuf, "hide_setname")) {
 			gameConf.chkHideSetname = atoi(valbuf);
-		} else if(!strcmp(strbuf, "hide_chain_button")) {
-			gameConf.chkHideChainButton = atoi(valbuf);
+		} else if(!strcmp(strbuf, "hide_hint_button")) {
+			gameConf.chkHideHintButton = atoi(valbuf);
 		} else if(!strcmp(strbuf, "control_mode")) {
 			gameConf.control_mode = atoi(valbuf);
 		} else if(!strcmp(strbuf, "draw_field_spell")) {
@@ -1020,8 +1024,8 @@ void Game::SaveConfig() {
 	fprintf(fp, "mute_opponent = %d\n", ((mainGame->chkIgnore1->isChecked()) ? 1 : 0));
 	fprintf(fp, "mute_spectators = %d\n", ((mainGame->chkIgnore2->isChecked()) ? 1 : 0));
 	fprintf(fp, "hide_setname = %d\n", ((mainGame->chkHideSetname->isChecked()) ? 1 : 0));
-	fprintf(fp, "hide_chain_button = %d\n", ((mainGame->chkHideChainButton->isChecked()) ? 1 : 0));
-	fprintf(fp, "#control_mode = 0: Key A/S/D/R. control_mode = 1: MouseLeft/MouseRight/NULL/F9\n");
+	fprintf(fp, "hide_hint_button = %d\n", ((mainGame->chkHideHintButton->isChecked()) ? 1 : 0));
+	fprintf(fp, "#control_mode = 0: Key A/S/D/R Chain Buttons. control_mode = 1: MouseLeft/MouseRight/NULL/F9 Without Chain Buttons\n");
 	fprintf(fp, "control_mode = %d\n", gameConf.control_mode);
 	fprintf(fp, "draw_field_spell = %d\n", gameConf.draw_field_spell);
 	fprintf(fp, "separate_clear_button = %d\n", gameConf.separate_clear_button);
@@ -1175,6 +1179,7 @@ void Game::CloseDuelWindow() {
 	btnChainIgnore->setVisible(false);
 	btnChainAlways->setVisible(false);
 	btnChainWhenAvail->setVisible(false);
+	btnCancelOrFinish->setVisible(false);
 	wChat->setVisible(false);
 	lstLog->clear();
 	logParam.clear();

@@ -32,7 +32,7 @@ struct Config {
 	int chkIgnore1;
 	int chkIgnore2;
 	int chkHideSetname;
-	int chkHideChainButton;
+	int chkHideHintButton;
 	int control_mode;
 	int draw_field_spell;
 	int separate_clear_button;
@@ -198,7 +198,7 @@ public:
 	irr::gui::IGUICheckBox* chkAutoChain;
 	irr::gui::IGUICheckBox* chkWaitChain;
 	irr::gui::IGUICheckBox* chkHideSetname;
-	irr::gui::IGUICheckBox* chkHideChainButton;
+	irr::gui::IGUICheckBox* chkHideHintButton;
 	irr::gui::IGUIListBox* lstLog;
 	irr::gui::IGUIButton* btnClearLog;
 	irr::gui::IGUIButton* btnSaveLog;
@@ -400,6 +400,8 @@ public:
 	irr::gui::IGUIButton* btnChainIgnore;
 	irr::gui::IGUIButton* btnChainAlways;
 	irr::gui::IGUIButton* btnChainWhenAvail;
+	//cancel or finish
+	irr::gui::IGUIButton* btnCancelOrFinish;
     */
 };
 
@@ -503,6 +505,7 @@ extern unsigned char draw_count;
 #define BUTTON_CHAIN_IGNORE			264
 #define BUTTON_CHAIN_ALWAYS			265
 #define BUTTON_CHAIN_WHENAVAIL		266
+#define BUTTON_CANCEL_OR_FINISH		267
 #define BUTTON_CLEAR_LOG			270
 #define LISTBOX_LOG					271
 #define SCROLL_CARDTEXT				280
