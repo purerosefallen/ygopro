@@ -64,6 +64,7 @@ public:
 	std::vector<ClientCard*> selected_cards;
 	std::set<ClientCard*> selectsum_cards;
 	std::vector<ClientCard*> selectsum_all;
+	std::vector<int> opcode;
 	std::vector<ClientCard*> display_cards;
 	std::vector<int> sort_list;
 	std::map<int, int> player_desc_hints[2];
@@ -77,6 +78,7 @@ public:
 	ChainInfo current_chain;
 	bool last_chain;
 	bool deck_reversed;
+	bool conti_selecting;
 	
 	ClientField();
 	void Clear();
@@ -105,7 +107,9 @@ public:
 	bool check_sel_sum_s(const std::set<ClientCard*>& left, int index, int acc);
 	void check_sel_sum_t(const std::set<ClientCard*>& left, int acc);
 	bool check_sum(std::set<ClientCard*>::const_iterator index, std::set<ClientCard*>::const_iterator end, int acc, int count);
-	
+
+	void UpdateDeclarableCodeType(bool enter);
+	void UpdateDeclarableCodeOpcode(bool enter);
 	void UpdateDeclarableCode(bool enter);
 
 	irr::gui::IGUIElement* panel;
