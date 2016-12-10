@@ -16,6 +16,7 @@ project "ygopro"
     links { "ocgcore", "clzma", "sqlite3", "lua" , "event"}
 
     configuration "windows"
+        files "ygopro.rc"
         includedirs { "../event/include", "../sqlite3" }
         links { "ws2_32" }
 
