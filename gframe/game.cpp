@@ -9,6 +9,11 @@
 #include "netserver.h"
 //#include "single_mode.h"
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#include "dirent.h"
+#endif // _WIN32
+
 #ifndef _WIN32
 #include <sys/types.h>
 #include <dirent.h>
