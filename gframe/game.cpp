@@ -1205,6 +1205,7 @@ int Game::LocalPlayer(int player) {
 const wchar_t* Game::LocalName(int local_player) {
 	return local_player == 0 ? dInfo.hostname : dInfo.clientname;
 }
+/*
 void Game::SetWindowsIcon() {
 #ifdef _WIN32
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(NULL);
@@ -1225,5 +1226,6 @@ void Game::FlashWindow() {
 	FlashWindowEx(&fi);
 #endif
 }
+*/
 
 }
