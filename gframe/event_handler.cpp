@@ -2087,13 +2087,14 @@ void ClientField::GetHoverField(int x, int y) {
 				hovered_controler = 1;
 				hovered_location = LOCATION_DECK;
 			}
+		} else if(boardx >= matManager.vFieldContiAct[0].X && boardx <= matManager.vFieldContiAct[1].X
+				&& boardy >= matManager.vFieldContiAct[0].Y && boardy <= matManager.vFieldContiAct[2].Y) {
+			hovered_controler = 0;
+			hovered_location = POSITION_HINT;
 		} else if(boardx >= matManager.vFieldRemove[1][1].Pos.X && boardx <= matManager.vFieldRemove[1][0].Pos.X) {
 			if(boardy >= matManager.vFieldRemove[1][2].Pos.Y && boardy <= matManager.vFieldRemove[1][0].Pos.Y) {
 				hovered_controler = 1;
 				hovered_location = LOCATION_REMOVED;
-			} else if(boardy >= matManager.vFieldContiAct[0].Y && boardy <= matManager.vFieldContiAct[2].Y) {
-				hovered_controler = 0;
-				hovered_location = POSITION_HINT;
 			}
 		} else if(boardx >= matManager.vFieldDeck[0][0].Pos.X && boardx <= matManager.vFieldDeck[0][1].Pos.X) {
 			if(boardy >= matManager.vFieldDeck[0][0].Pos.Y && boardy <= matManager.vFieldDeck[0][2].Pos.Y) {
