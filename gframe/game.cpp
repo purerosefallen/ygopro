@@ -20,7 +20,7 @@
 #include <unistd.h>
 #endif
 
-const unsigned short PRO_VERSION = 0x133C;
+const unsigned short PRO_VERSION = 0x133D;
 
 namespace ygo {
 
@@ -109,11 +109,11 @@ bool Game::Initialize() {
 	imageManager.SetDevice(device);
 	if(!imageManager.Initial())
 		return false;
+	LoadExpansionDB();
 	if(!dataManager.LoadDB("cards.cdb"))
 		return false;
 	if(!dataManager.LoadStrings("strings.conf"))
 		return false;
-	RefreshExpansionDB();
 	dataManager.LoadStrings("./expansions/strings.conf");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -154,12 +154,12 @@ bool Game::Initialize() {
 	lstHostList->setItemHeight(18);
 	btnLanRefresh = env->addButton(rect<s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
 	env->addStaticText(dataManager.GetSysString(1221), rect<s32>(10, 360, 220, 380), false, false, wLanWindow);
-	ebJoinIP = env->addEditBox(gameConf.lastip, rect<s32>(110, 355, 250, 380), true, wLanWindow);
-	ebJoinIP->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebJoinPort = env->addEditBox(gameConf.lastport, rect<s32>(260, 355, 320, 380), true, wLanWindow);
+	ebJoinHost = env->addEditBox(gameConf.lasthost, rect<s32>(110, 355, 350, 380), true, wLanWindow);
+	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	ebJoinPort = env->addEditBox(gameConf.lastport, rect<s32>(360, 355, 420, 380), true, wLanWindow);
 	ebJoinPort->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1222), rect<s32>(10, 390, 220, 410), false, false, wLanWindow);
-	ebJoinPass = env->addEditBox(gameConf.roompass, rect<s32>(110, 385, 320, 410), true, wLanWindow);
+	ebJoinPass = env->addEditBox(gameConf.roompass, rect<s32>(110, 385, 420, 410), true, wLanWindow);
 	ebJoinPass->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	btnJoinHost = env->addButton(rect<s32>(460, 355, 570, 380), wLanWindow, BUTTON_JOIN_HOST, dataManager.GetSysString(1223));
 	btnJoinCancel = env->addButton(rect<s32>(460, 385, 570, 410), wLanWindow, BUTTON_JOIN_CANCEL, dataManager.GetSysString(1212));
@@ -419,11 +419,11 @@ bool Game::Initialize() {
 	for(int filter = 0x1, i = 0; i < 7; filter <<= 1, ++i)
 		chkAttribute[i] = env->addCheckBox(false, rect<s32>(10 + (i % 4) * 80, 25 + (i / 4) * 25, 90 + (i % 4) * 80, 50 + (i / 4) * 25),
 		                                   wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter));
-	//announce attribute
-	wANRace = env->addWindow(rect<s32>(480, 200, 850, 385), false, dataManager.GetSysString(563));
+	//announce race
+	wANRace = env->addWindow(rect<s32>(480, 200, 850, 410), false, dataManager.GetSysString(563));
 	wANRace->getCloseButton()->setVisible(false);
 	wANRace->setVisible(false);
-	for(int filter = 0x1, i = 0; i < 24; filter <<= 1, ++i)
+	for(int filter = 0x1, i = 0; i < 25; filter <<= 1, ++i)
 		chkRace[i] = env->addCheckBox(false, rect<s32>(10 + (i % 4) * 90, 25 + (i / 4) * 25, 100 + (i % 4) * 90, 50 + (i / 4) * 25),
 		                              wANRace, CHECK_RACE, dataManager.FormatRace(filter));
 	//selection hint
@@ -512,7 +512,7 @@ bool Game::Initialize() {
 	cbRace = env->addComboBox(rect<s32>(60, 40 + 75 / 6, 190, 60 + 75 / 6), wFilter, -1);
 	cbRace->setMaxSelectionRows(10);
 	cbRace->addItem(dataManager.GetSysString(1310), 0);
-	for(int filter = 0x1; filter != 0x1000000; filter <<= 1)
+	for(int filter = 0x1; filter != 0x2000000; filter <<= 1)
 		cbRace->addItem(dataManager.FormatRace(filter), filter);
 	env->addStaticText(dataManager.GetSysString(1322), rect<s32>(205, 22 + 50 / 6, 280, 42 + 50 / 6), false, false, wFilter);
 	ebAttack = env->addEditBox(L"", rect<s32>(260, 20 + 50 / 6, 340, 40 + 50 / 6), true, wFilter);
@@ -771,7 +771,7 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 	dataManager.strBuffer[pbuffer] = 0;
 	pControl->setText(dataManager.strBuffer);
 }
-void Game::RefreshExpansionDB() {
+void Game::LoadExpansionDB() {
 #ifdef _WIN32
 	char fpath[1000];
 	WIN32_FIND_DATAW fdataw;
@@ -922,7 +922,7 @@ void Game::LoadConfig() {
 	gameConf.lastdeck[0] = 0;
 	gameConf.numfont[0] = 0;
 	gameConf.textfont[0] = 0;
-	gameConf.lastip[0] = 0;
+	gameConf.lasthost[0] = 0;
 	gameConf.lastport[0] = 0;
 	gameConf.roompass[0] = 0;
 	//settings
@@ -960,9 +960,9 @@ void Game::LoadConfig() {
 			BufferIO::CopyWStr(wstr, gameConf.numfont, 256);
 		} else if(!strcmp(strbuf, "serverport")) {
 			gameConf.serverport = atoi(valbuf);
-		} else if(!strcmp(strbuf, "lastip")) {
+		} else if(!strcmp(strbuf, "lasthost")) {
 			BufferIO::DecodeUTF8(valbuf, wstr);
-			BufferIO::CopyWStr(wstr, gameConf.lastip, 20);
+			BufferIO::CopyWStr(wstr, gameConf.lasthost, 100);
 		} else if(!strcmp(strbuf, "lastport")) {
 			BufferIO::DecodeUTF8(valbuf, wstr);
 			BufferIO::CopyWStr(wstr, gameConf.lastport, 20);
@@ -1027,8 +1027,8 @@ void Game::SaveConfig() {
 	BufferIO::EncodeUTF8(gameConf.numfont, linebuf);
 	fprintf(fp, "numfont = %s\n", linebuf);
 	fprintf(fp, "serverport = %d\n", gameConf.serverport);
-	BufferIO::EncodeUTF8(gameConf.lastip, linebuf);
-	fprintf(fp, "lastip = %s\n", linebuf);
+	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
+	fprintf(fp, "lasthost = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
 	fprintf(fp, "lastport = %s\n", linebuf);
 	//settings

@@ -9,7 +9,7 @@ DataManager dataManager;
 
 bool DataManager::LoadDB(const char* file) {
 	sqlite3* pDB;
-	if(sqlite3_open(file, &pDB) != SQLITE_OK)
+	if(sqlite3_open_v2(file, &pDB, SQLITE_OPEN_READONLY, 0) != SQLITE_OK)
 		return Error(pDB);
 	sqlite3_stmt* pStmt;
 	const char* sql = "select * from datas";
@@ -252,7 +252,7 @@ const wchar_t* DataManager::FormatRace(int race) {
 	wchar_t* p = racBuffer;
 	unsigned filter = 1;
 	int i = 1020;
-	for(; filter != 0x1000000; filter <<= 1, ++i) {
+	for(; filter != 0x2000000; filter <<= 1, ++i) {
 		if(race & filter) {
 			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
 			*p = L'|';
@@ -269,7 +269,7 @@ const wchar_t* DataManager::FormatType(int type) {
 	wchar_t* p = tpBuffer;
 	unsigned filter = 1;
 	int i = 1050;
-	for(; filter != 0x2000000; filter <<= 1, ++i) {
+	for(; filter != 0x4000000; filter <<= 1, ++i) {
 		if(type & filter) {
 			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
 			*p = L'|';

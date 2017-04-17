@@ -88,7 +88,8 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_SAVE_DECK: {
-				if(deckManager.SaveDeck(deckManager.current_deck, mainGame->cbDBDecks->getItem(mainGame->cbDBDecks->getSelected()))) {
+				int sel = mainGame->cbDBDecks->getSelected();
+				if(sel>-1 && deckManager.SaveDeck(deckManager.current_deck, mainGame->cbDBDecks->getItem(sel))) {
 					mainGame->stACMessage->setText(dataManager.GetSysString(1335));
 					mainGame->PopupElement(mainGame->wACMessage, 20);
 				}
@@ -204,6 +205,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				DuelClient::SendBufferToServer(CTOS_UPDATE_DECK, deckbuf, pdeck - deckbuf);
 				break;
 			}
+			case BUTTON_MSG_OK: {
+				mainGame->HideElement(mainGame->wMessage);
+				mainGame->actionSignal.Set();
+				break;
+			}
 			case BUTTON_YES: {
 				mainGame->HideElement(mainGame->wQuery);
 				if(!mainGame->is_building || mainGame->is_siding)
@@ -313,6 +319,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1063), TYPE_MONSTER + TYPE_SYNCHRO);
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1073), TYPE_MONSTER + TYPE_XYZ);
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1074), TYPE_MONSTER + TYPE_PENDULUM);
+					mainGame->cbCardType2->addItem(dataManager.GetSysString(1075), TYPE_MONSTER + TYPE_SPSUMMON);
 					myswprintf(normaltuner, L"%ls|%ls", dataManager.GetSysString(1054), dataManager.GetSysString(1062));
 					mainGame->cbCardType2->addItem(normaltuner, TYPE_MONSTER + TYPE_NORMAL + TYPE_TUNER);
 					myswprintf(normalpen, L"%ls|%ls", dataManager.GetSysString(1054), dataManager.GetSysString(1074));
