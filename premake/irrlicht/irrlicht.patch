@@ -101,22 +101,22 @@ index f33b5a2..8375444 100644
  					if (MarkBegin == MarkEnd)
  					{
 @@ -658,6 +658,16 @@ bool CGUIEditBox::processKey(const SEvent& event)
-        case KEY_ESCAPE:
-        case KEY_TAB:
-        case KEY_SHIFT:
-+       case KEY_LSHIFT:
-+       case KEY_RSHIFT:
-+       case KEY_MENU:
-+       case KEY_LMENU:
-+       case KEY_RMENU:
-+       case KEY_LWIN:
-+       case KEY_RWIN:
-+       case KEY_CAPITAL:
-+       case KEY_NUMLOCK:
-+       case KEY_SCROLL:
-        case KEY_F1:
-        case KEY_F2:
-        case KEY_F3:
+ 	case KEY_ESCAPE:
+ 	case KEY_TAB:
+ 	case KEY_SHIFT:
++	case KEY_LSHIFT:
++	case KEY_RSHIFT:
++	case KEY_MENU:
++	case KEY_LMENU:
++	case KEY_RMENU:
++	case KEY_LWIN:
++	case KEY_RWIN:
++	case KEY_CAPITAL:
++	case KEY_NUMLOCK:
++	case KEY_SCROLL:
+ 	case KEY_F1:
+ 	case KEY_F2:
+ 	case KEY_F3:
 diff --git a/irrlicht/src/CIrrDeviceWin32.cpp b/irrlicht/src/CIrrDeviceWin32.cpp
 index f96c178..2e7a9ee 100644
 --- a/irrlicht/src/CIrrDeviceWin32.cpp
