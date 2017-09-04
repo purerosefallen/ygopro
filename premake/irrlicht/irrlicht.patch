@@ -326,8 +326,9 @@ index 3f633da..c0712df 100644
  
  	//! gets the processor speed in megahertz
  	//! \param Mhz:
---- CGUIListBox.old.cpp	2017-09-05 04:20:28.619271300 +0800
-+++ CGUIListBox.cpp	2017-09-05 04:11:37.367885500 +0800
+diff --git a/irrlicht/src/CGUIListBox.old.cpp b/irrlicht/src/CGUIListBox.cpp
+--- a/irrlicht/src/CGUIListBox.old.cpp	2017-09-05 04:20:28.619271300 +0800
++++ b/irrlicht/src/CGUIListBox.cpp	2017-09-05 04:11:37.367885500 +0800
 @@ -411,6 +411,10 @@
  				case EMIE_LMOUSE_PRESSED_DOWN:
  				{
