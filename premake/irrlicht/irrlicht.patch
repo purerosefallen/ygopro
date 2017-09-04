@@ -100,7 +100,7 @@ index f33b5a2..8375444 100644
  
  					if (MarkBegin == MarkEnd)
  					{
-@@ -658,6 +658,16 @@ bool CGUIEditBox::processKey(const SEvent& event)
+@@ -664,6 +658,16 @@ bool CGUIEditBox::processKey(const SEvent& event)
  	case KEY_ESCAPE:
  	case KEY_TAB:
  	case KEY_SHIFT:
@@ -326,3 +326,32 @@ index 3f633da..c0712df 100644
  
  	//! gets the processor speed in megahertz
  	//! \param Mhz:
+--- CGUIListBox.old.cpp	2017-09-05 04:20:28.619271300 +0800
++++ CGUIListBox.cpp	2017-09-05 04:11:37.367885500 +0800
+@@ -411,6 +411,10 @@
+ 				case EMIE_LMOUSE_PRESSED_DOWN:
+ 				{
+ 					Selecting = true;
++
++					if(isPointInside(p))
++						selectNew(event.MouseInput.Y);
++
+ 					return true;
+ 				}
+ 
+@@ -455,9 +459,12 @@
+ 	u32 now = os::Timer::getTime();
+ 	s32 oldSelected = Selected;
+ 
+-	Selected = getItemAt(AbsoluteRect.UpperLeftCorner.X, ypos);
+-	if (Selected<0 && !Items.empty())
+-		Selected = 0;
++	if (!onlyHover)
++	{
++		Selected = getItemAt(AbsoluteRect.UpperLeftCorner.X, ypos);
++		if(Selected<0 && !Items.empty())
++			Selected = 0;
++	}
+ 
+ 	recalculateScrollPos();
+ 
