@@ -329,30 +329,12 @@ index 3f633da..c0712df 100644
 diff --git a/irrlicht/src/CGUIListBox.old.cpp b/irrlicht/src/CGUIListBox.cpp
 --- a/irrlicht/src/CGUIListBox.old.cpp	2017-09-05 04:20:28.619271300 +0800
 +++ b/irrlicht/src/CGUIListBox.cpp	2017-09-05 04:11:37.367885500 +0800
-@@ -411,6 +411,10 @@
- 				case EMIE_LMOUSE_PRESSED_DOWN:
- 				{
- 					Selecting = true;
-+
-+					if(isPointInside(p))
-+						selectNew(event.MouseInput.Y);
-+
- 					return true;
+@@ -425,7 +425,7 @@
  				}
  
-@@ -455,9 +459,12 @@
- 	u32 now = os::Timer::getTime();
- 	s32 oldSelected = Selected;
- 
--	Selected = getItemAt(AbsoluteRect.UpperLeftCorner.X, ypos);
--	if (Selected<0 && !Items.empty())
--		Selected = 0;
-+	if (!onlyHover)
-+	{
-+		Selected = getItemAt(AbsoluteRect.UpperLeftCorner.X, ypos);
-+		if(Selected<0 && !Items.empty())
-+			Selected = 0;
-+	}
- 
- 	recalculateScrollPos();
- 
+ 				case EMIE_MOUSE_MOVED:
+-					if (Selecting || MoveOverSelect)
++					if (MoveOverSelect)
+ 					{
+ 						if (isPointInside(p))
+ 						{
