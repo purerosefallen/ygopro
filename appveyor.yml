@@ -9,17 +9,17 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha11/premake-5.0.0-alpha11-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-alpha11-windows.zip
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-alpha12-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
   - move libevent-2.0.22-stable event
   - xcopy /E event\WIN32-Code event\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/freetype/freetype-2.7.1.tar.bz2 ; exit 0"
-  - tar xf freetype-2.7.1.tar.bz2
-  - move freetype-2.7.1 freetype
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/freetype/freetype-2.8.tar.bz2 ; exit 0"
+  - tar xf freetype-2.8.tar.bz2
+  - move freetype-2.8 freetype
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip ; exit 0"
   - 7z x irrlicht-1.8.4.zip
@@ -31,9 +31,9 @@ install:
   - tar xf lua-5.2.4.tar.gz
   - move lua-5.2.4\src lua
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3170000.zip ; exit 0"
-  - 7z x sqlite-amalgamation-3170000.zip
-  - move sqlite-amalgamation-3170000 sqlite3
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3200100.zip ; exit 0"
+  - 7z x sqlite-amalgamation-3200100.zip
+  - move sqlite-amalgamation-3200100 sqlite3
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
   - 7z x irrKlang-32bit-1.5.0.zip
@@ -90,10 +90,10 @@ deploy:
         branch: master
 
 cache:
-  - premake-5.0.0-alpha11-windows.zip
+  - premake-5.0.0-alpha12-windows.zip
   - libevent-2.0.22-stable.tar.gz
-  - freetype-2.7.1.tar.bz2
+  - freetype-2.8.tar.bz2
   - irrlicht-1.8.4.zip
   - lua-5.2.4.tar.gz
-  - sqlite-amalgamation-3170000.zip
+  - sqlite-amalgamation-3200100.zip
   - irrKlang-32bit-1.5.0.zip
