@@ -7,6 +7,7 @@ solution "ygo"
 
     configuration "windows"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
+        entrypoint "mainCRTStartup"
 
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
@@ -24,7 +25,7 @@ solution "ygo"
         defines { "LUA_USE_LINUX" }
 
     configuration "Release"
-        flags { "OptimizeSpeed" }
+        optimize "Speed"
         targetdir "bin/release"
 
     configuration "Debug"
@@ -45,7 +46,7 @@ solution "ygo"
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
 
     configuration "vs*"
-        flags "EnableSSE2"
+        vectorextensions "SSE2"
         defines { "_CRT_SECURE_NO_WARNINGS" }
     
     configuration "not vs*"
@@ -58,7 +59,7 @@ solution "ygo"
 
     include "ocgcore"
     include "gframe"
-    if os.is("windows") then
+    if os.ishost("windows") then
     include "event"
     include "freetype"
     include "irrlicht"
