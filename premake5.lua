@@ -7,7 +7,10 @@ solution "ygo"
 
     configuration "windows"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
+        libdirs { "$(DXSDK_DIR)Lib/x86" }
         entrypoint "mainCRTStartup"
+        toolset "v140_xp"
+        startproject "ygopro"
 
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
@@ -44,6 +47,7 @@ solution "ygo"
 
     configuration { "Debug", "vs*" }
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
+        disablewarnings { "4819" }
 
     configuration "vs*"
         vectorextensions "SSE2"
@@ -54,8 +58,6 @@ solution "ygo"
 
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
-
-    startproject "ygopro"
 
     include "ocgcore"
     include "gframe"
