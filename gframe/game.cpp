@@ -14,7 +14,7 @@
 #include <dirent.h>
 #endif
 
-const unsigned short PRO_VERSION = 0x233D;
+const unsigned short PRO_VERSION = 0x233E;
 
 namespace ygo {
 
@@ -106,8 +106,8 @@ bool Game::Initialize() {
 	env->addStaticText(L"http://mercury233.me/ygosrv233/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
 	env->addStaticText(L"已知问题：\n\n\
-特殊同调和特殊超量没有正确检查是否\n\
-有可用格子。", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
+特殊同调没有正确检查是否有可用格子。\n\n\
+天气模样等卡赋予效果的处理存在问题。", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
 	wLanWindow = env->addWindow(rect<s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
