@@ -24,6 +24,7 @@ void Game::DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, 
 		glEnd();
 		glMaterialfv(GL_FRONT, GL_AMBIENT, origin);
 		glDisable(GL_LINE_STIPPLE);
+		glEnable(GL_TEXTURE_2D);
 	} else {
 		driver->setMaterial(matManager.mOutLine);
 		if(strip) {
@@ -49,9 +50,9 @@ void Game::DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, 
 void Game::DrawBackGround() {
 	static int selFieldAlpha = 255;
 	static int selFieldDAlpha = -10;
-	matrix4 im = irr::core::IdentityMatrix;
-	im.setTranslation(vector3df(0, 0, -0.01f));
-	driver->setTransform(irr::video::ETS_WORLD, im);
+//	matrix4 im = irr::core::IdentityMatrix;
+//	im.setTranslation(vector3df(0, 0, -0.01f));
+//	driver->setTransform(irr::video::ETS_WORLD, im);
 	//dark shade
 //	matManager.mSelField.AmbientColor = 0xff000000;
 //	matManager.mSelField.DiffuseColor = 0xa0000000;
@@ -64,41 +65,42 @@ void Game::DrawBackGround() {
 	//draw field
 	//draw field spell card
 	driver->setTransform(irr::video::ETS_WORLD, irr::core::IdentityMatrix);
-	int fieldcode1 = -1;
-	int fieldcode2 = -1;
 	bool drawField = false;
-	if(mainGame->gameConf.draw_field_spell
-		&& mainGame->dField.szone[0][5] && mainGame->dField.szone[0][5]->position & POS_FACEUP)
-		fieldcode1 = mainGame->dField.szone[0][5]->code;
-	if(mainGame->gameConf.draw_field_spell
-		&& mainGame->dField.szone[1][5] && mainGame->dField.szone[1][5]->position & POS_FACEUP)
-		fieldcode2 = mainGame->dField.szone[1][5]->code;
-	int fieldcode = (fieldcode1 > 0) ? fieldcode1 : fieldcode2;
-	if(fieldcode1 > 0 && fieldcode2 > 0 && fieldcode1 != fieldcode2) {
-		ITexture* texture = imageManager.GetTextureField(fieldcode1);
-		if(texture) {
-			drawField = true;
-			matManager.mTexture.setTexture(0, texture);
-			driver->setMaterial(matManager.mTexture);
-			driver->drawVertexPrimitiveList(matManager.vFieldSpell1, 4, matManager.iRectangle, 2);
-		}
-		texture = imageManager.GetTextureField(fieldcode2);
-		if(texture) {
-			drawField = true;
-			matManager.mTexture.setTexture(0, texture);
-			driver->setMaterial(matManager.mTexture);
-			driver->drawVertexPrimitiveList(matManager.vFieldSpell2, 4, matManager.iRectangle, 2);
-		}
-	} else if(fieldcode > 0) {
-		ITexture* texture = imageManager.GetTextureField(fieldcode);
-		if(texture) {
-			drawField = true;
-			matManager.mTexture.setTexture(0, texture);
-			driver->setMaterial(matManager.mTexture);
-			driver->drawVertexPrimitiveList(matManager.vFieldSpell, 4, matManager.iRectangle, 2);
+	int rule = (dInfo.duel_rule >= 4) ? 1 : 0;
+	if(mainGame->gameConf.draw_field_spell) {
+		int fieldcode1 = -1;
+		int fieldcode2 = -1;
+		if(mainGame->dField.szone[0][5] && mainGame->dField.szone[0][5]->position & POS_FACEUP)
+			fieldcode1 = mainGame->dField.szone[0][5]->code;
+		if(mainGame->dField.szone[1][5] && mainGame->dField.szone[1][5]->position & POS_FACEUP)
+			fieldcode2 = mainGame->dField.szone[1][5]->code;
+		int fieldcode = (fieldcode1 > 0) ? fieldcode1 : fieldcode2;
+		if(fieldcode1 > 0 && fieldcode2 > 0 && fieldcode1 != fieldcode2) {
+			ITexture* texture = imageManager.GetTextureField(fieldcode1);
+			if(texture) {
+				drawField = true;
+				matManager.mTexture.setTexture(0, texture);
+				driver->setMaterial(matManager.mTexture);
+				driver->drawVertexPrimitiveList(matManager.vFieldSpell1, 4, matManager.iRectangle, 2);
+			}
+			texture = imageManager.GetTextureField(fieldcode2);
+			if(texture) {
+				drawField = true;
+				matManager.mTexture.setTexture(0, texture);
+				driver->setMaterial(matManager.mTexture);
+				driver->drawVertexPrimitiveList(matManager.vFieldSpell2, 4, matManager.iRectangle, 2);
+			}
+		} else if(fieldcode > 0) {
+			ITexture* texture = imageManager.GetTextureField(fieldcode);
+			if(texture) {
+				drawField = true;
+				matManager.mTexture.setTexture(0, texture);
+				driver->setMaterial(matManager.mTexture);
+				driver->drawVertexPrimitiveList(matManager.vFieldSpell, 4, matManager.iRectangle, 2);
+			}
 		}
 	}
-	matManager.mTexture.setTexture(0, drawField ? imageManager.tFieldTransparent : imageManager.tField);
+	matManager.mTexture.setTexture(0, drawField ? imageManager.tFieldTransparent[rule] : imageManager.tField[rule]);
 	driver->setMaterial(matManager.mTexture);
 	driver->drawVertexPrimitiveList(matManager.vField, 4, matManager.iRectangle, 2);
 	driver->setMaterial(matManager.mBackLine);
@@ -106,76 +108,79 @@ void Game::DrawBackGround() {
 	if(dInfo.curMsg == MSG_SELECT_PLACE || dInfo.curMsg == MSG_SELECT_DISFIELD) {
 		float cv[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 		unsigned int filter = 0x1;
-		for (int i = 0; i < 5; ++i, filter <<= 1) {
+		for (int i = 0; i < 7; ++i, filter <<= 1) {
 			if (dField.selectable_field & filter)
-				DrawSelectionLine(&matManager.vFields[16 + i * 4], !(dField.selected_field & filter), 2, cv);
+				DrawSelectionLine(matManager.vFieldMzone[0][i], !(dField.selected_field & filter), 2, cv);
 		}
 		filter = 0x100;
 		for (int i = 0; i < 8; ++i, filter <<= 1) {
 			if (dField.selectable_field & filter)
-				DrawSelectionLine(&matManager.vFields[36 + i * 4], !(dField.selected_field & filter), 2, cv);
+				DrawSelectionLine(matManager.vFieldSzone[0][i][rule], !(dField.selected_field & filter), 2, cv);
 		}
 		filter = 0x10000;
-		for (int i = 0; i < 5; ++i, filter <<= 1) {
+		for (int i = 0; i < 7; ++i, filter <<= 1) {
 			if (dField.selectable_field & filter)
-				DrawSelectionLine(&matManager.vFields[84 + i * 4], !(dField.selected_field & filter), 2, cv);
+				DrawSelectionLine(matManager.vFieldMzone[1][i], !(dField.selected_field & filter), 2, cv);
 		}
 		filter = 0x1000000;
 		for (int i = 0; i < 8; ++i, filter <<= 1) {
 			if (dField.selectable_field & filter)
-				DrawSelectionLine(&matManager.vFields[104 + i * 4], !(dField.selected_field & filter), 2, cv);
+				DrawSelectionLine(matManager.vFieldSzone[1][i][rule], !(dField.selected_field & filter), 2, cv);
 		}
 	}
 	//disabled field
 	{
 		/*float cv[4] = {0.0f, 0.0f, 1.0f, 1.0f};*/
 		unsigned int filter = 0x1;
-		for (int i = 0; i < 5; ++i, filter <<= 1) {
+		for (int i = 0; i < 7; ++i, filter <<= 1) {
 			if (dField.disabled_field & filter) {
-				driver->draw3DLine(matManager.vFields[16 + i * 4].Pos, matManager.vFields[16 + i * 4 + 3].Pos, 0xffffffff);
-				driver->draw3DLine(matManager.vFields[16 + i * 4 + 1].Pos, matManager.vFields[16 + i * 4 + 2].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldMzone[0][i][0].Pos, matManager.vFieldMzone[0][i][3].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldMzone[0][i][1].Pos, matManager.vFieldMzone[0][i][2].Pos, 0xffffffff);
 			}
 		}
 		filter = 0x100;
 		for (int i = 0; i < 8; ++i, filter <<= 1) {
 			if (dField.disabled_field & filter) {
-				driver->draw3DLine(matManager.vFields[36 + i * 4].Pos, matManager.vFields[36 + i * 4 + 3].Pos, 0xffffffff);
-				driver->draw3DLine(matManager.vFields[36 + i * 4 + 1].Pos, matManager.vFields[36 + i * 4 + 2].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldSzone[0][i][rule][0].Pos, matManager.vFieldSzone[0][i][rule][3].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldSzone[0][i][rule][1].Pos, matManager.vFieldSzone[0][i][rule][2].Pos, 0xffffffff);
 			}
 		}
 		filter = 0x10000;
-		for (int i = 0; i < 5; ++i, filter <<= 1) {
+		for (int i = 0; i < 7; ++i, filter <<= 1) {
 			if (dField.disabled_field & filter) {
-				driver->draw3DLine(matManager.vFields[84 + i * 4].Pos, matManager.vFields[84 + i * 4 + 3].Pos, 0xffffffff);
-				driver->draw3DLine(matManager.vFields[84 + i * 4 + 1].Pos, matManager.vFields[84 + i * 4 + 2].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldMzone[1][i][0].Pos, matManager.vFieldMzone[1][i][3].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldMzone[1][i][1].Pos, matManager.vFieldMzone[1][i][2].Pos, 0xffffffff);
 			}
 		}
 		filter = 0x1000000;
 		for (int i = 0; i < 8; ++i, filter <<= 1) {
 			if (dField.disabled_field & filter) {
-				driver->draw3DLine(matManager.vFields[104 + i * 4].Pos, matManager.vFields[104 + i * 4 + 3].Pos, 0xffffffff);
-				driver->draw3DLine(matManager.vFields[104 + i * 4 + 1].Pos, matManager.vFields[104 + i * 4 + 2].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldSzone[1][i][rule][0].Pos, matManager.vFieldSzone[1][i][rule][3].Pos, 0xffffffff);
+				driver->draw3DLine(matManager.vFieldSzone[1][i][rule][1].Pos, matManager.vFieldSzone[1][i][rule][2].Pos, 0xffffffff);
 			}
 		}
 	}
 	//current sel
-	if (dField.hovered_location != 0 && dField.hovered_location != 2 && dField.hovered_location != POSITION_HINT) {
-		int index = 0;
-		if (dField.hovered_controler == 0) {
-			if (dField.hovered_location == LOCATION_DECK) index = 0;
-			else if (dField.hovered_location == LOCATION_MZONE) index = 16 + dField.hovered_sequence * 4;
-			else if (dField.hovered_location == LOCATION_SZONE) index = 36 + dField.hovered_sequence * 4;
-			else if (dField.hovered_location == LOCATION_GRAVE) index = 4;
-			else if (dField.hovered_location == LOCATION_REMOVED) index = 12;
-			else if (dField.hovered_location == LOCATION_EXTRA) index = 8;
-		} else {
-			if (dField.hovered_location == LOCATION_DECK) index = 68;
-			else if (dField.hovered_location == LOCATION_MZONE) index = 84 + dField.hovered_sequence * 4;
-			else if (dField.hovered_location == LOCATION_SZONE) index = 104 + dField.hovered_sequence * 4;
-			else if (dField.hovered_location == LOCATION_GRAVE) index = 72;
-			else if (dField.hovered_location == LOCATION_REMOVED) index = 80;
-			else if (dField.hovered_location == LOCATION_EXTRA) index = 76;
-		}
+	if (dField.hovered_location != 0 && dField.hovered_location != 2 && dField.hovered_location != POSITION_HINT
+		&& !(dInfo.duel_rule < 4 && dField.hovered_location == LOCATION_MZONE && dField.hovered_sequence > 4)
+		&& !(dInfo.duel_rule >= 4 && dField.hovered_location == LOCATION_SZONE && dField.hovered_sequence > 5)) {
+		S3DVertex *vertex = 0;
+		if (dField.hovered_location == LOCATION_DECK)
+			vertex = matManager.vFieldDeck[dField.hovered_controler];
+		else if (dField.hovered_location == LOCATION_MZONE) {
+			vertex = matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence];
+			ClientCard* pcard = mainGame->dField.mzone[dField.hovered_controler][dField.hovered_sequence];
+			if(pcard && pcard->type & TYPE_LINK) {
+				DrawLinkedZones(pcard);
+			}
+		} else if (dField.hovered_location == LOCATION_SZONE)
+			vertex = matManager.vFieldSzone[dField.hovered_controler][dField.hovered_sequence][rule];
+		else if (dField.hovered_location == LOCATION_GRAVE)
+			vertex = matManager.vFieldGrave[dField.hovered_controler][rule];
+		else if (dField.hovered_location == LOCATION_REMOVED)
+			vertex = matManager.vFieldRemove[dField.hovered_controler][rule];
+		else if (dField.hovered_location == LOCATION_EXTRA)
+			vertex = matManager.vFieldExtra[dField.hovered_controler];
 		selFieldAlpha += selFieldDAlpha;
 		if (selFieldAlpha <= 5) {
 			selFieldAlpha = 5;
@@ -188,33 +193,114 @@ void Game::DrawBackGround() {
 		matManager.mSelField.AmbientColor = 0xffffffff;
 		matManager.mSelField.DiffuseColor = selFieldAlpha << 24;
 		driver->setMaterial(matManager.mSelField);
-		driver->drawVertexPrimitiveList(&matManager.vFields[index], 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vertex, 4, matManager.iRectangle, 2);
+	}
+}
+void Game::DrawLinkedZones(ClientCard* pcard) {
+	int mark = pcard->link_marker;
+	ClientCard* pcard2;
+	if (dField.hovered_sequence < 5) {
+		if (mark & LINK_MARKER_LEFT && dField.hovered_sequence > 0) {
+			pcard2 = mainGame->dField.mzone[dField.hovered_controler][dField.hovered_sequence - 1];
+			CheckMutual(pcard2, LINK_MARKER_RIGHT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence - 1], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_RIGHT && dField.hovered_sequence < 4) {
+			pcard2 = mainGame->dField.mzone[dField.hovered_controler][dField.hovered_sequence + 1];
+			CheckMutual(pcard2, LINK_MARKER_LEFT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence + 1], 4, matManager.iRectangle, 2);
+		}
+		if (dInfo.duel_rule >= 4) {
+			if ((mark & LINK_MARKER_TOP_LEFT && dField.hovered_sequence == 2)
+				|| (mark & LINK_MARKER_TOP && dField.hovered_sequence == 1)
+				|| (mark & LINK_MARKER_TOP_RIGHT && dField.hovered_sequence == 0)) {
+				int mark = (dField.hovered_sequence == 2) ? LINK_MARKER_BOTTOM_RIGHT : (dField.hovered_sequence == 1) ? LINK_MARKER_BOTTOM : LINK_MARKER_BOTTOM_LEFT;
+				pcard2 = mainGame->dField.mzone[dField.hovered_controler][5];
+				if (!pcard2) {
+					pcard2 = mainGame->dField.mzone[1 - dField.hovered_controler][6];
+					mark = (dField.hovered_sequence == 2) ? LINK_MARKER_TOP_LEFT : (dField.hovered_sequence == 1) ? LINK_MARKER_TOP : LINK_MARKER_TOP_RIGHT;
+				}
+				CheckMutual(pcard2, mark);
+				driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][5], 4, matManager.iRectangle, 2);
+			}
+			if ((mark & LINK_MARKER_TOP_LEFT && dField.hovered_sequence == 4)
+				|| (mark & LINK_MARKER_TOP && dField.hovered_sequence == 3)
+				|| (mark & LINK_MARKER_TOP_RIGHT && dField.hovered_sequence == 2)) {
+				int mark = (dField.hovered_sequence == 4) ? LINK_MARKER_BOTTOM_RIGHT : (dField.hovered_sequence == 3) ? LINK_MARKER_BOTTOM : LINK_MARKER_BOTTOM_LEFT;
+				pcard2 = mainGame->dField.mzone[dField.hovered_controler][6];
+				if (!pcard2) {
+					pcard2 = mainGame->dField.mzone[1 - dField.hovered_controler][5];
+					mark = (dField.hovered_sequence == 4) ? LINK_MARKER_TOP_LEFT : (dField.hovered_sequence == 3) ? LINK_MARKER_TOP : LINK_MARKER_TOP_RIGHT;
+				}
+				CheckMutual(pcard2, mark);
+				driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][6], 4, matManager.iRectangle, 2);
+			}
+		}
+	} else {
+		int swap = (dField.hovered_sequence == 5) ? 0 : 2;
+		if (mark & LINK_MARKER_BOTTOM_LEFT) {
+			pcard2 = mainGame->dField.mzone[dField.hovered_controler][0 + swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP_RIGHT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][0 + swap], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_BOTTOM) {
+			pcard2 = mainGame->dField.mzone[dField.hovered_controler][1 + swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][1 + swap], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_BOTTOM_RIGHT) {
+			pcard2 = mainGame->dField.mzone[dField.hovered_controler][2 + swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP_LEFT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][2 + swap], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_TOP_LEFT) {
+			pcard2 = mainGame->dField.mzone[1 - dField.hovered_controler][4 - swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP_LEFT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[1 - dField.hovered_controler][4 - swap], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_TOP) {
+			pcard2 = mainGame->dField.mzone[1 - dField.hovered_controler][3 - swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[1 - dField.hovered_controler][3 - swap], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_TOP_RIGHT) {
+			pcard2 = mainGame->dField.mzone[1 - dField.hovered_controler][2 - swap];
+			CheckMutual(pcard2, LINK_MARKER_TOP_RIGHT);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[1 - dField.hovered_controler][2 - swap], 4, matManager.iRectangle, 2);
+		}
+	}
+}
+void Game::CheckMutual(ClientCard* pcard, int mark) {
+	matManager.mSelField.AmbientColor = 0xff0261a2;
+	driver->setMaterial(matManager.mSelField);
+	if (pcard && pcard->type & TYPE_LINK && pcard->link_marker & mark) {
+		matManager.mSelField.AmbientColor = 0xff009900;
+		driver->setMaterial(matManager.mSelField);
 	}
 }
 void Game::DrawCards() {
 	for(int p = 0; p < 2; ++p) {
-		for(int i = 0; i < 5; ++i)
-			if(dField.mzone[p][i])
-				DrawCard(dField.mzone[p][i]);
-		for(int i = 0; i < 8; ++i)
-			if(dField.szone[p][i])
-				DrawCard(dField.szone[p][i]);
-		for(size_t i = 0; i < dField.deck[p].size(); ++i)
-			DrawCard(dField.deck[p][i]);
-		for(size_t i = 0; i < dField.hand[p].size(); ++i)
-			DrawCard(dField.hand[p][i]);
-		for(size_t i = 0; i < dField.grave[p].size(); ++i)
-			DrawCard(dField.grave[p][i]);
-		for(size_t i = 0; i < dField.remove[p].size(); ++i)
-			DrawCard(dField.remove[p][i]);
-		for(size_t i = 0; i < dField.extra[p].size(); ++i)
-			DrawCard(dField.extra[p][i]);
+		for(auto it = dField.mzone[p].begin(); it != dField.mzone[p].end(); ++it)
+			if(*it)
+				DrawCard(*it);
+		for(auto it = dField.szone[p].begin(); it != dField.szone[p].end(); ++it)
+			if(*it)
+				DrawCard(*it);
+		for(auto it = dField.deck[p].begin(); it != dField.deck[p].end(); ++it)
+			DrawCard(*it);
+		for(auto it = dField.hand[p].begin(); it != dField.hand[p].end(); ++it)
+			DrawCard(*it);
+		for(auto it = dField.grave[p].begin(); it != dField.grave[p].end(); ++it)
+			DrawCard(*it);
+		for(auto it = dField.remove[p].begin(); it != dField.remove[p].end(); ++it)
+			DrawCard(*it);
+		for(auto it = dField.extra[p].begin(); it != dField.extra[p].end(); ++it)
+			DrawCard(*it);
 	}
 	for(auto cit = dField.overlay_cards.begin(); cit != dField.overlay_cards.end(); ++cit)
 		DrawCard(*cit);
 }
 void Game::DrawCard(ClientCard* pcard) {
-	driver->setTransform(irr::video::ETS_WORLD, pcard->mTransform);
 	if(pcard->aniFrame) {
 		if(pcard->is_moving) {
 			pcard->curPos += pcard->dPos;
@@ -232,29 +318,20 @@ void Game::DrawCard(ClientCard* pcard) {
 	}
 	matManager.mCard.AmbientColor = 0xffffffff;
 	matManager.mCard.DiffuseColor = (pcard->curAlpha << 24) | 0xffffff;
-	matManager.mCard.setTexture(0, imageManager.GetTexture(pcard->code));
 	driver->setTransform(irr::video::ETS_WORLD, pcard->mTransform);
-	driver->setMaterial(matManager.mCard);
-	driver->drawVertexPrimitiveList(matManager.vCardFront, 4, matManager.iRectangle, 2);
-	if(pcard->controler == 0 || !imageManager.tCover[1])
-		matManager.mCard.setTexture(0, imageManager.tCover[0]);
-	else
-		matManager.mCard.setTexture(0, imageManager.tCover[1]);
-	driver->setMaterial(matManager.mCard);
-	driver->drawVertexPrimitiveList(matManager.vCardBack, 4, matManager.iRectangle, 2);
-	if(pcard->is_showequip) {
-		matManager.mTexture.setTexture(0, imageManager.tEquip);
-		driver->setMaterial(matManager.mTexture);
-		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
-	} else if(pcard->is_showtarget) {
-		matManager.mTexture.setTexture(0, imageManager.tTarget);
-		driver->setMaterial(matManager.mTexture);
-		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
-	} else if(pcard->is_disabled && (pcard->location & LOCATION_ONFIELD) && (pcard->position & POS_FACEUP)) {
-		matManager.mTexture.setTexture(0, imageManager.tNegated);
-		driver->setMaterial(matManager.mTexture);
-		driver->drawVertexPrimitiveList(matManager.vNegate, 4, matManager.iRectangle, 2);
+	auto m22 = pcard->mTransform(2, 2);
+	if(m22 > -0.99 || pcard->is_moving) {
+		matManager.mCard.setTexture(0, imageManager.GetTexture(pcard->code));
+		driver->setMaterial(matManager.mCard);
+		driver->drawVertexPrimitiveList(matManager.vCardFront, 4, matManager.iRectangle, 2);
 	}
+	if(m22 < 0.99 || pcard->is_moving) {
+		matManager.mCard.setTexture(0, imageManager.tCover[pcard->controler]);
+		driver->setMaterial(matManager.mCard);
+		driver->drawVertexPrimitiveList(matManager.vCardBack, 4, matManager.iRectangle, 2);
+	}
+	if(pcard->is_moving)
+		return;
 	if(pcard->is_selectable && (pcard->location & 0xe)) {
 		float cv[4] = {1.0f, 1.0f, 0.0f, 1.0f};
 		if((pcard->location == LOCATION_HAND && pcard->code) || ((pcard->location & 0xc) && (pcard->position & POS_FACEUP)))
@@ -269,6 +346,26 @@ void Game::DrawCard(ClientCard* pcard) {
 		else
 			DrawSelectionLine(matManager.vCardOutliner, true, 2, cv);
 	}
+	irr::core::matrix4 im;
+	im.setTranslation(pcard->curPos);
+	driver->setTransform(irr::video::ETS_WORLD, im);
+	if(pcard->is_showequip) {
+		matManager.mTexture.setTexture(0, imageManager.tEquip);
+		driver->setMaterial(matManager.mTexture);
+		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
+	} else if(pcard->is_showtarget) {
+		matManager.mTexture.setTexture(0, imageManager.tTarget);
+		driver->setMaterial(matManager.mTexture);
+		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
+	} else if(pcard->is_showchaintarget) {
+		matManager.mTexture.setTexture(0, imageManager.tChainTarget);
+		driver->setMaterial(matManager.mTexture);
+		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
+	} else if(pcard->is_disabled && (pcard->location & LOCATION_ONFIELD) && (pcard->position & POS_FACEUP)) {
+		matManager.mTexture.setTexture(0, imageManager.tNegated);
+		driver->setMaterial(matManager.mTexture);
+		driver->drawVertexPrimitiveList(matManager.vNegate, 4, matManager.iRectangle, 2);
+	}
 	if(pcard->cmdFlag & COMMAND_ATTACK) {
 		matManager.mTexture.setTexture(0, imageManager.tAttack);
 		driver->setMaterial(matManager.mTexture);
@@ -280,50 +377,53 @@ void Game::DrawCard(ClientCard* pcard) {
 }
 void Game::DrawMisc() {
 	static irr::core::vector3df act_rot(0, 0, 0);
+	int rule = (dInfo.duel_rule >= 4) ? 1 : 0;
 	irr::core::matrix4 im, ic, it;
 	act_rot.Z += 0.02f;
 	im.setRotationRadians(act_rot);
 	matManager.mTexture.setTexture(0, imageManager.tAct);
 	driver->setMaterial(matManager.mTexture);
 	if(dField.deck_act) {
-		im.setTranslation(vector3df(matManager.vFields[0].Pos.X - (matManager.vFields[0].Pos.X - matManager.vFields[1].Pos.X)/2,
-			matManager.vFields[0].Pos.Y - (matManager.vFields[0].Pos.Y - matManager.vFields[3].Pos.Y)/2, dField.deck[0].size() * 0.01f + 0.02f));
+		im.setTranslation(vector3df((matManager.vFieldDeck[0][0].Pos.X + matManager.vFieldDeck[0][1].Pos.X) / 2,
+			(matManager.vFieldDeck[0][0].Pos.Y + matManager.vFieldDeck[0][2].Pos.Y) / 2, dField.deck[0].size() * 0.01f + 0.02f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.grave_act) {
-		im.setTranslation(vector3df(matManager.vFields[4].Pos.X - (matManager.vFields[4].Pos.X - matManager.vFields[5].Pos.X)/2,
-			matManager.vFields[4].Pos.Y - (matManager.vFields[4].Pos.Y - matManager.vFields[6].Pos.Y)/2, dField.grave[0].size() * 0.01f + 0.02f));
+		im.setTranslation(vector3df((matManager.vFieldGrave[0][rule][0].Pos.X + matManager.vFieldGrave[0][rule][1].Pos.X) / 2,
+			(matManager.vFieldGrave[0][rule][0].Pos.Y + matManager.vFieldGrave[0][rule][2].Pos.Y) / 2, dField.grave[0].size() * 0.01f + 0.02f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.remove_act) {
-		im.setTranslation(vector3df(matManager.vFields[12].Pos.X - (matManager.vFields[12].Pos.X - matManager.vFields[13].Pos.X)/2,
-			matManager.vFields[12].Pos.Y - (matManager.vFields[12].Pos.Y - matManager.vFields[14].Pos.Y)/2, dField.remove[0].size() * 0.01f + 0.02f));
+		im.setTranslation(vector3df((matManager.vFieldRemove[0][rule][0].Pos.X + matManager.vFieldRemove[0][rule][1].Pos.X) / 2,
+			(matManager.vFieldRemove[0][rule][0].Pos.Y + matManager.vFieldRemove[0][rule][2].Pos.Y) / 2, dField.remove[0].size() * 0.01f + 0.02f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.extra_act) {
-		im.setTranslation(vector3df(matManager.vFields[8].Pos.X - (matManager.vFields[8].Pos.X - matManager.vFields[9].Pos.X)/2,
-			matManager.vFields[8].Pos.Y - (matManager.vFields[8].Pos.Y - matManager.vFields[10].Pos.Y)/2, dField.extra[0].size() * 0.01f + 0.02f));
+		im.setTranslation(vector3df((matManager.vFieldExtra[0][0].Pos.X + matManager.vFieldExtra[0][1].Pos.X) / 2,
+			(matManager.vFieldExtra[0][0].Pos.Y + matManager.vFieldExtra[0][2].Pos.Y) / 2, dField.extra[0].size() * 0.01f + 0.02f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.pzone_act[0]) {
-		im.setTranslation(vector3df(matManager.vFields[60].Pos.X - (matManager.vFields[60].Pos.X - matManager.vFields[61].Pos.X)/2,
-			matManager.vFields[60].Pos.Y - (matManager.vFields[60].Pos.Y - matManager.vFields[62].Pos.Y)/2, 0.03f));
+		int seq = dInfo.duel_rule >= 4 ? 0 : 6;
+		im.setTranslation(vector3df((matManager.vFieldSzone[0][seq][rule][0].Pos.X + matManager.vFieldSzone[0][seq][rule][1].Pos.X) / 2,
+			(matManager.vFieldSzone[0][seq][rule][0].Pos.Y + matManager.vFieldSzone[0][seq][rule][2].Pos.Y) / 2, 0.03f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.pzone_act[1]) {
-		im.setTranslation(vector3df(matManager.vFields[128].Pos.X - (matManager.vFields[128].Pos.X - matManager.vFields[129].Pos.X)/2,
-			matManager.vFields[128].Pos.Y - (matManager.vFields[128].Pos.Y - matManager.vFields[130].Pos.Y)/2, 0.03f));
+		int seq = dInfo.duel_rule >= 4 ? 0 : 6;
+		im.setTranslation(vector3df((matManager.vFieldSzone[1][seq][rule][0].Pos.X + matManager.vFieldSzone[1][seq][rule][1].Pos.X) / 2,
+			(matManager.vFieldSzone[1][seq][rule][0].Pos.Y + matManager.vFieldSzone[1][seq][rule][2].Pos.Y) / 2, 0.03f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.conti_act) {
-		im.setTranslation(vector3df(matManager.vFields[136].Pos.X - (matManager.vFields[136].Pos.X - matManager.vFields[137].Pos.X)/2,
-			matManager.vFields[136].Pos.Y - (matManager.vFields[136].Pos.Y - matManager.vFields[138].Pos.Y)/2, 0.03f));
+		im.setTranslation(vector3df((matManager.vFieldContiAct[0].X + matManager.vFieldContiAct[1].X) / 2,
+			(matManager.vFieldContiAct[0].Y + matManager.vFieldContiAct[2].Y) / 2, 0.03f));
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
@@ -410,61 +510,68 @@ void Game::DrawMisc() {
 	ClientCard* pcard;
 	for(int i = 0; i < 5; ++i) {
 		pcard = dField.mzone[0][i];
-		if(pcard && pcard->code != 0) {
-			int m = 493 + i * 85;
-			adFont->draw(L"/", recti(m - 4, 416, m + 4, 436), 0xff000000, true, false, 0);
-			adFont->draw(L"/", recti(m - 3, 417, m + 5, 437), 0xffffffff, true, false, 0);
-			int w = adFont->getDimension(pcard->atkstring).Width;
-			adFont->draw(pcard->atkstring, recti(m - 5 - w, 416, m - 5, 436), 0xff000000, false, false, 0);
-			adFont->draw(pcard->atkstring, recti(m - 4 - w, 417, m - 4, 437),
-			             pcard->attack > pcard->base_attack ? 0xffffff00 : pcard->attack < pcard->base_attack ? 0xffff2090 : 0xffffffff , false, false, 0);
-			w = adFont->getDimension(pcard->defstring).Width;
-			adFont->draw(pcard->defstring, recti(m + 4, 416, m + 4 + w, 436), 0xff000000, false, false, 0);
-			adFont->draw(pcard->defstring, recti(m + 5, 417, m + 5 + w, 437),
-			             pcard->defense > pcard->base_defense ? 0xffffff00 : pcard->defense < pcard->base_defense ? 0xffff2090 : 0xffffffff , false, false, 0);
-			adFont->draw(pcard->lvstring, recti(473 + i * 80, 356, 475 + i * 80, 366), 0xff000000, false, false, 0);
-			adFont->draw(pcard->lvstring, recti(474 + i * 80, 357, 476 + i * 80, 367),
-			             (pcard->type & TYPE_XYZ) ? 0xffff80ff : (pcard->type & TYPE_TUNER) ? 0xffffff00 : 0xffffffff, false, false, 0);
-		}
+		if(pcard && pcard->code != 0)
+			DrawStatus(pcard, 493 + i * 85, 416, 473 + i * 80, 356);
 	}
+	pcard = dField.mzone[0][5];
+	if(pcard && pcard->code != 0)
+		DrawStatus(pcard, 589, 338, 563, 291);
+	pcard = dField.mzone[0][6];
+	if(pcard && pcard->code != 0)
+		DrawStatus(pcard, 743, 338, 712, 291);
 	for(int i = 0; i < 5; ++i) {
 		pcard = dField.mzone[1][i];
-		if(pcard && (pcard->position & POS_FACEUP)) {
-			int m = 803 - i * 68;
-			adFont->draw(L"/", recti(m - 4, 235, m + 4, 255), 0xff000000, true, false, 0);
-			adFont->draw(L"/", recti(m - 3, 236, m + 5, 256), 0xffffffff, true, false, 0);
-			int w = adFont->getDimension(pcard->atkstring).Width;
-			adFont->draw(pcard->atkstring, recti(m - 5 - w, 235, m - 5, 255), 0xff000000, false, false, 0);
-			adFont->draw(pcard->atkstring, recti(m - 4 - w, 236, m - 4, 256),
-			             pcard->attack > pcard->base_attack ? 0xffffff00 : pcard->attack < pcard->base_attack ? 0xffff2090 : 0xffffffff , false, false, 0);
-			w = adFont->getDimension(pcard->defstring).Width;
-			adFont->draw(pcard->defstring, recti(m + 4, 235, m + 4 + w, 255), 0xff000000, false, false, 0);
-			adFont->draw(pcard->defstring, recti(m + 5, 236, m + 5 + w, 256),
-			             pcard->defense > pcard->base_defense ? 0xffffff00 : pcard->defense < pcard->base_defense ? 0xffff2090 : 0xffffffff , false, false, 0);
-			adFont->draw(pcard->lvstring, recti(779 - i * 71, 272, 800 - i * 71, 292), 0xff000000, false, false, 0);
-			adFont->draw(pcard->lvstring, recti(780 - i * 71, 273, 800 - i * 71, 293),
-			             (pcard->type & TYPE_XYZ) ? 0xffff80ff : (pcard->type & TYPE_TUNER) ? 0xffffff00 : 0xffffffff, false, false, 0);
+		if(pcard && (pcard->position & POS_FACEUP))
+			DrawStatus(pcard, 803 - i * 68, 235, 779 - i * 71, 272);
+	}
+	pcard = dField.mzone[1][5];
+	if(pcard && (pcard->position & POS_FACEUP))
+		DrawStatus(pcard, 739, 291, 710, 338);
+	pcard = dField.mzone[1][6];
+	if(pcard && (pcard->position & POS_FACEUP))
+		DrawStatus(pcard, 593, 291, 555, 338);
+	if(dInfo.duel_rule < 4) {
+		pcard = dField.szone[0][6];
+		if(pcard) {
+			adFont->draw(pcard->lscstring, recti(426, 394, 438, 414), 0xff000000, true, false, 0);
+			adFont->draw(pcard->lscstring, recti(427, 395, 439, 415), 0xffffffff, true, false, 0);
 		}
-	}
-	pcard = dField.szone[0][6];
-	if(pcard) {
-		adFont->draw(pcard->lscstring, recti(426, 394, 438, 414), 0xff000000, true, false, 0);
-		adFont->draw(pcard->lscstring, recti(427, 395, 439, 415), 0xffffffff, true, false, 0);
-	}
-	pcard = dField.szone[0][7];
-	if(pcard) {
-		adFont->draw(pcard->rscstring, recti(880, 394, 912, 414), 0xff000000, true, false, 0);
-		adFont->draw(pcard->rscstring, recti(881, 395, 913, 415), 0xffffffff, true, false, 0);
-	}
-	pcard = dField.szone[1][6];
-	if(pcard) {
-		adFont->draw(pcard->lscstring, recti(839, 245, 871, 265), 0xff000000, true, false, 0);
-		adFont->draw(pcard->lscstring, recti(840, 246, 872, 266), 0xffffffff, true, false, 0);
-	}
-	pcard = dField.szone[1][7];
-	if(pcard) {
-		adFont->draw(pcard->rscstring, recti(463, 245, 495, 265), 0xff000000, true, false, 0);
-		adFont->draw(pcard->rscstring, recti(464, 246, 496, 266), 0xffffffff, true, false, 0);
+		pcard = dField.szone[0][7];
+		if(pcard) {
+			adFont->draw(pcard->rscstring, recti(880, 394, 912, 414), 0xff000000, true, false, 0);
+			adFont->draw(pcard->rscstring, recti(881, 395, 913, 415), 0xffffffff, true, false, 0);
+		}
+		pcard = dField.szone[1][6];
+		if(pcard) {
+			adFont->draw(pcard->lscstring, recti(839, 245, 871, 265), 0xff000000, true, false, 0);
+			adFont->draw(pcard->lscstring, recti(840, 246, 872, 266), 0xffffffff, true, false, 0);
+		}
+		pcard = dField.szone[1][7];
+		if(pcard) {
+			adFont->draw(pcard->rscstring, recti(463, 245, 495, 265), 0xff000000, true, false, 0);
+			adFont->draw(pcard->rscstring, recti(464, 246, 496, 266), 0xffffffff, true, false, 0);
+		}
+	} else {
+		pcard = dField.szone[0][0];
+		if(pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
+			adFont->draw(pcard->lscstring, recti(454, 430, 466, 450), 0xff000000, true, false, 0);
+			adFont->draw(pcard->lscstring, recti(455, 431, 467, 451), 0xffffffff, true, false, 0);
+		}
+		pcard = dField.szone[0][4];
+		if(pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
+			adFont->draw(pcard->rscstring, recti(850, 430, 882, 450), 0xff000000, true, false, 0);
+			adFont->draw(pcard->rscstring, recti(851, 431, 883, 451), 0xffffffff, true, false, 0);
+		}
+		pcard = dField.szone[1][0];
+		if(pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
+			adFont->draw(pcard->lscstring, recti(806, 222, 838, 242), 0xff000000, true, false, 0);
+			adFont->draw(pcard->lscstring, recti(807, 223, 839, 243), 0xffffffff, true, false, 0);
+		}
+		pcard = dField.szone[1][4];
+		if(pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
+			adFont->draw(pcard->rscstring, recti(498, 222, 530, 242), 0xff000000, true, false, 0);
+			adFont->draw(pcard->rscstring, recti(499, 223, 531, 243), 0xffffffff, true, false, 0);
+		}
 	}
 	if(dField.extra[0].size()) {
 		int offset = (dField.extra[0].size() >= 10) ? 0 : mainGame->textFont->getDimension(dataManager.GetNumString(1)).Width;
@@ -477,13 +584,24 @@ void Game::DrawMisc() {
 		numFont->draw(dataManager.GetNumString(dField.deck[0].size()), recti(907, 562, 1021, 552), 0xff000000, true, false, 0);
 		numFont->draw(dataManager.GetNumString(dField.deck[0].size()), recti(908, 563, 1023, 553), 0xffffff00, true, false, 0);
 	}
-	if(dField.grave[0].size()) {
-		numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(837, 375, 984, 456), 0xff000000, true, false, 0);
-		numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(837, 376, 986, 457), 0xffffff00, true, false, 0);
-	}
-	if(dField.remove[0].size()) {
-		numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(1015, 375, 957, 380), 0xff000000, true, false, 0);
-		numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(1015, 376, 959, 381), 0xffffff00, true, false, 0);
+	if (rule == 0) {
+		if (dField.grave[0].size()) {
+			numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(837, 375, 984, 380), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(837, 376, 986, 381), 0xffffff00, true, false, 0);
+		}
+		if (dField.remove[0].size()) {
+			numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(1015, 375, 957, 380), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(1015, 376, 959, 381), 0xffffff00, true, false, 0);
+		}
+	} else {
+		if (dField.grave[0].size()) {
+			numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(870, 456, 1002, 461), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.grave[0].size()), recti(870, 457, 1004, 462), 0xffffff00, true, false, 0);
+		}
+		if (dField.remove[0].size()) {
+			numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(837, 375, 984, 380), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.remove[0].size()), recti(837, 376, 986, 381), 0xffffff00, true, false, 0);
+		}
 	}
 	if(dField.extra[1].size()) {
 		int offset = (dField.extra[1].size() >= 10) ? 0 : mainGame->textFont->getDimension(dataManager.GetNumString(1)).Width;
@@ -496,13 +614,45 @@ void Game::DrawMisc() {
 		numFont->draw(dataManager.GetNumString(dField.deck[1].size()), recti(465, 207, 481, 232), 0xff000000, true, false, 0);
 		numFont->draw(dataManager.GetNumString(dField.deck[1].size()), recti(465, 208, 483, 233), 0xffffff00, true, false, 0);
 	}
-	if(dField.grave[1].size()) {
-		numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(420, 310, 462, 281), 0xff000000, true, false, 0);
-		numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(420, 311, 464, 282), 0xffffff00, true, false, 0);
+	if (rule == 0) {
+		if (dField.grave[1].size()) {
+			numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(420, 310, 462, 281), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(420, 311, 464, 282), 0xffffff00, true, false, 0);
+		}
+		if (dField.remove[1].size()) {
+			numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(300, 310, 443, 340), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(300, 311, 445, 341), 0xffffff00, true, false, 0);
+		}
+	} else {
+		if (dField.grave[1].size()) {
+			numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(455, 249, 462, 299), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.grave[1].size()), recti(455, 250, 464, 300), 0xffffff00, true, false, 0);
+		}
+		if (dField.remove[1].size()) {
+			numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(420, 310, 462, 281), 0xff000000, true, false, 0);
+			numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(420, 311, 464, 282), 0xffffff00, true, false, 0);
+		}
 	}
-	if(dField.remove[1].size()) {
-		numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(300, 310, 443, 340), 0xff000000, true, false, 0);
-		numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(300, 311, 445, 341), 0xffffff00, true, false, 0);
+}
+void Game::DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2) {
+	adFont->draw(L"/", recti(x1 - 4, y1, x1 + 4, y1 + 20), 0xff000000, true, false, 0);
+	adFont->draw(L"/", recti(x1 - 3, y1 + 1, x1 + 5, y1 + 21), 0xffffffff, true, false, 0);
+	int w = adFont->getDimension(pcard->atkstring).Width;
+	adFont->draw(pcard->atkstring, recti(x1 - 5 - w, y1, x1 - 5, y1 + 20), 0xff000000, false, false, 0);
+	adFont->draw(pcard->atkstring, recti(x1 - 4 - w, y1 + 1, x1 - 4, y1 + 21),
+		pcard->attack > pcard->base_attack ? 0xffffff00 : pcard->attack < pcard->base_attack ? 0xffff2090 : 0xffffffff, false, false, 0);
+	if(pcard->type & TYPE_LINK) {
+		w = adFont->getDimension(pcard->linkstring).Width;
+		adFont->draw(pcard->linkstring, recti(x1 + 4, y1, x1 + 4 + w, y1 + 20), 0xff000000, false, false, 0);
+		adFont->draw(pcard->linkstring, recti(x1 + 5, y1 + 1, x1 + 5 + w, y1 + 21), 0xff99ffff, false, false, 0);
+	} else {
+		w = adFont->getDimension(pcard->defstring).Width;
+		adFont->draw(pcard->defstring, recti(x1 + 4, y1, x1 + 4 + w, y1 + 20), 0xff000000, false, false, 0);
+		adFont->draw(pcard->defstring, recti(x1 + 5, y1 + 1, x1 + 5 + w, y1 + 21),
+			pcard->defense > pcard->base_defense ? 0xffffff00 : pcard->defense < pcard->base_defense ? 0xffff2090 : 0xffffffff, false, false, 0);
+		adFont->draw(pcard->lvstring, recti(x2, y2, x2 + 2, y2 + 20), 0xff000000, false, false, 0);
+		adFont->draw(pcard->lvstring, recti(x2 + 1, y2, x2 + 3, y2 + 21),
+			(pcard->type & TYPE_XYZ) ? 0xffff80ff : (pcard->type & TYPE_TUNER) ? 0xffffff00 : 0xffffffff, false, false, 0);
 	}
 }
 void Game::DrawGUI() {
@@ -596,10 +746,10 @@ void Game::DrawSpec() {
 		switch(showcard) {
 		case 1: {
 			driver->draw2DImage(imageManager.GetTexture(showcardcode), position2di(574, 150));
-			driver->draw2DImage(imageManager.tMask, recti(574, 150, 574 + (showcarddif > 177 ? 177 : showcarddif), 404),
-			                    recti(254 - showcarddif, 0, 254 - (showcarddif > 177 ? showcarddif - 177 : 0), 254), 0, 0, true);
+			driver->draw2DImage(imageManager.tMask, recti(574, 150, 574 + (showcarddif > CARD_IMG_WIDTH ? CARD_IMG_WIDTH : showcarddif), 404),
+			                    recti(CARD_IMG_HEIGHT - showcarddif, 0, CARD_IMG_HEIGHT - (showcarddif > CARD_IMG_WIDTH ? showcarddif - CARD_IMG_WIDTH : 0), CARD_IMG_HEIGHT), 0, 0, true);
 			showcarddif += 15;
-			if(showcarddif >= 254) {
+			if(showcarddif >= CARD_IMG_HEIGHT) {
 				showcard = 2;
 				showcarddif = 0;
 			}
@@ -607,9 +757,9 @@ void Game::DrawSpec() {
 		}
 		case 2: {
 			driver->draw2DImage(imageManager.GetTexture(showcardcode), position2di(574, 150));
-			driver->draw2DImage(imageManager.tMask, recti(574 + showcarddif, 150, 761, 404), recti(0, 0, 177 - showcarddif, 254), 0, 0, true);
+			driver->draw2DImage(imageManager.tMask, recti(574 + showcarddif, 150, 761, 404), recti(0, 0, CARD_IMG_WIDTH - showcarddif, CARD_IMG_HEIGHT), 0, 0, true);
 			showcarddif += 15;
-			if(showcarddif >= 177) {
+			if(showcarddif >= CARD_IMG_WIDTH) {
 				showcard = 0;
 			}
 			break;
@@ -627,7 +777,7 @@ void Game::DrawSpec() {
 			matManager.c2d[2] = (showcarddif << 24) | 0xffffff;
 			matManager.c2d[3] = (showcarddif << 24) | 0xffffff;
 			driver->draw2DImage(imageManager.GetTexture(showcardcode), recti(574, 154, 751, 404),
-			                    recti(0, 0, 177, 254), 0, matManager.c2d, true);
+			                    recti(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT), 0, matManager.c2d, true);
 			if(showcarddif < 255)
 				showcarddif += 17;
 			break;
@@ -638,7 +788,7 @@ void Game::DrawSpec() {
 			matManager.c2d[2] = (showcarddif << 25) | 0xffffff;
 			matManager.c2d[3] = (showcarddif << 25) | 0xffffff;
 			driver->draw2DImage(imageManager.GetTexture(showcardcode), recti(662 - showcarddif * 0.69685f, 277 - showcarddif, 662 + showcarddif * 0.69685f, 277 + showcarddif),
-			                    recti(0, 0, 177, 254), 0, matManager.c2d, true);
+			                    recti(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT), 0, matManager.c2d, true);
 			if(showcarddif < 127)
 				showcarddif += 9;
 			break;
@@ -653,12 +803,12 @@ void Game::DrawSpec() {
 		}
 		case 7: {
 			core::position2d<s32> corner[4];
-			float y = sin(showcarddif * 3.1415926f / 180.0f) * 254;
-			corner[0] = core::position2d<s32>(574 - (254 - y) * 0.3f, 404 - y);
-			corner[1] = core::position2d<s32>(751 + (254 - y) * 0.3f, 404 - y);
+			float y = sin(showcarddif * 3.1415926f / 180.0f) * CARD_IMG_HEIGHT;
+			corner[0] = core::position2d<s32>(574 - (CARD_IMG_HEIGHT - y) * 0.3f, 404 - y);
+			corner[1] = core::position2d<s32>(751 + (CARD_IMG_HEIGHT - y) * 0.3f, 404 - y);
 			corner[2] = core::position2d<s32>(574, 404);
 			corner[3] = core::position2d<s32>(751, 404);
-			irr::gui::Draw2DImageQuad(driver, imageManager.GetTexture(showcardcode), rect<s32>(0, 0, 177, 254), corner);
+			irr::gui::Draw2DImageQuad(driver, imageManager.GetTexture(showcardcode), rect<s32>(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT), corner);
 			showcardp++;
 			showcarddif += 9;
 			if(showcarddif >= 90)
@@ -757,7 +907,7 @@ void Game::DrawSpec() {
 		matk.setRotationRadians(atk_r);
 		driver->setTransform(irr::video::ETS_WORLD, matk);
 		driver->setMaterial(matManager.mATK);
-		driver->drawVertexPrimitiveList(&matManager.vArrow[attack_sv], 40, matManager.iArrow, 10, EVT_STANDARD, EPT_TRIANGLE_STRIP);
+		driver->drawVertexPrimitiveList(&matManager.vArrow[attack_sv], 12, matManager.iArrow, 10, EVT_STANDARD, EPT_TRIANGLE_STRIP);
 		attack_sv += 4;
 		if (attack_sv > 28)
 			attack_sv = 0;
@@ -784,6 +934,11 @@ void Game::DrawSpec() {
 			textFont->draw(chatMsg[i].c_str(), rect<s32>(306, 596 - 20 * i, 1021, 616 - 20 * i), chatColor[chatType[i]], false, false);
 		}
 	}
+}
+void Game::DrawBackImage(irr::video::ITexture* texture) {
+	if(!texture)
+		return;
+	driver->draw2DImage(texture, recti(0, 0, 1024, 640), recti(0, 0, texture->getOriginalSize().Width, texture->getOriginalSize().Height));
 }
 void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 	FadingUnit fu;
@@ -867,8 +1022,6 @@ void Game::WaitFrameSignal(int frame) {
 	frameSignal.Wait();
 }
 void Game::DrawThumb(code_pointer cp, position2di pos, std::unordered_map<int, int>* lflist) {
-	const int width = 44; //standard pic size, maybe it should be defined in game.h
-	const int height = 64;
 	int code = cp->first;
 	int lcode = cp->second.alias;
 	if(lcode == 0)
@@ -877,7 +1030,7 @@ void Game::DrawThumb(code_pointer cp, position2di pos, std::unordered_map<int, i
 	if(img == NULL)
 		return; //NULL->getSize() will cause a crash
 	dimension2d<u32> size = img->getOriginalSize();
-	driver->draw2DImage(img, rect<s32>(pos.X, pos.Y, pos.X + width, pos.Y + height), rect<s32>(0, 0, size.Width, size.Height));
+	driver->draw2DImage(img, rect<s32>(pos.X, pos.Y, pos.X + CARD_THUMB_WIDTH, pos.Y + CARD_THUMB_HEIGHT), rect<s32>(0, 0, size.Width, size.Height));
 
 	if(lflist->count(lcode)) {
 		switch((*lflist)[lcode]) {
@@ -962,6 +1115,7 @@ void Game::DrawDeckBd() {
 		if(deckBuilder.hovered_pos == 3 && deckBuilder.hovered_seq == (int)i)
 			driver->draw2DRectangleOutline(recti(313 + i * dx, 563, 359 + i * dx, 629));
 	}
+	//search result
 	driver->draw2DRectangle(recti(805, 137, 915, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(recti(804, 136, 915, 157));
 	textFont->draw(dataManager.GetSysString(1333), recti(809, 136, 914, 156), 0xff000000, false, true);
@@ -976,21 +1130,30 @@ void Game::DrawDeckBd() {
 			driver->draw2DRectangle(0x80000000, recti(806, 164 + i * 66, 1019, 230 + i * 66));
 		DrawThumb(ptr, position2di(810, 165 + i * 66), deckBuilder.filterList);
 		if(ptr->second.type & TYPE_MONSTER) {
-			int form = 0x2605;
-			if(ptr->second.type & TYPE_XYZ) ++form;
 			myswprintf(textBuffer, L"%ls", dataManager.GetName(ptr->first));
 			textFont->draw(textBuffer, recti(859, 164 + i * 66, 955, 185 + i * 66), 0xff000000, false, false);
 			textFont->draw(textBuffer, recti(860, 165 + i * 66, 955, 185 + i * 66), 0xffffffff, false, false);
-			myswprintf(textBuffer, L"%ls/%ls %c%d", dataManager.FormatAttribute(ptr->second.attribute), dataManager.FormatRace(ptr->second.race), form, ptr->second.level);
-			textFont->draw(textBuffer, recti(859, 186 + i * 66, 955, 207 + i * 66), 0xff000000, false, false);
-			textFont->draw(textBuffer, recti(860, 187 + i * 66, 955, 207 + i * 66), 0xffffffff, false, false);
-			if(ptr->second.attack < 0 && ptr->second.defense < 0)
-				myswprintf(textBuffer, L"?/?");
-			else if(ptr->second.attack < 0)
-				myswprintf(textBuffer, L"?/%d", ptr->second.defense);
-			else if(ptr->second.defense < 0)
-				myswprintf(textBuffer, L"%d/?", ptr->second.attack);
-			else myswprintf(textBuffer, L"%d/%d", ptr->second.attack, ptr->second.defense);
+			if(!(ptr->second.type & TYPE_LINK)) {
+				wchar_t* form = L"\u2605";
+				if(ptr->second.type & TYPE_XYZ) form = L"\u2606";
+				myswprintf(textBuffer, L"%ls/%ls %ls%d", dataManager.FormatAttribute(ptr->second.attribute), dataManager.FormatRace(ptr->second.race), form, ptr->second.level);
+				textFont->draw(textBuffer, recti(859, 186 + i * 66, 955, 207 + i * 66), 0xff000000, false, false);
+				textFont->draw(textBuffer, recti(860, 187 + i * 66, 955, 207 + i * 66), 0xffffffff, false, false);
+				if(ptr->second.attack < 0 && ptr->second.defense < 0)
+					myswprintf(textBuffer, L"?/?");
+				else if(ptr->second.attack < 0)
+					myswprintf(textBuffer, L"?/%d", ptr->second.defense);
+				else if(ptr->second.defense < 0)
+					myswprintf(textBuffer, L"%d/?", ptr->second.attack);
+				else myswprintf(textBuffer, L"%d/%d", ptr->second.attack, ptr->second.defense);
+			} else {
+				myswprintf(textBuffer, L"%ls/%ls LINK-%d", dataManager.FormatAttribute(ptr->second.attribute), dataManager.FormatRace(ptr->second.race), ptr->second.level);
+				textFont->draw(textBuffer, recti(859, 186 + i * 66, 955, 207 + i * 66), 0xff000000, false, false);
+				textFont->draw(textBuffer, recti(860, 187 + i * 66, 955, 207 + i * 66), 0xffffffff, false, false);
+				if(ptr->second.attack < 0)
+					myswprintf(textBuffer, L"?/-");
+				else myswprintf(textBuffer, L"%d/-", ptr->second.attack);
+			}
 			if(ptr->second.type & TYPE_PENDULUM) {
 				wchar_t scaleBuffer[16];
 				myswprintf(scaleBuffer, L" %d/%d", ptr->second.lscale, ptr->second.rscale);

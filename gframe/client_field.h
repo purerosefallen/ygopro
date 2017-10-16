@@ -3,12 +3,13 @@
 
 #include "config.h"
 #include <vector>
+#include <set>
 
 namespace ygo {
 
 class ClientCard;
 
-struct ChainInfo{
+struct ChainInfo {
 	irr::core::vector3df chain_pos;
 	ClientCard* chain_card;
 	int code;
@@ -17,6 +18,7 @@ struct ChainInfo{
 	int location;
 	int sequence;
 	bool solved;
+	std::set<ClientCard*> target;
 };
 
 class ClientField: public irr::IEventReceiver {
@@ -41,7 +43,7 @@ public:
 	std::vector<int> select_options;
 	std::vector<ChainInfo> chains;
 	int extra_p_count[2];
-	
+
 	size_t selected_option;
 	ClientCard* attacker;
 	ClientCard* attack_target;
@@ -79,7 +81,7 @@ public:
 	bool last_chain;
 	bool deck_reversed;
 	bool conti_selecting;
-	
+
 	ClientField();
 	void Clear();
 	void Initial(int player, int deckc, int extrac);
@@ -96,7 +98,7 @@ public:
 	void ShowLocationCard();
 	void ReplaySwap();
 	void RefreshAllCards();
-	
+
 	void GetChainLocation(int controler, int location, int sequence, irr::core::vector3df* t);
 	void GetCardLocation(ClientCard* pcard, irr::core::vector3df* t, irr::core::vector3df* r, bool setTrans = false);
 	void MoveCard(ClientCard* pcard, int frame);
@@ -128,10 +130,12 @@ public:
 	int list_command;
 
 	virtual bool OnEvent(const irr::SEvent& event);
+	virtual bool OnCommonEvent(const irr::SEvent& event);
 	void GetHoverField(int x, int y);
 	void ShowMenu(int flag, int x, int y);
 	void UpdateChainButtons();
 	void ShowCancelOrFinishButton(int buttonOp);
+	void SetShowMark(ClientCard* pcard, bool enable);
 	void SetResponseSelectedCards() const;
 };
 

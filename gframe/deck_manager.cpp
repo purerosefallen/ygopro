@@ -13,12 +13,7 @@ void DeckManager::LoadLFList() {
 	char linebuf[256];
 	wchar_t strBuffer[256];
 	if(fp) {
-		fseek(fp, 0, SEEK_END);
-		int fsize = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-		fgets(linebuf, 256, fp);
-		while(ftell(fp) < fsize) {
-			fgets(linebuf, 256, fp);
+		while(fgets(linebuf, 256, fp)) {
 			if(linebuf[0] == '#')
 				continue;
 			int p = 0, sa = 0, code, count;
@@ -84,7 +79,7 @@ int DeckManager::CheckLFList(Deck& deck, int lfhash, bool allow_ocg, bool allow_
 		code_pointer cit = deck.main[i];
 		if((!allow_ocg && (cit->second.ot == 0x1)) || (!allow_tcg && (cit->second.ot == 0x2)))
 			return cit->first;
-		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_TOKEN))
+		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_TOKEN | TYPE_LINK))
 			return 1;
 		int code = cit->second.alias ? cit->second.alias : cit->first;
 		ccount[code]++;
@@ -127,7 +122,7 @@ void DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 			continue;
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & 0x802040 && deck.extra.size() < 15) {
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && deck.extra.size() < 15) {
 			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 		} else if(deck.main.size() < 60) {
 			deck.main.push_back(dataManager.GetCodePointer(code));
@@ -191,12 +186,7 @@ bool DeckManager::LoadDeck(const wchar_t* file) {
 	int cardlist[128];
 	bool is_side = false;
 	char linebuf[256];
-	fseek(fp, 0, SEEK_END);
-	int fsize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	fgets(linebuf, 256, fp);
-	while(ftell(fp) < fsize && ct < 128) {
-		fgets(linebuf, 256, fp);
+	while(fgets(linebuf, 256, fp) && ct < 128) {
 		if(linebuf[0] == '!') {
 			is_side = true;
 			continue;
