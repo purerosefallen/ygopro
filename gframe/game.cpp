@@ -107,9 +107,10 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"目前测试的内容：\n\n\
 音效与背景音乐。\n\
-n\n\
-已知问题：\n\n\
-无。", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
+\n\
+\n\n已知问题：\n\n\
+无。\n\
+", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
 	wLanWindow = env->addWindow(rect<s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
