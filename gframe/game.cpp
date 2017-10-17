@@ -95,7 +95,7 @@ bool Game::Initialize() {
 	btnDeckEdit = env->addButton(rect<s32>(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
 	btnModeExit = env->addButton(rect<s32>(10, 170, 270, 200), wMainMenu, BUTTON_MODE_EXIT, dataManager.GetSysString(1210));
 
-	env->addStaticText(L"此版本为23333服内测版本，", rect<s32>(10, 220, 270, 240), false, false, wMainMenu);
+	env->addStaticText(L"此版本为233服测试版本，", rect<s32>(10, 220, 270, 240), false, false, wMainMenu);
 	env->addStaticText(L"遇到问题请务必反馈，群：275986039。", rect<s32>(10, 240, 270, 260), false, false, wMainMenu);
 	env->addStaticText(L"不要觉得会有别人报告，别人也会这么想。", rect<s32>(10, 260, 270, 280), false, false, wMainMenu);
 
@@ -105,8 +105,11 @@ bool Game::Initialize() {
 	env->addStaticText(L"网址：", rect<s32>(10, 340, 270, 360), false, false, wMainMenu);
 	env->addStaticText(L"http://mercury233.me/ygosrv233/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
-	env->addStaticText(L"已知问题：\n\n\
-天气模样等卡赋予效果的处理存在问题。", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
+	env->addStaticText(L"目前测试的内容：\n\n\
+音效与背景音乐。\n\
+n\n\
+已知问题：\n\n\
+无。", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
 	wLanWindow = env->addWindow(rect<s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
