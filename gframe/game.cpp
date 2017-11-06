@@ -103,7 +103,7 @@ bool Game::Initialize() {
 	env->addStaticText(L"建议随时在233服官网下载最新版本！", rect<s32>(10, 320, 270, 340), false, false, wMainMenu);
 
 	env->addStaticText(L"网址：", rect<s32>(10, 340, 270, 360), false, false, wMainMenu);
-	env->addStaticText(L"http://mercury233.me/ygosrv233/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
+	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
 	env->addStaticText(L"目前测试的内容：\n\n\
 音效与背景音乐。\n\
