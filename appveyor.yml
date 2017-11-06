@@ -87,7 +87,7 @@ deploy:
     auth_token: $(access_token)
     force_update: true
     on:
-        branch: master
+        branch: test
 
 cache:
   - premake-5.0.0-alpha12-windows.zip
