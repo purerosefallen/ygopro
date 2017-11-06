@@ -82,7 +82,7 @@ artifacts:
 
 deploy:
     release: latest
-    description: 'Automatic Build by Appveyor'
+    description: 'Automatic build by Appveyor.\nUpdated on $(APPVEYOR_REPO_COMMIT_TIMESTAMP).'
     provider: GitHub
     auth_token: $(access_token)
     force_update: true
