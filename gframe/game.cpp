@@ -89,7 +89,7 @@ bool Game::Initialize() {
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 950, 600), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
-	btnServerMode = env->addButton(rect<s32>(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, dataManager.GetSysString(1201));
+	btnSingleMode = env->addButton(rect<s32>(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, dataManager.GetSysString(1201));
 	btnReplayMode = env->addButton(rect<s32>(10, 100, 270, 130), wMainMenu, BUTTON_REPLAY_MODE, dataManager.GetSysString(1202));
 //	btnTestMode = env->addButton(rect<s32>(10, 135, 270, 165), wMainMenu, BUTTON_TEST_MODE, dataManager.GetSysString(1203));
 	btnDeckEdit = env->addButton(rect<s32>(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
@@ -299,7 +299,7 @@ bool Game::Initialize() {
 	chkAutoSearch = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
 	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
 	posY += 30;
-	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, -1, dataManager.GetSysString(1380));
+	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, -1, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
 	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrSoundVolume->setMax(100);
@@ -308,7 +308,7 @@ bool Game::Initialize() {
 	scrSoundVolume->setLargeStep(1);
 	scrSoundVolume->setSmallStep(1);
 	posY += 30;
-	chkEnableMusic = env->addCheckBox(gameConf.enable_music, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1381));
+	chkEnableMusic = env->addCheckBox(gameConf.enable_music, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
 	chkEnableMusic->setChecked(gameConf.enable_music);
 	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrMusicVolume->setMax(100);
@@ -317,7 +317,7 @@ bool Game::Initialize() {
 	scrMusicVolume->setLargeStep(1);
 	scrMusicVolume->setSmallStep(1);
 	posY += 30;
-	chkMusicMode = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1382));
+	chkMusicMode = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1281));
 	chkMusicMode->setChecked(gameConf.music_mode != 0);
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
@@ -595,12 +595,25 @@ bool Game::Initialize() {
 	wSinglePlay = env->addWindow(rect<s32>(220, 100, 800, 520), false, dataManager.GetSysString(1201));
 	wSinglePlay->getCloseButton()->setVisible(false);
 	wSinglePlay->setVisible(false);
-	lstSinglePlayList = env->addListBox(rect<s32>(10, 30, 350, 400), wSinglePlay, LISTBOX_SINGLEPLAY_LIST, true);
+	irr::gui::IGUITabControl* wSingle = env->addTabControl(rect<s32>(0, 20, 579, 419), wSinglePlay, true);
+	irr::gui::IGUITab* tabBot = wSingle->addTab(dataManager.GetSysString(1380));
+	lstBotList = env->addListBox(rect<s32>(10, 10, 350, 350), tabBot, LISTBOX_BOT_LIST, true);
+	lstBotList->setItemHeight(18);
+	btnStartBot = env->addButton(rect<s32>(459, 301, 569, 326), tabBot, BUTTON_BOT_START, dataManager.GetSysString(1211));
+	btnBotCancel = env->addButton(rect<s32>(459, 331, 569, 356), tabBot, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
+	env->addStaticText(dataManager.GetSysString(1382), rect<s32>(360, 10, 550, 30), false, true, tabBot);
+	stBotInfo = env->addStaticText(L"", rect<s32>(360, 40, 560, 160), false, true, tabBot);
+	chkBotOldRule = env->addCheckBox(false, rect<s32>(360, 170, 560, 190), tabBot, CHECKBOX_BOT_OLD_RULE, dataManager.GetSysString(1383));
+	chkBotHand = env->addCheckBox(false, rect<s32>(360, 200, 560, 220), tabBot, -1, dataManager.GetSysString(1384));
+	chkBotNoCheckDeck = env->addCheckBox(false, rect<s32>(360, 230, 560, 250), tabBot, -1, dataManager.GetSysString(1229));
+	chkBotNoShuffleDeck = env->addCheckBox(false, rect<s32>(360, 260, 560, 280), tabBot, -1, dataManager.GetSysString(1230));
+	irr::gui::IGUITab* tabSingle = wSingle->addTab(dataManager.GetSysString(1381));
+	lstSinglePlayList = env->addListBox(rect<s32>(10, 10, 350, 350), tabSingle, LISTBOX_SINGLEPLAY_LIST, true);
 	lstSinglePlayList->setItemHeight(18);
-	btnLoadSinglePlay = env->addButton(rect<s32>(460, 355, 570, 380), wSinglePlay, BUTTON_LOAD_SINGLEPLAY, dataManager.GetSysString(1211));
-	btnSinglePlayCancel = env->addButton(rect<s32>(460, 385, 570, 410), wSinglePlay, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
-	env->addStaticText(dataManager.GetSysString(1352), rect<s32>(360, 30, 570, 50), false, true, wSinglePlay);
-	stSinglePlayInfo = env->addStaticText(L"", rect<s32>(360, 60, 570, 350), false, true, wSinglePlay);
+	btnLoadSinglePlay = env->addButton(rect<s32>(459, 301, 569, 326), tabSingle, BUTTON_LOAD_SINGLEPLAY, dataManager.GetSysString(1211));
+	btnSinglePlayCancel = env->addButton(rect<s32>(459, 331, 569, 356), tabSingle, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
+	env->addStaticText(dataManager.GetSysString(1352), rect<s32>(360, 10, 550, 30), false, true, tabSingle);
+	stSinglePlayInfo = env->addStaticText(L"", rect<s32>(360, 40, 550, 280), false, true, tabSingle);
 	//replay save
 	wReplaySave = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1340));
 	wReplaySave->getCloseButton()->setVisible(false);
@@ -1004,6 +1017,43 @@ void Game::RefershBGMDir(std::wstring path, int scene) {
 	}
 	closedir(dir);
 #endif
+}
+void Game::RefreshBot() {
+	botInfo.clear();
+	FILE* fp = fopen("bot.conf", "r");
+	char linebuf[256];
+	char strbuf[256];
+	if(fp) {
+		while(fgets(linebuf, 256, fp)) {
+			if(linebuf[0] == '#')
+				continue;
+			if(linebuf[0] == '!') {
+				BotInfo newinfo;
+				sscanf(linebuf, "!%240[^\n]", strbuf);
+				BufferIO::DecodeUTF8(strbuf, newinfo.internalname);
+				fgets(linebuf, 256, fp);
+				sscanf(linebuf, "%240[^\n]", strbuf);
+				BufferIO::DecodeUTF8(strbuf, newinfo.name);
+				fgets(linebuf, 256, fp);
+				sscanf(linebuf, "%240[^\n]", strbuf);
+				BufferIO::DecodeUTF8(strbuf, newinfo.desc);
+				fgets(linebuf, 256, fp);
+				sscanf(linebuf, "%d", &newinfo.flag);
+				if((chkBotOldRule->isChecked() && (newinfo.flag & 0x1))
+					|| (!chkBotOldRule->isChecked() && (newinfo.flag & 0x2)))
+					botInfo.push_back(newinfo);
+				continue;
+			}
+		}
+		fclose(fp);
+	}
+	lstBotList->clear();
+	stBotInfo->setText(L"");
+	for(unsigned int i = 0; i < botInfo.size(); ++i) {
+		lstBotList->addItem(botInfo[i].name);
+	}
+	if(botInfo.size() == 0)
+		stBotInfo->setText(dataManager.GetSysString(1385));
 }
 void Game::LoadConfig() {
 	FILE* fp = fopen("system.conf", "r");
