@@ -138,7 +138,10 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->btnJoinCancel->setEnabled(true);
 					mainGame->btnStartBot->setEnabled(true);
 					mainGame->btnBotCancel->setEnabled(true);
-					mainGame->ShowElement(mainGame->wLanWindow);
+					if(bot_mode)
+						mainGame->ShowElement(mainGame->wSinglePlay);
+					else
+						mainGame->ShowElement(mainGame->wLanWindow);
 				} else {
 					DuelClient::SendPacketToServer(CTOS_SURRENDER);
 				}
