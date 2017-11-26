@@ -106,6 +106,7 @@ bool Game::Initialize() {
 	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
 	env->addStaticText(L"目前测试的内容：\n\n\
+人机模式。\n\
 音效与背景音乐。\n\
 \n\
 \n\n已知问题：\n\n\
