@@ -3,6 +3,9 @@ solution "ygo"
     language "C++"
     objdir "obj"
 
+    USE_IRRKLANG = true
+    IRRKLANG_PRO = true
+
     configurations { "Debug", "Release" }
 
     configuration "windows"

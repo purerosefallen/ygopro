@@ -4,6 +4,11 @@ skip_tags: true
 environment:
   access_token:
     secure: DOOS4g7CT8ctOgiMr62K56qQ1FO6s2ESpqNZlhf8F4nomemvvwxV/pRj9nbKmtjR
+  irrklang_pro:
+    secure: XQY3pqdfMAQcuPgy0cNq//RdaPFrJxF+/9BE5x7t8i8QyI+Q2c7dz0ybNE0RNhR95Q+asmDvARsQdGtTXgfDhRWKTSkkN/2P5tf3Xgq7u+s=
+
+  irrklang_pro_user:
+    secure: OB8Ovwbw/q75ASCjlKT94W9pw2HliIhq4j6J5tMk+7M=
 
 install:
   - git submodule update --init --recursive
@@ -35,9 +40,13 @@ install:
   - 7z x sqlite-amalgamation-3200100.zip
   - move sqlite-amalgamation-3200100 sqlite3
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
-  - 7z x irrKlang-32bit-1.5.0.zip
-  - move irrKlang-1.5.0 irrklang
+  #- bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
+  #- 7z x irrKlang-32bit-1.5.0.zip
+  #- move irrKlang-1.5.0 irrklang
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name -u $(irrklang_pro_user) $(irrklang_pro) ; exit 0"
+  - 7z x irrKlang-pro-1.5.0.zip
+  - move irrKlang-pro-1.5.0 irrklang
 
   # let premake happy
   - xcopy /E premake\* .
@@ -96,4 +105,4 @@ cache:
   - irrlicht-1.8.4.zip
   - lua-5.2.4.tar.gz
   - sqlite-amalgamation-3200100.zip
-  - irrKlang-32bit-1.5.0.zip
+  #- irrKlang-32bit-1.5.0.zip
