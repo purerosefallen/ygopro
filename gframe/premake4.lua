@@ -14,7 +14,7 @@ project "ygopro"
         includedirs { "../irrlicht/include", "../freetype/include", "../event/include", "../sqlite3" }
         if USE_IRRKLANG then
 			defines { "YGOPRO_USE_IRRKLANG" }
-			links { "irrKlang" }
+			links { "irrKlang", "ikpMP3" }
 			includedirs { "../irrklang/include" }
 			if IRRKLANG_PRO then
 				defines { "IRRKLANG_STATIC" }

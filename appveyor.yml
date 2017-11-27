@@ -47,13 +47,18 @@ install:
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name -u %irrklang_pro_user% %irrklang_pro% ; exit 0"
   - 7z x irrKlang-pro-1.5.0.zip
   - move irrKlang-pro-1.5.0 irrklang
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
+  - 7z x irrKlang-32bit-1.5.0.zip
+  - move irrKlang-1.5.0\plugins\ikpMP3 ikpmp3
 
   # let premake happy
   - xcopy /E premake\* .
   
   # patch irrlicht
   - patch -p0 < irrlicht\irrlicht.patch
-  
+  - patch -p0 < ikpmp3\ikpmp3.patch
+
   # premake
   - premake5 vs2015
   

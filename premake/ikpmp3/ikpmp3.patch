@@ -1,0 +1,30 @@
+diff -r ikpmp3/CIrrKlangAudioStreamMP3.cpp ikpmp3-static/CIrrKlangAudioStreamMP3.cpp
+10a11
+> #include <algorithm>
+diff -r ikpmp3/ikpMP3.cpp ikpmp3-static/ikpMP3.cpp
+9,14d8
+< // this is the only function needed to be implemented for the plugin, it gets
+< // called by irrKlang when loaded.
+< // In this plugin, we create an audiostream loader class and register
+< // it at the engine, but a plugin can do anything.
+< // Be sure to name the function 'irrKlangPluginInit' and let the dll start with 'ikp'.
+< 
+17c11
+< __declspec(dllexport) void __stdcall irrKlangPluginInit(ISoundEngine* engine, const char* version)
+---
+> extern "C" __declspec(dllexport) void ikpMP3Init(ISoundEngine* engine)
+20c14
+< void irrKlangPluginInit(ISoundEngine* engine, const char* version)
+---
+> extern "C" void ikpMP3Init(ISoundEngine* engine)
+23,32d16
+< 	// do some version security check to be sure that this plugin isn't begin used
+< 	// by some newer irrKlang version with changed interfaces which could possibily
+< 	// cause crashes.
+< 
+< 	if (strcmp(version, IRR_KLANG_VERSION))
+< 	{
+< 		printf("This MP3 plugin only supports irrKlang version %s, mp3 playback disabled.\n", IRR_KLANG_VERSION);
+< 		return;
+< 	}
+< 

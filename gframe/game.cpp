@@ -679,6 +679,12 @@ bool Game::Initialize() {
 	}
 	engineSound = irrklang::createIrrKlangDevice();
 	engineMusic = irrklang::createIrrKlangDevice();
+#ifdef IRRKLANG_STATIC
+	if(engineMusic) {
+		irrklang::ikpMP3Init(engineSound);
+		irrklang::ikpMP3Init(engineMusic);
+	}
+#endif
 	if(!engineSound || !engineMusic) {
 		chkEnableSound->setChecked(false);
 		chkEnableSound->setEnabled(false);
