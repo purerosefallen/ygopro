@@ -1,3 +1,4 @@
+/bak/
 /bin/
 /build/
 /event/
@@ -5,9 +6,11 @@
 /gframe/ygopro.ico
 /gframe/ygopro.rc
 /gframe/ygopro.aps
+/gframe/__iob_func_fix.cpp
 /irrlicht/
 /lua/
 /obj/
 /sqlite3/
 /irrklang/
+/ikpmp3/
 premake5.exe
