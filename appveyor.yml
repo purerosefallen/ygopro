@@ -111,4 +111,4 @@ cache:
   - irrlicht-1.8.4.zip
   - lua-5.2.4.tar.gz
   - sqlite-amalgamation-3200100.zip
-  #- irrKlang-32bit-1.5.0.zip
+  - irrKlang-32bit-1.5.0.zip
