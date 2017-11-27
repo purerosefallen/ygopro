@@ -1104,7 +1104,7 @@ void Game::LoadConfig() {
 	gameConf.auto_search_limit = 0;
 	gameConf.chkIgnoreDeckChanges = 0;
 	gameConf.defaultOT = 1;
-	gameConf.enable_bot_mode = 0;
+	gameConf.enable_bot_mode = 1;
 	gameConf.enable_sound = true;
 	gameConf.sound_volume = 0.5;
 	gameConf.enable_music = true;
