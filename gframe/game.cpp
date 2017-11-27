@@ -597,17 +597,19 @@ bool Game::Initialize() {
 	wSinglePlay->getCloseButton()->setVisible(false);
 	wSinglePlay->setVisible(false);
 	irr::gui::IGUITabControl* wSingle = env->addTabControl(rect<s32>(0, 20, 579, 419), wSinglePlay, true);
-	irr::gui::IGUITab* tabBot = wSingle->addTab(dataManager.GetSysString(1380));
-	lstBotList = env->addListBox(rect<s32>(10, 10, 350, 350), tabBot, LISTBOX_BOT_LIST, true);
-	lstBotList->setItemHeight(18);
-	btnStartBot = env->addButton(rect<s32>(459, 301, 569, 326), tabBot, BUTTON_BOT_START, dataManager.GetSysString(1211));
-	btnBotCancel = env->addButton(rect<s32>(459, 331, 569, 356), tabBot, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
-	env->addStaticText(dataManager.GetSysString(1382), rect<s32>(360, 10, 550, 30), false, true, tabBot);
-	stBotInfo = env->addStaticText(L"", rect<s32>(360, 40, 560, 160), false, true, tabBot);
-	chkBotOldRule = env->addCheckBox(false, rect<s32>(360, 170, 560, 190), tabBot, CHECKBOX_BOT_OLD_RULE, dataManager.GetSysString(1383));
-	chkBotHand = env->addCheckBox(false, rect<s32>(360, 200, 560, 220), tabBot, -1, dataManager.GetSysString(1384));
-	chkBotNoCheckDeck = env->addCheckBox(false, rect<s32>(360, 230, 560, 250), tabBot, -1, dataManager.GetSysString(1229));
-	chkBotNoShuffleDeck = env->addCheckBox(false, rect<s32>(360, 260, 560, 280), tabBot, -1, dataManager.GetSysString(1230));
+	if(gameConf.enable_bot_mode) {
+		irr::gui::IGUITab* tabBot = wSingle->addTab(dataManager.GetSysString(1380));
+		lstBotList = env->addListBox(rect<s32>(10, 10, 350, 350), tabBot, LISTBOX_BOT_LIST, true);
+		lstBotList->setItemHeight(18);
+		btnStartBot = env->addButton(rect<s32>(459, 301, 569, 326), tabBot, BUTTON_BOT_START, dataManager.GetSysString(1211));
+		btnBotCancel = env->addButton(rect<s32>(459, 331, 569, 356), tabBot, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
+		env->addStaticText(dataManager.GetSysString(1382), rect<s32>(360, 10, 550, 30), false, true, tabBot);
+		stBotInfo = env->addStaticText(L"", rect<s32>(360, 40, 560, 160), false, true, tabBot);
+		chkBotOldRule = env->addCheckBox(false, rect<s32>(360, 170, 560, 190), tabBot, CHECKBOX_BOT_OLD_RULE, dataManager.GetSysString(1383));
+		chkBotHand = env->addCheckBox(false, rect<s32>(360, 200, 560, 220), tabBot, -1, dataManager.GetSysString(1384));
+		chkBotNoCheckDeck = env->addCheckBox(false, rect<s32>(360, 230, 560, 250), tabBot, -1, dataManager.GetSysString(1229));
+		chkBotNoShuffleDeck = env->addCheckBox(false, rect<s32>(360, 260, 560, 280), tabBot, -1, dataManager.GetSysString(1230));
+	}
 	irr::gui::IGUITab* tabSingle = wSingle->addTab(dataManager.GetSysString(1381));
 	lstSinglePlayList = env->addListBox(rect<s32>(10, 10, 350, 350), tabSingle, LISTBOX_SINGLEPLAY_LIST, true);
 	lstSinglePlayList->setItemHeight(18);
@@ -1026,6 +1028,8 @@ void Game::RefershBGMDir(std::wstring path, int scene) {
 #endif
 }
 void Game::RefreshBot() {
+	if(!gameConf.enable_bot_mode)
+		return;
 	botInfo.clear();
 	FILE* fp = fopen("bot.conf", "r");
 	char linebuf[256];
@@ -1045,9 +1049,10 @@ void Game::RefreshBot() {
 				sscanf(linebuf, "%240[^\n]", strbuf);
 				BufferIO::DecodeUTF8(strbuf, newinfo.desc);
 				fgets(linebuf, 256, fp);
-				sscanf(linebuf, "%d", &newinfo.flag);
-				if((chkBotOldRule->isChecked() && (newinfo.flag & 0x1))
-					|| (!chkBotOldRule->isChecked() && (newinfo.flag & 0x2)))
+				newinfo.support_master_rule_3 = !!strstr(linebuf, "SUPPORT_MASTER_RULE_3");
+				newinfo.support_new_master_rule = !!strstr(linebuf, "SUPPORT_NEW_MASTER_RULE");
+				if((chkBotOldRule->isChecked() && newinfo.support_master_rule_3)
+					|| (!chkBotOldRule->isChecked() && newinfo.support_new_master_rule))
 					botInfo.push_back(newinfo);
 				continue;
 			}
@@ -1060,7 +1065,7 @@ void Game::RefreshBot() {
 		lstBotList->addItem(botInfo[i].name);
 	}
 	if(botInfo.size() == 0)
-		stBotInfo->setText(dataManager.GetSysString(1385));
+		SetStaticText(stBotInfo, 200, guiFont, dataManager.GetSysString(1385));
 }
 void Game::LoadConfig() {
 	FILE* fp = fopen("system.conf", "r");
@@ -1099,6 +1104,7 @@ void Game::LoadConfig() {
 	gameConf.auto_search_limit = 0;
 	gameConf.chkIgnoreDeckChanges = 0;
 	gameConf.defaultOT = 1;
+	gameConf.enable_bot_mode = 0;
 	gameConf.enable_sound = true;
 	gameConf.sound_volume = 0.5;
 	gameConf.enable_music = true;
@@ -1164,6 +1170,10 @@ void Game::LoadConfig() {
 			gameConf.chkIgnoreDeckChanges = atoi(valbuf);
 		} else if(!strcmp(strbuf, "default_ot")) {
 			gameConf.defaultOT = atoi(valbuf);
+		} else if(!strcmp(strbuf, "enable_bot_mode")) {
+#ifdef _WIN32
+			gameConf.enable_bot_mode = atoi(valbuf);
+#endif
 		} else if(!strcmp(strbuf, "enable_sound")) {
 			gameConf.enable_sound = atoi(valbuf) > 0;
 		} else if(!strcmp(strbuf, "sound_volume")) {
@@ -1233,6 +1243,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "auto_search_limit = %d\n", gameConf.auto_search_limit);
 	fprintf(fp, "ignore_deck_changes = %d\n", ((mainGame->chkIgnoreDeckChanges->isChecked()) ? 1 : 0));
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
+	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
 	fprintf(fp, "enable_sound = %d\n", ((mainGame->chkEnableSound->isChecked()) ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", ((mainGame->chkEnableMusic->isChecked()) ? 1 : 0));
 	fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
