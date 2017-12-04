@@ -37,13 +37,10 @@ install:
   - 7z x sqlite-amalgamation-3200100.zip
   - move sqlite-amalgamation-3200100 sqlite3
   
-  #- bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
-  #- 7z x irrKlang-32bit-1.5.0.zip
-  #- move irrKlang-1.5.0 irrklang
-  
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
   - 7z x irrKlang-32bit-1.5.0.zip
-  - move irrKlang-1.5.0\plugins\ikpMP3 ikpmp3
+  - move irrKlang-1.5.0 irrklang
+  - move irrklang\plugins\ikpMP3 ikpmp3
 
   # let premake happy
   - xcopy /E premake\* .
