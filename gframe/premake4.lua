@@ -14,13 +14,12 @@ project "ygopro"
         includedirs { "../irrlicht/include", "../freetype/include", "../event/include", "../sqlite3" }
         if USE_IRRKLANG then
 			defines { "YGOPRO_USE_IRRKLANG" }
-			links { "irrKlang", "ikpMP3" }
+			links { "irrKlang" }
 			includedirs { "../irrklang/include" }
+			libdirs { "../irrklang/lib/Win32-visualStudio" }
 			if IRRKLANG_PRO then
 				defines { "IRRKLANG_STATIC" }
-				libdirs { "../irrklang/bin/win32-visualstudio_lib" }
-			else
-				libdirs { "../irrklang/lib/Win32-visualStudio" }
+				links { "ikpmp3" }
 			end
 		end
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32" }
