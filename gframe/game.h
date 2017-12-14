@@ -107,8 +107,6 @@ public:
 	void RefreshDeck(irr::gui::IGUIComboBox* cbDeck);
 	void RefreshReplay();
 	void RefreshSingleplay();
-	void RefreshBGMList();
-	void RefershBGMDir(std::wstring path, int scene);
 	void RefreshBot();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawBackGround();
@@ -134,9 +132,6 @@ public:
 	void AddDebugMsg(char* msgbuf);
 	void ClearTextures();
 	void CloseDuelWindow();
-	void PlaySoundEffect(int sound);
-	void PlayMusic(char* song, bool loop);
-	void PlayBGM(int scene);
 
 	int LocalPlayer(int player);
 	const wchar_t* LocalName(int local_player);
@@ -163,7 +158,6 @@ public:
 	std::list<FadingUnit> fadingList;
 	std::vector<int> logParam;
 	std::wstring chatMsg[8];
-	std::vector<std::wstring> BGMList[8];
 	std::vector<BotInfo> botInfo;
 
 	int hideChatTimer;
@@ -195,8 +189,6 @@ public:
 
 	bool is_building;
 	bool is_siding;
-
-	int bgm_scene;
 
 	ClientField dField;
 	DeckBuilder deckBuilder;
@@ -466,11 +458,6 @@ public:
 	irr::gui::IGUIButton* btnChainWhenAvail;
 	//cancel or finish
 	irr::gui::IGUIButton* btnCancelOrFinish;
-
-	//soundEngine
-	irrklang::ISoundEngine* engineSound;
-	irrklang::ISoundEngine* engineMusic;
-	irrklang::ISound* soundBGM;
 };
 
 extern Game* mainGame;
