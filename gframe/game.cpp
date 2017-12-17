@@ -95,22 +95,22 @@ bool Game::Initialize() {
 	btnDeckEdit = env->addButton(rect<s32>(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
 	btnModeExit = env->addButton(rect<s32>(10, 170, 270, 200), wMainMenu, BUTTON_MODE_EXIT, dataManager.GetSysString(1210));
 
-	env->addStaticText(L"此版本为233服测试版本，", rect<s32>(10, 220, 270, 240), false, false, wMainMenu);
-	env->addStaticText(L"遇到问题请务必反馈，群：275986039。", rect<s32>(10, 240, 270, 260), false, false, wMainMenu);
-	env->addStaticText(L"不要觉得会有别人报告，别人也会这么想。", rect<s32>(10, 260, 270, 280), false, false, wMainMenu);
+	env->addStaticText(L"\u6B64\u7248\u672C\u4E3A233\u670D\u6D4B\u8BD5\u7248\u672C\uFF0C", rect<s32>(10, 220, 270, 240), false, false, wMainMenu);
+	env->addStaticText(L"\u9047\u5230\u95EE\u9898\u8BF7\u52A1\u5FC5\u53CD\u9988\uFF0C\u7FA4\uFF1A275986039\u3002", rect<s32>(10, 240, 270, 260), false, false, wMainMenu);
+	env->addStaticText(L"\u4E0D\u8981\u89C9\u5F97\u4F1A\u6709\u522B\u4EBA\u62A5\u544A\uFF0C\u522B\u4EBA\u4E5F\u4F1A\u8FD9\u4E48\u60F3\u3002", rect<s32>(10, 260, 270, 280), false, false, wMainMenu);
 
-	env->addStaticText(L"此版本会不定期更新，", rect<s32>(10, 300, 270, 320), false, false, wMainMenu);
-	env->addStaticText(L"建议随时在233服官网下载最新版本！", rect<s32>(10, 320, 270, 340), false, false, wMainMenu);
+	env->addStaticText(L"\u6B64\u7248\u672C\u4F1A\u4E0D\u5B9A\u671F\u66F4\u65B0\uFF0C", rect<s32>(10, 300, 270, 320), false, false, wMainMenu);
+	env->addStaticText(L"\u5EFA\u8BAE\u968F\u65F6\u5728233\u670D\u5B98\u7F51\u4E0B\u8F7D\u6700\u65B0\u7248\u672C\uFF01", rect<s32>(10, 320, 270, 340), false, false, wMainMenu);
 
-	env->addStaticText(L"网址：", rect<s32>(10, 340, 270, 360), false, false, wMainMenu);
+	env->addStaticText(L"\u7F51\u5740\uFF1A", rect<s32>(10, 340, 270, 360), false, false, wMainMenu);
 	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
-	env->addStaticText(L"目前测试的内容：\n\n\
-人机模式。\n\
-音效与背景音乐。\n\
+	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
+\u4EBA\u673A\u6A21\u5F0F\u3002\n\
+\u97F3\u6548\u4E0E\u80CC\u666F\u97F3\u4E50\u3002\n\
 \n\
-\n\n已知问题：\n\n\
-无。\n\
+\n\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\n\
+\u65E0\u3002\n\
 ", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
