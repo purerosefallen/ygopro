@@ -29,6 +29,7 @@ solution "ygo"
 
     configuration "linux"
         defines { "LUA_USE_LINUX" }
+        buildoptions { "-U_FORTIFY_SOURCE" }
 
     configuration "Release"
         optimize "Speed"
