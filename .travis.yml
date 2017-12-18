@@ -60,7 +60,7 @@ before_deploy:
 - curl --location --retry 5 --output 'ygopro-starter-pack-master.zip' https://github.com/moecube/ygopro-starter-pack/archive/master.zip
 - unzip -q ygopro-starter-pack-master.zip
 - mv ygopro-starter-pack-master/* .
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME-.tar.gz
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
   --format=posix --exclude='.git*' ygopro.app LICENSE README.md lflist.conf strings.conf
   system.conf cards.cdb script textures deck single pics replay; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
@@ -78,8 +78,7 @@ deploy:
   - ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
   skip_cleanup: true
   overwrite: true
-  api-key:
-    secure: Fzztf9zNOJnY4jQNwp7jPmjcx1nnSitgdCyxALdprDET+AEBtaiv4oW/aPY4F0/sQsaEZ56veoJf7g76gENVUg5Jdkn6DqoK+dJdyACx7C3ymwwZWV+be7kh24Avrnktikry95IdadpoY9a0sgK14gOmicEuIOOc1Eb/YICpe2zq0Q+iIvTEmsCxNuG2vv/WU8vKCQ6rUhRpDAc33+P91naAaNM4ZzQF/YquGobZCjhoZSla6Gj19sUnjGLVUQgnyLrgnEZjuX+552MRFUO8ff6q8Gt4Voa6TE98wwCO7c3e8NBHysJvevaxFyqIXqxKWh2Bt0aDPpbQO/cExPu5VAmgpKa6k7KTnOPiM2DsSry60HNrjVDKds6KkKPGoKZQPB93nQnj+PfZ65LHJEXjA/9YEfA1v5fH+ANbn4SMkQ5b66S8K6djtpASeNMbsLkdLxZlExwoX5uGye1JafOBFCh8DFhJwN8tMAv+R9XunKsuQHVhj6YDweA7Wvd16bjsuwPHn84y/kWoirSM4jQBmZIE1Iw1Q8JkqKAoDTnCnrbz+WqrJclKHbCbWpSNEFxx3MIvO4e5Gq1qVBJWbp1EgAdyDJKdmZAKcKcR67bnYea4vG3Sb1Y0s10JLhUC96vgyJoFDb+F5aOK721CJqs9jek9r+wJXT5HCDhPpr1kqkA=
+  api-key: $ak
 
 branches:
   only:
