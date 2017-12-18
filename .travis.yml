@@ -72,6 +72,8 @@ before_deploy:
 - git tag latest HEAD
 deploy:
   provider: releases
+  on:
+    condition: true
   file:
   - ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
   skip_cleanup: true
