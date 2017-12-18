@@ -73,7 +73,7 @@ before_deploy:
 deploy:
   provider: releases
   on:
-    condition: true
+    branch: test
   file:
   - ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
   skip_cleanup: true
