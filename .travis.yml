@@ -1,0 +1,77 @@
+language: cpp
+os:
+- linux
+#- osx
+sudo: required
+dist: trusty
+osx_image: xcode8
+git:
+  submodules: false
+addons:
+  ssh_known_hosts:
+  - github.com
+  apt:
+    packages:
+    - libfreetype6-dev
+    - libevent-dev
+    - libsqlite3-dev
+    - libirrlicht-dev
+    - liblua5.2-dev
+    - libglu-dev
+before_install:
+- git submodule update --init --recursive
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install freetype libevent
+  sqlite lua dylibbundler; curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz
+  | tar zfx -; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz
+  | tar zfx -; fi
+script:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
+- cd build
+- make config=release ygopro
+- cd ..
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv bin/release/ygopro ./; strip ygopro;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    mkdir -p ygopro.app/Contents/MacOS;
+    mv bin/release/ygopro ygopro.app/Contents/MacOS;
+    dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd;
+    strip ygopro.app/Contents/MacOS/ygopro; mkdir ygopro.app/Contents/Resources;
+    mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
+    defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
+    if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+      echo $CERTIFICATE | base64 --decode --output cert.p12;
+      security create-keychain -p "" build.keychain; security unlock-keychain -p "" build.keychain;
+      security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign;
+      codesign --deep --keychain build.keychain --sign "$(security find-identity -v -p
+      codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
+    fi
+  fi
+before_deploy:
+- curl --location --retry 5 'https://github.com/moecube/ygopro-database/archive/master.tar.gz'
+  | tar --strip-components=1 -zxf - ygopro-database-master/locales
+- cp locales/zh-cn/cards.cdb .
+- mkdir replay
+- mkdir pics
+- curl --location --retry 5 --output 'ygopro-starter-pack-master.zip' https://github.com/moecube/ygopro-starter-pack/archive/master.zip
+- unzip -q ygopro-starter-pack-master.zip
+- mv ygopro-starter-pack-master/* .
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME-.tar.gz
+  --format=posix --exclude='.git*' ygopro.app LICENSE README.md lflist.conf strings.conf
+  system.conf cards.cdb script textures deck single pics replay; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
+  --format=posix --exclude='.git*' ygopro LICENSE README.md lflist.conf strings.conf
+  system.conf cards.cdb script textures deck single pics replay; fi
+deploy:
+  provider: releases
+  file:
+  - ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
+  skip_cleanup: true
+  api-key:
+    secure: j7YxYAyoQr1albVJIypwloeJXtZMj11FtqmCDyJ8QGiFk2431o0KMNvN1tC2pK/x08ntN5iVzwEfWh7owDSBeu1HDJo7H7w69s5Rt3UfJE4bw5G2RM6PhG8ZQBwIPkXyXULPTjj3YQRFvcPdBusndQVPhFe/staGLa/t+KOzMyw=
+branches:
+  only:
+  - test
