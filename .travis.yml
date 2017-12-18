@@ -60,10 +60,10 @@ before_deploy:
 - curl --location --retry 5 --output 'ygopro-starter-pack-master.zip' https://github.com/moecube/ygopro-starter-pack/archive/master.zip
 - unzip -q ygopro-starter-pack-master.zip
 - mv ygopro-starter-pack-master/* .
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
   --format=posix --exclude='.git*' ygopro.app LICENSE README.md lflist.conf strings.conf
   system.conf cards.cdb script textures deck single pics replay; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar -zcf ygopro-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar -zcf ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
   --format=posix --exclude='.git*' ygopro LICENSE README.md lflist.conf strings.conf
   system.conf cards.cdb script textures deck single pics replay; fi
 - git config --local user.name "mercury233"
