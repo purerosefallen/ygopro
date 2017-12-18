@@ -6,7 +6,7 @@ solution "ygo"
     USE_IRRKLANG = true
     IRRKLANG_PRO = true
 
-    configurations { "Debug", "Release" }
+    configurations { "Release", "Debug" }
 
     configuration "windows"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
