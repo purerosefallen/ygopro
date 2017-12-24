@@ -1124,9 +1124,7 @@ void Game::LoadConfig() {
 		} else if(!strcmp(strbuf, "default_ot")) {
 			gameConf.defaultOT = atoi(valbuf);
 		} else if(!strcmp(strbuf, "enable_bot_mode")) {
-#ifdef _WIN32
 			gameConf.enable_bot_mode = atoi(valbuf);
-#endif
 		} else if(!strcmp(strbuf, "enable_sound")) {
 			gameConf.enable_sound = atoi(valbuf) > 0;
 		} else if(!strcmp(strbuf, "sound_volume")) {
