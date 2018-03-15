@@ -109,6 +109,7 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
 \u97F3\u6548\u4E0E\u80CC\u666F\u97F3\u4E50\u3002\n\
+\nLua 5.3\u3002\n\
 \n\
 \n\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\n\
 \u65E0\u3002\n\
