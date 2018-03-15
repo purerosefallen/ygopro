@@ -2249,7 +2249,6 @@ void ClientField::CancelOrFinish() {
 			break;
 		if(mainGame->wCardSelect->isVisible()) {
 			mainGame->HideElement(mainGame->wCardSelect);
-			ShowCancelOrFinishButton(0);
 			break;
 		}
 		if(mainGame->wQuery->isVisible()) {
