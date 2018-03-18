@@ -29,9 +29,9 @@ install:
   - move irrlicht-1.8.4\source\Irrlicht irrlicht\src
   - move irrlicht-1.8.4\include irrlicht\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.2.4.tar.gz ; exit 0"
-  - tar xf lua-5.2.4.tar.gz
-  - move lua-5.2.4\src lua
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.4.tar.gz ; exit 0"
+  - tar xf lua-5.3.4.tar.gz
+  - move lua-5.3.4\src lua
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3210000.zip ; exit 0"
   - 7z x sqlite-amalgamation-3210000.zip
@@ -102,6 +102,6 @@ cache:
   - libevent-2.0.22-stable.tar.gz
   - freetype-2.8.1.tar.bz2
   - irrlicht-1.8.4.zip
-  - lua-5.2.4.tar.gz
+  - lua-5.3.4.tar.gz
   - sqlite-amalgamation-3210000.zip
   - irrKlang-32bit-1.5.0.zip
