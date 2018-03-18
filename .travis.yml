@@ -3,7 +3,7 @@ os:
 - linux
 #- osx
 sudo: required
-dist: xenial
+dist: trusty
 osx_image: xcode8
 git:
   submodules: false
@@ -16,7 +16,6 @@ addons:
     - libevent-dev
     - libsqlite3-dev
     - libirrlicht-dev
-    - liblua5.3-dev
     - libglu-dev
 before_install:
 - git submodule update --init --recursive
@@ -27,6 +26,8 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz
   | tar zfx -; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl --location --retry 5 --output 'irrKlang-64bit-1.5.0.zip' http://www.ambiera.at/downloads/irrKlang-64bit-1.5.0.zip; unzip -q irrKlang-64bit-1.5.0.zip; mv irrKlang-64bit-1.5.0 irrklang; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O - https://www.lua.org/ftp/lua-5.3.4.tar.gz
+  | tar zfx -; cd lua-5.3.4; make & make install; fi
 script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
