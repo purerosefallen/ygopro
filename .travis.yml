@@ -16,7 +16,7 @@ addons:
     - libevent-dev
     - libsqlite3-dev
     - libirrlicht-dev
-    - liblua5.2-dev
+    - liblua5.3-dev
     - libglu-dev
 before_install:
 - git submodule update --init --recursive
