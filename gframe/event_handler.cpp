@@ -1706,8 +1706,8 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 		s32 id = event.GUIEvent.Caller->getID();
 		switch(event.GUIEvent.EventType) {
 		case irr::gui::EGET_ELEMENT_HOVERED: {
-			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX)
-				mainGame->SetCursor(event.GUIEvent.Caller->isEnabled() ? ECI_IBEAM : ECI_NORMAL);
+			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX && event.GUIEvent.Caller->isEnabled())
+				mainGame->SetCursor(ECI_IBEAM);
 			break;
 		}
 		case irr::gui::EGET_ELEMENT_LEFT: {
