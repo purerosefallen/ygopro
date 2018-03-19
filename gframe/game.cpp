@@ -1435,5 +1435,11 @@ void Game::FlashWindow() {
 	FlashWindowEx(&fi);
 #endif
 }
+void Game::SetCursor(ECURSOR_ICON icon) {
+	ICursorControl* cursor = mainGame->device->getCursorControl();
+	if(cursor->getActiveIcon() != icon) {
+		cursor->setActiveIcon(icon);
+	}
+}
 
 }
