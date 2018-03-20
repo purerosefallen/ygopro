@@ -1445,7 +1445,8 @@ void Game::OnResize() {
 		gameConf.window_height = window_size.Height;
 	}
 
-	wMainMenu->setRelativePosition(ResizeWin(370, 200, 950, 600));
+	recti menuposition = ResizeWin(370, 200, 650, 415);
+	wMainMenu->setRelativePosition(recti(menuposition.UpperLeftCorner.X, menuposition.UpperLeftCorner.Y, menuposition.LowerRightCorner.X + 300, menuposition.LowerRightCorner.Y + 185));
 	wDeckEdit->setRelativePosition(Resize(309, 8, 605, 130));
 	cbDBLFList->setRelativePosition(Resize(80, 5, 220, 30));
 	cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
