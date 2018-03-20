@@ -111,6 +111,8 @@ bool Game::Initialize() {
 \u97F3\u6548\u4E0E\u80CC\u666F\u97F3\u4E50\u3002\n\
 \nLua 5.3\u3002\n\
 \n\
+\u7A97\u53E3\u7F29\u653E\u3002\n\
+\n\
 \n\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\n\
 \u65E0\u3002\n\
 ", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
@@ -1423,7 +1425,7 @@ const wchar_t* Game::LocalName(int local_player) {
 	return local_player == 0 ? dInfo.hostname : dInfo.clientname;
 }
 void Game::OnResize() {
-	wMainMenu->setRelativePosition(ResizeWin(370, 200, 650, 415));
+	wMainMenu->setRelativePosition(ResizeWin(370, 200, 950, 600));
 	wDeckEdit->setRelativePosition(Resize(309, 8, 605, 130));
 	cbDBLFList->setRelativePosition(Resize(80, 5, 220, 30));
 	cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
