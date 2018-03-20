@@ -1445,6 +1445,18 @@ void Game::OnResize() {
 		gameConf.window_height = window_size.Height;
 	}
 
+	irr::gui::CGUITTFont* old_numFont = numFont;
+	irr::gui::CGUITTFont* old_adFont = adFont;
+	irr::gui::CGUITTFont* old_lpcFont = lpcFont;
+	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, (yScale > 0.5 ? 16 * yScale : 8));
+	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, (yScale > 0.75 ? 12 * yScale : 9));
+	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48 * yScale);
+	old_numFont->drop();
+	old_adFont->drop();
+	old_lpcFont->drop();
+	//guiFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize * yScale);
+	//env->getSkin()->setFont(guiFont);
+
 	recti menuposition = ResizeWin(370, 200, 650, 415);
 	wMainMenu->setRelativePosition(recti(menuposition.UpperLeftCorner.X, menuposition.UpperLeftCorner.Y, menuposition.LowerRightCorner.X + 300, menuposition.LowerRightCorner.Y + 185));
 	wDeckEdit->setRelativePosition(Resize(309, 8, 605, 130));
