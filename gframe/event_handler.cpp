@@ -967,6 +967,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->ShowCardInfo(mcard->code);
 				} else {
 					mainGame->imgCard->setImage(imageManager.tCover[0]);
+					mainGame->showingcode = 0;
 					mainGame->stName->setText(L"");
 					mainGame->stInfo->setText(L"");
 					mainGame->stDataInfo->setText(L"");
@@ -982,6 +983,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->ShowCardInfo(mcard->code);
 				} else {
 					mainGame->imgCard->setImage(imageManager.tCover[0]);
+					mainGame->showingcode = 0;
 					mainGame->stName->setText(L"");
 					mainGame->stInfo->setText(L"");
 					mainGame->stDataInfo->setText(L"");
@@ -1548,6 +1550,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					} else {
 						should_show_tip = false;
 						mainGame->imgCard->setImage(imageManager.tCover[0]);
+						mainGame->showingcode = 0;
 						mainGame->stName->setText(L"");
 						mainGame->stInfo->setText(L"");
 						mainGame->stDataInfo->setText(L"");
