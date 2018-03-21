@@ -45,6 +45,7 @@ struct Config {
 	bool window_maximized;
 	int window_width;
 	int window_height;
+	bool resize_popup_menu;
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
