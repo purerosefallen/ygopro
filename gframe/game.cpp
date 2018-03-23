@@ -310,7 +310,7 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, -1, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
-	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + (300 * xScale) - 40, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrSoundVolume->setMax(100);
 	scrSoundVolume->setMin(0);
 	scrSoundVolume->setPos(gameConf.sound_volume * 100);
@@ -319,7 +319,7 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnableMusic = env->addCheckBox(gameConf.enable_music, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
 	chkEnableMusic->setChecked(gameConf.enable_music);
-	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + (300 * xScale) - 40, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrMusicVolume->setMax(100);
 	scrMusicVolume->setMin(0);
 	scrMusicVolume->setPos(gameConf.music_volume * 100);
