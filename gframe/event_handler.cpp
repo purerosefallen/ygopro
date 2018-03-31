@@ -686,6 +686,24 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					}
 					break;
 				}
+				case MSG_SELECT_UNSELECT_CARD: {
+					command_card = selectable_cards[id - BUTTON_CARD_0 + mainGame->scrCardList->getPos() / 10];
+					if (command_card->is_selected) {
+						command_card->is_selected = false;
+						if(command_card->controler)
+							mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffd0d0d0);
+						else mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffffffff);
+					} else {
+						command_card->is_selected = true;
+						mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffffff00);
+					}
+					selected_cards.push_back(command_card);
+					if (selected_cards.size() > 0) {
+						SetResponseSelectedCards();
+						ShowCancelOrFinishButton(0);
+						mainGame->HideElement(mainGame->wCardSelect, true);}
+					break;
+				}
 				case MSG_SELECT_SUM: {
 					command_card = selectable_cards[id - BUTTON_CARD_0 + mainGame->scrCardList->getPos() / 10];
 					selected_cards.push_back(command_card);
@@ -747,6 +765,10 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->HideElement(mainGame->wCardSelect);
 					mainGame->actionSignal.Set();
 					break;
+				} else if(mainGame->dInfo.curMsg == MSG_SELECT_UNSELECT_CARD){
+					DuelClient::SetResponseI(-1);
+					ShowCancelOrFinishButton(0);
+					mainGame->HideElement(mainGame->wCardSelect, true);
 				} else {
 					mainGame->HideElement(mainGame->wCardSelect);
 					if(mainGame->dInfo.curMsg == MSG_SELECT_CHAIN && !chain_forced)
@@ -940,16 +962,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				const wchar_t* input = mainGame->ebChatInput->getText();
 				if(input[0]) {
 					unsigned short msgbuf[256];
-					if(mainGame->dInfo.isStarted) {
-						if(mainGame->dInfo.player_type < 7) {
-							if(mainGame->dInfo.isTag && (mainGame->dInfo.player_type % 2))
-								mainGame->AddChatMsg((wchar_t*)input, 2);
-							else
-								mainGame->AddChatMsg((wchar_t*)input, 0);
-						} else
-							mainGame->AddChatMsg((wchar_t*)input, 10);
-					} else
-						mainGame->AddChatMsg((wchar_t*)input, 7);
 					int len = BufferIO::CopyWStr(input, msgbuf, 256);
 					DuelClient::SendBufferToServer(CTOS_CHAT, msgbuf, (len + 1) * sizeof(short));
 					mainGame->ebChatInput->setText(L"");
@@ -1341,6 +1353,22 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						ShowCancelOrFinishButton(1);
 					else
 						ShowCancelOrFinishButton(0);
+				}
+				break;
+			}
+			case MSG_SELECT_UNSELECT_CARD: {
+				if (!(hovered_location & 0xe) || !clicked_card || !clicked_card->is_selectable)
+					break;
+				if (clicked_card->is_selected) {
+					clicked_card->is_selected = false;
+				} else {
+					clicked_card->is_selected = true;
+				}
+				selected_cards.push_back(clicked_card);
+				if (selected_cards.size() > 0) {
+					ShowCancelOrFinishButton(0);
+					SetResponseSelectedCards();
+					DuelClient::SendResponse();
 				}
 				break;
 			}
@@ -2239,6 +2267,17 @@ void ClientField::CancelOrFinish() {
 		}
 		break;
 	}
+	case MSG_SELECT_UNSELECT_CARD: {
+        if (select_cancelable) {
+            DuelClient::SetResponseI(-1);
+            ShowCancelOrFinishButton(0);
+            if (mainGame->wCardSelect->isVisible())
+                mainGame->HideElement(mainGame->wCardSelect, true);
+            else
+                DuelClient::SendResponse();
+        }
+        break;
+    }
 	case MSG_SELECT_TRIBUTE: {
 		if(selected_cards.size() == 0) {
 			if(select_cancelable) {
