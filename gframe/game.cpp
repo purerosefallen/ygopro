@@ -1081,7 +1081,7 @@ void Game::LoadConfig() {
 	gameConf.auto_search_limit = 0;
 	gameConf.chkIgnoreDeckChanges = 0;
 	gameConf.defaultOT = 1;
-	gameConf.enable_bot_mode = 1;
+	gameConf.enable_bot_mode = 0;
 	gameConf.window_maximized = false;
 	gameConf.window_width = 1024;
 	gameConf.window_height = 640;
@@ -1153,6 +1153,16 @@ void Game::LoadConfig() {
 			gameConf.defaultOT = atoi(valbuf);
 		} else if(!strcmp(strbuf, "enable_bot_mode")) {
 			gameConf.enable_bot_mode = atoi(valbuf);
+		} else if(!strcmp(strbuf, "enable_sound")) {
+			gameConf.enable_sound = atoi(valbuf) > 0;
+		} else if(!strcmp(strbuf, "sound_volume")) {
+			gameConf.sound_volume = atof(valbuf) / 100;
+		} else if(!strcmp(strbuf, "enable_music")) {
+			gameConf.enable_music = atoi(valbuf) > 0;
+		} else if(!strcmp(strbuf, "music_volume")) {
+			gameConf.music_volume = atof(valbuf) / 100;
+		} else if(!strcmp(strbuf, "music_mode")) {
+			gameConf.music_mode = atoi(valbuf);
 		} else if(!strcmp(strbuf, "window_maximized")) {
 			gameConf.window_maximized = atoi(valbuf) > 0;
 		} else if(!strcmp(strbuf, "window_width")) {
@@ -1231,6 +1241,16 @@ void Game::SaveConfig() {
 	fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
 	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
+	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
+	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
+	fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
+	int vol = gameConf.sound_volume * 100;
+	if(vol < 0) vol = 0; else if(vol > 100) vol = 100;
+	fprintf(fp, "sound_volume = %d\n", vol);
+	vol = gameConf.music_volume * 100;
+	if(vol < 0) vol = 0; else if(vol > 100) vol = 100;
+	fprintf(fp, "music_volume = %d\n", vol);
+	fprintf(fp, "music_mode = %d\n", (chkMusicMode->isChecked() ? 1 : 0));
 	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
