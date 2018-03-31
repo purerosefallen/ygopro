@@ -4,8 +4,6 @@ skip_tags: true
 environment:
   access_token:
     secure: DOOS4g7CT8ctOgiMr62K56qQ1FO6s2ESpqNZlhf8F4nomemvvwxV/pRj9nbKmtjR
-  irrklang_pro_passwd:
-    secure: 3wmY6LZoi+aLqtpqw2RSx9Ae3Qq91ZV0LM8ghEnwFIpW7tP3jbOUEXxvzg98JYOShMN22iISCDHyfSQIv+xWEA==
 
 install:
   - git submodule update --init --recursive
@@ -37,20 +35,14 @@ install:
   - 7z x sqlite-amalgamation-3210000.zip
   - move sqlite-amalgamation-3210000 sqlite3
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://www.ambiera.at/downloads/irrKlang-32bit-1.5.0.zip ; exit 0"
-  - 7z x irrKlang-32bit-1.5.0.zip
-  - move irrKlang-1.5.0 irrklang
-  - move irrklang\plugins\ikpMP3 ikpmp3
+  - git clone --depth=1 https://%access_token%@github.com/purerosefallen/irrklang
+  - mv -f irrklang/plugins/ikpmp3 .
 
   # let premake happy
   - xcopy /E premake\* .
-
-  # use irrklang pro
-  - 7z x irrklang\irrKlang.7z -p%irrklang_pro_passwd% -oirrklang\lib\Win32-visualStudio -y
   
   # patch irrlicht
   - patch -p0 < irrlicht\irrlicht.patch
-  - patch -p0 < ikpmp3\ikpmp3.patch
 
   # premake
   - premake5 vs2015
