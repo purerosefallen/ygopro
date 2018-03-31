@@ -51,11 +51,6 @@ struct Config {
 	int window_width;
 	int window_height;
 	bool resize_popup_menu;
-	bool enable_sound;
-	bool enable_music;
-	double sound_volume;
-	double music_volume;
-	int music_mode;
 };
 
 struct DuelInfo {
