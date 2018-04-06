@@ -672,7 +672,6 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #endif
 				break;
 			}
-			//modded
 			case 11:
 			case 12:
 			case 13: {

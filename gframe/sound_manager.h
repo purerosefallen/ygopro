@@ -79,7 +79,6 @@ extern SoundManager soundManager;
 #define BGM_DISADVANTAGE			5
 #define BGM_WIN						6
 #define BGM_LOSE					7
-//modded
 #define BGM_CUSTOM					8
 
 }

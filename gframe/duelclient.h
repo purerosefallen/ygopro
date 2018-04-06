@@ -33,7 +33,6 @@ private:
 	static wchar_t event_string[256];
 	static mtrandom rnd;
 public:
-	//modded
 	static unsigned int temp_ip;
 	static unsigned short temp_port;
 	static unsigned short temp_ver;

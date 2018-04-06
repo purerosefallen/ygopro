@@ -132,7 +132,6 @@ bool Game::Initialize() {
 	guiFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 	textFont = guiFont;
 	smgr = device->getSceneManager();
-	//modded
 	device->setWindowCaption(L"KoishiPro");
 	device->setResizable(true);
 	if(gameConf.window_maximized)
@@ -153,7 +152,6 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	//modded
 	myswprintf(strbuf, L"KoishiPro Version:%X.0%X.%X", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
@@ -839,7 +837,6 @@ void Game::MainLoop() {
 			usleep(20000);
 #endif
 		if(cur_time >= 1000) {
-			//modded
 			myswprintf(cap, L"KoishiPro FPS: %d", fps);
 			device->setWindowCaption(cap);
 			fps = 0;
@@ -851,7 +848,6 @@ void Game::MainLoop() {
 					RefreshTimeDisplay();
 				}
 		}
-		//modded
 		if (DuelClient::try_needed) {
 			DuelClient::try_needed = false;
 			DuelClient::StartClient(DuelClient::temp_ip, DuelClient::temp_port, false);
@@ -1495,7 +1491,6 @@ void Game::ShowCardInfo(int code, bool resize) {
 			wcscat(formatBuffer, scaleBuffer);
 		}
 		stDataInfo->setText(formatBuffer);
-		//modded
 		if ((cd.type & TYPE_LINK) && (cd.level > 5)) {
 			stDataInfo->setRelativePosition(rect<s32>(15, 60, 296, 98));
 			stSetName->setRelativePosition(rect<s32>(15, 98, 296 * xScale, 121));
