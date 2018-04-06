@@ -6,6 +6,8 @@ environment:
     secure: EQ9miMjfX/QAoBvgc6D+JLmHatLyxOEKZ/uo68QijxWW5Gp4MzB/pOH9+u2GlDVO
 
 install:
+  - git submodule update --init --recursive
+
   # environment and system dependency
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
   - 7z x premake-5.0.0-alpha12-windows.zip
@@ -52,27 +54,7 @@ build:
     parallel: true
 
 after_build:
-  - mv -f bin/release/ygopro.exe ygopro_222.exe
-  
-  - git config --global user.name "Smile-DK"
-  - git config --global user.email "2236141431@qq.com"
-  
-  - rm -rf sound
-  
-  - git clone --depth=1 https://github.com/purerosefallen/ygopro-222DIY-data
-  - cd ygopro-222DIY-data
-  
-  # - cp -rf ../ygopro_222.exe .
-
-  # - git add . -A
-  # - git commit -m "Builded by Appveyor"
-  # - git push https://%AUTH_TOKEN%@github.com/purerosefallen/ygopro-222DIY-data master
-  
-  - mv -f deck ..
-  - mv -f expansions ..
-  - mv -f sound ..
-  - mv -f update ..
-  - cd ..
+  - mv -f bin/release/ygopro.exe .
 
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip ; exit 0"
   - 7z x windbot-master.zip
@@ -83,10 +65,6 @@ after_build:
   - mv -f BotWrapper/bin/Release/Bot.exe ./..
   - mv -f BotWrapper/bin/Release/Bot.conf ./..
   - cd ..
-  
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip ; exit 0"
-  - 7z x -y ygopro-scripts-master.zip
-  - mv -f ygopro-scripts-master script
 
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip ; exit 0"
   - 7z x ygopro222-images-master.zip
@@ -96,26 +74,24 @@ after_build:
   - 7z x update-koishipro-master.zip
   - mv -f update-koishipro-master update-koishipro
 
-  - rm -rf pics/thumbnail pics/*.db expansions/pics/thumbnail expansions/pics/*.db
-  - mkdir replay
-
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip ; exit 0"
   - 7z x ygopro-starter-pack-master.zip
   - cp -rf ygopro-starter-pack-master/* .
 
-  - 7z a -mx9 -xr!.git* ygopro-222DIY-full.7z ygopro_222.exe lflist.conf expansions update update-koishipro LICENSE README.md strings.conf system.conf cards.cdb script textures deck single pics replay WindBot Bot.exe bot.conf
-  - cp -rf ygopro-222DIY-full.7z ygopro-222DIY-full-with-sound.7z
-  - 7z a -mx9 -xr!.git* ygopro-222DIY-full-with-sound.7z sound
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/archive/master.zip ; exit 0"
+  - 7z x -y ygopro-222DIY-data-master.zip
+  - rm -rf sound
+  - mv -f ygopro-222DIY-data-master/sound .
+  - rm -rf sound/custom sound/BGM/custom
+
+  - rm -rf pics/thumbnail pics/*.db
+  - mkdir replay
+
+  - 7z a -mx9 -xr!.git* YGOPro-by-Koishi.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics update-koishipro replay WindBot Bot.exe bot.conf
+  - cp -rf YGOPro-by-Koishi.7z YGOPro-by-Koishi-with-sound.7z
+  - 7z a -mx9 -xr!.git* YGOPro-by-Koishi-with-sound.7z sound
 
 test: off
-
-artifacts:
-  - path: ygopro_222.exe
-    name: ygopro client for 222
-  - path: ygopro-222DIY-full.7z
-    name: ygopro-222DIY-full
-  - path: ygopro-222DIY-full-with-sound.7z
-    name: ygopro-222DIY-full-with-sound
 
 deploy:
   description: 'Automatic build commit $(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
@@ -124,6 +100,14 @@ deploy:
   auth_token: $(access_token)
   on:
     appveyor_repo_tag: true
+
+artifacts:
+  - path: ygopro.exe
+    name: ygopro client
+  - path: YGOPro-by-Koishi.7z
+    name: ygopro full repack
+  - path: YGOPro-by-Koishi-with-sound.7z
+    name: ygopro full repack with sound
 
 cache:
   - premake-5.0.0-alpha12-windows.zip

@@ -19,6 +19,7 @@ addons:
 env:
 - USE_IRRKLANG=1
 before_install:
+- git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update > /dev/null;
     brew install freetype libevent sqlite dylibbundler > /dev/null;
@@ -95,51 +96,37 @@ before_deploy:
     zip -q -r ygopro-koishi-$TRAVIS_OS_NAME.zip ygopro.app;
   fi
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip
-- unzip -q ygopro-scripts-master.zip
-- mv -f ygopro-scripts-master script
-
-- rm -rf ygopro-scripts-master.zip
-
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Fluorohydride/ygopro-scripts/archive/master.zip;
-    unzip -q ygopro-scripts-master.zip;
-    cp -rf ygopro-scripts-master/* script;
-  fi
-
-
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
 - unzip -q ygopro222-images-master.zip
 - mv -f ygopro222-images-master pics
-
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/archive/master.zip
-- rm -rf sound
-- unzip -q ygopro-222DIY-data-master.zip
-- mv -f ygopro-222DIY-data-master/deck .
-- mv -f ygopro-222DIY-data-master/expansions .
-- mv -f ygopro-222DIY-data-master/sound .
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
 - unzip -q ygopro-starter-pack-master.zip
 - cp -rf ygopro-starter-pack-master/* .
 
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/archive/master.zip
+- rm -rf sound
+- unzip -q ygopro-222DIY-data-master.zip
+- mv -f ygopro-222DIY-data-master/sound .
+- rm -rf sound/custom sound/BGM/custom
+
 - rm -rf pics/thumbnail pics/*.db
 - mkdir replay
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay expansions;
-    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound expansions;
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME-full.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME-full-with-sound.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay expansions;
-    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound expansions;
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME-full.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME-full-with-sound.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
   fi
 
 deploy:
   provider: releases
   file:
   - ygopro-koishi-$TRAVIS_OS_NAME.zip
-  - ygopro-222DIY-$TRAVIS_OS_NAME-full.zip
-  - ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip
+  - ygopro-koishi-$TRAVIS_OS_NAME-full.zip
+  - ygopro-koishi-$TRAVIS_OS_NAME-full-with-sound.zip
   skip_cleanup: true
   overwrite: true
   on:
