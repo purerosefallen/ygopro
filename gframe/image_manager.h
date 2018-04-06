@@ -9,16 +9,21 @@ namespace ygo {
 
 class ImageManager {
 public:
+	std::vector<std::wstring> ImageList[7];
 	bool Initial();
+	//random image
+	irr::video::ITexture* GetRandomImage(int image_type);
+	void RefreshRandomImageList();
+	void RefreshImageDir(std::wstring path, int image_type);
 	void SetDevice(irr::IrrlichtDevice* dev);
 	void ClearTexture();
 	void RemoveTexture(int code);
 	irr::video::ITexture* GetTextureFromFile(char* file, s32 width, s32 height);
-	irr::video::ITexture* GetTexture(int code);
+	irr::video::ITexture* GetTexture(int code, bool fit = false);
 	irr::video::ITexture* GetTextureThumb(int code);
 	irr::video::ITexture* GetTextureField(int code);
 
-	std::unordered_map<int, irr::video::ITexture*> tMap;
+	std::unordered_map<int, irr::video::ITexture*> tMap[2];
 	std::unordered_map<int, irr::video::ITexture*> tThumb;
 	std::unordered_map<int, irr::video::ITexture*> tFields;
 	irr::IrrlichtDevice* device;
