@@ -58,10 +58,6 @@ after_build:
   - mkdir ygopro
   - cd ygopro
 
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip ; exit 0"
-  - 7z x -y ygopro-scripts-master.zip
-  - mv -f ygopro-scripts-master script
-
   - mkdir replay
   - mv -f ../../gframe .
   - mv -f ../../ocgcore .
@@ -69,6 +65,7 @@ after_build:
   - mv -f ../../event .
   - mv -f ../../lua .
   - mv -f ../../sqlite3 .
+  - mv -f ../../script .
   - mv -f ../../cards.cdb .
   - mv -f ../../textures .
   - mv -f ../../premake4.lua .
