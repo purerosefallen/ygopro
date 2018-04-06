@@ -2,12 +2,18 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
+    if os.ishost("windows") or os.getenv("USE_IRRKLANG") then
+        USE_IRRKLANG = true
+        if os.getenv("irrklang_pro") then
+            IRRKLANG_PRO = true
+        end
+    end
 
-    USE_IRRKLANG = true
-    IRRKLANG_PRO = true
-
-    configurations { "Release", "Debug" }
-
+    configurations { "Debug", "Release" }
+    defines { "LUA_COMPAT_5_2" }
+    if os.getenv("YGOPRO_COMPAT_MYCARD") then
+        defines { "YGOPRO_COMPAT_MYCARD" }
+    end
     configuration "windows"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
         libdirs { "$(DXSDK_DIR)Lib/x86" }
@@ -29,7 +35,6 @@ solution "ygo"
 
     configuration "linux"
         defines { "LUA_USE_LINUX" }
-        buildoptions { "-U_FORTIFY_SOURCE" }
 
     configuration "Release"
         optimize "Speed"
@@ -65,13 +70,13 @@ solution "ygo"
 
     include "ocgcore"
     include "gframe"
-    if os.ishost("windows") then
-    include "event"
-    include "freetype"
-    include "irrlicht"
-    include "lua"
-    include "sqlite3"
-    if IRRKLANG_PRO then
-    include "ikpmp3"
-    end
-    end
+	if os.ishost("windows") then
+		include "event"
+		include "freetype"
+		include "irrlicht"
+		include "lua"
+		include "sqlite3"
+	end
+	if USE_IRRKLANG then
+		include "ikpmp3"
+	end

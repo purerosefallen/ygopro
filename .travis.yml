@@ -1,12 +1,10 @@
 language: cpp
 os:
 - linux
-#- osx
+- osx
 sudo: required
 dist: trusty
 osx_image: xcode8
-git:
-  submodules: false
 addons:
   ssh_known_hosts:
   - github.com
@@ -16,32 +14,68 @@ addons:
     - libevent-dev
     - libsqlite3-dev
     - libirrlicht-dev
+    - libgl1-mesa-dev
     - libglu-dev
+env:
+- USE_IRRKLANG=1
 before_install:
-- git submodule update --init --recursive
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install freetype libevent
-  sqlite lua dylibbundler; curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz
-  | tar zfx -; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz
-  | tar zfx -; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl --location --retry 5 --output 'irrKlang-64bit-1.5.0.zip' http://www.ambiera.at/downloads/irrKlang-64bit-1.5.0.zip; unzip -q irrKlang-64bit-1.5.0.zip; mv irrKlang-64bit-1.5.0 irrklang; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O - https://www.lua.org/ftp/lua-5.3.4.tar.gz
-  | tar zfx -; cd lua-5.3.4; sudo make linux install; cd .. ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update > /dev/null;
+    brew install freetype libevent sqlite dylibbundler > /dev/null;
+  fi
+
+- curl --location --retry 5 http://www.lua.org/ftp/lua-5.3.4.tar.gz | tar zfx -
+- cd lua-5.3.4
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    sudo make macosx test install > /dev/null;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    sudo make linux test install > /dev/null;
+  fi
+- cd ..
+
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz | tar zfx -;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz | tar zfx -;
+  fi
+
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip;
+    unzip -q irrlicht-1.8.4.zip;
+    cd irrlicht-1.8.4/;
+    curl --location --retry 5 https://github.com/moecube/ygopro/raw/master/premake/irrlicht/irrlicht-mac.patch | patch -p1;
+    cd source/Irrlicht/MacOSX/;
+    xcodebuild -project MacOSX.xcodeproj > /dev/null;
+    sudo cp -rf build/Release/libIrrlicht.a /usr/local/lib/;
+    sudo cp -rf ../../../include /usr/local/include/irrlicht;
+    cd ../../../../;
+  fi
+- git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
+- mv -f irrklang/plugins/ikpmp3 .
+
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    sudo cp -rf irrklang/bin/macosx-gcc/libirrKlang.dylib /usr/local/lib/;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    cp -rf irrklang/bin/linux-gcc-64/libirrKlang.so .;
+  fi
+
 script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
 - cd build
-- make config=release -j2
+- make config=release ygopro -j4
 - cd ..
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv bin/release/ygopro ./; strip ygopro;
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/release/ygopro ./; strip ygopro;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     mkdir -p ygopro.app/Contents/MacOS;
-    mv bin/release/ygopro ygopro.app/Contents/MacOS;
+    mv -f bin/release/ygopro ygopro.app/Contents/MacOS;
     dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd;
     strip ygopro.app/Contents/MacOS/ygopro; mkdir ygopro.app/Contents/Resources;
-    mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    mv -f premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
     defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
     defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
@@ -52,35 +86,62 @@ script:
       codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
     fi
   fi
-before_deploy:
-- curl --location --retry 5 'https://github.com/moecube/ygopro-database/archive/master.tar.gz'
-  | tar --strip-components=1 -zxf - ygopro-database-master/locales
-- cp locales/zh-CN/cards.cdb .
-- mkdir replay
-- mkdir pics
-- curl --location --retry 5 --output 'ygopro-starter-pack-master.zip' https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- unzip -q ygopro-starter-pack-master.zip
-- mv ygopro-starter-pack-master/* .
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then tar -zcf ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
-  --format=posix --exclude='.git*' ygopro.app LICENSE README.md lflist.conf strings.conf
-  system.conf cards.cdb script textures deck single pics replay; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar -zcf ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
-  --format=posix --exclude='.git*' ygopro LICENSE README.md lflist.conf strings.conf
-  system.conf cards.cdb script textures deck single pics replay; fi
-- git config --local user.name "mercury233"
-- git config --local user.email "me@mercury233.me"
-- bash -c "git tag -d latest ; exit 0"
-- git tag latest HEAD
-#deploy:
-#  provider: releases
-#  on:
-#    branch: test
-#  file:
-#  - ygopro-ver.233-$TRAVIS_OS_NAME.tar.gz
-#  skip_cleanup: true
-#  overwrite: true
-#  api-key: $ak
 
-branches:
-  only:
-  - test
+before_deploy:
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME.zip ygopro libirrKlang.so;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    zip -q -r ygopro-koishi-$TRAVIS_OS_NAME.zip ygopro.app;
+  fi
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip
+- unzip -q ygopro-scripts-master.zip
+- mv -f ygopro-scripts-master script
+
+- rm -rf ygopro-scripts-master.zip
+
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Fluorohydride/ygopro-scripts/archive/master.zip;
+    unzip -q ygopro-scripts-master.zip;
+    cp -rf ygopro-scripts-master/* script;
+  fi
+
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
+- unzip -q ygopro222-images-master.zip
+- mv -f ygopro222-images-master pics
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/archive/master.zip
+- rm -rf sound
+- unzip -q ygopro-222DIY-data-master.zip
+- mv -f ygopro-222DIY-data-master/deck .
+- mv -f ygopro-222DIY-data-master/expansions .
+- mv -f ygopro-222DIY-data-master/sound .
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
+- unzip -q ygopro-starter-pack-master.zip
+- cp -rf ygopro-starter-pack-master/* .
+
+- rm -rf pics/thumbnail pics/*.db
+- mkdir replay
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay expansions;
+    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound expansions;
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay expansions;
+    zip -q -r ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound expansions;
+  fi
+
+deploy:
+  provider: releases
+  file:
+  - ygopro-koishi-$TRAVIS_OS_NAME.zip
+  - ygopro-222DIY-$TRAVIS_OS_NAME-full.zip
+  - ygopro-222DIY-$TRAVIS_OS_NAME-full-with-sound.zip
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
+  api-key: $NANAHIRA

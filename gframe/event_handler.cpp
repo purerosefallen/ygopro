@@ -858,6 +858,8 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 							myswprintf(formatBuffer, L"%ls[%d](%d)",
 								dataManager.FormatLocation(selectable_cards[i + pos]->overlayTarget->location, selectable_cards[i + pos]->overlayTarget->sequence),
 								selectable_cards[i + pos]->overlayTarget->sequence + 1, selectable_cards[i + pos]->sequence + 1);
+						else if (selectable_cards[i]->location == 0)
+							myswprintf(formatBuffer, L"");
 						else
 							myswprintf(formatBuffer, L"%ls[%d]", dataManager.FormatLocation(selectable_cards[i + pos]->location, selectable_cards[i + pos]->sequence),
 								selectable_cards[i + pos]->sequence + 1);
@@ -1791,12 +1793,21 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+#ifdef YGOPRO_USE_IRRKLANG
 			case CHECKBOX_ENABLE_MUSIC: {
 				if(!mainGame->chkEnableMusic->isChecked())
 					soundManager.StopBGM();
 				return true;
 				break;
 			}
+			//modded
+			case CHECKBOX_ENABLE_SOUND: {
+				if(!mainGame->chkEnableSound->isChecked())
+					soundManager.StopSound();
+				return true;
+				break;
+			}
+#endif
 			}
 			break;
 		}
@@ -1838,6 +1849,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+#ifdef YGOPRO_USE_IRRKLANG
 			case SCROLL_VOLUME: {
 				mainGame->gameConf.sound_volume = (double)mainGame->scrSoundVolume->getPos() / 100;
 				mainGame->gameConf.music_volume = (double)mainGame->scrMusicVolume->getPos() / 100;
@@ -1846,6 +1858,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+#endif
 			}
 			break;
 		}

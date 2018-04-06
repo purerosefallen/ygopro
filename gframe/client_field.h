@@ -30,6 +30,7 @@ public:
 	std::vector<ClientCard*> grave[2];
 	std::vector<ClientCard*> remove[2];
 	std::vector<ClientCard*> extra[2];
+	std::vector<ClientCard*> limbo_temp;
 	std::set<ClientCard*> overlay_cards;
 	std::vector<ClientCard*> summonable_cards;
 	std::vector<ClientCard*> spsummonable_cards;
@@ -64,6 +65,7 @@ public:
 	int select_counter_type;
 	std::vector<ClientCard*> selectable_cards;
 	std::vector<ClientCard*> selected_cards;
+	std::vector<ClientCard*> unselected_cards;
 	std::set<ClientCard*> selectsum_cards;
 	std::vector<ClientCard*> selectsum_all;
 	std::vector<int> opcode;

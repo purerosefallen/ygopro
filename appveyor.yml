@@ -1,13 +1,11 @@
 version: '{build}'
-skip_tags: true
 
 environment:
+  irrklang_pro: 1
   access_token:
-    secure: DOOS4g7CT8ctOgiMr62K56qQ1FO6s2ESpqNZlhf8F4nomemvvwxV/pRj9nbKmtjR
+    secure: EQ9miMjfX/QAoBvgc6D+JLmHatLyxOEKZ/uo68QijxWW5Gp4MzB/pOH9+u2GlDVO
 
 install:
-  - git submodule update --init --recursive
-
   # environment and system dependency
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
   - 7z x premake-5.0.0-alpha12-windows.zip
@@ -39,9 +37,9 @@ install:
   - mv -f irrklang/plugins/ikpmp3 .
 
   # let premake happy
-  - xcopy /E premake\* .
+  - cp -rf premake/* .
   
-  # patch irrlicht
+  # patch irrlicht & ikpmp3
   - patch -p0 < irrlicht\irrlicht.patch
 
   # premake
@@ -54,40 +52,78 @@ build:
     parallel: true
 
 after_build:
-  - mv bin\release\ygopro.exe .
-  #- mv irrklang\bin\win32-visualStudio\irrKlang.dll .
-  #- mv irrklang\bin\win32-visualStudio\ikpMP3.dll .
-  - mkdir pics
-  - mkdir replay
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/mycard/ygopro-database/raw/master/locales/zh-CN/cards.cdb ; exit 0"
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/mycard/ygopro-starter-pack/archive/master.zip ; exit 0"
-  - 7z x ygopro-starter-pack-master.zip
-  - xcopy /E ygopro-starter-pack-master\* .
-  #- 7z a ygopro-ver.233.7z ygopro.exe irrKlang.dll ikpMP3.dll LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay -xr!.git*
-  - 7z a ygopro-ver.233.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay -xr!.git*
+  - mv -f bin/release/ygopro.exe ygopro_222.exe
+  
+  - git config --global user.name "Smile-DK"
+  - git config --global user.email "2236141431@qq.com"
+  
+  - rm -rf sound
+  
+  - git clone --depth=1 https://github.com/purerosefallen/ygopro-222DIY-data
+  - cd ygopro-222DIY-data
+  
+  # - cp -rf ../ygopro_222.exe .
 
-  - git config --global credential.helper store
-  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-  - bash -c "git tag -d latest ; exit 0"
-  - git tag latest HEAD
-  - git push -f origin latest
+  # - git add . -A
+  # - git commit -m "Builded by Appveyor"
+  # - git push https://%AUTH_TOKEN%@github.com/purerosefallen/ygopro-222DIY-data master
+  
+  - mv -f deck ..
+  - mv -f expansions ..
+  - mv -f sound ..
+  - mv -f update ..
+  - cd ..
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip ; exit 0"
+  - 7z x windbot-master.zip
+  - cd windbot-master
+  - msbuild /property:Configuration=Release /property:Platform=x86
+  - rm -rf bin/Release/WindBot.exe.config
+  - mv -f bin/Release ../WindBot
+  - mv -f BotWrapper/bin/Release/Bot.exe ./..
+  - mv -f BotWrapper/bin/Release/Bot.conf ./..
+  - cd ..
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip ; exit 0"
+  - 7z x -y ygopro-scripts-master.zip
+  - mv -f ygopro-scripts-master script
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip ; exit 0"
+  - 7z x ygopro222-images-master.zip
+  - mv -f ygopro222-images-master pics
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/update-koishipro/archive/master.zip ; exit 0"
+  - 7z x update-koishipro-master.zip
+  - mv -f update-koishipro-master update-koishipro
+
+  - rm -rf pics/thumbnail pics/*.db expansions/pics/thumbnail expansions/pics/*.db
+  - mkdir replay
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip ; exit 0"
+  - 7z x ygopro-starter-pack-master.zip
+  - cp -rf ygopro-starter-pack-master/* .
+
+  - 7z a -mx9 -xr!.git* ygopro-222DIY-full.7z ygopro_222.exe lflist.conf expansions update update-koishipro LICENSE README.md strings.conf system.conf cards.cdb script textures deck single pics replay WindBot Bot.exe bot.conf
+  - cp -rf ygopro-222DIY-full.7z ygopro-222DIY-full-with-sound.7z
+  - 7z a -mx9 -xr!.git* ygopro-222DIY-full-with-sound.7z sound
 
 test: off
 
 artifacts:
-  - path: ygopro.exe
-    name: ygopro
-  - path: ygopro-ver.233.7z
-    name: ygopro-ver.233
+  - path: ygopro_222.exe
+    name: ygopro client for 222
+  - path: ygopro-222DIY-full.7z
+    name: ygopro-222DIY-full
+  - path: ygopro-222DIY-full-with-sound.7z
+    name: ygopro-222DIY-full-with-sound
 
 deploy:
-    release: latest
-    description: 'Automatic build by Appveyor.\nUpdated on $(APPVEYOR_REPO_COMMIT_TIMESTAMP).'
-    provider: GitHub
-    auth_token: $(access_token)
-    force_update: true
-    on:
-        branch: test
+  description: 'Automatic build commit $(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
+  provider: GitHub
+  force_update: true
+  auth_token: $(access_token)
+  on:
+    appveyor_repo_tag: true
 
 cache:
   - premake-5.0.0-alpha12-windows.zip
@@ -96,4 +132,4 @@ cache:
   - irrlicht-1.8.4.zip
   - lua-5.3.4.tar.gz
   - sqlite-amalgamation-3210000.zip
-  - irrKlang-32bit-1.5.0.zip
+  - Redis-x64-3.2.100.zip

@@ -42,15 +42,15 @@ struct Config {
 	int chkIgnoreDeckChanges;
 	int defaultOT;
 	int enable_bot_mode;
+	bool window_maximized;
+	int window_width;
+	int window_height;
+	bool resize_popup_menu;
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
 	double music_volume;
 	int music_mode;
-	bool window_maximized;
-	int window_width;
-	int window_height;
-	bool resize_popup_menu;
 };
 
 struct DuelInfo {
@@ -62,8 +62,11 @@ struct DuelInfo {
 	bool isTag;
 	bool isSingleMode;
 	bool is_shuffling;
+	//modded - to check swapped
+	bool is_swapped;
 	bool tag_player[2];
 	int lp[2];
+	int start_lp[2];
 	int duel_rule;
 	int turn;
 	short curMsg;
@@ -77,6 +80,9 @@ struct DuelInfo {
 	unsigned char time_player;
 	unsigned short time_limit;
 	unsigned short time_left[2];
+	wchar_t str_time_limit[16];
+	wchar_t str_time_left[2][16];
+	video::SColor time_color[2];
 	bool isReplaySwapped;
 };
 
@@ -105,6 +111,7 @@ class Game {
 public:
 	bool Initialize();
 	void MainLoop();
+	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, f32 left, f32 right, f32 bottom, f32 top, f32 znear, f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	void SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, u32 pos = 0);
@@ -648,6 +655,17 @@ extern Game* mainGame;
 
 #define BUTTON_MARKS_FILTER			380
 #define BUTTON_MARKERS_OK			381
+
+
+#define TEXTURE_DUEL				0
+#define TEXTURE_DECK				1
+#define TEXTURE_MENU				2
+#define TEXTURE_COVER_S				3
+#define TEXTURE_COVER_O				4
+#define TEXTURE_ATTACK				5
+#define TEXTURE_ACTIVATE			6
+
+
 
 #define DEFAULT_DUEL_RULE			4
 #endif // GAME_H
