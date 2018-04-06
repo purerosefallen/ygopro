@@ -12,7 +12,7 @@ addons:
     packages:
     - libfreetype6-dev
     - libevent-dev
-    - libsqlite3-dev
+    - libsqliteeases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz3-dev
     - libirrlicht-dev
     - libgl1-mesa-dev
     - libglu-dev
@@ -42,17 +42,8 @@ before_install:
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz | tar zfx -;
   fi
 
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip;
-    unzip -q irrlicht-1.8.4.zip;
-    cd irrlicht-1.8.4/;
-    curl --location --retry 5 https://github.com/moecube/ygopro/raw/master/premake/irrlicht/irrlicht-mac.patch | patch -p1;
-    cd source/Irrlicht/MacOSX/;
-    xcodebuild -project MacOSX.xcodeproj > /dev/null;
-    sudo cp -rf build/Release/libIrrlicht.a /usr/local/lib/;
-    sudo cp -rf ../../../include /usr/local/include/irrlicht;
-    cd ../../../../;
-  fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
+
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
 - mv -f irrklang/plugins/ikpmp3 .
 
