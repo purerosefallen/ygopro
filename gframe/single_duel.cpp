@@ -31,10 +31,6 @@ void SingleDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 	NetServer::ReSendToPlayer(players[1]);
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 		NetServer::ReSendToPlayer(*pit);
-#ifdef YGOPRO_SERVER_MODE
-	if(cache_recorder)
-		NetServer::ReSendToPlayer(cache_recorder);
-#endif
 }
 void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 	if(!is_creater) {
