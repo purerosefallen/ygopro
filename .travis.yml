@@ -12,7 +12,7 @@ addons:
     packages:
     - libfreetype6-dev
     - libevent-dev
-    - libsqliteeases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz3-dev
+    - libsqlite3-dev
     - libirrlicht-dev
     - libgl1-mesa-dev
     - libglu-dev
