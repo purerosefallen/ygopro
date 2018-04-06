@@ -588,7 +588,6 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 					NetServer::ReSendToPlayer(*oit);
 				break;
 			}
-			//modded
 			case 10:
 			case 11:
 			case 12:

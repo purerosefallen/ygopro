@@ -537,7 +537,6 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 					NetServer::ReSendToPlayer(*oit);
 				break;
 			}
-			//modded
 			case 11:
 			case 12:
 			case 13: {
