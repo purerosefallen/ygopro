@@ -2,16 +2,31 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
+	startproject "ygopro"
 
-    configurations { "Release", "Debug" }
+    configurations { "Debug", "Release" }
+	defines { "LUA_COMPAT_5_2" }
 
     configuration "windows"
         defines { "WIN32", "_WIN32" }
+
+    configuration "bsd"
+        defines { "LUA_USE_POSIX" }
+        includedirs { "/usr/local/include" }
+        libdirs { "/usr/local/lib" }
+
+    configuration "macosx"
+        defines { "LUA_USE_MACOSX" }
+        includedirs { "/usr/local/include/*" }
+        libdirs { "/usr/local/lib", "/usr/X11/lib" }
+        buildoptions { "-stdlib=libc++" }
+        links {"OpenGL.framework","Cocoa.framework","IOKit.framework"}
 
     configuration "linux"
         defines { "LUA_USE_LINUX" }
 
     configuration "Release"
+        flags { "OptimizeSpeed" }
         targetdir "bin/release"
 
     configuration "Debug"
@@ -20,7 +35,6 @@ solution "ygo"
         targetdir "bin/debug"
 
     configuration { "Release", "vs*" }
-        optimize "Speed"
         flags { "StaticRuntime", "LinkTimeOptimization" }
         disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477" }
 
@@ -46,7 +60,7 @@ solution "ygo"
 
     include "ocgcore"
     include "gframe"
-    if os.is("windows") then
+    if os.ishost("windows") then
     include "event"
     include "lua"
     include "sqlite3"

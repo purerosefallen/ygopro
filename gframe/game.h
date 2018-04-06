@@ -47,10 +47,16 @@ struct Config {
 	int chkIgnoreDeckChanges;
 	int defaultOT;
 	int enable_bot_mode;
+	bool enable_sound;
+	bool enable_music;
+	double sound_volume;
+	double music_volume;
+	int music_mode;
 };
 
 struct DuelInfo {
 	bool isStarted;
+	bool isFinished;
 	bool isReplay;
 	bool isReplaySkiping;
 	bool isFirst;
@@ -103,6 +109,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	void MainServerLoop();
 	void LoadExpansionDB();
+	void LoadBetaDB();
 	void AddDebugMsg(char* msgbuf);
 #else
 	void MainLoop();
@@ -115,6 +122,7 @@ public:
 	void RefreshSingleplay();
 	void RefreshBot();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
+	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
 	void DrawLinkedZones(ClientCard* pcard);
 	void CheckMutual(ClientCard* pcard, int mark);
@@ -149,6 +157,7 @@ public:
 
 	void SetWindowsIcon();
 	void FlashWindow();
+	void SetCursor(ECURSOR_ICON icon);
 
 	Mutex gMutex;
 	Mutex gBuffer;
@@ -170,7 +179,8 @@ public:
 	bool hideChat;
 	int chatTiming[8];
 	int chatType[8];
-	unsigned short linePattern;
+	unsigned short linePatternD3D;
+	unsigned short linePatternGL;
 	int waitFrame;
 	int signalFrame;
 	int actionParam;
@@ -230,6 +240,9 @@ public:
 	irr::gui::IGUIStaticText* stSetName;
 	irr::gui::IGUIStaticText* stText;
 	irr::gui::IGUIScrollBar* scrCardText;
+	irr::gui::IGUIListBox* lstLog;
+	irr::gui::IGUIButton* btnClearLog;
+	irr::gui::IGUIButton* btnSaveLog;
 	irr::gui::IGUICheckBox* chkMAutoPos;
 	irr::gui::IGUICheckBox* chkSTAutoPos;
 	irr::gui::IGUICheckBox* chkRandomPos;
@@ -239,9 +252,11 @@ public:
 	irr::gui::IGUICheckBox* chkHideHintButton;
 	irr::gui::IGUICheckBox* chkIgnoreDeckChanges;
 	irr::gui::IGUICheckBox* chkAutoSearch;
-	irr::gui::IGUIListBox* lstLog;
-	irr::gui::IGUIButton* btnClearLog;
-	irr::gui::IGUIButton* btnSaveLog;
+	irr::gui::IGUICheckBox* chkEnableSound;
+	irr::gui::IGUICheckBox* chkEnableMusic;
+	irr::gui::IGUIScrollBar* scrSoundVolume;
+	irr::gui::IGUIScrollBar* scrMusicVolume;
+	irr::gui::IGUICheckBox* chkMusicMode;
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu;
 	irr::gui::IGUIButton* btnLanMode;
@@ -613,6 +628,10 @@ extern HostInfo game_info;
 #define BUTTON_LOAD_SINGLEPLAY		351
 #define BUTTON_CANCEL_SINGLEPLAY	352
 #define CHECKBOX_AUTO_SEARCH		360
+#define CHECKBOX_ENABLE_SOUND		361
+#define CHECKBOX_ENABLE_MUSIC		362
+#define SCROLL_VOLUME				363
+
 #define COMBOBOX_SORTTYPE			370
 #define COMBOBOX_LIMIT				371
 

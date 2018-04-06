@@ -4,25 +4,31 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-alpha10-windows.zip
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-alpha12-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
   - move libevent-2.0.22-stable event
   - xcopy /E event\WIN32-Code event\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.2.4.tar.gz ; exit 0"
-  - tar xf lua-5.2.4.tar.gz
-  - move lua-5.2.4\src lua
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.4.tar.gz ; exit 0"
+  - tar xf lua-5.3.4.tar.gz
+  - move lua-5.3.4\src lua
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3200000.zip  ; exit 0"
-  - 7z x sqlite-amalgamation-3200000.zip
-  - move sqlite-amalgamation-3200000 sqlite3
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3210000.zip ; exit 0"
+  - 7z x sqlite-amalgamation-3210000.zip
+  - move sqlite-amalgamation-3210000 sqlite3
   
+  - appveyor DownloadFile https://github.com/tronkko/dirent/raw/master/include/dirent.h
+  - move dirent.h gframe\
+
   # let premake happy
   - xcopy /E premake\* .
   
+  # patch lua
+  # - patch -p0 < lua\lua.patch
+    
   # premake
   - premake5 vs2015
   
@@ -34,15 +40,82 @@ build:
 
 after_build:
   - ps: move bin\release\ygopro.exe .
+  - git clone https://github.com/Smile-DK/ygopro-svrelease
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-server/archive/master.zip ; exit 0"
+  - 7z x ygopro-server-master.zip
+  - mv -f ygopro-server-master ygopro-server
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v9.1.0/node-v9.1.0-win-x64.zip ; exit 0"
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/MicrosoftArchive/redis/releases/download/win-3.2.100/Redis-x64-3.2.100.zip ; exit 0"
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip ; exit 0"
+  - 7z x windbot-master.zip
+  - cd windbot-master
+  - msbuild /property:Configuration=Release /property:OutDir=../ygopro-server/windbot
+
+  - cd ../ygopro-server
+  - mkdir ygopro
+  - cd ygopro
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip ; exit 0"
+  - 7z x -y ygopro-scripts-master.zip
+  - mv -f ygopro-scripts-master script
+
+  - mkdir replay
+  - mv -f ../../gframe .
+  - mv -f ../../ocgcore .
+  - mv -f ../../premake .
+  - mv -f ../../event .
+  - mv -f ../../lua .
+  - mv -f ../../sqlite3 .
+  - mv -f ../../cards.cdb .
+  - mv -f ../../textures .
+  - mv -f ../../premake4.lua .
+  - mv -f ../../premake5.lua .
+  - mv -f ../../lflist.conf .  
+  - mv -f ../../strings.conf .
+  - mv -f ../../system.conf .
+  - cp -rf ../../ygopro.exe .
+  - mv -f ../../premake5.exe .
+  - cd ..
+  
+  - mkdir redis
+  - cd redis
+  - cp -rf ../../Redis-x64-3.2.100.zip .
+  - 7z x Redis-x64-3.2.100.zip
+  - rm -rf Redis-x64-3.2.100.zip
+  - cd ..
+
+  - cp -rf ygopro/cards.cdb windbot
+  - cp -rf config_build config
+  - cp -rf ../node-v9.1.0-win-x64.zip .
+  - 7z x node-v9.1.0-win-x64.zip
+  - rm -rf node-v9.1.0-win-x64.zip
+  - cp -rf node-v9.1.0-win-x64/* .
+  - rm -rf node-v9.1.0-win-x64
+  - npm install
+  - npm install pm2@latest -g
+  - npm install ws
+  - npm install redis
+  - 7z a -mx9 -xr!.git* ../ygopro-server.7z ./*
+  - cd ..
+
 
 test: off
 
 artifacts:
   - path: ygopro.exe
-    name: ygopro(server)
+    name: ygopro
+  - path: ygopro-server.7z
+    name: ygopro-server	
 
 cache:
-  - premake-5.0.0-alpha10-windows.zip
+  - premake-5.0.0-alpha12-windows.zip
   - libevent-2.0.22-stable.tar.gz
-  - lua-5.2.4.tar.gz
-  - sqlite-amalgamation-3200000.zip
+  - freetype-2.8.1.tar.bz2
+  - irrlicht-1.8.4.zip
+  - lua-5.3.4.tar.gz
+  - sqlite-amalgamation-3210000.zip
+  - Redis-x64-3.2.100.zip
+

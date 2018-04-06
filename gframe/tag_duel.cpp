@@ -31,8 +31,9 @@ void TagDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 	unsigned short* msg = (unsigned short*)pdata;
 	int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
 	for(int i = 0; i < 4; ++i)
-		if(players[i] != dp)
-			NetServer::SendBufferToPlayer(players[i], STOC_CHAT, &scc, 4 + msglen * 2);
+		NetServer::SendBufferToPlayer(players[i], STOC_CHAT, &scc, 4 + msglen * 2);
+	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
+		NetServer::ReSendToPlayer(*pit);
 #ifdef YGOPRO_SERVER_MODE
 	if(cache_recorder)
 		NetServer::ReSendToPlayer(cache_recorder);
@@ -52,6 +53,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			return;
 		}
 		CTOS_JoinGame* pkt = (CTOS_JoinGame*)pdata;
+		/* disabled version check
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_VERERROR;
@@ -60,6 +62,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			NetServer::DisconnectPlayer(dp);
 			return;
 		}
+		*/
 		wchar_t jpass[20];
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 #ifdef YGOPRO_SERVER_MODE
@@ -669,6 +672,19 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #endif
 				break;
 			}
+			//modded
+			case 11:
+			case 12:
+			case 13: {
+				for(int i = 0; i < 4; ++i)
+					NetServer::SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
+				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
+					NetServer::ReSendToPlayer(*oit);
+#ifdef YGOPRO_SERVER_MODE
+			NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
+#endif
+				break;
+			}
 			}
 			break;
 		}
@@ -755,6 +771,34 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 			pbuf += 3;
 			count = BufferIO::ReadInt8(pbuf);
 			int c/*, l, s, ss, code*/;
+			for (int i = 0; i < count; ++i) {
+				pbufw = pbuf;
+				/*code = */BufferIO::ReadInt32(pbuf);
+				c = BufferIO::ReadInt8(pbuf);
+				/*l = */BufferIO::ReadInt8(pbuf);
+				/*s = */BufferIO::ReadInt8(pbuf);
+				/*ss = */BufferIO::ReadInt8(pbuf);
+				if (c != player) BufferIO::WriteInt32(pbufw, 0);
+			}
+			WaitforResponse(player);
+			NetServer::SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, pbuf - offset);
+			return 1;
+		}
+		case MSG_SELECT_UNSELECT_CARD: {
+			player = BufferIO::ReadInt8(pbuf);
+			pbuf += 4;
+			count = BufferIO::ReadInt8(pbuf);
+			int c/*, l, s, ss, code*/;
+			for (int i = 0; i < count; ++i) {
+				pbufw = pbuf;
+				/*code = */BufferIO::ReadInt32(pbuf);
+				c = BufferIO::ReadInt8(pbuf);
+				/*l = */BufferIO::ReadInt8(pbuf);
+				/*s = */BufferIO::ReadInt8(pbuf);
+				/*ss = */BufferIO::ReadInt8(pbuf);
+				if (c != player) BufferIO::WriteInt32(pbufw, 0);
+			}
+			count = BufferIO::ReadInt8(pbuf);
 			for (int i = 0; i < count; ++i) {
 				pbufw = pbuf;
 				/*code = */BufferIO::ReadInt32(pbuf);
@@ -993,7 +1037,7 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 			break;
 		}
 		case MSG_NEW_TURN: {
-			pbuf++;
+			int r_player = BufferIO::ReadInt8(pbuf);
 			time_limit[0] = host_info.time_limit;
 			time_limit[1] = host_info.time_limit;
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
@@ -1005,20 +1049,22 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
-			if(turn_count > 0) {
-				if(turn_count % 2 == 0) {
-					if(cur_player[0] == players[0])
-						cur_player[0] = players[1];
-					else
-						cur_player[0] = players[0];
-				} else {
-					if(cur_player[1] == players[2])
-						cur_player[1] = players[3];
-					else
-						cur_player[1] = players[2];
+			if(!(r_player & 0x2)) {
+				if(turn_count > 0) {
+					if(turn_count % 2 == 0) {
+						if(cur_player[0] == players[0])
+							cur_player[0] = players[1];
+						else
+							cur_player[0] = players[0];
+					} else {
+						if(cur_player[1] == players[2])
+							cur_player[1] = players[3];
+						else
+							cur_player[1] = players[2];
+					}
 				}
+				turn_count++;
 			}
-			turn_count++;
 			break;
 		}
 		case MSG_NEW_PHASE: {
