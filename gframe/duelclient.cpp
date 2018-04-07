@@ -662,7 +662,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->btnChainAlways->setVisible(false);
 		mainGame->btnChainWhenAvail->setVisible(false);
 		mainGame->btnCancelOrFinish->setVisible(false);
-		if(!mainGame->dInfo.isReplay)
+		if(!mainGame->dInfo.isReplay && mainGame->dInfo.isReplaySkiping)
 			mainGame->dInfo.isReplaySkiping = false;
 		mainGame->stMessage->setText(dataManager.GetSysString(1500));
 		mainGame->PopupElement(mainGame->wMessage);
@@ -1063,6 +1063,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->dInfo.isFinished = true;
 		if(!mainGame->dInfo.isReplay && mainGame->dInfo.isReplaySkiping) {
 			mainGame->dInfo.isReplaySkiping = false;
+			mainGame->gMutex.Lock();
 			mainGame->dField.RefreshAllCards();
 			mainGame->gMutex.Unlock();
 		}

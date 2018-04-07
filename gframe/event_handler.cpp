@@ -1683,9 +1683,8 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 		case irr::KEY_KEY_Z: {
 			if(mainGame->dInfo.isStarted && !mainGame->dInfo.isReplay && !mainGame->HasFocus(EGUIET_EDIT_BOX)) {
 				mainGame->dInfo.isReplaySkiping = event.KeyInput.PressedDown;
-				if(mainGame->dInfo.isReplaySkiping)
+				if(!mainGame->dInfo.isReplaySkiping) {
 					mainGame->gMutex.Lock();
-				else {
 					mainGame->dField.RefreshAllCards();
 					mainGame->gMutex.Unlock();
 				}
