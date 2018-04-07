@@ -371,6 +371,9 @@ bool Game::Initialize() {
 	posY += 30;
 	chkMusicMode = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1281));
 	chkMusicMode->setChecked(gameConf.music_mode != 0);
+	posY += 30;
+	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1282));
+	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1159,6 +1162,7 @@ void Game::LoadConfig() {
 	gameConf.window_width = 1024;
 	gameConf.window_height = 640;
 	gameConf.resize_popup_menu = false;
+	gameConf.chkEnablePScale = 1;
 	if(fp) {
 		while(fgets(linebuf, 256, fp)) {
 			sscanf(linebuf, "%s = %s", strbuf, valbuf);
@@ -1242,6 +1246,8 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
+				gameConf.chkEnablePScale = atoi(valbuf);
 			} else {
 				// options allowing multiple words
 				sscanf(linebuf, "%s = %240[^\n]", strbuf, valbuf);
@@ -1343,6 +1349,8 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
+				gameConf.chkEnablePScale = atoi(valbuf);
 			} else {
 				// options allowing multiple words
 				sscanf(linebuf, "%s = %240[^\n]", strbuf, valbuf);
@@ -1426,6 +1434,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
+	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
 	fclose(fp);
 }
 void Game::ShowCardInfo(int code, bool resize) {
