@@ -51,6 +51,7 @@ struct Config {
 	double sound_volume;
 	double music_volume;
 	int music_mode;
+	int chkEnablePScale;
 };
 
 struct DuelInfo {
