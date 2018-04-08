@@ -817,7 +817,7 @@ void DeckBuilder::FilterCards() {
 	results.clear();
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	int trycode = BufferIO::GetVal(pstr);
-	if (dataManager.GetData(trycode, 0)) {
+	if(dataManager.GetData(trycode, 0)) {
 		auto ptr = dataManager.GetCodePointer(trycode);	// verified by GetData()
 		results.push_back(ptr);
 		mainGame->scrFilter->setVisible(false);
@@ -958,7 +958,7 @@ void DeckBuilder::FilterCards() {
 		}
 	}
 	myswprintf(result_string, L"%d", results.size());
-	if (results.size() > 7) {
+	if(results.size() > 7) {
 		mainGame->scrFilter->setVisible(true);
 		mainGame->scrFilter->setMax(results.size() - 7);
 		mainGame->scrFilter->setPos(0);
