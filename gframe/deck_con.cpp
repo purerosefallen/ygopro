@@ -951,11 +951,10 @@ void DeckBuilder::FilterCards() {
 				}
 			}
 		}
-		if (is_target) {
+		if (is_target)
 			results.push_back(ptr);
-		} else {
+		else
 			continue;
-		}
 	}
 	myswprintf(result_string, L"%d", results.size());
 	if(results.size() > 7) {
