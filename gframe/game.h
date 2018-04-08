@@ -464,6 +464,12 @@ public:
 	irr::gui::IGUIStaticText* stStar;
 	irr::gui::IGUIStaticText* stSearch;
 	irr::gui::IGUIStaticText* stScale;
+	irr::gui::IGUIButton* btnRenameDeck;
+	//deck rename
+	irr::gui::IGUIWindow* wRenameDeck;
+	irr::gui::IGUIEditBox* ebREName;
+	irr::gui::IGUIButton* btnREYes;
+	irr::gui::IGUIButton* btnRENo;
 	//filter
 	irr::gui::IGUIStaticText* wFilter;
 	irr::gui::IGUIScrollBar* scrFilter;
@@ -674,6 +680,10 @@ extern HostInfo game_info;
 
 #define BUTTON_MARKS_FILTER			380
 #define BUTTON_MARKERS_OK			381
+
+#define BUTTON_RENAME_DECK			386
+#define BUTTON_RENAME_DECK_SAVE			387
+#define BUTTON_RENAME_DECK_CANCEL		388
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1
