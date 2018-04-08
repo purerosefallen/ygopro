@@ -1619,7 +1619,8 @@ void Game::OnResize() {
 	//guiFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize * yScale);
 	//env->getSkin()->setFont(guiFont);
 
-	wMainMenu->setRelativePosition(ResizeWin(370, 200, 650, 415));
+	recti menuposition = ResizeWin(370, 200, 650, 415);
+	wMainMenu->setRelativePosition(recti(menuposition.UpperLeftCorner.X, menuposition.UpperLeftCorner.Y, menuposition.LowerRightCorner.X + 300, menuposition.LowerRightCorner.Y + 185));
 	wDeckEdit->setRelativePosition(Resize(309, 8, 605, 130));
 	cbDBLFList->setRelativePosition(Resize(80, 5, 220, 30));
 	cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
@@ -1690,7 +1691,7 @@ void Game::OnResize() {
 	wANRace->setRelativePosition(ResizeWin(480, 200, 850, 410));
 	wReplaySave->setRelativePosition(ResizeWin(510, 200, 820, 320));
 	stHintMsg->setRelativePosition(ResizeWin(500, 60, 820, 90));
-	
+
 	//sound / music volume bar
 	scrSoundVolume->setRelativePosition(recti(20 + 126, 200 + 4, 20 + (300 * xScale) - 40, 200 + 21));
 	scrMusicVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
