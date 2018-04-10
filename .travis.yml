@@ -81,10 +81,10 @@ script:
 
 before_deploy:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME.zip ygopro libirrKlang.so;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libirrKlang.so;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME.zip ygopro.app;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
   fi
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
@@ -104,20 +104,20 @@ before_deploy:
 - rm -rf pics/thumbnail pics/*.db
 - mkdir replay
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound;
   fi
 
 deploy:
   provider: releases
   file:
-  - KoishiPro-$TRAVIS_OS_NAME.zip
-  - KoishiPro-$TRAVIS_OS_NAME-full.zip
-  - KoishiPro-$TRAVIS_OS_NAME-full-with-sound.zip
+  - KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip
+  - KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip
+  - KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip
   skip_cleanup: true
   overwrite: true
   on:
