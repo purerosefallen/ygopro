@@ -87,9 +87,9 @@ after_build:
   - rm -rf pics/thumbnail pics/*.db
   - mkdir replay
 
-  - 7z a -mx9 -xr!.git* KoishiPro.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics update-koishipro replay WindBot Bot.exe bot.conf
-  - cp -rf KoishiPro.7z KoishiPro-with-sound.7z
-  - 7z a -mx9 -xr!.git* KoishiPro-with-sound.7z sound
+  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics update-koishipro replay WindBot Bot.exe bot.conf
+  - cp -rf KoishiPro.7z KoishiPro-with-sound-%APPVEYOR_REPO_TAG_NAME%.7z
+  - 7z a -mx9 -xr!.git* KoishiPro-with-sound-%APPVEYOR_REPO_TAG_NAME%.7z sound
 
 test: off
 
@@ -104,9 +104,9 @@ deploy:
 artifacts:
   - path: ygopro.exe
     name: ygopro client
-  - path: KoishiPro.7z
+  - path: KoishiPro-$(APPVEYOR_REPO_TAG_NAME).7z
     name: ygopro full repack
-  - path: KoishiPro-with-sound.7z
+  - path: KoishiPro-with-sound-$(APPVEYOR_REPO_TAG_NAME).7z
     name: ygopro full repack with sound
 
 cache:
