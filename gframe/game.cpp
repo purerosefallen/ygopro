@@ -111,13 +111,12 @@ bool Game::Initialize() {
 	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
 	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
-\u97F3\u6548\u4E0E\u80CC\u666F\u97F3\u4E50\u3002\n\
-\nLua 5.3\u3002\n\
-\n\
 \u7A97\u53E3\u7F29\u653E\u3002\n\
 \n\
-\n\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\n\
-\u65E0\u3002\n\
+\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\
+\n\u5361\u56FE\u6BD4\u4F8B\u968F\u7A97\u53E3\u53D8\u5F62\u3002\n\
+\n\u90E8\u5206\u6587\u672C\u4E0D\u4F1A\u81EA\u52A8\u7F29\u653E\u3002\n\
+\n\u6548\u679C\u6587\u5185\u82F1\u6587\u6362\u884C\u4F1A\u622A\u65AD\u5355\u8BCD\u3002\n\
 ", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
