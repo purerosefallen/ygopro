@@ -60,8 +60,13 @@ deploy:
 cache:
   - premake-5.0.0-alpha12-windows.zip
   - libevent-2.0.22-stable.tar.gz
+<<<<<<< HEAD
   - freetype-2.8.1.tar.bz2
   - irrlicht-1.8.4.zip
   - lua-5.3.4.tar.gz
   - sqlite-amalgamation-3210000.zip
 
+=======
+  - lua-5.3.4.tar.gz
+  - sqlite-amalgamation-3200000.zip
+>>>>>>> e5df907f03618cd72942838237c5d8b50f841b53
