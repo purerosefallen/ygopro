@@ -1545,8 +1545,8 @@ void Game::OnResize() {
 		btnReset->setRelativePosition(recti(1, 1, width, height));
 	}
 
-	wCardImg->setRelativePosition(Resize(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18));
-	imgCard->setRelativePosition(Resize(10, 9, 10 + CARD_IMG_WIDTH, 9 + CARD_IMG_HEIGHT));
+	wCardImg->setRelativePosition(ResizeCard(1, 1, 20, 18));
+	imgCard->setRelativePosition(ResizeCard(10, 9, 0, 0));
 	wInfos->setRelativePosition(Resize(1, 275, 301, 639));
 	stName->setRelativePosition(recti(10, 10, 287 * xScale, 32));
 	lstLog->setRelativePosition(Resize(10, 10, 290, 290));
@@ -1625,6 +1625,18 @@ recti Game::ResizeElem(s32 x, s32 y, s32 x2, s32 y2) {
 	s32 sx = x2 - x;
 	s32 sy = y2 - y;
 	x = (x + sx / 2 - 100) * xScale - sx / 2 + 100;
+	y = y * yScale;
+	x2 = sx + x;
+	y2 = sy + y;
+	return recti(x, y, x2, y2);
+}
+recti Game::ResizeCard(s32 x, s32 y, s32 x2, s32 y2) {
+	float mul = xScale;
+	if(xScale > yScale)
+		mul = yScale;
+	s32 sx = CARD_IMG_WIDTH * mul + x2 * xScale;
+	s32 sy = CARD_IMG_HEIGHT * mul + y2 * yScale;
+	x = x * xScale;
 	y = y * yScale;
 	x2 = sx + x;
 	y2 = sy + y;
