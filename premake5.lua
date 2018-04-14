@@ -5,8 +5,7 @@ solution "ygo"
 	startproject "ygopro"
 
     configurations { "Debug", "Release" }
-	defines { "LUA_COMPAT_5_2" }
-
+    defines { "LUA_COMPAT_5_2" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
 
