@@ -11,9 +11,6 @@ solution "ygo"
 
     configurations { "Debug", "Release" }
     defines { "LUA_COMPAT_5_2" }
-    if os.getenv("YGOPRO_COMPAT_MYCARD") then
-        defines { "YGOPRO_COMPAT_MYCARD" }
-    end
     configuration "windows"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
         libdirs { "$(DXSDK_DIR)Lib/x86" }

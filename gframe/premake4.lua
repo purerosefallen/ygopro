@@ -15,6 +15,9 @@ project "ygopro"
             defines { "IRRKLANG_STATIC" }
         end
     end
+    if os.getenv("YGOPRO_COMPAT_MYCARD") then
+        defines { "YGOPRO_COMPAT_MYCARD" }
+    end
 
     configuration "windows"
         files "ygopro.rc"
