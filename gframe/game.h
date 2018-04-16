@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <list>
+#include "CGUISkinSystem/CGUISkinSystem.h"
 
 namespace ygo {
 
@@ -52,6 +53,7 @@ struct Config {
 	double music_volume;
 	int music_mode;
 	int chkEnablePScale;
+	int skin_index;
 };
 
 struct DuelInfo {
@@ -219,6 +221,8 @@ public:
 	irr::core::dimension2d<irr::u32> window_size;
 	float xScale;
 	float yScale;
+	
+	CGUISkinSystem *skinSystem;
 
 	ClientField dField;
 	DeckBuilder deckBuilder;
