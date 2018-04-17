@@ -98,14 +98,20 @@ bool Game::Initialize() {
 	if(!device)
 		return false;
 	// Apply skin
-	if(gameConf.skin_index >= 0) {
+	if(gameConf.skin_index) {
 		wchar_t skin_dir[16];
 		myswprintf(skin_dir, L"skin");
 		skinSystem = new CGUISkinSystem(skin_dir, device);
 		core::array<core::stringw> skins = skinSystem->listSkins();
-		if((size_t)gameConf.skin_index < skins.size()) {
-			int index = skins.size() - gameConf.skin_index - 1; // reverse index
-			skinSystem->applySkin(skins[index].c_str());
+		size_t count = skins.size();
+		if(count > 0) {
+			int index = -1;
+			if(gameConf.skin_index < 0)
+				index = rand() % count;
+			else if((size_t)gameConf.skin_index <= skins.size())
+				index = gameConf.skin_index - 1;
+			if(index >= 0)
+				skinSystem->applySkin(skins[index].c_str());
 		}
 	}
 	linePatternD3D = 0;
