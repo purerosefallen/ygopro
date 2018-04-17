@@ -87,7 +87,7 @@ after_build:
   - rm -rf pics/thumbnail pics/*.db
   - mkdir replay
 
-  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics update-koishipro replay WindBot Bot.exe bot.conf
+  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures skin deck single pics update-koishipro replay WindBot Bot.exe bot.conf
   - cp -rf KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z KoishiPro-with-sound-%APPVEYOR_REPO_TAG_NAME%.7z
   - 7z a -mx9 -xr!.git* KoishiPro-with-sound-%APPVEYOR_REPO_TAG_NAME%.7z sound
 
