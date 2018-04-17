@@ -14,6 +14,7 @@
 #include "duelclient.h"
 #include "netserver.h"
 #include "single_mode.h"
+#include <sstream>
 #endif //YGOPRO_SERVER_MODE
 
 #ifndef _WIN32
@@ -96,6 +97,17 @@ bool Game::Initialize() {
 	device = irr::createDeviceEx(params);
 	if(!device)
 		return false;
+	// Apply skin
+	if(gameConf.skin_index >= 0) {
+		wchar_t skin_dir[16];
+		myswprintf(skin_dir, L"skin");
+		skinSystem = new CGUISkinSystem(skin_dir, device);
+		core::array<core::stringw> skins = skinSystem->listSkins();
+		if((size_t)gameConf.skin_index < skins.size()) {
+			int index = skins.size() - gameConf.skin_index - 1; // reverse index
+			skinSystem->applySkin(skins[index].c_str());
+		}
+	}
 	linePatternD3D = 0;
 	linePatternGL = 0x0f0f;
 	waitFrame = 0;
@@ -1173,6 +1185,7 @@ void Game::LoadConfig() {
 	gameConf.window_height = 640;
 	gameConf.resize_popup_menu = false;
 	gameConf.chkEnablePScale = 1;
+	gameConf.skin_index = -1;
 	if(fp) {
 		while(fgets(linebuf, 256, fp)) {
 			sscanf(linebuf, "%s = %s", strbuf, valbuf);
@@ -1258,6 +1271,8 @@ void Game::LoadConfig() {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
 				gameConf.chkEnablePScale = atoi(valbuf);
+			} else if (!strcmp(strbuf, "skin_index")) {
+				gameConf.skin_index = atoi(valbuf);
 			} else {
 				// options allowing multiple words
 				sscanf(linebuf, "%s = %240[^\n]", strbuf, valbuf);
@@ -1361,6 +1376,8 @@ void Game::LoadConfig() {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
 				gameConf.chkEnablePScale = atoi(valbuf);
+			} else if (!strcmp(strbuf, "skin_index")) {
+				gameConf.skin_index = atoi(valbuf);
 			} else {
 				// options allowing multiple words
 				sscanf(linebuf, "%s = %240[^\n]", strbuf, valbuf);
@@ -1445,6 +1462,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
 	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
+	fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
 	fclose(fp);
 }
 void Game::ShowCardInfo(int code, bool resize) {
