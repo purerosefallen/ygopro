@@ -464,6 +464,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					list_command = COMMAND_SPSUMMON;
 					mainGame->wCardSelect->setText(dataManager.GetSysString(509));
 					ShowSelectCard();
+					select_ready = false;
 					ShowCancelOrFinishButton(1);
 				}
 				break;
@@ -1810,6 +1811,14 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				break;
 			}
 #endif
+			case CHECKBOX_DISABLE_CHAT: {
+				bool show = mainGame->is_building ? false : !mainGame->chkIgnore1->isChecked();
+				mainGame->wChat->setVisible(show);
+				if(!show)
+					mainGame->ClearChatMsg();
+				return true;
+				break;
+			}
 			}
 			break;
 		}
