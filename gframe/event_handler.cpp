@@ -958,18 +958,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				UpdateDeclarableCode(true);
 				break;
 			}
-			case EDITBOX_CHAT: {
-				if(mainGame->dInfo.isReplay)
-					break;
-				const wchar_t* input = mainGame->ebChatInput->getText();
-				if(input[0]) {
-					unsigned short msgbuf[256];
-					int len = BufferIO::CopyWStr(input, msgbuf, 256);
-					DuelClient::SendBufferToServer(CTOS_CHAT, msgbuf, (len + 1) * sizeof(short));
-					mainGame->ebChatInput->setText(L"");
-				}
-				break;
-			}
 			}
 			break;
 		}
@@ -1776,13 +1764,17 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 		s32 id = event.GUIEvent.Caller->getID();
 		switch(event.GUIEvent.EventType) {
 		case irr::gui::EGET_ELEMENT_HOVERED: {
-			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX)
+			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX) {
 				mainGame->SetCursor(event.GUIEvent.Caller->isEnabled() ? ECI_IBEAM : ECI_NORMAL);
+				return true;
+			}
 			break;
 		}
 		case irr::gui::EGET_ELEMENT_LEFT: {
-			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX)
+			if(event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX) {
 				mainGame->SetCursor(ECI_NORMAL);
+				return true;
+			}
 			break;
 		}
 		case irr::gui::EGET_BUTTON_CLICKED: {
@@ -1869,6 +1861,24 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				break;
 			}
 #endif
+			}
+			break;
+		}
+		case irr::gui::EGET_EDITBOX_ENTER: {
+			switch(id) {
+			case EDITBOX_CHAT: {
+				if(mainGame->dInfo.isReplay)
+					break;
+				const wchar_t* input = mainGame->ebChatInput->getText();
+				if(input[0]) {
+					unsigned short msgbuf[256];
+					int len = BufferIO::CopyWStr(input, msgbuf, 256);
+					DuelClient::SendBufferToServer(CTOS_CHAT, msgbuf, (len + 1) * sizeof(short));
+					mainGame->ebChatInput->setText(L"");
+					return true;
+				}
+				break;
+			}
 			}
 			break;
 		}
