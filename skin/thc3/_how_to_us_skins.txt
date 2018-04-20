@@ -1,0 +1,6 @@
+Open [Your ygopro folder]\system.conf with a text editor.
+Change the following settings:
+use_d3d = 1
+use_skin = 1
+
+To make your own skin just replace the images in this skin folder.
