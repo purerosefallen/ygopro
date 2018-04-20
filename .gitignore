@@ -76,6 +76,8 @@
 /.vscode
 /bak/
 /temp
+[Tt]humbs.cdb
+
 /PrinterData.txt
 /ygopro_*.bat
 /ygopro_*.sh
