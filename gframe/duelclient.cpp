@@ -765,7 +765,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 					player = 3;
 				else
 					player = 10;
-				if((player == 1 || player == 3) && mainGame->chkIgnore1->isChecked())
+				if(mainGame->dInfo.isStarted && (player == 1 || player == 3) && mainGame->chkIgnore1->isChecked())
 					break;
 			}
 		} else {
