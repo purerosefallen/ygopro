@@ -746,11 +746,12 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		STOC_Chat* pkt = (STOC_Chat*)pdata;
 		int player = pkt->player;
 		if(player < 4) {
-			if(mainGame->chkIgnore1->isChecked())
-				break;
 			if(!mainGame->dInfo.isTag) {
-				if(mainGame->dInfo.isStarted)
+				if(mainGame->dInfo.isStarted) {
 					player = mainGame->LocalPlayer(player);
+					if(player == 1 && mainGame->chkIgnore1->isChecked())
+						break;
+				}
 			} else {
 				if(mainGame->dInfo.isStarted && !mainGame->dInfo.isFirst)
 					player ^= 2;
@@ -764,6 +765,8 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 					player = 3;
 				else
 					player = 10;
+				if((player == 1 || player == 3) && mainGame->chkIgnore1->isChecked())
+					break;
 			}
 		} else {
 			if(player == 8) { //system custom message.
