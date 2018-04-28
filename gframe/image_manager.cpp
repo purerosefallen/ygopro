@@ -168,12 +168,18 @@ irr::video::ITexture* ImageManager::GetTextureFromFile(char* file, s32 width, s3
 		return driver->getTexture(file);
 	}
 }
-irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
+irr::video::ITexture* ImageManager::GetTexture(int code, bool fit, bool forced_fit) {
 	if(code == 0)
 		return tUnknown;
 	int width = CARD_IMG_WIDTH;
 	int height = CARD_IMG_HEIGHT;
-	if(fit) {
+	if(forced_fit) {
+		float mul = mainGame->xScale;
+		if(mainGame->xScale > mainGame->yScale)
+			mul = mainGame->yScale;
+		width = width * mul;
+		height = height * mul;
+	} else if(fit) {
 		width = width * mainGame->xScale;
 		height = height * mainGame->yScale;
 	}
