@@ -1642,6 +1642,20 @@ recti Game::ResizeCard(s32 x, s32 y, s32 x2, s32 y2) {
 	y2 = sy + y;
 	return recti(x, y, x2, y2);
 }
+recti Game::ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2) {
+	float mul = xScale;
+	if(xScale > yScale)
+		mul = yScale;
+	s32 cx = (x2 + x) * xScale * 0.5;
+	s32 cy = (y2 + y) * yScale * 0.5;
+	s32 lx = (x2 - x) * mul * 0.5;
+	s32 ly = (y2 - y) * mul * 0.5;
+	x = cx - lx;
+	y = cy - ly;
+	x2 = cx + lx;
+	y2 = cy + ly;
+	return recti(x, y, x2, y2);
+}
 void Game::SetWindowsIcon() {
 #ifdef _WIN32
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(NULL);
