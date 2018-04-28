@@ -167,6 +167,8 @@ public:
 	recti ResizeWin(s32 x, s32 y, s32 x2, s32 y2, bool chat = false);
 	recti ResizeCard(s32 x, s32 y, s32 x2, s32 y2);
 	recti ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2);
+	position2di ResizeCardHint(s32 x, s32 y);
+	recti ResizeForced(s32 x, s32 y, s32 x2, s32 y2);
 
 	void SetWindowsIcon();
 	void FlashWindow();
