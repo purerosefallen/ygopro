@@ -808,13 +808,19 @@ void Game::DrawSpec() {
 			break;
 		}
 		case 7: {
+			float mul = xScale;
+			if(xScale > yScale)
+				mul = yScale;
 			core::position2d<s32> corner[4];
-			float y = sin(showcarddif * 3.1415926f / 180.0f) * CARD_IMG_HEIGHT * yScale;
-			corner[0] = core::position2d<s32>(574 * xScale - (CARD_IMG_HEIGHT * yScale - y) * 0.3f, 404 * yScale - y);
-			corner[1] = core::position2d<s32>(751 * xScale + (CARD_IMG_HEIGHT * yScale - y) * 0.3f, 404 * yScale - y);
-			corner[2] = core::position2d<s32>(574 * xScale, 404 * yScale);
-			corner[3] = core::position2d<s32>(751 * xScale, 404 * yScale);
-			irr::gui::Draw2DImageQuad(driver, imageManager.GetTexture(showcardcode, true), ResizeForced(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT), corner);
+			float y = sin(showcarddif * 3.1415926f / 180.0f) * CARD_IMG_HEIGHT * mul;
+			s32 winx = midx * xScale + (574 - midx) * mul;
+			s32 winx2 = midx * xScale + (751 - midx) * mul;
+			s32 winy = midy * yScale + (404 - midy) * mul;
+			corner[0] = core::position2d<s32>(winx - (CARD_IMG_HEIGHT * mul - y) * 0.3f, winy - y);
+			corner[1] = core::position2d<s32>(winx2 + (CARD_IMG_HEIGHT * mul - y) * 0.3f, winy - y);
+			corner[2] = core::position2d<s32>(winx, winy);
+			corner[3] = core::position2d<s32>(winx2, winy);
+			irr::gui::Draw2DImageQuad(driver, imageManager.GetTexture(showcardcode, true, true), ResizeForced(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT), corner);
 			showcardp++;
 			showcarddif += 9;
 			if(showcarddif >= 90)
