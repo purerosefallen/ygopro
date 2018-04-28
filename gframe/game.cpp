@@ -1908,6 +1908,44 @@ recti Game::ResizeCard(s32 x, s32 y, s32 x2, s32 y2) {
 	y2 = sy + y;
 	return recti(x, y, x2, y2);
 }
+recti Game::ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2) {
+	return ResizeCardMid(x, y, x2, y2, (x + x2) * 0.5, (y + y2) * 0.5);
+}
+position2di Game::ResizeCardHint(s32 x, s32 y) {
+	return ResizeCardMid(x, y, x + CARD_IMG_WIDTH * 0.5, y + CARD_IMG_HEIGHT * 0.5);
+}
+recti Game::ResizeCardMid(s32 x, s32 y, s32 x2, s32 y2, s32 midx, s32 midy) {
+	float mul = xScale;
+	if(xScale > yScale)
+		mul = yScale;
+	s32 cx = midx * xScale;
+	s32 cy = midy * yScale;
+	x = cx + (x - midx) * mul;
+	y = cy + (y - midy) * mul;
+	x2 = cx + (x2 - midx) * mul;
+	y2 = cy + (y2 - midy) * mul;
+	return recti(x, y, x2, y2);
+}
+position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
+	float mul = xScale;
+	if(xScale > yScale)
+		mul = yScale;
+	s32 cx = midx * xScale;
+	s32 cy = midy * yScale;
+	x = cx + (x - midx) * mul;
+	y = cy + (y - midy) * mul;
+	return position2di(x, y);
+}
+recti Game::ResizeForced(s32 x, s32 y, s32 x2, s32 y2) {
+	float mul = xScale;
+	if(xScale > yScale)
+		mul = yScale;
+	x = x * mul;
+	y = y * mul;
+	x2 = x2 * mul;
+	y2 = y2 * mul;
+	return recti(x, y, x2, y2);
+}
 void Game::SetWindowsIcon() {
 #ifdef _WIN32
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(NULL);

@@ -147,12 +147,17 @@ void ImageManager::ClearTexture() {
 		if(tit->second)
 			driver->removeTexture(tit->second);
 	}
+	for(auto tit = tMap[2].begin(); tit != tMap[2].end(); ++tit) {
+		if(tit->second)
+			driver->removeTexture(tit->second);
+	}
 	for(auto tit = tThumb.begin(); tit != tThumb.end(); ++tit) {
 		if(tit->second)
 			driver->removeTexture(tit->second);
 	}
 	tMap[0].clear();
 	tMap[1].clear();
+	tMap[2].clear();
 	tThumb.clear();
 }
 void ImageManager::RemoveTexture(int code) {
@@ -167,6 +172,12 @@ void ImageManager::RemoveTexture(int code) {
 		if(tit->second)
 			driver->removeTexture(tit->second);
 		tMap[1].erase(tit);
+	}
+	tit = tMap[2].find(code);
+	if(tit != tMap[2].end()) {
+		if(tit->second)
+			driver->removeTexture(tit->second);
+		tMap[2].erase(tit);
 	}
 }
 // function by Warr1024, from https://github.com/minetest/minetest/issues/2419 , modified
@@ -262,17 +273,23 @@ irr::video::ITexture* ImageManager::GetTextureFromFile(char* file, s32 width, s3
 		return driver->getTexture(file);
 	}
 }
-irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
+irr::video::ITexture* ImageManager::GetTexture(int code, bool fit, bool forced_fit) {
 	if(code == 0)
 		return tUnknown;
 	int width = CARD_IMG_WIDTH;
 	int height = CARD_IMG_HEIGHT;
-	if(fit) {
+	if(forced_fit) {
+		float mul = mainGame->xScale;
+		if(mainGame->xScale > mainGame->yScale)
+			mul = mainGame->yScale;
+		width = width * mul;
+		height = height * mul;
+	} else if(fit) {
 		width = width * mainGame->xScale;
 		height = height * mainGame->yScale;
 	}
-	auto tit = tMap[fit ? 1 : 0].find(code);
-	if(tit == tMap[fit ? 1 : 0].end()) {
+	auto tit = tMap[forced_fit ? 2 : (fit ? 1 : 0)].find(code);
+	if(tit == tMap[forced_fit ? 2 : (fit ? 1 : 0)].end()) {
 		char file[256];
 		sprintf(file, "expansions/pics/%d.png", code);
 		irr::video::ITexture* img = GetTextureFromFile(file, width, height);
@@ -289,10 +306,10 @@ irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == NULL && !mainGame->gameConf.use_image_scale) {
-			tMap[fit ? 1 : 0][code] = NULL;
+			tMap[forced_fit ? 2 : (fit ? 1 : 0)][code] = NULL;
 			return GetTextureThumb(code);
 		}
-		tMap[fit ? 1 : 0][code] = img;
+		tMap[forced_fit ? 2 : (fit ? 1 : 0)][code] = img;
 		return (img == NULL) ? tUnknown : img;
 	}
 	if(tit->second)
