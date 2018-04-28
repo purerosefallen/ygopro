@@ -18,7 +18,7 @@ public:
 	irr::video::ITexture* GetTextureThumb(int code);
 	irr::video::ITexture* GetTextureField(int code);
 
-	std::unordered_map<int, irr::video::ITexture*> tMap[2];
+	std::unordered_map<int, irr::video::ITexture*> tMap[3];
 	std::unordered_map<int, irr::video::ITexture*> tThumb;
 	std::unordered_map<int, irr::video::ITexture*> tFields;
 	irr::IrrlichtDevice* device;
