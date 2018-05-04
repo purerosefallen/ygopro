@@ -1939,7 +1939,7 @@ position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
 	y = cy + (y - midy) * mul;
 	return position2di(x, y);
 }
-recti Game::ResizeForced(s32 x, s32 y, s32 x2, s32 y2) {
+recti Game::ResizeFit(s32 x, s32 y, s32 x2, s32 y2) {
 	float mul = xScale;
 	if(xScale > yScale)
 		mul = yScale;
