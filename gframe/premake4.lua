@@ -4,6 +4,7 @@ project "ygopro"
     kind "ConsoleApp"
 	
     defines { "YGOPRO_SERVER_MODE" }
+    if os.getenv("YGOPRO_TEST_REDTEXT") then defines { "YGOPRO_TEST_REDTEXT" } end
 
     files { "gframe.cpp", "config.h",
             "game.cpp", "game.h",

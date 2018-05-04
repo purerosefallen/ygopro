@@ -40,8 +40,18 @@ void Game::MainServerLoop() {
 	dataManager.LoadDB("cards.cdb");
 	aServerPort = NetServer::StartServer(aServerPort);
 	NetServer::InitDuel();
+#ifdef YGOPRO_TEST_REDTEXT
+	time_t nowtime = time(NULL);
+	struct tm *localedtime = localtime(&nowtime);
+	char timebuf[40];
+	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
+	char startmsg[256];
+	sprintf(startmsg, "Log of redtext check with commit %s \"%s\" on %s.", getenv("TRAVIS_COMMIT"), getenv("TRAVIS_COMMIT_MESSAGE"), timebuf);
+	AddDebugMsg(startmsg);
+#else
 	printf("%u\n", aServerPort);
 	fflush(stdout);
+#endif //YGOPRO_TEST_REDTEXT
 	
 	while(NetServer::net_evbase) {
 #ifdef WIN32
@@ -1616,7 +1626,15 @@ void Game::ClearChatMsg() {
 void Game::AddDebugMsg(char* msg)
 {
 #ifdef YGOPRO_SERVER_MODE
+#ifdef YGOPRO_TEST_REDTEXT
+	FILE* fp = fopen("./redtext.txt", "at");
+	if (!fp)
+		return;
+	fprintf(fp, "%s\n", msg);
+	fclose(fp);
+#else
 	fprintf(stderr, "%s\n", msg);
+#endif //YGOPRO_TEST_REDTEXT
 #else
 	if (enable_log & 0x1) {
 		wchar_t wbuf[1024];

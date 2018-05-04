@@ -76,14 +76,24 @@ int main(int argc, char* argv[]) {
 	ygo::replay_mode = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
+#ifdef YGOPRO_TEST_REDTEXT
+	ygo::game_info.mode = 2;
+#else
 	ygo::game_info.mode = 0;
+#endif //YGOPRO_TEST_REDTEXT
 	ygo::game_info.start_hand = 5;
 	ygo::game_info.start_lp = 8000;
 	ygo::game_info.draw_count = 1;
+#ifdef YGOPRO_TEST_REDTEXT
+	ygo::game_info.no_check_deck = true;
+	ygo::game_info.no_shuffle_deck = true;
+#else
 	ygo::game_info.no_check_deck = false;
 	ygo::game_info.no_shuffle_deck = false;
+#endif //YGOPRO_TEST_REDTEXT
 	ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
+#ifndef YGOPRO_TEST_REDTEXT
 	if(argc > 1) {
 		ygo::aServerPort = atoi(argv[1]);
 		int lflist = atoi(argv[2]);
@@ -113,6 +123,7 @@ int main(int argc, char* argv[]) {
 		ygo::game_info.time_limit = atoi(argv[11]);
 		ygo::replay_mode = atoi(argv[12]);
 	}
+#endif //YGOPRO_TEST_REDTEXT
 	ygo::mainGame = &_game;
 	ygo::mainGame->MainServerLoop();
 	return 0;
