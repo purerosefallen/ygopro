@@ -7,6 +7,7 @@ solution "ygo"
     defines { "LUA_COMPAT_5_2" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
+        startproject "ygopro"
 
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
@@ -53,8 +54,6 @@ solution "ygo"
 
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
-
-    startproject "ygopro"
 
     include "ocgcore"
     include "gframe"
