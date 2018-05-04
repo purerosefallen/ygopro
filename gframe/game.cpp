@@ -1617,11 +1617,7 @@ void Game::AddDebugMsg(char* msg)
 {
 #ifdef YGOPRO_SERVER_MODE
 #ifdef YGOPRO_TEST_REDTEXT
-	FILE* fp = fopen("./redtext.txt", "at");
-	if (!fp)
-		return;
-	fprintf(fp, "%s\n", msg);
-	fclose(fp);
+	fprintf(stdout, "%s\n", msg);
 #else
 	fprintf(stderr, "%s\n", msg);
 #endif //YGOPRO_TEST_REDTEXT
