@@ -46,7 +46,7 @@ solution "ygo"
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
 
     configuration "vs*"
-        flags "EnableSSE2"
+        vectorextensions "SSE2"
         defines { "_CRT_SECURE_NO_WARNINGS" }
 
     configuration "not vs*"
