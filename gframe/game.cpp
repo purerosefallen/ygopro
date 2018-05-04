@@ -40,15 +40,7 @@ void Game::MainServerLoop() {
 	dataManager.LoadDB("cards.cdb");
 	aServerPort = NetServer::StartServer(aServerPort);
 	NetServer::InitDuel();
-#ifdef YGOPRO_TEST_REDTEXT
-	time_t nowtime = time(NULL);
-	struct tm *localedtime = localtime(&nowtime);
-	char timebuf[40];
-	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
-	char startmsg[256];
-	sprintf(startmsg, "Log of redtext check with commit %s \"%s\" on %s.", getenv("TRAVIS_COMMIT"), getenv("TRAVIS_COMMIT_MESSAGE"), timebuf);
-	AddDebugMsg(startmsg);
-#else
+#ifndef YGOPRO_TEST_REDTEXT
 	printf("%u\n", aServerPort);
 	fflush(stdout);
 #endif //YGOPRO_TEST_REDTEXT
