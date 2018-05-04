@@ -40,10 +40,8 @@ void Game::MainServerLoop() {
 	dataManager.LoadDB("cards.cdb");
 	aServerPort = NetServer::StartServer(aServerPort);
 	NetServer::InitDuel();
-#ifndef YGOPRO_TEST_REDTEXT
 	printf("%u\n", aServerPort);
 	fflush(stdout);
-#endif //YGOPRO_TEST_REDTEXT
 	
 	while(NetServer::net_evbase) {
 #ifdef WIN32
