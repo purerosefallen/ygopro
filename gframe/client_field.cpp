@@ -94,6 +94,7 @@ void ClientField::Clear() {
 	pzone_act[1] = false;
 	conti_act = false;
 	deck_reversed = false;
+	RefreshCardCountDisplay();
 }
 void ClientField::Initial(int player, int deckc, int extrac) {
 	ClientCard* pcard;
@@ -117,6 +118,7 @@ void ClientField::Initial(int player, int deckc, int extrac) {
 		pcard->position = POS_FACEDOWN_DEFENSE;
 		GetCardLocation(pcard, &pcard->curPos, &pcard->curRot, true);
 	}
+	RefreshCardCountDisplay();
 }
 ClientCard* ClientField::GetCard(int controler, int location, int sequence, int sub_seq) {
 	std::vector<ClientCard*>* lst = 0;
@@ -226,6 +228,7 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 		break;
 	}
 	}
+	RefreshCardCountDisplay();
 }
 ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	ClientCard* pcard = 0;
@@ -297,6 +300,7 @@ ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	}
 	}
 	pcard->location = 0;
+	RefreshCardCountDisplay();
 	return pcard;
 }
 void ClientField::UpdateCard(int controler, int location, int sequence, char* data) {
@@ -1461,5 +1465,30 @@ void ClientField::UpdateDeclarableCode(bool enter) {
 		UpdateDeclarableCodeType(enter);
 	else
 		UpdateDeclarableCodeOpcode(enter);
+}
+void ClientField::RefreshCardCountDisplay() {
+	for(int p = 0; p < 2; ++p) {
+		mainGame->dInfo.card_count[p] = mzone[p].size() + szone[p].size() + hand[p].size();
+		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
+	}
+	if(mainGame->dInfo.card_count[0] > mainGame->dInfo.card_count[1]) {
+		mainGame->dInfo.card_adv_color[0] = 0xffffff00;
+		mainGame->dInfo.card_adv_color[1] = 0xffff0000;
+		mainGame->dInfo.card_adv = mainGame->dInfo.card_count[0] - mainGame->dInfo.card_count[1];
+		myswprintf(mainGame->dInfo.str_card_adv[0], L"+%d", mainGame->dInfo.card_adv);
+		myswprintf(mainGame->dInfo.str_card_adv[1], L"-%d", mainGame->dInfo.card_adv);
+	} else if(mainGame->dInfo.card_count[1] > mainGame->dInfo.card_count[0]) {
+		mainGame->dInfo.card_adv_color[1] = 0xffffff00;
+		mainGame->dInfo.card_adv_color[0] = 0xffff0000;
+		mainGame->dInfo.card_adv = mainGame->dInfo.card_count[1] - mainGame->dInfo.card_count[0];
+		myswprintf(mainGame->dInfo.str_card_adv[1], L"+%d", mainGame->dInfo.card_adv);
+		myswprintf(mainGame->dInfo.str_card_adv[0], L"-%d", mainGame->dInfo.card_adv);
+	} else {
+		mainGame->dInfo.card_adv_color[0] = 0xffffffff;
+		mainGame->dInfo.card_adv_color[1] = 0xffffffff;
+		mainGame->dInfo.card_adv = 0;
+		myswprintf(mainGame->dInfo.str_card_adv[0], L"+%d", mainGame->dInfo.card_adv);
+		myswprintf(mainGame->dInfo.str_card_adv[1], L"+%d", mainGame->dInfo.card_adv);
+	}
 }
 }

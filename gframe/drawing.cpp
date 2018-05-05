@@ -546,6 +546,12 @@ void Game::DrawMisc() {
 	}
 	DrawShadowText(numFont, dInfo.strLP[0], Resize(330, 12, 631, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	DrawShadowText(numFont, dInfo.strLP[1], Resize(691, 12, 992, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
+	
+	DrawShadowText(numFont, dInfo.str_card_adv[0], Resize(455, 52, 490, 71), Resize(0, 1, 2, 0), dInfo.card_adv_color[0], 0xff000000, true, false, 0);
+	DrawShadowText(numFont, dInfo.str_card_count[0], Resize(490, 52, 525, 71), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+
+	DrawShadowText(numFont, dInfo.str_card_count[1], Resize(795, 52, 830, 71), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+	DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(830, 52, 865, 71), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
 
 	recti p1size = Resize(335, 31, 629, 50);
 	recti p2size = Resize(986, 31, 986, 50);

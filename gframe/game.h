@@ -69,6 +69,8 @@ struct DuelInfo {
 	bool tag_player[2];
 	int lp[2];
 	int start_lp[2];
+	int card_count[2];
+	int card_adv;
 	int duel_rule;
 	int turn;
 	short curMsg;
@@ -85,6 +87,9 @@ struct DuelInfo {
 	wchar_t str_time_limit[16];
 	wchar_t str_time_left[2][16];
 	video::SColor time_color[2];
+	wchar_t str_card_adv[2][16];
+	wchar_t str_card_count[2][16];
+	video::SColor card_adv_color[2];
 	bool isReplaySwapped;
 };
 

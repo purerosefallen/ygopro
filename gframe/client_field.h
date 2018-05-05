@@ -115,6 +115,8 @@ public:
 	void UpdateDeclarableCodeOpcode(bool enter);
 	void UpdateDeclarableCode(bool enter);
 
+	void RefreshCardCountDisplay();
+
 	irr::gui::IGUIElement* panel;
 	std::vector<int> ancard;
 	int hovered_controler;
