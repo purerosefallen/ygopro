@@ -1598,6 +1598,8 @@ void Game::initUtils() {
 	//user files
 	MakeDirectory("replay");
 	MakeDirectory("screenshots");
+	//cards from extra pack
+	MakeDirectory("expansions");
 	//files in ygopro-starter-pack
 	MakeDirectory("deck");
 	MakeDirectory("single");
