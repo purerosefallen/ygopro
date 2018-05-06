@@ -186,6 +186,7 @@ public:
 
 	void SetWindowsIcon();
 	void FlashWindow();
+	void takeScreenshot();
 	void SetCursor(ECURSOR_ICON icon);
 
 	Mutex gMutex;
