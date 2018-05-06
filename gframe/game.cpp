@@ -1674,6 +1674,7 @@ void Game::initUtils() {
 #ifdef YGOPRO_SERVER_MODE
 	//special scripts
 	MakeDirectory("specials");
+	MakeDirectory("beta");
 #else
 	MakeDirectory("screenshots");
 	//cards from extra pack
