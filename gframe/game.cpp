@@ -1671,14 +1671,14 @@ bool Game::MakeDirectory(const std::string folder) {
 void Game::initUtils() {
 	//user files
 	MakeDirectory("replay");
+	//cards from extra pack
+	MakeDirectory("expansions");
 #ifdef YGOPRO_SERVER_MODE
 	//special scripts
 	MakeDirectory("specials");
 	MakeDirectory("beta");
 #else
 	MakeDirectory("screenshots");
-	//cards from extra pack
-	MakeDirectory("expansions");
 	//files in ygopro-starter-pack
 	MakeDirectory("deck");
 	MakeDirectory("single");
