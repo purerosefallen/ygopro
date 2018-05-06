@@ -1597,6 +1597,7 @@ bool Game::MakeDirectory(const std::string folder) {
 void Game::initUtils() {
 	//user files
 	MakeDirectory("replay");
+	MakeDirectory("screenshots");
 	//cards from extra pack
 	MakeDirectory("expansions");
 	//files in ygopro-starter-pack
@@ -1604,7 +1605,17 @@ void Game::initUtils() {
 	MakeDirectory("single");
 	//original files
 	MakeDirectory("script");
+	MakeDirectory("skin");
 	MakeDirectory("textures");
+	//subdirs in textures
+	MakeDirectory("textures/act");
+	MakeDirectory("textures/attack");
+	MakeDirectory("textures/bg");
+	MakeDirectory("textures/bg_deck");
+	MakeDirectory("textures/bg_menu");
+	MakeDirectory("textures/cover");
+	MakeDirectory("textures/cover2");
+	MakeDirectory("textures/pscale");
 	//sound
 	MakeDirectory("sound");
 	MakeDirectory("sound/BGM");
@@ -1615,6 +1626,9 @@ void Game::initUtils() {
 	MakeDirectory("sound/BGM/lose");
 	MakeDirectory("sound/BGM/menu");
 	MakeDirectory("sound/BGM/win");
+	//custom sound
+	MakeDirectory("sound/custom");
+	MakeDirectory("sound/BGM/custom");
 	//pics
 	MakeDirectory("pics");
 	MakeDirectory("pics/field");
