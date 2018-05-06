@@ -123,6 +123,8 @@ public:
 	void LoadExpansionDB();
 	void LoadBetaDB();
 	void AddDebugMsg(char* msgbuf);
+	void AddDebugMsg(char* msgbuf);
+	bool MakeDirectory(const std::string folder);
 #else
 	void MainLoop();
 	void RefreshTimeDisplay();
@@ -159,6 +161,8 @@ public:
 	void AddChatMsg(wchar_t* msg, int player);
 	void ClearChatMsg();
 	void AddDebugMsg(char* msgbuf);
+	bool MakeDirectory(const std::string folder);
+	void initUtils();
 	void ClearTextures();
 	void CloseDuelWindow();
 

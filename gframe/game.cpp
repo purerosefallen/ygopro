@@ -19,7 +19,12 @@
 
 #ifndef _WIN32
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
+#else
+#include <direct.h>
+#include <io.h>
 #endif
 
 unsigned short PRO_VERSION = 0x1343;
@@ -34,6 +39,7 @@ unsigned short replay_mode;
 HostInfo game_info;
 
 void Game::MainServerLoop() {
+	initUtils();
 	deckManager.LoadLFList();
 	LoadBetaDB();
 	LoadExpansionDB();
@@ -86,6 +92,7 @@ void Game::LoadBetaDB() {
 #else //YGOPRO_SERVER_MODE
 bool Game::Initialize() {
 	srand(time(0));
+	initUtils();
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
 	params.AntiAlias = gameConf.antialias;
@@ -1638,6 +1645,57 @@ void Game::AddDebugMsg(char* msg)
 		fprintf(fp, "[%s][Script Error]: %s\n", timebuf, msg);
 		fclose(fp);
 	}
+#endif //YGOPRO_SERVER_MODE
+}
+bool Game::MakeDirectory(const std::string folder) {
+    std::string folder_builder;
+    std::string sub;
+    sub.reserve(folder.size());
+    for(auto it = folder.begin(); it != folder.end(); ++it) {
+        const char c = *it;
+        sub.push_back(c);
+        if(c == '/' || it == folder.end() - 1) {
+            folder_builder.append(sub);
+            if(access(folder_builder.c_str(), 0) != 0)
+#ifdef _WIN32
+                if(mkdir(folder_builder.c_str()) != 0)
+#else
+                if(mkdir(folder_builder.c_str(), 0777) != 0)
+#endif
+                    return false;
+            sub.clear();
+        }
+    }
+    return true;
+}
+void Game::initUtils() {
+	//user files
+	MakeDirectory("replay");
+#ifdef YGOPRO_SERVER_MODE
+	//special scripts
+	MakeDirectory("specials");	
+#else
+	//cards from extra pack
+	MakeDirectory("expansions");
+	//files in ygopro-starter-pack
+	MakeDirectory("deck");
+	MakeDirectory("single");
+	//original files
+	MakeDirectory("script");
+	MakeDirectory("textures");
+	//sound
+	MakeDirectory("sound");
+	MakeDirectory("sound/BGM");
+	MakeDirectory("sound/BGM/advantage");
+	MakeDirectory("sound/BGM/deck");
+	MakeDirectory("sound/BGM/disadvantage");
+	MakeDirectory("sound/BGM/duel");
+	MakeDirectory("sound/BGM/lose");
+	MakeDirectory("sound/BGM/menu");
+	MakeDirectory("sound/BGM/win");
+	//pics
+	MakeDirectory("pics");
+	MakeDirectory("pics/field");
 #endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
