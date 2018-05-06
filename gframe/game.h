@@ -123,8 +123,8 @@ public:
 	void LoadExpansionDB();
 	void LoadBetaDB();
 	void AddDebugMsg(char* msgbuf);
-	void AddDebugMsg(char* msgbuf);
 	bool MakeDirectory(const std::string folder);
+	void initUtils();
 #else
 	void MainLoop();
 	void RefreshTimeDisplay();
