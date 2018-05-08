@@ -1476,7 +1476,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 			wcscat(formatBuffer, scaleBuffer);
 		}
 		stDataInfo->setText(formatBuffer);
-		if ((cd.type & TYPE_LINK) && (cd.level > 5)) {
+		if (cd.type & TYPE_LINK && cd.level > 5 && window_size.Width < 1220.0) {
 			stDataInfo->setRelativePosition(recti(15, 60 * yScale, 300 * xScale - 13, (83 + 15) * yScale));
 			stSetName->setRelativePosition(rect<s32>(15, (83 + 15) * yScale, 296 * xScale, (83 + 15) * yScale + offset));
 			stText->setRelativePosition(rect<s32>(15, (83 + 15) * yScale + offset, 287 * xScale, 324 * yScale));
