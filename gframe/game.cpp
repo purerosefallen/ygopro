@@ -1632,10 +1632,7 @@ void Game::ClearChatMsg() {
 void Game::AddDebugMsg(char* msg)
 {
 #ifdef YGOPRO_SERVER_MODE
-	if(aServerPort < 0)
-		fprintf(stdout, "%s\n", msg);
-	else
-		fprintf(stderr, "%s\n", msg);
+	fprintf(stderr, "%s\n", msg);
 #else
 	if (enable_log & 0x1) {
 		wchar_t wbuf[1024];
