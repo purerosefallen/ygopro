@@ -9,6 +9,9 @@ addons:
     packages:
     - libevent-dev
     - libsqlite3-dev
+env:
+- DATABASE_FILE=expansions/mcg.cdb
+
 before_install:
 - git submodule update --init --recursive
 - wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz | tar zfx -
