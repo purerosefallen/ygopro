@@ -135,6 +135,9 @@ public:
 	virtual void GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {}
 	virtual void TimeConfirm(DuelPlayer* dp) {}
 	virtual void EndDuel() {};
+#ifdef YGOPRO_SERVER_MODE
+	virtual void TestCard(int code) {};
+#endif
 
 public:
 	event* etimer;

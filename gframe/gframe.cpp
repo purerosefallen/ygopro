@@ -84,7 +84,14 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.no_shuffle_deck = false;
 	ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
-	if(argc > 1) {
+	if (argc == 2) {
+		ygo::aServerPort = -1;
+		int code = atoi(argv[1]);
+		ygo::mainGame = &_game;
+		ygo::mainGame->MainTestLoop(code);
+		return 0;
+	} else
+	if(argc > 2) {
 		ygo::aServerPort = atoi(argv[1]);
 		int lflist = atoi(argv[2]);
 		if(lflist < 0)

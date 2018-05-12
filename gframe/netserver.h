@@ -28,6 +28,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	static event_base* net_evbase;
 	static void InitDuel();
+	static void InitTestCard(int code);
 	static unsigned short StartServer(unsigned short port);
 #else
 	static bool StartServer(unsigned short port);

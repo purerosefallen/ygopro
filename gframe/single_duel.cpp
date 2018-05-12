@@ -1935,5 +1935,21 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 		event_del(sd->etimer);
 	}
 }
+#ifdef YGOPRO_SERVER_MODE
+void SingleDuel::TestCard(int code) {
+	time_t seed = time(0);
+	mtrandom rnd;
+	rnd.reset(seed);
+	set_script_reader(default_script_reader);
+	set_card_reader((card_reader)DataManager::CardReader);
+	set_message_handler((message_handler)SingleDuel::MessageHandler);
+	rnd.reset(seed);
+	unsigned long tduel = create_duel(rnd.rand());
+	set_player_info(tduel, 0, 8000, 5, 1);
+	set_player_info(tduel, 1, 8000, 5, 1);
+	new_card(tduel, code, 0, 0, LOCATION_DECK, 0, POS_FACEUP_ATTACK);
+	end_duel(tduel);
+}
+#endif
 
 }

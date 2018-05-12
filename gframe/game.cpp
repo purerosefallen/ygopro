@@ -58,6 +58,13 @@ void Game::MainServerLoop() {
 #endif
 	}
 }
+void Game::MainTestLoop(int code) {
+	LoadBetaDB();
+	LoadExpansionDB();
+	dataManager.LoadDB("cards.cdb");
+	fflush(stdout);
+	NetServer::InitTestCard(code);
+}
 void Game::LoadBetaDB() {
 #ifdef _WIN32
 	char fpath[1000];
@@ -1625,11 +1632,10 @@ void Game::ClearChatMsg() {
 void Game::AddDebugMsg(char* msg)
 {
 #ifdef YGOPRO_SERVER_MODE
-#ifdef YGOPRO_TEST_REDTEXT
-	fprintf(stdout, "%s\n", msg);
-#else
-	fprintf(stderr, "%s\n", msg);
-#endif //YGOPRO_TEST_REDTEXT
+	if(aServerPort < 0)
+		fprintf(stdout, "%s\n", msg);
+	else
+		fprintf(stderr, "%s\n", msg);
 #else
 	if (enable_log & 0x1) {
 		wchar_t wbuf[1024];

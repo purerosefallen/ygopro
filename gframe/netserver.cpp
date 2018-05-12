@@ -54,6 +54,10 @@ void NetServer::InitDuel()
 	BufferIO::CopyWStr(pkt->name, duel_mode->name, 20);
 	BufferIO::CopyWStr(pkt->pass, duel_mode->pass, 20);
 }
+void NetServer::InitTestCard(int code) {
+	DuelMode* test_duel = new SingleDuel(false);
+	test_duel->TestCard(code);
+}
 
 unsigned short NetServer::StartServer(unsigned short port) {
 #else

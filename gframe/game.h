@@ -120,6 +120,7 @@ public:
 	bool Initialize();
 #ifdef YGOPRO_SERVER_MODE
 	void MainServerLoop();
+	void MainTestLoop(int code);
 	void LoadExpansionDB();
 	void LoadBetaDB();
 	void AddDebugMsg(char* msgbuf);
