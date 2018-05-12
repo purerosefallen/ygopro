@@ -85,7 +85,6 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
 	if (argc == 2) {
-		ygo::aServerPort = -1;
 		int code = atoi(argv[1]);
 		ygo::mainGame = &_game;
 		ygo::mainGame->MainTestLoop(code);
