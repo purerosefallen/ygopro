@@ -10,7 +10,7 @@ addons:
     - libevent-dev
     - libsqlite3-dev
 env:
-- DATABASE_FILE=expansions/mcg.cdb
+- DATABASE_FILE=cards.cdb
 
 before_install:
 - git submodule update --init --recursive
@@ -26,5 +26,5 @@ script:
 - strip ygopro
 - mkdir replay
 
-- echo "select id from datas;" | sqlite3 ./cards.cdb | xargs -I {} ./ygopro {} 2>&1 | tee ./redtext.txt
+- echo "select id from datas;" | sqlite3 $DATABASE_FILE | xargs -I {} ./ygopro {} 2>&1 | tee ./redtext.txt
 - bash -c "exit $(cat ./redtext.txt | wc -l)"
