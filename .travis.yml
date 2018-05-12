@@ -17,3 +17,11 @@ script:
 - ./premake5 gmake
 - cd build
 - make config=release
+
+- cd ..
+- mv -f ./bin/release/ygopro .
+- strip ygopro
+- mkdir replay
+
+- echo "select id from datas;" | sqlite3 ./cards.cdb | xargs -I {} ./ygopro {} 2>&1 | tee ./redtext.txt
+- exit $(cat ./redtext.txt | wc -l)
