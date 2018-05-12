@@ -44,6 +44,7 @@ void Game::MainServerLoop() {
 	LoadBetaDB();
 	LoadExpansionDB();
 	dataManager.LoadDB("cards.cdb");
+
 	aServerPort = NetServer::StartServer(aServerPort);
 	NetServer::InitDuel();
 	printf("%u\n", aServerPort);
