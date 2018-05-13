@@ -106,7 +106,7 @@ before_deploy:
 - mkdir screenshots
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/fonts
-- sed -i "s/c:\/windows/./g" system.conf
+- sed -i "s/c:\/windows/./g" ./system.conf
 
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
