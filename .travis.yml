@@ -106,17 +106,18 @@ before_deploy:
 - mkdir screenshots
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/fonts
-- sed -i "s/c:\/windows/./g" ./system.conf
 
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    sed -i "s/c:\/windows/./g" ./system.conf;
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay sound screenshots;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    sed -i "" "s/c:\/windows/./g" ./system.conf;
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots sound;
   fi
-
+  
 deploy:
   provider: releases
   file:
