@@ -117,7 +117,7 @@ before_deploy:
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots sound;
   fi
-  
+
 deploy:
   provider: releases
   file:
