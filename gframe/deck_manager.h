@@ -49,7 +49,7 @@ public:
 	const wchar_t* GetMainFormatString();
 	const wchar_t* GetSideFormatString();
 	const wchar_t* GetExtraFormatString();
-	int GetTypeCount(std::vector<code_pointer> list, unsigned int ctype);
+	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 };
 
 extern DeckManager deckManager;
