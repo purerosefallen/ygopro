@@ -554,8 +554,8 @@ void Game::DrawMisc() {
 		DrawShadowText(numFont, dInfo.str_card_adv[0], Resize(575, 31, 600, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[0], 0xff000000, true, false, 0);
 		DrawShadowText(numFont, dInfo.str_card_count[0], Resize(600, 31, 625, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
 
-		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(745, 31, 770, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
-		DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(770, 31, 795, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(695, 31, 720, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(720, 31, 745, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
 	}
 	DrawShadowText(numFont, dInfo.strLP[0], Resize(330, 12, 631, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	DrawShadowText(numFont, dInfo.strLP[1], Resize(691, 12, 992, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
