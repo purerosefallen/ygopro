@@ -543,16 +543,23 @@ void Game::DrawMisc() {
 		driver->draw2DRectangleOutline(Resize(525, 34, 625, 44), 0xffffffff);
 		driver->draw2DRectangle(Resize(795 - dInfo.time_left[1] * 100 / dInfo.time_limit, 34, 795, 44), 0xa0e0e0e0, 0xa0e0e0e0, 0xa0c0c0c0, 0xa0c0c0c0);
 		driver->draw2DRectangleOutline(Resize(695, 34, 795, 44), 0xffffffff);
+		
+		DrawShadowText(numFont, dInfo.str_card_adv[0], Resize(405, 31, 430, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[0], 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_count[0], Resize(430, 31, 455, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+
+		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(865, 31, 890, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(890, 31, 915, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
+	}
+	else {
+		DrawShadowText(numFont, dInfo.str_card_adv[0], Resize(575, 31, 600, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[0], 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_count[0], Resize(600, 31, 625, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+
+		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(745, 31, 770, 50), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(770, 31, 795, 50), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
 	}
 	DrawShadowText(numFont, dInfo.strLP[0], Resize(330, 12, 631, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	DrawShadowText(numFont, dInfo.strLP[1], Resize(691, 12, 992, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	
-	DrawShadowText(numFont, dInfo.str_card_adv[0], Resize(525, 52, 575, 71), Resize(0, 1, 2, 0), dInfo.card_adv_color[0], 0xff000000, true, false, 0);
-	DrawShadowText(numFont, dInfo.str_card_count[0], Resize(575, 52, 625, 71), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
-
-	DrawShadowText(numFont, dInfo.str_card_count[1], Resize(695, 52, 745, 71), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false, 0);
-	DrawShadowText(numFont, dInfo.str_card_adv[1], Resize(745, 52, 795, 71), Resize(0, 1, 2, 0), dInfo.card_adv_color[1], 0xff000000, true, false, 0);
-
 	recti p1size = Resize(335, 31, 629, 50);
 	recti p2size = Resize(986, 31, 986, 50);
 	if(!dInfo.isTag || !dInfo.tag_player[0])
