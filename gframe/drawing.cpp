@@ -1122,8 +1122,8 @@ void Game::DrawDeckBd() {
 	//main deck
 	driver->draw2DRectangle(Resize(310, 137, 797, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 136, 797, 157));
-	DrawShadowText(textFont, dataManager.GetSysString(1330), Resize(315, 137, 510, 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, deckManager.GetMainFormatString(), Resize(380, 138, 797, 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(textFont, dataManager.GetSysString(1330), Resize(315, 137, 410, 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.main.size()], Resize(380, 138, 440, 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	driver->draw2DRectangle(Resize(310, 160, 797, 436), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 159, 797, 436));
 	int lx;
@@ -1143,8 +1143,8 @@ void Game::DrawDeckBd() {
 	//extra deck
 	driver->draw2DRectangle(Resize(310, 440, 797, 460), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 439, 797, 460));
-	DrawShadowText(textFont, dataManager.GetSysString(1331), Resize(315, 440, 510, 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, deckManager.GetExtraFormatString(), Resize(380, 441, 797, 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(textFont, dataManager.GetSysString(1331), Resize(315, 440, 410, 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.extra.size()], Resize(380, 441, 440, 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	driver->draw2DRectangle(Resize(310, 463, 797, 533), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 462, 797, 533));
 	if(deckManager.current_deck.extra.size() <= 10)
@@ -1158,8 +1158,8 @@ void Game::DrawDeckBd() {
 	//side deck
 	driver->draw2DRectangle(Resize(310, 537, 797, 557), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 536, 797, 557));
-	DrawShadowText(textFont, dataManager.GetSysString(1332), Resize(315, 537, 510, 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, deckManager.GetSideFormatString(), Resize(380, 538, 797, 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(textFont, dataManager.GetSysString(1332), Resize(315, 537, 410, 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.side.size()], Resize(380, 538, 440, 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	driver->draw2DRectangle(Resize(310, 560, 797, 630), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 559, 797, 630));
 	if(deckManager.current_deck.side.size() <= 10)
