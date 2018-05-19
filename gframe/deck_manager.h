@@ -46,10 +46,7 @@ public:
 	bool DeleteDeck(Deck& deck, const wchar_t* name);
 	static bool RenameDeck(const wchar_t* oldname, const wchar_t* newname);
 	wchar_t DeckFormatBuffer[128];
-	const wchar_t* GetMainFormatString();
-	const wchar_t* GetSideFormatString();
-	const wchar_t* GetExtraFormatString();
-	int GetTypeCount(std::vector<code_pointer> list, unsigned int ctype);
+	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 };
 
 extern DeckManager deckManager;
