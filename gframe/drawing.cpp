@@ -499,11 +499,11 @@ void Game::DrawMisc() {
 		DrawSelectionLine(btnCancelOrFinish, 2, 0xffffff00);
 	//lp bar
 	if((dInfo.turn % 2 && dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && !dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && dInfo.isFirst && dInfo.is_swapped) || (dInfo.turn % 2 && !dInfo.isFirst && dInfo.is_swapped)) {
-		driver->draw2DRectangle(0xa0000000, Resize(327, 8, 630, 72));
-		driver->draw2DRectangleOutline(Resize(327, 8, 630, 72), 0xffff8080);
+		driver->draw2DRectangle(0xa0000000, Resize(327, 8, 630, 51));
+		driver->draw2DRectangleOutline(Resize(327, 8, 630, 51), 0xffff8080);
 	} else {
-		driver->draw2DRectangle(0xa0000000, Resize(689, 8, 991, 72));
-		driver->draw2DRectangleOutline(Resize(689, 8, 991, 72), 0xffff8080);
+		driver->draw2DRectangle(0xa0000000, Resize(689, 8, 991, 51));
+		driver->draw2DRectangleOutline(Resize(689, 8, 991, 51), 0xffff8080);
 	}
 	driver->draw2DImage(imageManager.tLPFrame, Resize(330, 10, 629, 30), recti(0, 0, 200, 20), 0, 0, true);
 	driver->draw2DImage(imageManager.tLPFrame, Resize(691, 10, 990, 30), recti(0, 0, 200, 20), 0, 0, true);
