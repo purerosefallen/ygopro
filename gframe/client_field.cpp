@@ -1467,7 +1467,6 @@ void ClientField::UpdateDeclarableCode(bool enter) {
 		UpdateDeclarableCodeOpcode(enter);
 }
 void ClientField::RefreshCardCountDisplay() {
-	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
 		mainGame->dInfo.card_count[p] = hand[p].size();
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
