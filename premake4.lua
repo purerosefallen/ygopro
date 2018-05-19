@@ -3,11 +3,11 @@ solution "ygo"
     language "C++"
     objdir "obj"
 
-    configurations { "Debug", "Release" }
-	 defines { "LUA_COMPAT_5_2" }
-
+    configurations { "Release", "Debug" }
+    defines { "LUA_COMPAT_5_2" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
+        startproject "ygopro"
 
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
