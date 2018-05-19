@@ -1470,11 +1470,11 @@ void ClientField::RefreshCardCountDisplay() {
 	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
 		mainGame->dInfo.card_count[p] = hand[p].size();
-		for(auto it = dField.mzone[p].begin(); it != dField.mzone[p].end(); ++it) {
+		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
 			if(*it)
 				mainGame->dInfo.card_count[p]++;
 		}
-		for(auto it = dField.szone[p].begin(); it != dField.szone[p].end(); ++it) {
+		for(auto it = szone[p].begin(); it != szone[p].end(); ++it) {
 			if(*it)
 				mainGame->dInfo.card_count[p]++;
 		}
