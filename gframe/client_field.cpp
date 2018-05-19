@@ -1467,8 +1467,17 @@ void ClientField::UpdateDeclarableCode(bool enter) {
 		UpdateDeclarableCodeOpcode(enter);
 }
 void ClientField::RefreshCardCountDisplay() {
+	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
-		mainGame->dInfo.card_count[p] = mzone[p].size() + szone[p].size() + hand[p].size();
+		mainGame->dInfo.card_count[p] = hand[p].size();
+		for(auto it = dField.mzone[p].begin(); it != dField.mzone[p].end(); ++it) {
+			if(*it)
+				mainGame->dInfo.card_count[p]++;
+		}
+		for(auto it = dField.szone[p].begin(); it != dField.szone[p].end(); ++it) {
+			if(*it)
+				mainGame->dInfo.card_count[p]++;
+		}
 		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
 	}
 	if(mainGame->dInfo.card_count[0] > mainGame->dInfo.card_count[1]) {
