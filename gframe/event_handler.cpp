@@ -1438,7 +1438,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					should_show_tip = true;
 					myswprintf(formatBuffer, dataManager.GetSysString(1700), mainGame->btnCancelOrFinish->getText());
 					mainGame->stTip->setText(formatBuffer);
-					irr::core::dimension2d<unsigned int> dtip = mainGame->textFont->getDimension(formatBuffer) + irr::core::dimension2d<unsigned int>(10, 10);
+					irr::core::dimension2d<unsigned int> dtip = mainGame->guiFont->getDimension(formatBuffer) + irr::core::dimension2d<unsigned int>(10, 10);
 					mainGame->stTip->setRelativePosition(mainGame->Resize(x - 10 - dtip.Width, y - 10 - dtip.Height, x - 10, y - 10));
 				}
 				mainGame->stTip->setVisible(should_show_tip);
@@ -1562,7 +1562,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 								str.append(formatBuffer);
 							}
 							should_show_tip = true;
-							irr::core::dimension2d<unsigned int> dtip = mainGame->textFont->getDimension(str.c_str()) + irr::core::dimension2d<unsigned int>(10, 10);
+							irr::core::dimension2d<unsigned int> dtip = mainGame->guiFont->getDimension(str.c_str()) + irr::core::dimension2d<unsigned int>(10, 10);
 							mainGame->stTip->setRelativePosition(recti(mousepos.X - 10 - dtip.Width, mousepos.Y - 10 - dtip.Height, mousepos.X - 10, mousepos.Y - 10));
 							mainGame->stTip->setText(str.c_str());
 						}
@@ -1916,6 +1916,13 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 		case irr::KEY_ESCAPE: {
 			if(!mainGame->HasFocus(EGUIET_EDIT_BOX))
 				mainGame->device->minimizeWindow();
+			return true;
+			break;
+		}
+		case irr::KEY_KEY_X:
+		case irr::KEY_F12: {
+			if(!event.KeyInput.PressedDown && !mainGame->HasFocus(EGUIET_EDIT_BOX))
+				mainGame->takeScreenshot();
 			return true;
 			break;
 		}
