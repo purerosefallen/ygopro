@@ -313,24 +313,7 @@ bool DeckManager::DeleteDeck(Deck& deck, const wchar_t* name) {
 	return result == 0;
 #endif
 }
-const wchar_t* DeckManager::GetMainFormatString() {
-	myswprintf(DeckFormatBuffer, L"%d    ( Monster: %d / Spell: %d / Trap: %d )", deckManager.current_deck.main.size(), GetTypeCount(deckManager.current_deck.main, TYPE_MONSTER), GetTypeCount(deckManager.current_deck.main, TYPE_SPELL), GetTypeCount(deckManager.current_deck.main, TYPE_TRAP));
-	wchar_t* result = DeckFormatBuffer;
-	return result;
-}
-const wchar_t* DeckManager::GetExtraFormatString() {
-	myswprintf(DeckFormatBuffer, L"%d    ( Fusion: %d / Synchro: %d / Xyz: %d / Link: %d )", deckManager.current_deck.extra.size(), GetTypeCount(deckManager.current_deck.extra, TYPE_FUSION), GetTypeCount(deckManager.current_deck.extra, TYPE_SYNCHRO), GetTypeCount(deckManager.current_deck.extra, TYPE_XYZ), GetTypeCount(deckManager.current_deck.extra, TYPE_LINK));
-	wchar_t* result = DeckFormatBuffer;
-	return result;
-}
-const wchar_t* DeckManager::GetSideFormatString() {
-	int mc = GetTypeCount(deckManager.current_deck.side, TYPE_MONSTER);
-	int ec = GetTypeCount(deckManager.current_deck.side, TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK);
-	myswprintf(DeckFormatBuffer, L"%d    ( Monster: %d / Spell: %d / Trap: %d / Extra: %d )", deckManager.current_deck.side.size(), mc - ec, GetTypeCount(deckManager.current_deck.side, TYPE_SPELL), GetTypeCount(deckManager.current_deck.side, TYPE_TRAP), ec);
-	wchar_t* result = DeckFormatBuffer;
-	return result;
-}
-int DeckManager::GetTypeCount(std::vector<code_pointer> list, unsigned int ctype) {
+int DeckManager::TypeCount(std::vector<code_pointer> list, unsigned int ctype) {
 	int res = 0;
 	for(size_t i = 0; i < list.size(); ++i) {
 		code_pointer cur = list[i];
