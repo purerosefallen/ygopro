@@ -1480,23 +1480,14 @@ void ClientField::RefreshCardCountDisplay() {
 		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
 	}
 	if(mainGame->dInfo.card_count[0] > mainGame->dInfo.card_count[1]) {
-		mainGame->dInfo.card_adv_color[0] = 0xffffff00;
-		mainGame->dInfo.card_adv_color[1] = 0xffff0000;
-		mainGame->dInfo.card_adv = mainGame->dInfo.card_count[0] - mainGame->dInfo.card_count[1];
-		myswprintf(mainGame->dInfo.str_card_adv[0], L"+%d", mainGame->dInfo.card_adv);
-		myswprintf(mainGame->dInfo.str_card_adv[1], L"-%d", mainGame->dInfo.card_adv);
+		mainGame->dInfo.card_count_color[0] = 0xffffff00;
+		mainGame->dInfo.card_count_color[1] = 0xffff0000;
 	} else if(mainGame->dInfo.card_count[1] > mainGame->dInfo.card_count[0]) {
-		mainGame->dInfo.card_adv_color[1] = 0xffffff00;
-		mainGame->dInfo.card_adv_color[0] = 0xffff0000;
-		mainGame->dInfo.card_adv = mainGame->dInfo.card_count[1] - mainGame->dInfo.card_count[0];
-		myswprintf(mainGame->dInfo.str_card_adv[1], L"+%d", mainGame->dInfo.card_adv);
-		myswprintf(mainGame->dInfo.str_card_adv[0], L"-%d", mainGame->dInfo.card_adv);
+		mainGame->dInfo.card_count_color[1] = 0xffffff00;
+		mainGame->dInfo.card_count_color[0] = 0xffff0000;
 	} else {
-		mainGame->dInfo.card_adv_color[0] = 0xffffffff;
-		mainGame->dInfo.card_adv_color[1] = 0xffffffff;
-		mainGame->dInfo.card_adv = 0;
-		myswprintf(mainGame->dInfo.str_card_adv[0], L"+%d", mainGame->dInfo.card_adv);
-		myswprintf(mainGame->dInfo.str_card_adv[1], L"+%d", mainGame->dInfo.card_adv);
+		mainGame->dInfo.card_count_color[0] = 0xffffffff;
+		mainGame->dInfo.card_count_color[1] = 0xffffffff;
 	}
 }
 }
