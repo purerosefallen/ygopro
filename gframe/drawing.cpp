@@ -531,7 +531,7 @@ void Game::DrawMisc() {
 		}
 	}
 	if(!dInfo.isReplay && dInfo.player_type < 7 && dInfo.time_limit) {
-		if(imageManager.tClock) {
+		if(imageManager.tClock != NULL) {
 			driver->draw2DImage(imageManager.tClock, ResizeCardMid(472, 32, 490, 50, 490, 41), ResizeFit(0, 0, 18, 18), 0, 0, true);
 			driver->draw2DImage(imageManager.tClock, ResizeCardMid(795, 32, 813, 50, 813, 41), ResizeFit(0, 0, 18, 18), 0, 0, true);
 		}
