@@ -74,6 +74,7 @@ bool ImageManager::Initial() {
 		snprintf(buff, 100, "textures/pscale/lscale_%d.png", i);
 		tLScale[i] = driver->getTexture(buff);
 	}
+	tClock = driver->getTexture("textures/clock.png");
 	return true;
 }
 irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
