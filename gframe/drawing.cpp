@@ -531,7 +531,7 @@ void Game::DrawMisc() {
 		}
 	}
 	if(!dInfo.isReplay && dInfo.player_type < 7 && dInfo.time_limit) {
-		if(imageManager.tClock != NULL) {
+		if(imageManager.tClock) {
 			driver->draw2DImage(imageManager.tClock, ResizeCardMid(472, 32, 490, 50, 490, 41), recti(0, 0, 128, 128), 0, 0, true);
 			driver->draw2DImage(imageManager.tClock, ResizeCardMid(800, 32, 818, 50, 818, 41), recti(0, 0, 128, 128), 0, 0, true);
 		}
@@ -558,7 +558,7 @@ void Game::DrawMisc() {
 	}
 	DrawShadowText(numFont, dInfo.strLP[0], Resize(330, 12, 631, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	DrawShadowText(numFont, dInfo.strLP[1], Resize(691, 12, 992, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
-	
+
 	recti p1size = Resize(335, 31, 629, 50);
 	recti p2size = Resize(986, 31, 986, 50);
 	if(!dInfo.isTag || !dInfo.tag_player[0])
