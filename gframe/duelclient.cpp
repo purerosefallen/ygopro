@@ -2296,7 +2296,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		return true;
 	}
 	case MSG_SHUFFLE_SET_CARD: {
-		std::vector<ClientCard*>::iterator cit;
 		std::vector<ClientCard*>* lst = 0;
 		int loc = BufferIO::ReadInt8(pbuf);
 		int count = BufferIO::ReadInt8(pbuf);
@@ -2341,7 +2340,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			soundManager.PlaySoundEffect(SOUND_SHUFFLE);
 			for (int i = 0; i < count; ++i) {
 				mainGame->dField.MoveCard(mc[i], 10);
-				for (cit = mc[i]->overlayed.begin(); cit != mc[i]->overlayed.end(); ++cit)
+				for (auto cit = mc[i]->overlayed.begin(); cit != mc[i]->overlayed.end(); ++cit)
 					mainGame->dField.MoveCard(*cit, 10);
 			}
 			mainGame->WaitFrameSignal(11);
