@@ -342,6 +342,7 @@ void ClientField::UpdateFieldCard(int controler, int location, char* data) {
 			(*cit)->UpdateInfo(data);
 		data += len - 4;
 	}
+	RefreshCardCountDisplay();
 }
 void ClientField::ClearCommandFlag() {
 	for(auto cit = activatable_cards.begin(); cit != activatable_cards.end(); ++cit)
@@ -1463,14 +1464,21 @@ void ClientField::UpdateDeclarableCode(bool enter) {
 		UpdateDeclarableCodeOpcode(enter);
 }
 void ClientField::RefreshCardCountDisplay() {
+	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
 		mainGame->dInfo.card_count[p] = hand[p].size();
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
-			if(*it)
-				mainGame->dInfo.card_count[p]++;
+			pcard = *it;
+			if(pcard) {
+				if(pcard->type & TYPE_LINK && pcard->link)
+					mainGame->dInfo.card_count[p] += pcard->link;
+				else
+					mainGame->dInfo.card_count[p]++;
+			}
 		}
 		for(auto it = szone[p].begin(); it != szone[p].end(); ++it) {
-			if(*it)
+			pcard = *it;
+			if(pcard)
 				mainGame->dInfo.card_count[p]++;
 		}
 		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
