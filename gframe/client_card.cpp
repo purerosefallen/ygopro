@@ -180,7 +180,6 @@ void ClientCard::UpdateInfo(char* buf) {
 			link_marker = pdata;
 		}
 	}
-	mainGame->dField.RefreshCardCountDisplay();
 }
 void ClientCard::ClearTarget() {
 	for(auto cit = cardTarget.begin(); cit != cardTarget.end(); ++cit) {

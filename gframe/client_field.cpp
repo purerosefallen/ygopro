@@ -307,6 +307,7 @@ void ClientField::UpdateCard(int controler, int location, int sequence, char* da
 	ClientCard* pcard = GetCard(controler, location, sequence);
 	if(pcard)
 		pcard->UpdateInfo(data + 4);
+	RefreshCardCountDisplay();
 }
 void ClientField::UpdateFieldCard(int controler, int location, char* data) {
 	std::vector<ClientCard*>* lst = 0;
