@@ -1293,6 +1293,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 			myswprintf(scaleBuffer, L"   %d/%d", cd.lscale, cd.rscale);
 			wcscat(formatBuffer, scaleBuffer);
 		}
+		stDataInfo->setText(formatBuffer);
 		int offset_sayuri = 0;
 		if(cd.type & TYPE_LINK && cd.level > 5 && window_size.Width < 1220.0)
 			offset_sayuri = 15;
