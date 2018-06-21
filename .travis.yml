@@ -48,10 +48,10 @@ before_install:
 - mv -f irrklang/plugins/ikpmp3 .
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    sudo cp -rf irrklang/bin/macosx-gcc/libirrKlang.dylib /usr/local/lib/;
+    sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    cp -rf irrklang/bin/linux-gcc-64/libirrKlang.so .;
+    cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so .;
   fi
 
 script:
