@@ -81,7 +81,7 @@ script:
 
 before_deploy:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libirrKlang.so;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libIrrKlang.so;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
@@ -109,8 +109,8 @@ before_deploy:
 
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sed -i "s/c:\/windows/./g" ./system.conf;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro libirrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay sound screenshots;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
+    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay sound screenshots;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sed -i "" "s/c:\/windows/./g" ./system.conf;
