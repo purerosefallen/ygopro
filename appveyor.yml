@@ -101,8 +101,6 @@ artifacts:
     name: ygopro client
   - path: KoishiPro-$(APPVEYOR_REPO_TAG_NAME).7z
     name: ygopro full repack
-  - path: KoishiPro-with-sound-$(APPVEYOR_REPO_TAG_NAME).7z
-    name: ygopro full repack with sound
 
 cache:
   - premake-5.0.0-alpha12-windows.zip

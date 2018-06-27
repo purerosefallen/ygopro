@@ -124,7 +124,6 @@ deploy:
   file:
   - KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip
   - KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip
-  - KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip
   skip_cleanup: true
   overwrite: true
   on:
