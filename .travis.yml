@@ -89,18 +89,12 @@ before_deploy:
   fi
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
-- unzip -q ygopro222-images-master.zip
+- 7z x ygopro222-images-master.zip
 - mv -f ygopro222-images-master pics
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- unzip -q ygopro-starter-pack-master.zip
+- 7z z ygopro-starter-pack-master.zip
 - cp -rf ygopro-starter-pack-master/* .
-
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/archive/master.zip
-- rm -rf sound
-- unzip -q ygopro-222DIY-data-master.zip
-- mv -f ygopro-222DIY-data-master/sound .
-- rm -rf sound/custom sound/BGM/custom
 
 - rm -rf pics/thumbnail pics/*.db
 
