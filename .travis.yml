@@ -89,16 +89,22 @@ before_deploy:
   fi
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
-- 7z x ygopro222-images-master.zip > /dev/null
+- 7z x -y ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- 7z x ygopro-starter-pack-master.zip > /dev/null
+- 7z x -y ygopro-starter-pack-master.zip > /dev/null
 - cp -rf ygopro-starter-pack-master/* .
 
 - rm -rf pics/thumbnail pics/*.db
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/fonts
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z
+- 7z x -y WindBot.7z > /dev/null
+- mv -f WindBot windbot
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/raw/master/BotWrapper/BotWrapper.sh
+- mv -f BotWrapper.sh bot.sh
 
 - cd sound
 - bash -c "grep -P '\w+\.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
@@ -106,11 +112,11 @@ before_deploy:
 
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sed -i "s/c:\/windows/./g" ./system.conf;
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot bot.conf bot.sh > /dev/null;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sed -i "" "s/c:\/windows/./g" ./system.conf;
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot bot.conf bot.sh > /dev/null;
   fi
 
 deploy:

@@ -10,7 +10,7 @@ install:
 
   # environment and system dependency
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-alpha12-windows.zip
+  - 7z x -y premake-5.0.0-alpha12-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
@@ -22,7 +22,7 @@ install:
   - move freetype-2.8.1 freetype
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip ; exit 0"
-  - 7z x irrlicht-1.8.4.zip
+  - 7z x -y irrlicht-1.8.4.zip
   - md irrlicht
   - move irrlicht-1.8.4\source\Irrlicht irrlicht\src
   - move irrlicht-1.8.4\include irrlicht\include
@@ -32,7 +32,7 @@ install:
   - move lua-5.3.4\src lua
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3210000.zip ; exit 0"
-  - 7z x sqlite-amalgamation-3210000.zip
+  - 7z x -y sqlite-amalgamation-3210000.zip
   - move sqlite-amalgamation-3210000 sqlite3
   
   - git clone --depth=1 https://%access_token%@github.com/purerosefallen/irrklang
@@ -56,26 +56,19 @@ build:
 after_build:
   - mv -f bin/release/ygopro.exe .
 
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip ; exit 0"
-  - 7z x windbot-master.zip
-  - cd windbot-master
-  - msbuild /property:Configuration=Release /property:Platform=x86
-  - rm -rf bin/Release/WindBot.exe.config
-  - mv -f bin/Release ../WindBot
-  - mv -f BotWrapper/bin/Release/Bot.exe ./..
-  - mv -f BotWrapper/bin/Release/Bot.conf ./..
-  - cd ..
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
+  - 7z x -y WindBot.7z
 
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip ; exit 0"
-  - 7z x ygopro222-images-master.zip
+  - 7z x -y ygopro222-images-master.zip
   - mv -f ygopro222-images-master pics
-  
+
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/update-koishipro/archive/master.zip ; exit 0"
-  - 7z x update-koishipro-master.zip
+  - 7z x -y update-koishipro-master.zip
   - mv -f update-koishipro-master update-koishipro
 
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip ; exit 0"
-  - 7z x ygopro-starter-pack-master.zip
+  - 7z x -y ygopro-starter-pack-master.zip
   - cp -rf ygopro-starter-pack-master/* .
 
   - cd sound
