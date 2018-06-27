@@ -72,7 +72,7 @@ after_build:
   - cp -rf ygopro-starter-pack-master/* .
 
   - cd sound
-  - bash -c "grep -P '\w+\.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
+  - bash -c "grep '.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
   - cd ..
 
   - rm -rf pics/thumbnail pics/*.db
