@@ -89,11 +89,11 @@ before_deploy:
   fi
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
-- 7z x ygopro222-images-master.zip
+- 7z x ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- 7z z ygopro-starter-pack-master.zip
+- 7z x ygopro-starter-pack-master.zip > /dev/null
 - cp -rf ygopro-starter-pack-master/* .
 
 - rm -rf pics/thumbnail pics/*.db
