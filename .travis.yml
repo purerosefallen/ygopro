@@ -16,13 +16,14 @@ addons:
     - libirrlicht-dev
     - libgl1-mesa-dev
     - libglu-dev
+    - p7zip-full
 env:
 - USE_IRRKLANG=1
 before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update > /dev/null;
-    brew install freetype libevent sqlite dylibbundler > /dev/null;
+    brew install freetype libevent sqlite p7zip dylibbundler > /dev/null;
   fi
 
 - curl --location --retry 5 http://www.lua.org/ftp/lua-5.3.4.tar.gz | tar zfx -
@@ -81,10 +82,10 @@ script:
 
 before_deploy:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libIrrKlang.so;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libIrrKlang.so;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
   fi
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
@@ -102,20 +103,20 @@ before_deploy:
 - rm -rf sound/custom sound/BGM/custom
 
 - rm -rf pics/thumbnail pics/*.db
-- mkdir replay
-- mkdir screenshots
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/fonts
 
+- cd sound
+- bash -c "grep -P '\w+\.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
+- cd ..
+
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sed -i "s/c:\/windows/./g" ./system.conf;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay sound screenshots;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sed -i "" "s/c:\/windows/./g" ./system.conf;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots;
-    zip -q -r KoishiPro-$TRAVIS_OS_NAME-full-with-sound-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics replay screenshots sound;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound;
   fi
 
 deploy:
