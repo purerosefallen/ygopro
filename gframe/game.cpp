@@ -1271,6 +1271,14 @@ void Game::LoadConfig() {
 				gameConf.defaultOT = atoi(valbuf);
 			} else if(!strcmp(strbuf, "enable_bot_mode")) {
 				gameConf.enable_bot_mode = atoi(valbuf);
+			} else if(!strcmp(strbuf, "window_maximized")) {
+				gameConf.window_maximized = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "window_width")) {
+				gameConf.window_width = atoi(valbuf);
+			} else if(!strcmp(strbuf, "window_height")) {
+				gameConf.window_height = atoi(valbuf);
+			} else if(!strcmp(strbuf, "resize_popup_menu")) {
+				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1283,14 +1291,6 @@ void Game::LoadConfig() {
 			} else if(!strcmp(strbuf, "music_mode")) {
 				gameConf.music_mode = atoi(valbuf);
 #endif
-			} else if(!strcmp(strbuf, "window_maximized")) {
-				gameConf.window_maximized = atoi(valbuf) > 0;
-			} else if(!strcmp(strbuf, "window_width")) {
-				gameConf.window_width = atoi(valbuf);
-			} else if(!strcmp(strbuf, "window_height")) {
-				gameConf.window_height = atoi(valbuf);
-			} else if(!strcmp(strbuf, "resize_popup_menu")) {
-				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
 				gameConf.chkEnablePScale = atoi(valbuf);
 			} else if (!strcmp(strbuf, "skin_index")) {
@@ -1378,6 +1378,14 @@ void Game::LoadConfig() {
 				gameConf.defaultOT = atoi(valbuf);
 			} else if(!strcmp(strbuf, "enable_bot_mode")) {
 				gameConf.enable_bot_mode = atoi(valbuf);
+			} else if(!strcmp(strbuf, "window_maximized")) {
+				gameConf.window_maximized = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "window_width")) {
+				gameConf.window_width = atoi(valbuf);
+			} else if(!strcmp(strbuf, "window_height")) {
+				gameConf.window_height = atoi(valbuf);
+			} else if(!strcmp(strbuf, "resize_popup_menu")) {
+				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1390,14 +1398,6 @@ void Game::LoadConfig() {
 			} else if(!strcmp(strbuf, "music_mode")) {
 				gameConf.music_mode = atoi(valbuf);
 #endif
-			} else if(!strcmp(strbuf, "window_maximized")) {
-				gameConf.window_maximized = atoi(valbuf) > 0;
-			} else if(!strcmp(strbuf, "window_width")) {
-				gameConf.window_width = atoi(valbuf);
-			} else if(!strcmp(strbuf, "window_height")) {
-				gameConf.window_height = atoi(valbuf);
-			} else if(!strcmp(strbuf, "resize_popup_menu")) {
-				gameConf.resize_popup_menu = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "enable_pendulum_scale")) {
 				gameConf.chkEnablePScale = atoi(valbuf);
 			} else if (!strcmp(strbuf, "skin_index")) {
@@ -1471,6 +1471,10 @@ void Game::SaveConfig() {
 	fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
 	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
+	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
+	fprintf(fp, "window_width = %d\n", gameConf.window_width);
+	fprintf(fp, "window_height = %d\n", gameConf.window_height);
+	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
 #ifdef YGOPRO_USE_IRRKLANG
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
@@ -1483,10 +1487,6 @@ void Game::SaveConfig() {
 	fprintf(fp, "music_volume = %d\n", vol);
 	fprintf(fp, "music_mode = %d\n", (chkMusicMode->isChecked() ? 1 : 0));
 #endif
-	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
-	fprintf(fp, "window_width = %d\n", gameConf.window_width);
-	fprintf(fp, "window_height = %d\n", gameConf.window_height);
-	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
 	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
 	fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
 	fclose(fp);
