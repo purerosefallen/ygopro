@@ -11,17 +11,9 @@ ImageManager imageManager;
 bool ImageManager::Initial() {
 	RefreshRandomImageList();
 
-	tCover[0] = GetRandomImage(TEXTURE_COVER_S);
-	if(!tCover[0])
-		tCover[0] = driver->getTexture("textures/cover.jpg");
-	tCover[1] = GetRandomImage(TEXTURE_COVER_O);
-	if(!tCover[1])
-		tCover[1] = driver->getTexture("textures/cover2.jpg");
-	if(!tCover[1])
-		tCover[1] = GetRandomImage(TEXTURE_COVER_S);
-	if(!tCover[1])
-		tCover[1] = tCover[0];
-	//tUnknown = driver->getTexture("textures/unknown.jpg");
+	tCover[0] = NULL;
+	tCover[1] = NULL;
+	//tUnknown = NULL;
 	tUnknown[0] = NULL;
 	tUnknown[1] = NULL;
 	tUnknown[2] = NULL;
@@ -45,25 +37,9 @@ bool ImageManager::Initial() {
 	tHand[0] = driver->getTexture("textures/f1.jpg");
 	tHand[1] = driver->getTexture("textures/f2.jpg");
 	tHand[2] = driver->getTexture("textures/f3.jpg");
-	tBackGround = GetRandomImage(TEXTURE_DUEL);
-	if(!tBackGround)
-		tBackGround = driver->getTexture("textures/bg.jpg");
-	if(!tBackGround)
-		tBackGround = driver->getTexture("textures/bg_duel.jpg");
-	tBackGround_menu = GetRandomImage(TEXTURE_MENU);
-	if(!tBackGround_menu)
-		tBackGround_menu = driver->getTexture("textures/bg_menu.jpg");
-	if(!tBackGround_menu)
-		tBackGround_menu = GetRandomImage(TEXTURE_DUEL);
-	if(!tBackGround_menu)
-		tBackGround_menu = tBackGround;
-	tBackGround_deck = GetRandomImage(TEXTURE_DECK);
-	if(!tBackGround_deck)
-		tBackGround_deck = driver->getTexture("textures/bg_deck.jpg");
-	if(!tBackGround_deck)
-		tBackGround_deck = GetRandomImage(TEXTURE_DUEL);
-	if(!tBackGround_deck)
-		tBackGround_deck = tBackGround;
+	tBackGround = NULL;
+	tBackGround_menu = NULL;
+	tBackGround_deck = NULL;
 	tField[0] = driver->getTexture("textures/field2.png");
 	tFieldTransparent[0] = driver->getTexture("textures/field-transparent2.png");
 	tField[1] = driver->getTexture("textures/field3.png");
@@ -78,6 +54,7 @@ bool ImageManager::Initial() {
 		tLScale[i] = driver->getTexture(buff);
 	}
 	tClock = driver->getTexture("textures/clock.png");
+	ResizeTexture();
 	return true;
 }
 irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
@@ -91,6 +68,18 @@ irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
 	myswprintf(fname, L"./textures/%ls", name);
 	BufferIO::EncodeUTF8(fname, ImageName);
 	return driver->getTexture(ImageName);
+}
+irr::video::ITexture* ImageManager::GetRandomImage(int image_type, s32 width, s32 height) {
+	int count = ImageList[image_type].size();
+	if(count <= 0)
+		return 0;
+	char ImageName[1024];
+	wchar_t fname[1024];
+	int image_id = rand() % count;
+	auto name = ImageList[image_type][image_id].c_str();
+	myswprintf(fname, L"./textures/%ls", name);
+	BufferIO::EncodeUTF8(fname, ImageName);
+	return GetTextureFromFile(ImageName, width, height);
 }
 void ImageManager::RefreshRandomImageList() {
 	RefreshImageDir(L"bg/", TEXTURE_DUEL);
@@ -158,7 +147,7 @@ void ImageManager::ClearTexture() {
 	tMap[0].clear();
 	tMap[1].clear();
 	tThumb.clear();
-	tThumb.clear();
+	tFields.clear();
 	for(int i = 0; i < 3; ++i)
 		if(tUnknown[i] != NULL) {
 			driver->removeTexture(tUnknown[i]);
@@ -178,6 +167,48 @@ void ImageManager::RemoveTexture(int code) {
 			driver->removeTexture(tit->second);
 		tMap[1].erase(tit);
 	}
+}
+void ImageManager::ResizeTexture() {
+	irr::s32 imgWidth = CARD_IMG_WIDTH * mainGame->xScale;
+	irr::s32 imgHeight = CARD_IMG_HEIGHT * mainGame->yScale;
+	irr::s32 bgWidth = 1024 * mainGame->xScale;
+	irr::s32 bgHeight = 640 * mainGame->yScale;
+	driver->removeTexture(tCover[0]);
+	driver->removeTexture(tCover[1]);
+	tCover[0] = GetRandomImage(TEXTURE_COVER_S, imgWidth, imgHeight);
+	if(!tCover[0])
+		tCover[0] = GetTextureFromFile("textures/cover.jpg", imgWidth, imgHeight);
+	tCover[1] = GetRandomImage(TEXTURE_COVER_O, imgWidth, imgHeight);
+	if(!tCover[1])
+		tCover[1] = GetTextureFromFile("textures/cover2.jpg", imgWidth, imgHeight);
+	if(!tCover[1])
+		tCover[1] = GetRandomImage(TEXTURE_COVER_S, imgWidth, imgHeight);
+	if(!tCover[1])
+		tCover[1] = tCover[0];
+	//driver->removeTexture(tUnknown);
+	//tUnknown = GetTextureFromFile("textures/unknown.jpg", imgWidth, imgHeight);
+	driver->removeTexture(tBackGround);
+	tBackGround = GetRandomImage(TEXTURE_DUEL, bgWidth, bgHeight);
+	if(!tBackGround)
+		tBackGround = GetTextureFromFile("textures/bg.jpg", bgWidth, bgHeight);
+	if(!tBackGround)
+		tBackGround = GetTextureFromFile("textures/bg_duel.jpg", bgWidth, bgHeight);
+	driver->removeTexture(tBackGround_menu);
+	tBackGround_menu = GetRandomImage(TEXTURE_MENU, bgWidth, bgHeight);
+	if(!tBackGround_menu)
+		tBackGround_menu = GetTextureFromFile("textures/bg_menu.jpg", bgWidth, bgHeight);
+	if(!tBackGround_menu)
+		tBackGround_menu = GetRandomImage(TEXTURE_DUEL, bgWidth, bgHeight);
+	if(!tBackGround_menu)
+		tBackGround_menu = tBackGround;
+	driver->removeTexture(tBackGround_deck);
+	tBackGround_deck = GetRandomImage(TEXTURE_DECK, bgWidth, bgHeight);
+	if(!tBackGround_deck)
+		tBackGround_deck = GetTextureFromFile("textures/bg_deck.jpg", bgWidth, bgHeight);
+	if(!tBackGround_deck)
+		tBackGround_deck = GetRandomImage(TEXTURE_DUEL, bgWidth, bgHeight);
+	if(!tBackGround_deck)
+		tBackGround_deck = tBackGround;
 }
 // function by Warr1024, from https://github.com/minetest/minetest/issues/2419 , modified
 void imageScaleNNAA(irr::video::IImage *src, irr::video::IImage *dest) {
