@@ -129,6 +129,8 @@ bool Game::Initialize() {
 				skinSystem->applySkin(skins[index].c_str());
 		}
 	}
+	xScale = 1;
+	yScale = 1;
 	linePatternD3D = 0;
 	linePatternGL = 0x0f0f;
 	waitFrame = 0;
@@ -1554,15 +1556,15 @@ void Game::ShowCardInfo(int code, bool resize) {
 			wcscat(formatBuffer, scaleBuffer);
 		}
 		stDataInfo->setText(formatBuffer);
-		int offset_sayuri = 0;
+		int offset_arrows = 0;
 		if(cd.type & TYPE_LINK && cd.level > 5 && window_size.Width < 1220.0)
-			offset_sayuri = 15;
-		stDataInfo->setRelativePosition(rect<s32>(15, 60, 300 * xScale - 13, (83 + offset_sayuri)));
-		//stSetName->setRelativePosition(rect<s32>(15, (83 + offset_sayuri) * yScale, 296 * xScale, (83 + offset_sayuri) * yScale + offset));
-		//stText->setRelativePosition(rect<s32>(15, (83 + offset_sayuri) * yScale + offset, 287 * xScale, 324 * yScale));
-		stSetName->setRelativePosition(rect<s32>(15, (83 + offset_sayuri), 296 * xScale, (83 + offset_sayuri) + offset));
-		stText->setRelativePosition(rect<s32>(15, (83 + offset_sayuri) + offset, 287 * xScale, 324 * yScale));
-		scrCardText->setRelativePosition(rect<s32>(287 * xScale - 20, (83 + offset_sayuri) + offset, 287 * xScale, 324 * yScale));
+			offset_arrows = 15;
+		stDataInfo->setRelativePosition(rect<s32>(15, 60, 300 * xScale - 13, (83 + offset_arrows)));
+		//stSetName->setRelativePosition(rect<s32>(15, (83 + offset_arrows) * yScale, 296 * xScale, (83 + offset_arrows) * yScale + offset));
+		//stText->setRelativePosition(rect<s32>(15, (83 + offset_arrows) * yScale + offset, 287 * xScale, 324 * yScale));
+		stSetName->setRelativePosition(rect<s32>(15, (83 + offset_arrows), 296 * xScale, (83 + offset_arrows) + offset));
+		stText->setRelativePosition(rect<s32>(15, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
+		scrCardText->setRelativePosition(rect<s32>(287 * xScale - 20, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
 	} else {
 		myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cd.type));
 		stInfo->setText(formatBuffer);
@@ -1818,6 +1820,9 @@ void Game::OnResize() {
 	//old_guiFont->drop();
 	old_textFont->drop();
 
+	imageManager.ClearTexture();
+	imageManager.ResizeTexture();
+
 	wMainMenu->setRelativePosition(ResizeWin(370, 200, 650, 415));
 	wDeckEdit->setRelativePosition(Resize(309, 5, 605, 130));
 	cbDBLFList->setRelativePosition(Resize(80, 5, 220, 30));
@@ -1948,8 +1953,6 @@ void Game::OnResize() {
 	btnChainWhenAvail->setRelativePosition(Resize(205, 180, 295, 215));
 	btnShuffle->setRelativePosition(Resize(205, 230, 295, 265));
 	btnCancelOrFinish->setRelativePosition(Resize(205, 230, 295, 265));
-
-	imageManager.ClearTexture();
 }
 recti Game::Resize(s32 x, s32 y, s32 x2, s32 y2) {
 	x = x * xScale;
