@@ -60,10 +60,12 @@ bool ImageManager::Initial() {
 irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
 	int count = ImageList[image_type].size();
 	if(count <= 0)
-		return 0;
+		return NULL;
 	char ImageName[1024];
 	wchar_t fname[1024];
-	int image_id = rand() % count;
+	if(saved_image_id[image_type] == -1)
+		saved_image_id[image_type] = rand() % count;
+	int image_id = saved_image_id[image_type];
 	auto name = ImageList[image_type][image_id].c_str();
 	myswprintf(fname, L"./textures/%ls", name);
 	BufferIO::EncodeUTF8(fname, ImageName);
@@ -72,10 +74,12 @@ irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
 irr::video::ITexture* ImageManager::GetRandomImage(int image_type, s32 width, s32 height) {
 	int count = ImageList[image_type].size();
 	if(count <= 0)
-		return 0;
+		return NULL;
 	char ImageName[1024];
 	wchar_t fname[1024];
-	int image_id = rand() % count;
+	if(saved_image_id[image_type] == -1)
+		saved_image_id[image_type] = rand() % count;
+	int image_id = saved_image_id[image_type];
 	auto name = ImageList[image_type][image_id].c_str();
 	myswprintf(fname, L"./textures/%ls", name);
 	BufferIO::EncodeUTF8(fname, ImageName);
@@ -90,6 +94,10 @@ void ImageManager::RefreshRandomImageList() {
 	RefreshImageDir(L"cover2/", TEXTURE_COVER_O);
 	RefreshImageDir(L"attack/", TEXTURE_ATTACK);
 	RefreshImageDir(L"act/", TEXTURE_ACTIVATE);
+
+	for(int i = 0; i < 7; ++ i) {
+		saved_image_id[i] = -1;
+	}
 }
 void ImageManager::RefreshImageDir(std::wstring path, int image_type) {
 #ifdef _WIN32
