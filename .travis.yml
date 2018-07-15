@@ -59,9 +59,10 @@ script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
 - cd build
-- make config=release ygopro -j4
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make config=release ygopro -j4; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make config=debug ygopro -j4; fi
 - cd ..
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/release/ygopro ./; strip ygopro;
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/debug/ygopro ./; strip ygopro;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     mkdir -p ygopro.app/Contents/MacOS;
