@@ -1048,7 +1048,7 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_NEW_TURN: {
 			int r_player = BufferIO::ReadInt8(pbuf);
 #ifdef YGOPRO_SERVER_MODE
-			turn_player = r_player;
+			turn_player = r_player & 0x1;
 #endif
 			time_limit[0] = host_info.time_limit;
 			time_limit[1] = host_info.time_limit;

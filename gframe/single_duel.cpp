@@ -1098,7 +1098,7 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 			RefreshHand(0);
 			RefreshHand(1);
 #ifdef YGOPRO_SERVER_MODE
-			turn_player = BufferIO::ReadInt8(pbuf);
+			turn_player = BufferIO::ReadInt8(pbuf) & 0x1;
 #else
 			pbuf++;
 #endif
