@@ -122,7 +122,6 @@ bool Game::Initialize() {
 \u7A97\u53E3\u7F29\u653E\u3002\n\
 \n\
 \n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\
-\n\u80CC\u666F\u56FE\u7247\u7F29\u653E\u6709\u952F\u9F7F\u3002\n\
 \n\u6548\u679C\u6587\u5185\u82F1\u6587\u6362\u884C\u4F1A\u622A\u65AD\u5355\u8BCD\u3002\n\
 ", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
