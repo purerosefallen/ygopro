@@ -338,6 +338,14 @@ irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/%d.png"), code);
+			img = GetTextureFromFile(file, width, height);
+		}
+		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
+			img = GetTextureFromFile(file, width, height);
+		}
+		if(img == NULL) {
 			sprintf(file, "pics/%d.png", code);
 			img = GetTextureFromFile(file, width, height);
 		}
@@ -372,6 +380,14 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/thumbnail/%d.png"), code);
+			img = GetTextureFromFile(file, width, height);
+		}
+		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/thumbnail/%d.jpg"), code);
+			img = GetTextureFromFile(file, width, height);
+		}
+		if(img == NULL) {
 			sprintf(file, "pics/thumbnail/%d.png", code);
 			img = GetTextureFromFile(file, width, height);
 		}
@@ -384,6 +400,14 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 			img = GetTextureFromFile(file, width, height);
 			if(img == NULL) {
 				sprintf(file, "expansions/pics/%d.jpg", code);
+				img = GetTextureFromFile(file, width, height);
+			}
+			if(img == NULL) {
+				sprintf(file, mainGame->GetLocaleDir("pics/%d.png"), code);
+				img = GetTextureFromFile(file, width, height);
+			}
+			if(img == NULL) {
+				sprintf(file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
 				img = GetTextureFromFile(file, width, height);
 			}
 			if(img == NULL) {

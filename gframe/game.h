@@ -26,6 +26,7 @@ struct Config {
 	wchar_t textfont[256];
 	wchar_t numfont[256];
 	wchar_t roompass[20];
+	wchar_t locale[64];
 	//settings
 	int chkMAutoPos;
 	int chkSTAutoPos;
@@ -156,6 +157,7 @@ public:
 
 	int LocalPlayer(int player);
 	const wchar_t* LocalName(int local_player);
+	const char* GetLocaleDir(const char* dir);
 
 	bool HasFocus(EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
@@ -233,8 +235,9 @@ public:
 	irr::core::dimension2d<irr::u32> window_size;
 	float xScale;
 	float yScale;
-	
+
 	CGUISkinSystem *skinSystem;
+	char locale_buf_utf8[256];
 
 	ClientField dField;
 	DeckBuilder deckBuilder;

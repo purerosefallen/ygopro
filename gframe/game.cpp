@@ -84,8 +84,10 @@ bool Game::Initialize() {
 	if(!imageManager.Initial())
 		return false;
 	LoadExpansionDB();
+	if(dataManager.LoadDB(GetLocaleDir("cards.cdb"))) {} else
 	if(!dataManager.LoadDB("cards.cdb"))
 		return false;
+	if(dataManager.LoadStrings(GetLocaleDir("strings.conf"))) {} else
 	if(!dataManager.LoadStrings("strings.conf"))
 		return false;
 	dataManager.LoadStrings("./expansions/strings.conf");
@@ -1049,7 +1051,9 @@ void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
 		return;
 	botInfo.clear();
-	FILE* fp = fopen("bot.conf", "r");
+	FILE* fp = fopen(GetLocaleDir("bot.conf"), "r");
+	if(!fp)
+		fp = fopen("bot.conf", "r");
 	char linebuf[256];
 	char strbuf[256];
 	if(fp) {
@@ -1236,6 +1240,9 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
+				} else if (!strcmp(strbuf, "locale")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.locale, 64);
 				}
 			}
 		}
@@ -1343,6 +1350,9 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
+				} else if (!strcmp(strbuf, "locale")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.locale, 64);
 				}
 			}
 		}
@@ -1418,6 +1428,8 @@ void Game::SaveConfig() {
 #endif
 	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
 	fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
+	BufferIO::EncodeUTF8(gameConf.locale, linebuf);
+	fprintf(fp, "locale = %s\n", linebuf);
 	fclose(fp);
 }
 void Game::ShowCardInfo(int code, bool resize) {
@@ -1636,6 +1648,8 @@ void Game::initUtils() {
 	MakeDirectory("sound/custom");
 	MakeDirectory("sound/BGM/custom");
 #endif
+	//locales
+	MakeDirectory("locales");
 	//pics
 	MakeDirectory("pics");
 	MakeDirectory("pics/field");
@@ -2001,6 +2015,16 @@ void Game::takeScreenshot() {
 		image->drop();
 	} else
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
+}
+const char* Game::GetLocaleDir(const char* dir) {
+	if(!gameConf.locale || !wcscmp(gameConf.locale, L"default"))
+		return dir;
+	wchar_t locale_buf[256];
+	wchar_t orig_dir[64];
+	BufferIO::DecodeUTF8(dir, orig_dir);
+	myswprintf(locale_buf, L"locales/%ls/%ls", gameConf.locale, orig_dir);
+	BufferIO::EncodeUTF8(locale_buf, locale_buf_utf8);
+	return locale_buf_utf8;
 }
 void Game::SetCursor(ECURSOR_ICON icon) {
 	ICursorControl* cursor = mainGame->device->getCursorControl();
