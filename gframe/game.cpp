@@ -177,12 +177,6 @@ bool Game::Initialize() {
 		hWnd = reinterpret_cast<HWND>(exposedData.D3D9.HWnd);
 	else
 		hWnd = reinterpret_cast<HWND>(exposedData.OpenGLWin32.HWnd);
-	/*if(hWnd) {
-		LONG style = GetWindowLong(hWnd, GWL_STYLE);
-		style |= WS_MINIMIZEBOX;
-		SetWindowLong(hWnd, GWL_STYLE, style);
-		SendMessage(hWnd, WM_NCPAINT, 1, 0);
-	}*/
 #endif
 	SetWindowsIcon();
 	//main menu
@@ -386,6 +380,12 @@ bool Game::Initialize() {
 	chkAutoSearch = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
 	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
 	posY += 30;
+	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 120, posY + 28), false, false, tabSystem);
+	btnWinResizeS = env->addButton(rect<s32>(posX + 125, posY, posX + 155, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
+	btnWinResizeM = env->addButton(rect<s32>(posX + 160, posY, posX + 190, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
+	btnWinResizeL = env->addButton(rect<s32>(posX + 195, posY, posX + 225, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
+	btnWinResizeXL = env->addButton(rect<s32>(posX + 230, posY, posX + 260, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
+	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
 	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
@@ -407,7 +407,7 @@ bool Game::Initialize() {
 	chkMusicMode = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1281));
 	chkMusicMode->setChecked(gameConf.music_mode != 0);
 	posY += 30;
-	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1282));
+	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1287));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
@@ -829,7 +829,7 @@ void Game::MainLoop() {
 		atkdy = (float)sin(atkframe);
 		driver->beginScene(true, true, SColor(0, 0, 0, 0));
 		gMutex.Lock();
-		if(dInfo.isStarted || dInfo.isReplaySkiping) {
+		if(dInfo.isStarted) {
 			if(dInfo.isFinished && showcardcode == 1)
 				soundManager.PlayBGM(BGM_WIN);
 			else if(dInfo.isFinished && (showcardcode == 2 || showcardcode == 3))
@@ -1502,7 +1502,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 		memset(&cd, 0, sizeof(CardData));
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	imgCard->setScaleImage(true);
-	if(cd.alias != 0 && (cd.alias - code < 10 || code - cd.alias < 10))
+	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
 	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
 	stName->setText(formatBuffer);
@@ -1568,10 +1568,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 	} else {
 		myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cd.type));
 		stInfo->setText(formatBuffer);
-		stDataInfo->setRelativePosition(recti(15, 60, 300 * xScale - 13, 83));
 		stDataInfo->setText(L"");
-		//stSetName->setRelativePosition(rect<s32>(15, 60 * yScale, 296 * xScale, 60 * yScale + offset));
-		//stText->setRelativePosition(rect<s32>(15, 60 * yScale + offset, 287 * xScale, 324 * yScale));
 		stSetName->setRelativePosition(rect<s32>(15, 60, 296 * xScale, 60 + offset));
 		stText->setRelativePosition(rect<s32>(15, 60 + offset, 287 * xScale, 324 * yScale));
 		scrCardText->setRelativePosition(rect<s32>(287 * xScale - 20, 60 + offset, 287 * xScale, 324 * yScale));
@@ -1806,18 +1803,14 @@ void Game::OnResize() {
 	irr::gui::CGUITTFont* old_numFont = numFont;
 	irr::gui::CGUITTFont* old_adFont = adFont;
 	irr::gui::CGUITTFont* old_lpcFont = lpcFont;
-	//irr::gui::CGUITTFont* old_guiFont = guiFont;
 	irr::gui::CGUITTFont* old_textFont = textFont;
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, (yScale > 0.5 ? 16 * yScale : 8));
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, (yScale > 0.75 ? 12 * yScale : 9));
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48 * yScale);
-	//guiFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize * yScale);
-	//env->getSkin()->setFont(guiFont);
 	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, (yScale > 0.642 ? gameConf.textfontsize * yScale : 9));
 	old_numFont->drop();
 	old_adFont->drop();
 	old_lpcFont->drop();
-	//old_guiFont->drop();
 	old_textFont->drop();
 
 	imageManager.ClearTexture();
@@ -1896,8 +1889,8 @@ void Game::OnResize() {
 	stHintMsg->setRelativePosition(ResizeWin(500, 60, 820, 90));
 
 	//sound / music volume bar
-	scrSoundVolume->setRelativePosition(recti(20 + 126, 200 + 4, 20 + (300 * xScale) - 40, 200 + 21));
-	scrMusicVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
+	scrSoundVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
+	scrMusicVolume->setRelativePosition(recti(20 + 126, 260 + 4, 20 + (300 * xScale) - 40, 260 + 21));
 
 	if(gameConf.resize_popup_menu) {
 		int width = 100 * mainGame->xScale;
@@ -1920,11 +1913,7 @@ void Game::OnResize() {
 	imgCard->setRelativePosition(ResizeCard(10, 9, 0, 0));
 	wInfos->setRelativePosition(Resize(1, 275, 301, 639));
 	stName->setRelativePosition(recti(10, 10, 300 * xScale - 13, 10 + 22));
-	//stName->setRelativePosition(recti(10, 10, 300 * xScale - 13, 10 + 22 * yScale));
-	//stInfo->setRelativePosition(recti(15, 37 * yScale, 300 * xScale - 13, 60 * yScale));
-	//stDataInfo->setRelativePosition(recti(15, 60 * yScale, 300 * xScale - 13, 83 * yScale));
 	lstLog->setRelativePosition(Resize(10, 10, 290, 290));
-	//const auto& tsize = stText->getRelativePosition();
 	if(showingcode)
 		ShowCardInfo(showingcode, true);
 	btnClearLog->setRelativePosition(Resize(160, 300, 260, 325));
@@ -2059,6 +2048,21 @@ void Game::SetWindowsIcon() {
 	HICON hBigIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCEW(1), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
 	SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (long)hSmallIcon);
 	SendMessageW(hWnd, WM_SETICON, ICON_BIG, (long)hBigIcon);
+#endif
+}
+void Game::SetWindowsScale(float scale) {
+#ifdef _WIN32
+	WINDOWPLACEMENT plc;
+	plc.length = sizeof(WINDOWPLACEMENT);
+	if(GetWindowPlacement(hWnd, &plc) && (plc.showCmd == SW_SHOWMAXIMIZED))
+		ShowWindow(hWnd, SW_RESTORE);
+	RECT rcWindow, rcClient;
+	GetWindowRect(hWnd, &rcWindow);
+	GetClientRect(hWnd, &rcClient);
+	MoveWindow(hWnd, rcWindow.left, rcWindow.top,
+		(rcWindow.right - rcWindow.left) - rcClient.right + 1024 * scale,
+		(rcWindow.bottom - rcWindow.top) - rcClient.bottom + 640 * scale,
+		true);
 #endif
 }
 void Game::FlashWindow() {
