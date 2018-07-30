@@ -702,4 +702,6 @@ extern Game* mainGame;
 #define TEXTURE_ACTIVATE			6
 
 #define DEFAULT_DUEL_RULE			4
+
+#define CARD_ARTWORK_VERSIONS_OFFSET	10
 #endif // GAME_H
