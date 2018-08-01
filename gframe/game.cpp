@@ -340,6 +340,10 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1287));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
+	posY += 30;
+	env->addStaticText(dataManager.GetSysString(1288), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
+	cbLocale = env->addComboBox(rect<s32>(posX + 160, posY + 4, posX + 260, posY + 21), tabSystem, COMBOBOX_LOCALE);
+	RefreshLocales();
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1049,6 +1053,41 @@ void Game::RefreshSingleplay() {
 	}
 	closedir(dir);
 #endif
+}
+void Game::RefreshLocales() {
+	cbLocale->clear();
+	cbLocale->addItem(L"default");
+#ifdef _WIN32
+	WIN32_FIND_DATAW fdataw;
+	HANDLE fh = FindFirstFileW(L"./locales/*", &fdataw);
+	if(fh == INVALID_HANDLE_VALUE)
+		return;
+	do {
+		if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && wcscmp(fdataw.cFileName, L".") && wcscmp(fdataw.cFileName, L".."))
+			cbLocale->addItem(fdataw.cFileName);
+	} while(FindNextFileW(fh, &fdataw));
+	FindClose(fh);
+#else
+	DIR * dir;
+	struct dirent * dirp;
+	if((dir = opendir("./locales/")) == NULL)
+		return;
+	while((dirp = readdir(dir)) != NULL) {
+		size_t len = strlen(dirp->d_name);
+		wchar_t wname[256];
+		BufferIO::DecodeUTF8(dirp->d_name, wname);
+		if(!wcscmp(wname, L".") || !wcscmp(wname, L".."))
+			continue;
+		cbLocale->addItem(wname);
+	}
+	closedir(dir);
+#endif
+	for(size_t i = 0; i < cbLocale->getItemCount(); ++i) {
+		if(!wcscmp(cbLocale->getItem(i), gameConf.locale)) {
+			cbLocale->setSelected(i);
+			break;
+		}
+	}
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
@@ -1822,6 +1861,7 @@ void Game::OnResize() {
 	//sound / music volume bar
 	scrSoundVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
 	scrMusicVolume->setRelativePosition(recti(20 + 126, 260 + 4, 20 + (300 * xScale) - 40, 260 + 21));
+	cbLocale->setRelativePosition(recti(20 + 160, 350 + 4, 20 + (300 * xScale) - 40, 350 + 21));
 
 	if(gameConf.resize_popup_menu) {
 		int width = 100 * mainGame->xScale;

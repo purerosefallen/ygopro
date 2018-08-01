@@ -125,6 +125,7 @@ public:
 	void RefreshReplay();
 	void RefreshSingleplay();
 	void RefreshBot();
+	void RefreshLocales();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
@@ -295,6 +296,7 @@ public:
 	irr::gui::IGUIButton* btnWinResizeL;
 	irr::gui::IGUIButton* btnWinResizeXL;
 	irr::gui::IGUICheckBox* chkEnablePScale;
+	irr::gui::IGUIComboBox* cbLocale;
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu;
 	irr::gui::IGUIButton* btnLanMode;
@@ -691,6 +693,7 @@ extern Game* mainGame;
 #define BUTTON_WINDOW_RESIZE_M		366
 #define BUTTON_WINDOW_RESIZE_L		367
 #define BUTTON_WINDOW_RESIZE_XL		368
+#define COMBOBOX_LOCALE				369
 
 #define COMBOBOX_SORTTYPE			370
 #define COMBOBOX_LIMIT				371
