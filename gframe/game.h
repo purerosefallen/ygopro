@@ -31,6 +31,7 @@ struct Config {
 	wchar_t textfont[256];
 	wchar_t numfont[256];
 	wchar_t roompass[20];
+	wchar_t locale[64];
 	//settings
 	int chkMAutoPos;
 	int chkSTAutoPos;
@@ -139,6 +140,7 @@ public:
 	void RefreshReplay();
 	void RefreshSingleplay();
 	void RefreshBot();
+	void RefreshLocales();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
@@ -171,6 +173,7 @@ public:
 
 	int LocalPlayer(int player);
 	const wchar_t* LocalName(int local_player);
+	const char* GetLocaleDir(const char* dir);
 
 	bool HasFocus(EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
@@ -248,8 +251,9 @@ public:
 	irr::core::dimension2d<irr::u32> window_size;
 	float xScale;
 	float yScale;
-	
+
 	CGUISkinSystem *skinSystem;
+	char locale_buf_utf8[256];
 
 	ClientField dField;
 	DeckBuilder deckBuilder;
@@ -307,6 +311,7 @@ public:
 	irr::gui::IGUIButton* btnWinResizeL;
 	irr::gui::IGUIButton* btnWinResizeXL;
 	irr::gui::IGUICheckBox* chkEnablePScale;
+	irr::gui::IGUIComboBox* cbLocale;
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu;
 	irr::gui::IGUIButton* btnLanMode;
@@ -709,6 +714,7 @@ extern HostInfo game_info;
 #define BUTTON_WINDOW_RESIZE_M		366
 #define BUTTON_WINDOW_RESIZE_L		367
 #define BUTTON_WINDOW_RESIZE_XL		368
+#define COMBOBOX_LOCALE				369
 
 #define COMBOBOX_SORTTYPE			370
 #define COMBOBOX_LIMIT				371
