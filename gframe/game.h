@@ -392,6 +392,7 @@ public:
 	irr::gui::IGUIButton* btnOptionp;
 	irr::gui::IGUIButton* btnOptionn;
 	irr::gui::IGUIButton* btnOptionOK;
+	irr::gui::IGUIButton* btnOption[5];
 	//pos selection
 	irr::gui::IGUIWindow* wPosSelect;
 	irr::gui::CGUIImageButton* btnPSAU;
@@ -600,6 +601,11 @@ extern Game* mainGame;
 #define BUTTON_OPTION_PREV			220
 #define BUTTON_OPTION_NEXT			221
 #define BUTTON_OPTION_OK			222
+#define BUTTON_OPTION_0				223
+#define BUTTON_OPTION_1				224
+#define BUTTON_OPTION_2				225
+#define BUTTON_OPTION_3				226
+#define BUTTON_OPTION_4				227
 #define BUTTON_CARD_0				230
 #define BUTTON_CARD_1				231
 #define BUTTON_CARD_2				232
@@ -705,4 +711,6 @@ extern Game* mainGame;
 #define TEXTURE_ACTIVATE			6
 
 #define DEFAULT_DUEL_RULE			4
+
+#define CARD_ARTWORK_VERSIONS_OFFSET	10
 #endif // GAME_H

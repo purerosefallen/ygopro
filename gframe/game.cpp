@@ -383,11 +383,14 @@ bool Game::Initialize() {
 	wOptions = env->addWindow(rect<s32>(490, 200, 840, 340), false, L"");
 	wOptions->getCloseButton()->setVisible(false);
 	wOptions->setVisible(false);
-	stOptions =  env->addStaticText(L"", rect<s32>(20, 20, 350, 100), false, true, wOptions, -1, false);
+	stOptions = env->addStaticText(L"", rect<s32>(20, 20, 350, 100), false, true, wOptions, -1, false);
 	stOptions->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	btnOptionOK = env->addButton(rect<s32>(130, 105, 220, 130), wOptions, BUTTON_OPTION_OK, dataManager.GetSysString(1211));
 	btnOptionp = env->addButton(rect<s32>(20, 105, 60, 130), wOptions, BUTTON_OPTION_PREV, L"<<<");
 	btnOptionn = env->addButton(rect<s32>(290, 105, 330, 130), wOptions, BUTTON_OPTION_NEXT, L">>>");
+	for(int i = 0; i < 5; ++i) {
+		btnOption[i] = env->addButton(rect<s32>(10, 30 + 40 * i, 340, 60 + 40 * i), wOptions, BUTTON_OPTION_0 + i, L"");
+	}
 	//pos select
 	wPosSelect = env->addWindow(rect<s32>(340, 200, 935, 410), false, dataManager.GetSysString(561));
 	wPosSelect->getCloseButton()->setVisible(false);
@@ -1441,7 +1444,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 		memset(&cd, 0, sizeof(CardData));
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	imgCard->setScaleImage(true);
-	if(cd.alias != 0 && (cd.alias - code < 10 || code - cd.alias < 10))
+	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
 	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
 	stName->setText(formatBuffer);
@@ -1496,11 +1499,10 @@ void Game::ShowCardInfo(int code, bool resize) {
 		}
 		stDataInfo->setText(formatBuffer);
 		int offset_arrows = 0;
-		if(cd.type & TYPE_LINK && cd.level > 5 && window_size.Width < 1290.0)
+		irr::core::dimension2d<unsigned int> dtxt = mainGame->guiFont->getDimension(formatBuffer);
+		if(dtxt.Width > (300 * xScale - 13) - 15)
 			offset_arrows = 15;
 		stDataInfo->setRelativePosition(rect<s32>(15, 60, 300 * xScale - 13, (83 + offset_arrows)));
-		//stSetName->setRelativePosition(rect<s32>(15, (83 + offset_arrows) * yScale, 296 * xScale, (83 + offset_arrows) * yScale + offset));
-		//stText->setRelativePosition(rect<s32>(15, (83 + offset_arrows) * yScale + offset, 287 * xScale, 324 * yScale));
 		stSetName->setRelativePosition(rect<s32>(15, (83 + offset_arrows), 296 * xScale, (83 + offset_arrows) + offset));
 		stText->setRelativePosition(rect<s32>(15, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
 		scrCardText->setRelativePosition(rect<s32>(287 * xScale - 20, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
