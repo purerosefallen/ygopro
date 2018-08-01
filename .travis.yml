@@ -111,13 +111,16 @@ before_deploy:
 - bash -c "grep '.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
 - cd ..
 
+- git clone --depth=1 https://github.com/purerosefallen/ygopro-database
+- mv -f ygopro-database/locales .
+
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sed -i "s/c:\/windows/./g" ./system.conf;
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot bot.conf bot > /dev/null;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sed -i "" "s/c:\/windows/./g" ./system.conf;
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot bot.conf bot > /dev/null;
+    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
   fi
 
 deploy:
