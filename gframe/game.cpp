@@ -84,8 +84,10 @@ bool Game::Initialize() {
 	if(!imageManager.Initial())
 		return false;
 	LoadExpansionDB();
+	if(dataManager.LoadDB(GetLocaleDir("cards.cdb"))) {} else
 	if(!dataManager.LoadDB("cards.cdb"))
 		return false;
+	if(dataManager.LoadStrings(GetLocaleDir("strings.conf"))) {} else
 	if(!dataManager.LoadStrings("strings.conf"))
 		return false;
 	dataManager.LoadStrings("./expansions/strings.conf");
@@ -338,6 +340,10 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1287));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
+	posY += 30;
+	env->addStaticText(dataManager.GetSysString(1288), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
+	cbLocale = env->addComboBox(rect<s32>(posX + 160, posY + 4, posX + 260, posY + 21), tabSystem, COMBOBOX_LOCALE);
+	RefreshLocales();
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1048,11 +1054,48 @@ void Game::RefreshSingleplay() {
 	closedir(dir);
 #endif
 }
+void Game::RefreshLocales() {
+	cbLocale->clear();
+	cbLocale->addItem(L"default");
+#ifdef _WIN32
+	WIN32_FIND_DATAW fdataw;
+	HANDLE fh = FindFirstFileW(L"./locales/*", &fdataw);
+	if(fh == INVALID_HANDLE_VALUE)
+		return;
+	do {
+		if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && wcscmp(fdataw.cFileName, L".") && wcscmp(fdataw.cFileName, L".."))
+			cbLocale->addItem(fdataw.cFileName);
+	} while(FindNextFileW(fh, &fdataw));
+	FindClose(fh);
+#else
+	DIR * dir;
+	struct dirent * dirp;
+	if((dir = opendir("./locales/")) == NULL)
+		return;
+	while((dirp = readdir(dir)) != NULL) {
+		size_t len = strlen(dirp->d_name);
+		wchar_t wname[256];
+		BufferIO::DecodeUTF8(dirp->d_name, wname);
+		if(!wcscmp(wname, L".") || !wcscmp(wname, L".."))
+			continue;
+		cbLocale->addItem(wname);
+	}
+	closedir(dir);
+#endif
+	for(size_t i = 0; i < cbLocale->getItemCount(); ++i) {
+		if(!wcscmp(cbLocale->getItem(i), gameConf.locale)) {
+			cbLocale->setSelected(i);
+			break;
+		}
+	}
+}
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
 		return;
 	botInfo.clear();
-	FILE* fp = fopen("bot.conf", "r");
+	FILE* fp = fopen(GetLocaleDir("bot.conf"), "r");
+	if(!fp)
+		fp = fopen("bot.conf", "r");
 	char linebuf[256];
 	char strbuf[256];
 	if(fp) {
@@ -1239,6 +1282,9 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
+				} else if (!strcmp(strbuf, "locale")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.locale, 64);
 				}
 			}
 		}
@@ -1346,6 +1392,9 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
+				} else if (!strcmp(strbuf, "locale")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.locale, 64);
 				}
 			}
 		}
@@ -1421,6 +1470,8 @@ void Game::SaveConfig() {
 #endif
 	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
 	fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
+	BufferIO::EncodeUTF8(gameConf.locale, linebuf);
+	fprintf(fp, "locale = %s\n", linebuf);
 	fclose(fp);
 }
 void Game::ShowCardInfo(int code, bool resize) {
@@ -1638,6 +1689,8 @@ void Game::initUtils() {
 	MakeDirectory("sound/custom");
 	MakeDirectory("sound/BGM/custom");
 #endif
+	//locales
+	MakeDirectory("locales");
 	//pics
 	MakeDirectory("pics");
 	MakeDirectory("pics/field");
@@ -1808,6 +1861,7 @@ void Game::OnResize() {
 	//sound / music volume bar
 	scrSoundVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
 	scrMusicVolume->setRelativePosition(recti(20 + 126, 260 + 4, 20 + (300 * xScale) - 40, 260 + 21));
+	cbLocale->setRelativePosition(recti(20 + 160, 350 + 4, 20 + (300 * xScale) - 40, 350 + 21));
 
 	if(gameConf.resize_popup_menu) {
 		int width = 100 * mainGame->xScale;
@@ -2003,6 +2057,16 @@ void Game::takeScreenshot() {
 		image->drop();
 	} else
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
+}
+const char* Game::GetLocaleDir(const char* dir) {
+	if(!gameConf.locale || !wcscmp(gameConf.locale, L"default"))
+		return dir;
+	wchar_t locale_buf[256];
+	wchar_t orig_dir[64];
+	BufferIO::DecodeUTF8(dir, orig_dir);
+	myswprintf(locale_buf, L"locales/%ls/%ls", gameConf.locale, orig_dir);
+	BufferIO::EncodeUTF8(locale_buf, locale_buf_utf8);
+	return locale_buf_utf8;
 }
 void Game::SetCursor(ECURSOR_ICON icon) {
 	ICursorControl* cursor = mainGame->device->getCursorControl();

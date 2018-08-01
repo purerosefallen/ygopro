@@ -1906,6 +1906,17 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			}
 			break;
 		}
+		case irr::gui::EGET_COMBO_BOX_CHANGED: {
+			switch(id) {
+			case COMBOBOX_LOCALE: {
+				myswprintf(mainGame->gameConf.locale, L"%ls",  mainGame->cbLocale->getItem(mainGame->cbLocale->getSelected()));
+				mainGame->SaveConfig();
+				return true;
+				break;
+			}
+			}
+			break;
+		}
 		case irr::gui::EGET_EDITBOX_ENTER: {
 			switch(id) {
 			case EDITBOX_CHAT: {

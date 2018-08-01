@@ -59,6 +59,7 @@
 /sound/BGM
 /update
 /update*
+/locales
 
 # ygopro main program
 /ygopro
