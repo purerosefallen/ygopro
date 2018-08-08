@@ -6,7 +6,7 @@
 #include "image_manager.h"
 #include "game.h"
 #include "materials.h"
-#include "../ocgcore/field.h"
+#include "../ocgcore/common.h"
 
 namespace ygo {
 
@@ -592,7 +592,7 @@ void ClientField::ShowLocationCard() {
 }
 void ClientField::ShowSelectOption(int select_hint) {
 	selected_option = 0;
-	wchar_t textBuffer[356];
+	wchar_t textBuffer[256];
 	int count = select_options.size();
 	bool quickmode = (count <= 5);
 	mainGame->gMutex.Lock();
