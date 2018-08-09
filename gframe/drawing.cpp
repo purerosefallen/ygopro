@@ -1181,7 +1181,7 @@ void Game::DrawDeckBd() {
 	//synchro count
 	if(imageManager.tCardType)
 		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(645, 440, 645+14+3/8, 460), recti(23, 32, 46, 64), 0, 0, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_SYNCHRO)], Resize(671, 441, 690, 461), Resize(0, 1, 1, 0), 0xffffffff, 0xff000000, true, false);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_SYNCHRO)], Resize(670, 441, 690, 461), Resize(0, 1, 1, 0), 0xffffffff, 0xff000000, true, false);
 	//XYZ count
 	if(imageManager.tCardType)
 		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(695, 440, 695+14+3/8, 460), recti(46, 32, 69, 64), 0, 0, true);
