@@ -13,6 +13,7 @@ bool ImageManager::Initial() {
 
 	tCover[0] = NULL;
 	tCover[1] = NULL;
+	tCover[2] = NULL;
 	//tUnknown = NULL;
 	tUnknown[0] = NULL;
 	tUnknown[1] = NULL;
@@ -40,6 +41,7 @@ bool ImageManager::Initial() {
 	tBackGround = NULL;
 	tBackGround_menu = NULL;
 	tBackGround_deck = NULL;
+	tCardType = driver->getTexture("textures/cardtype.png");
 	tField[0] = driver->getTexture("textures/field2.png");
 	tFieldTransparent[0] = driver->getTexture("textures/field-transparent2.png");
 	tField[1] = driver->getTexture("textures/field3.png");
@@ -193,6 +195,12 @@ void ImageManager::ResizeTexture() {
 		tCover[1] = GetRandomImage(TEXTURE_COVER_S, imgWidth, imgHeight);
 	if(!tCover[1])
 		tCover[1] = tCover[0];
+	if(!tCover[2])
+		tCover[2] = GetRandomImage(TEXTURE_COVER_S, CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
+	if(!tCover[2])
+		tCover[2] = GetTextureFromFile("textures/cover.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
+	if(!tCover[2])
+		tCover[2] = tCover[0];
 	//driver->removeTexture(tUnknown);
 	//tUnknown = GetTextureFromFile("textures/unknown.jpg", imgWidth, imgHeight);
 	driver->removeTexture(tBackGround);

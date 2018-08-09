@@ -1130,22 +1130,25 @@ void Game::DrawThumb(code_pointer cp, position2di pos, std::unordered_map<int, i
 void Game::DrawDeckBd() {
 	wchar_t textBuffer[64];
 	//main deck
-	driver->draw2DRectangle(Resize(310, 137, 797, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
-	driver->draw2DRectangleOutline(Resize(309, 136, 797, 157));
+	driver->draw2DRectangle(Resize(310, 137, 410, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(309, 136, 410, 157));
 	DrawShadowText(textFont, dataManager.GetSysString(1330), Resize(315, 137, 410, 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.main.size()], Resize(380, 138, 440, 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	//type count 2DRectangle
+	driver->draw2DRectangle(Resize(638, 137, 797, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(637, 136, 797, 157));
 	//monster count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1312));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 3) - (25 * 3), 137, 797 - (55 * 2) - (25 * 3), 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_MONSTER)], Resize(797 - (55 * 2) - (25 * 3), 138, 797 - (55 * 2) - (25 * 2), 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(645, 136, 645+14+3/8, 156), recti(0, 0, 23, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_MONSTER)], Resize(670, 137, 690, 157), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 	//spell count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1313));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 2) - (25 * 2), 137, 797 - (55 * 1) - (25 * 2), 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_SPELL)], Resize(797 - (55 * 1) - (25 * 2), 138, 797 - (55 * 1) - (25 * 1), 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	//trap count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1314));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 1) - (25 * 1), 137, 797 - (55 * 0) - (25 * 1), 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_TRAP)], Resize(797 - (55 * 0) - (25 * 1), 138, 797 - (55 * 0) - (25 * 0), 158), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(695, 136, 695+14+3/8, 156), recti(23, 0, 46, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_SPELL)], Resize(720, 137, 740, 157), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
+    //trap count
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(745, 136, 745+14+3/8, 156), recti(46, 0, 69, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.main, TYPE_TRAP)], Resize(770, 137, 790, 157), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 
 	driver->draw2DRectangle(Resize(310, 160, 797, 436), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 159, 797, 436));
@@ -1164,26 +1167,29 @@ void Game::DrawDeckBd() {
 			driver->draw2DRectangleOutline(Resize(313 + (i % lx) * dx, 163 + (i / lx) * 68, 359 + (i % lx) * dx, 228 + (i / lx) * 68));
 	}
 	//extra deck
-	driver->draw2DRectangle(Resize(310, 440, 797, 460), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
-	driver->draw2DRectangleOutline(Resize(309, 439, 797, 460));
+	driver->draw2DRectangle(Resize(310, 440, 410, 460), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(309, 439, 410, 460));
 	DrawShadowText(textFont, dataManager.GetSysString(1331), Resize(315, 440, 410, 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.extra.size()], Resize(380, 441, 440, 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	//type count 2DRectangle
+	driver->draw2DRectangle(Resize(582, 440, 797, 460), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(581, 439, 797, 460));
 	//fusion count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1056));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 4) - (25 * 4), 440, 797 - (55 * 3) - (25 * 4), 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_FUSION)], Resize(797 - (55 * 3) - (25 * 4), 441, 797 - (55 * 3) - (25 * 3), 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(595, 440, 595+14+3/8, 460), recti(0, 32, 23, 64), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_FUSION)], Resize(620, 440, 640, 460), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 	//synchro count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1063));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 3) - (25 * 3), 440, 797 - (55 * 2) - (25 * 3), 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_SYNCHRO)], Resize(797 - (55 * 2) - (25 * 3), 441, 797 - (55 * 2) - (25 * 2), 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	//xyz count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1073));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 2) - (25 * 2), 440, 797 - (55 * 1) - (25 * 2), 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_XYZ)], Resize(797 - (55 * 1) - (25 * 2), 441, 797 - (55 * 1) - (25 * 1), 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(645, 440, 645+14+3/8, 460), recti(23, 32, 46, 64), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_SYNCHRO)], Resize(670, 440, 690, 460), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
+	//XYZ count
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(695, 440, 695+14+3/8, 460), recti(46, 32, 69, 64), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_XYZ)], Resize(720, 440, 740, 460), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 	//link count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1076));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 1) - (25 * 1), 440, 797 - (55 * 0) - (25 * 1), 460), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_LINK)], Resize(797 - (55 * 0) - (25 * 1), 441, 797 - (55 * 0) - (25 * 0), 461), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(745, 440, 745+14+3/8, 460), recti(0, 64, 23, 96), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.extra, TYPE_LINK)], Resize(770, 440, 790, 460), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 
 	driver->draw2DRectangle(Resize(310, 463, 797, 533), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 462, 797, 533));
@@ -1196,22 +1202,25 @@ void Game::DrawDeckBd() {
 			driver->draw2DRectangleOutline(Resize(313 + i * dx, 465, 359 + i * dx, 531));
 	}
 	//side deck
-	driver->draw2DRectangle(Resize(310, 537, 797, 557), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
-	driver->draw2DRectangleOutline(Resize(309, 536, 797, 557));
+	driver->draw2DRectangle(Resize(310, 537, 410, 557), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(309, 536, 410, 557));
 	DrawShadowText(textFont, dataManager.GetSysString(1332), Resize(315, 537, 410, 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	DrawShadowText(numFont, dataManager.numStrings[deckManager.current_deck.side.size()], Resize(380, 538, 440, 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	//type count 2DRectangle
+	driver->draw2DRectangle(Resize(638, 537, 797, 557), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
+	driver->draw2DRectangleOutline(Resize(637, 536, 797, 557));
 	//monster count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1312));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 3) - (25 * 3), 537, 797 - (55 * 2) - (25 * 3), 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_MONSTER)], Resize(797 - (55 * 2) - (25 * 3), 538, 797 - (55 * 2) - (25 * 2), 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(645, 537, 645+14+3/8, 557), recti(0, 0, 23, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_MONSTER)], Resize(670, 537, 690, 557), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 	//spell count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1313));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 2) - (25 * 2), 537, 797 - (55 * 1) - (25 * 2), 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_SPELL)], Resize(797 - (55 * 1) - (25 * 2), 538, 797 - (55 * 1) - (25 * 1), 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	//trap count
-	myswprintf(textBuffer, L"%ls:", dataManager.GetSysString(1314));
-	DrawShadowText(textFont, textBuffer, Resize(797 - (55 * 1) - (25 * 1), 537, 797 - (55 * 0) - (25 * 1), 557), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
-	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_TRAP)], Resize(797 - (55 * 0) - (25 * 1), 538, 797 - (55 * 0) - (25 * 0), 558), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(695, 537, 695+14+3/8, 557), recti(23, 0, 46, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_SPELL)], Resize(720, 537, 740, 557), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
+    //trap count
+	if(imageManager.tCardType)
+		driver->draw2DImage(imageManager.tCardType, ResizeCardHint(745, 537, 745+14+3/8, 557), recti(46, 0, 69, 32), 0, 0, true);
+	DrawShadowText(numFont, dataManager.numStrings[deckManager.TypeCount(deckManager.current_deck.side, TYPE_TRAP)], Resize(770, 537, 790, 557), Resize(0, 1, 2, 0), 0xffffffff, 0xff000000, true, false);
 
 	driver->draw2DRectangle(Resize(310, 560, 797, 630), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(309, 559, 797, 630));
