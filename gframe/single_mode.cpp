@@ -852,9 +852,20 @@ void SingleMode::SinglePlayReload() {
 	mainGame->dField.UpdateFieldCard(mainGame->LocalPlayer(1), LOCATION_REMOVED, (char*)queryBuffer);
 }
 byte* SingleMode::ScriptReaderEx(const char* script_name, int* slen) {
-	char sname[256] = "./expansions";
-	strcat(sname, script_name + 1);//default script name: ./script/c%d.lua
-	if(ScriptReader(sname, slen))
+	char sname[256] = "./specials";
+	strcat(sname, script_name + 8);//default script name: ./script/c%d.lua
+	byte* buffer = ScriptReader(sname, slen);
+	if(!buffer) {
+		char sname[256] = "./expansions";
+		strcat(sname, script_name + 1);
+		buffer = ScriptReader(sname, slen);
+	}
+	if(!buffer) {
+		char sname[256] = "./beta";
+ 		strcat(sname, script_name + 1);
+ 		buffer = ScriptReader(sname, slen);
+ 	}
+	if(buffer)
 		return buffer;
 	else
 		return ScriptReader(script_name, slen);

@@ -14,13 +14,13 @@ install:
   - move libevent-2.0.22-stable event
   - xcopy /E event\WIN32-Code event\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.4.tar.gz ; exit 0"
-  - tar xf lua-5.3.4.tar.gz
-  - move lua-5.3.4\src lua
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.5.tar.gz ; exit 0"
+  - tar xf lua-5.3.5.tar.gz
+  - move lua-5.3.5\src lua
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3210000.zip ; exit 0"
-  - 7z x sqlite-amalgamation-3210000.zip
-  - move sqlite-amalgamation-3210000 sqlite3
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2018/sqlite-amalgamation-3240000.zip ; exit 0"
+  - 7z x -y sqlite-amalgamation-3240000.zip
+  - move sqlite-amalgamation-3240000 sqlite3
   
   - appveyor DownloadFile https://github.com/tronkko/dirent/raw/master/include/dirent.h
   - move dirent.h gframe\
@@ -60,7 +60,7 @@ deploy:
 cache:
   - premake-5.0.0-alpha12-windows.zip
   - libevent-2.0.22-stable.tar.gz
-  - freetype-2.8.1.tar.bz2
+  - freetype-2.9.1.tar.bz2
   - irrlicht-1.8.4.zip
-  - lua-5.3.4.tar.gz
-  - sqlite-amalgamation-3210000.zip
+  - lua-5.3.5.tar.gz
+  - sqlite-amalgamation-3240000.zip

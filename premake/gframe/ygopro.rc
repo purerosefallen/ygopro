@@ -1,8 +1,8 @@
 1 ICON "ygopro.ico"
 
 1 VERSIONINFO
-FILEVERSION 1, 0, 34, 4
-PRODUCTVERSION 1, 0, 34, 4
+FILEVERSION 1, 0, 34, 5
+PRODUCTVERSION 1, 0, 34, 5
 FILEOS 0x4
 FILETYPE 0x1
 
@@ -16,8 +16,8 @@ VALUE "InternalName", "YGOPRO Server Mode"
 VALUE "LegalCopyright", "Copyright (C) 2018 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "YGOPRO Server Mode"
-VALUE "FileVersion", "1.034.4.Koishi"
-VALUE "ProductVersion", "1.034.4.Koishi"
+VALUE "FileVersion", "1.034.5.Koishi"
+VALUE "ProductVersion", "1.034.5.Koishi"
 END
 END
 BLOCK "VarFileInfo"
