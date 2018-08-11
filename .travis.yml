@@ -26,8 +26,8 @@ before_install:
     brew install freetype libevent sqlite p7zip dylibbundler > /dev/null;
   fi
 
-- curl --location --retry 5 http://www.lua.org/ftp/lua-5.3.4.tar.gz | tar zfx -
-- cd lua-5.3.4
+- curl --location --retry 5 http://www.lua.org/ftp/lua-5.3.5.tar.gz | tar zfx -
+- cd lua-5.3.5
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sudo make macosx test install > /dev/null;
   fi
