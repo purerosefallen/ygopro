@@ -27,7 +27,7 @@
 #include <io.h>
 #endif
 
-unsigned short PRO_VERSION = 0x1344;
+unsigned short PRO_VERSION = 0x1345;
 
 namespace ygo {
 
