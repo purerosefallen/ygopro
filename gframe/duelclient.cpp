@@ -390,6 +390,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->wFilter->setVisible(false);
 		mainGame->wSort->setVisible(false);
+		mainGame->stTip->setVisible(false);
 		mainGame->btnSideOK->setVisible(true);
 		mainGame->btnSideShuffle->setVisible(true);
 		mainGame->btnSideSort->setVisible(true);
