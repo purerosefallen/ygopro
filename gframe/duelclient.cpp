@@ -2885,6 +2885,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	case MSG_CHAIN_DISABLED: {
 		int ct = BufferIO::ReadInt8(pbuf);
 		if(!mainGame->dInfo.isReplaySkiping) {
+			soundManager.PlaySoundEffect(SOUND_NEGATE);
 			mainGame->showcardcode = mainGame->dField.chains[ct - 1].code;
 			mainGame->showcarddif = 0;
 			mainGame->showcard = 3;
