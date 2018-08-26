@@ -126,6 +126,10 @@ void SoundManager::PlaySoundEffect(int sound) {
 		engineSound->play2D("./sound/token.wav");
 		break;
 	}
+	case SOUND_NEGATE: {
+		engineSound->play2D("./sound/negate.wav");
+		break;
+	}
 	case SOUND_ATTACK: {
 		engineSound->play2D("./sound/attack.wav");
 		break;
