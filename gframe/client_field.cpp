@@ -1457,12 +1457,16 @@ void ClientField::UpdateDeclarableCodeType(bool enter) {
 		ancard.push_back(trycode);
 		return;
 	}
-	if((pname[0] == 0 || pname[1] == 0) && !enter)
-		return;
+	bool use_cache = false;
+	if(pname[0] == 0 || pname[1] == 0) {
+		if(!enter)
+			return;
+		use_cache = (mainGame->dInfo.announce_cache.size() != 0);
+	}
 	mainGame->lstANCard->clear();
 	ancard.clear();
 	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos) {
+		if((!use_cache && cit->second.name.find(pname) != std::wstring::npos) || (use_cache && std::find(mainGame->dInfo.announce_cache.begin(), mainGame->dInfo.announce_cache.end(), cit->first) != mainGame->dInfo.announce_cache.end())) {
 			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declarable_type)) {
@@ -1489,12 +1493,16 @@ void ClientField::UpdateDeclarableCodeOpcode(bool enter) {
 		ancard.push_back(trycode);
 		return;
 	}
-	if((pname[0] == 0 || pname[1] == 0) && !enter)
-		return;
+	bool use_cache = false;
+	if(pname[0] == 0 || pname[1] == 0) {
+		if(!enter)
+			return;
+		use_cache = (mainGame->dInfo.announce_cache.size() != 0);
+	}
 	mainGame->lstANCard->clear();
 	ancard.clear();
 	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos) {
+		if((!use_cache && cit->second.name.find(pname) != std::wstring::npos) || (use_cache && std::find(mainGame->dInfo.announce_cache.begin(), mainGame->dInfo.announce_cache.end(), cit->first) != mainGame->dInfo.announce_cache.end())) {
 			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, opcode)) {
