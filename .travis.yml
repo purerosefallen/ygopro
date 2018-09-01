@@ -115,11 +115,9 @@ before_deploy:
 - mv -f ygopro-database/locales .
 
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sed -i "s/c:\/windows/./g" ./system.conf;
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    sed -i "" "s/c:\/windows/./g" ./system.conf;
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
   fi
 

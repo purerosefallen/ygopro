@@ -79,8 +79,10 @@ after_build:
 
   - git clone --depth=1 https://github.com/purerosefallen/ygopro-database
   - mv -f ygopro-database/locales .
+  
+  - git clone --depth=1 https://%access_token%@github.com/purerosefallen/fonts
 
-  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures skin deck single pics sound update-koishipro locales WindBot Bot.exe bot.conf
+  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures skin deck single pics sound update-koishipro locales fonts WindBot Bot.exe bot.conf
 
 test: off
 
