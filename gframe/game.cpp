@@ -10,6 +10,7 @@
 #include "netserver.h"
 #include "single_mode.h"
 #include <sstream>
+#include <fstream>
 
 #ifndef _WIN32
 #include <sys/types.h>
