@@ -643,6 +643,9 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 	NetServer::ReSendToPlayer(players[3]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 		NetServer::ReSendToPlayer(*oit);
+#ifdef YGOPRO_SERVER_MODE
+	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
+#endif
 	EndDuel();
 	DuelEndProc();
 	event_del(etimer);
