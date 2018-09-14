@@ -9,8 +9,6 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - libevent-dev
-      - libsqlite3-dev
       - gcc-6
       - g++-6
       - libevent-dev
