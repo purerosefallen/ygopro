@@ -6,14 +6,23 @@ addons:
   ssh_known_hosts:
   - github.com
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libevent-dev
-    - libsqlite3-dev
+      - libevent-dev
+      - libsqlite3-dev
+      - gcc-6
+      - g++-6
+      - libevent-dev
+      - libsqlite3-dev
 env:
 - DATABASE_FILE=cards.cdb
 
 before_install:
 - git submodule update --init --recursive
+- sudo ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
+- sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++
+- g++ --version
 - wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz | tar zfx -
 - wget -O - https://www.lua.org/ftp/lua-5.3.5.tar.gz | tar zfx -; cd lua-5.3.5; sudo make linux install; cd ..
 script:
