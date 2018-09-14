@@ -7,20 +7,25 @@ dist: trusty
 osx_image: xcode8
 addons:
   ssh_known_hosts:
-  - github.com
+    - github.com
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libfreetype6-dev
-    - libevent-dev
-    - libsqlite3-dev
-    - libirrlicht-dev
-    - libgl1-mesa-dev
-    - libglu-dev
-    - p7zip-full
+      - gcc-6
+      - g++-6
+      - libfreetype6-dev
+      - libevent-dev
+      - libsqlite3-dev
+      - libirrlicht-dev
+      - libgl1-mesa-dev
+      - libglu-dev
+      - p7zip-full
 env:
 - USE_IRRKLANG=1
 before_install:
 - git submodule update --init --recursive
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/bin/gcc-6 /usr/local/bin/gcc; sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update > /dev/null;
     brew install freetype libevent sqlite p7zip dylibbundler > /dev/null;
