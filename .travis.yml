@@ -10,13 +10,13 @@ addons:
   - github.com
   apt:
     packages:
-    - libfreetype6-dev
-    - libevent-dev
-    - libsqlite3-dev
-    - libirrlicht-dev
-    - libgl1-mesa-dev
-    - libglu-dev
-    - p7zip-full
+      - libfreetype6-dev
+      - libevent-dev
+      - libsqlite3-dev
+      - libirrlicht-dev
+      - libgl1-mesa-dev
+      - libglu-dev
+      - p7zip-full
 env:
 - USE_IRRKLANG=1
 before_install:
