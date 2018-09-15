@@ -195,7 +195,13 @@ void Game::DrawBackGround() {
 				DrawLinkedZones(pcard);
 			}
 		} else if (dField.hovered_location == LOCATION_SZONE)
+		{
 			vertex = matManager.vFieldSzone[dField.hovered_controler][dField.hovered_sequence][rule];
+			ClientCard* pcard = dField.szone[dField.hovered_controler][dField.hovered_sequence];
+			if(pcard && pcard->link_marker) {
+				DrawSpellLinkedZones(pcard);
+			}
+		}
 		else if (dField.hovered_location == LOCATION_GRAVE)
 			vertex = matManager.vFieldGrave[dField.hovered_controler][rule];
 		else if (dField.hovered_location == LOCATION_REMOVED)
@@ -288,6 +294,23 @@ void Game::DrawLinkedZones(ClientCard* pcard) {
 			pcard2 = dField.mzone[1 - dField.hovered_controler][2 - swap];
 			CheckMutual(pcard2, LINK_MARKER_TOP_RIGHT);
 			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[1 - dField.hovered_controler][2 - swap], 4, matManager.iRectangle, 2);
+		}
+	}
+}
+void Game::DrawSpellLinkedZones(ClientCard* pcard) {
+	int mark = pcard->link_marker;
+	if (dField.hovered_sequence < 5) {
+		if ((mark & LINK_MARKER_TOP_LEFT) && dField.hovered_sequence > 0) {
+			CheckMutual(0, 0);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence - 1], 4, matManager.iRectangle, 2);
+		}
+		if (mark & LINK_MARKER_TOP) {
+			CheckMutual(0, 0);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence], 4, matManager.iRectangle, 2);
+		}
+		if ((mark & LINK_MARKER_TOP_RIGHT) && dField.hovered_sequence < 4) {
+			CheckMutual(0, 0);
+			driver->drawVertexPrimitiveList(&matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence + 1], 4, matManager.iRectangle, 2);
 		}
 	}
 }
