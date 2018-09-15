@@ -52,6 +52,7 @@ int SingleMode::SinglePlayThread(void* param) {
 	myswprintf(mainGame->dInfo.strLP[1], L"%d", mainGame->dInfo.lp[1]);
 	BufferIO::CopyWStr(mainGame->ebNickName->getText(), mainGame->dInfo.hostname, 20);
 	mainGame->dInfo.clientname[0] = 0;
+	mainGame->dInfo.player_type = 0;
 	mainGame->dInfo.turn = 0;
 	mainGame->dInfo.announce_cache.clear();
 	char filename[256];
