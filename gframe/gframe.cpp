@@ -12,21 +12,8 @@ bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
 
-void GetParameter(char* param, const char* arg) {
-#ifdef _WIN32
-	wchar_t arg1[260];
-	MultiByteToWideChar(CP_ACP, 0, arg, -1, arg1, 260);
-	BufferIO::EncodeUTF8(arg1, param);
-#else
-	strcpy(param, arg);
-#endif
-}
 void GetParameterW(wchar_t* param, const char* arg) {
-#ifdef _WIN32
-	MultiByteToWideChar(CP_ACP, 0, arg, -1, param, 260);
-#else
 	BufferIO::DecodeUTF8(arg, param);
-#endif
 }
 void ClickButton(irr::gui::IGUIElement* btn) {
 	irr::SEvent event;
@@ -72,19 +59,72 @@ int main(int argc, char* argv[]) {
 	if(!ygo::mainGame->Initialize())
 		return 0;
 
+#ifdef _WIN32
+	wchar_t* command = GetCommandLineW();
+	char buffer[2048];
+	BufferIO::EncodeUTF8(command, buffer);
+	char* p = buffer;
+	argc = 0;
+	int j = 0;
+	bool in_QM = false, in_TEXT = false, in_SPACE = true;
+	while(*p) {
+		if(in_QM) {
+			if(*p == '\"')
+				in_QM = false;
+			else
+				++j;
+		} else {
+			switch(*p) {
+			case '\"': {
+				in_QM = true;
+				in_TEXT = true;
+				if(in_SPACE) {
+					argv[argc] = p + 1;
+					j = 0;
+				}
+				in_SPACE = FALSE;
+				break;
+			}
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r': {
+				if(in_TEXT) {
+					argv[argc][j] = '\0';
+					++argc;
+				}
+				in_TEXT = FALSE;
+				in_SPACE = TRUE;
+				break;
+			}
+			default: {
+				in_TEXT = TRUE;
+				if(in_SPACE) {
+					argv[argc] = p;
+					j = 1;
+				} else
+					++j;
+				in_SPACE = FALSE;
+				break;
+			}
+			}
+		}
+		++p;
+	}
+	argv[argc][j] = '\0';
+	++argc;
+	argv[argc] = NULL;
+#endif // _WIN32
+
 	bool keep_on_return = false;
 	for(int i = 1; i < argc; ++i) {
 		if(argv[i][0] == '-' && argv[i][1] == 'e') {
-			char param[128];
-			GetParameter(param, &argv[i][2]);
-			ygo::dataManager.LoadDB(param);
+			ygo::dataManager.LoadDB(&argv[i][2]);
 			continue;
 		}
 		if(!strcmp(argv[i], "-e")) { // extra database
 			++i;
-			char param[128];
-			GetParameter(param, &argv[i][0]);
-			ygo::dataManager.LoadDB(param);
+			ygo::dataManager.LoadDB(&argv[i][0]);
 			continue;
 		} else if(!strcmp(argv[i], "-n")) { // nickName
 			++i;
