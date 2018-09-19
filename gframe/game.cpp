@@ -114,6 +114,7 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
 \u7A97\u53E3\u7F29\u653E\u3002\n\
+\u589E\u52A0\u52A0\u5FEB\u52A8\u753B\u6548\u679C\u529F\u80FD\u3002\n\
 \n\
 \n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\
 \n\u6548\u679C\u6587\u5185\u82F1\u6587\u6362\u884C\u4F1A\u622A\u65AD\u5355\u8BCD\u3002\n\
@@ -1092,7 +1093,7 @@ void Game::LoadConfig() {
 	gameConf.chkIgnoreDeckChanges = 0;
 	gameConf.defaultOT = 1;
 	gameConf.enable_bot_mode = 0;
-	gameConf.quick_animation = 0;
+	gameConf.quick_animation = 1;
 	gameConf.enable_sound = true;
 	gameConf.sound_volume = 0.5;
 	gameConf.enable_music = true;
