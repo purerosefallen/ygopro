@@ -89,7 +89,6 @@ struct DuelInfo {
 	wchar_t str_card_count[2][16];
 	video::SColor card_count_color[2];
 	bool isReplaySwapped;
-	std::vector<unsigned int> announce_cache;
 };
 
 struct BotInfo {
