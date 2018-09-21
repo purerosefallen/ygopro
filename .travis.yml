@@ -61,7 +61,7 @@ script:
 - cd build
 - make config=release ygopro -j4
 - cd ..
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/debug/ygopro ./; strip ygopro;
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/release/ygopro ./; strip ygopro;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     mkdir -p ygopro.app/Contents/MacOS;
