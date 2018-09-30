@@ -2188,6 +2188,7 @@ void SingleDuel::TestCard(int code) {
 	rnd.reset(seed);
 	unsigned long tduel = create_duel(rnd.rand());
 	preload_script(tduel, "./script/special.lua", 0);
+	preload_script(tduel, "./script/init.lua", 0);
 	set_player_info(tduel, 0, 8000, 5, 1);
 	set_player_info(tduel, 1, 8000, 5, 1);
 	new_card(tduel, code, 0, 0, LOCATION_DECK, 0, POS_FACEUP_ATTACK);
