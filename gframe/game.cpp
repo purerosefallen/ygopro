@@ -1518,7 +1518,7 @@ void Game::SaveConfig() {
 	FILE* fp = fopen("system_user.conf", "w");
 #endif //YGOPRO_COMPAT_MYCARD
 	fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
-	char linebuf[512];
+	char linebuf[256];
 	fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
 	fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
 	fprintf(fp, "pro_version = %d\n", PRO_VERSION);
