@@ -114,7 +114,8 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
 \u7A97\u53E3\u7F29\u653E\u3002\n\
-\u589E\u52A0\u52A0\u5FEB\u52A8\u753B\u6548\u679C\u529F\u80FD\u3002\n\
+\u6295\u964D\u65F6\u786E\u8BA4\u3002\n\
+\u66F4\u6539\u5893\u5730\u7B49\u5904\u5361\u7247\u88AB\u9009\u4E3A\u5BF9\u8C61\u7684\u52A8\u753B\u3002\n\
 \n\
 \n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\
 \n\u6548\u679C\u6587\u5185\u82F1\u6587\u6362\u884C\u4F1A\u622A\u65AD\u5355\u8BCD\u3002\n\
@@ -1188,8 +1189,6 @@ void Game::LoadConfig() {
 			gameConf.window_height = atoi(valbuf);
 		} else if(!strcmp(strbuf, "resize_popup_menu")) {
 			gameConf.resize_popup_menu = atoi(valbuf) > 0;
-		} else if(!strcmp(strbuf, "quick_animation")) {
-			gameConf.quick_animation = atoi(valbuf);
 #ifdef YGOPRO_USE_IRRKLANG
 		} else if(!strcmp(strbuf, "enable_sound")) {
 			gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1267,7 +1266,6 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
-	fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
 #ifdef YGOPRO_USE_IRRKLANG
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
