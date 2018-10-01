@@ -1409,7 +1409,32 @@ void Game::LoadConfig() {
 		}
 		fclose(fp_user);
 	} else {
-		SaveConfig();
+#ifdef _WIN32
+		unsigned int lcid = ((unsigned int)GetSystemDefaultLangID()) & 0xff;
+		switch(lcid) {
+			case 0x04: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"zh-CN");
+				break;
+			}
+			case 0x09: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"en-US");
+				break;
+			}
+			case 0x0a: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"es-ES");
+				break;
+			}
+			case 0x11: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"ja-JP");
+				break;
+			}
+			case 0x12: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"ko-KR");
+				break;
+			}
+		}
+#endif
+		//SaveConfig();
 	}
 #endif //YGOPRO_COMPAT_MYCARD
 }
@@ -1420,7 +1445,7 @@ void Game::SaveConfig() {
 	FILE* fp = fopen("system_user.conf", "w");
 #endif //YGOPRO_COMPAT_MYCARD
 	fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
-	char linebuf[256];
+	char linebuf[512];
 	fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
 	fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
 	fprintf(fp, "pro_version = %d\n", PRO_VERSION);
