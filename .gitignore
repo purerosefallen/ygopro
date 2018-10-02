@@ -78,10 +78,10 @@
 /.vscode
 /bak/
 /output
-/replace.sh
 /temp
 [Tt]humbs.cdb
 
 /PrinterData.txt
-/ygopro_*.bat
-/ygopro_*.sh
+/*.bat
+/*.sh
+/*.txt
