@@ -63,13 +63,13 @@ solution "ygo"
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
 
+    include "lua"
     include "ocgcore"
     include "gframe"
     if os.ishost("windows") then
     include "event"
     include "freetype"
     include "irrlicht"
-    include "lua"
     include "sqlite3"
     if IRRKLANG_PRO then
     include "ikpmp3"
