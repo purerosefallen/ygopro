@@ -741,7 +741,9 @@ extern HostInfo game_info;
 #define TEXTURE_ATTACK				5
 #define TEXTURE_ACTIVATE			6
 
+#ifndef DEFAULT_DUEL_RULE
 #define DEFAULT_DUEL_RULE			4
+#endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
 #endif // GAME_H
