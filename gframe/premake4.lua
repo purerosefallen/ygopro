@@ -4,8 +4,6 @@ project "ygopro"
     kind "ConsoleApp"
 	
     defines { "YGOPRO_SERVER_MODE" }
-    local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
-    if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
     files { "gframe.cpp", "config.h",
             "game.cpp", "game.h",
@@ -26,5 +24,4 @@ project "ygopro"
     configuration "not vs*"
         buildoptions { "-std=c++1y", "-fno-rtti" }
     configuration "not windows"
-        includedirs { "/usr/include/lua", "/usr/include/lua5.3", "/usr/include/lua/5.3" }
         links { "event_pthreads", "dl", "pthread" }
