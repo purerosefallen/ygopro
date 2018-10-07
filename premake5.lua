@@ -4,7 +4,7 @@ solution "ygo"
     objdir "obj"
 
     configurations { "Release", "Debug" }
-    defines { "LUA_COMPAT_5_2" }
+    defines { "LUA_COMPAT_5_2", "LUA_SAFE_MODE" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
         startproject "ygopro"
