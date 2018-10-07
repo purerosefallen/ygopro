@@ -55,6 +55,8 @@ solution "ygo"
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
 
+    startproject "ygopro"
+
     include "lua"
     include "ocgcore"
     include "gframe"
