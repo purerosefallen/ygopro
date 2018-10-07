@@ -2,6 +2,7 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
+    startproject "ygopro"
 
     configurations { "Release", "Debug" }
     defines { "LUA_COMPAT_5_2" }
@@ -50,12 +51,12 @@ solution "ygo"
         --flags { "OptimizeSpeed" }
         targetdir "bin/release"
 
+    include "lua"
     include "ocgcore"
     include "gframe"
     if os.is("windows") then
     include "event"
     include "freetype"
     include "irrlicht"
-    include "lua"
     include "sqlite3"
     end
