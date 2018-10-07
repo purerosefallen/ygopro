@@ -36,7 +36,6 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
-- mv -f irrklang/plugins/ikpmp3 .
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/;
