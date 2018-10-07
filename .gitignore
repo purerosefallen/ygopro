@@ -15,7 +15,6 @@
 /ikpmp3
 /irrklang
 /irrlicht
-/lua
 
 # gframe additionals
 /gframe/ygopro.ico
@@ -85,3 +84,6 @@
 /PrinterData.txt
 /ygopro_*.bat
 /ygopro_*.sh
+
+/*.bat
+/*.sh
