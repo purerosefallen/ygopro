@@ -2,7 +2,7 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    startproject "ygopro"
+    --startproject "ygopro"
 
     configurations { "Release", "Debug" }
     defines { "LUA_COMPAT_5_2" }
