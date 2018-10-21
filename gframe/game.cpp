@@ -487,14 +487,14 @@ bool Game::Initialize() {
 	btnPSAU->setImageScale(core::vector2df(0.5, 0.5));
 	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(155, 45, 295, 185), wPosSelect, BUTTON_POS_AD);
 	btnPSAD->setImageScale(core::vector2df(0.5, 0.5));
-	btnPSAD->setImage(imageManager.tCover[2], rect<s32>(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT));
+	btnPSAD->setImage(imageManager.tCover[2]);
 	btnPSDU = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(300, 45, 440, 185), wPosSelect, BUTTON_POS_DU);
 	btnPSDU->setImageScale(core::vector2df(0.5, 0.5));
 	btnPSDU->setImageRotation(270);
 	btnPSDD = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(445, 45, 585, 185), wPosSelect, BUTTON_POS_DD);
 	btnPSDD->setImageScale(core::vector2df(0.5, 0.5));
 	btnPSDD->setImageRotation(270);
-	btnPSDD->setImage(imageManager.tCover[2], rect<s32>(0, 0, CARD_IMG_WIDTH, CARD_IMG_HEIGHT));
+	btnPSDD->setImage(imageManager.tCover[2]);
 	//card select
 	wCardSelect = env->addWindow(rect<s32>(320, 100, 1000, 400), false, L"");
 	wCardSelect->getCloseButton()->setVisible(false);
@@ -2101,13 +2101,11 @@ recti Game::ResizeWin(s32 x, s32 y, s32 x2, s32 y2, bool chat) {
 	y2 = sy + y;
 	return recti(x, y, x2, y2);
 }
-recti Game::ResizeElem(s32 x, s32 y, s32 x2, s32 y2) {
-	s32 sx = x2 - x;
-	s32 sy = y2 - y;
-	x = (x + sx / 2 - 100) * xScale - sx / 2 + 100;
+recti Game::ResizePhaseHint(s32 x, s32 y, s32 x2, s32 y2, s32 width) {
+	x = x * xScale - width / 2;
 	y = y * yScale;
-	x2 = sx + x;
-	y2 = sy + y;
+	x2 = x2 * xScale;
+	y2 = y2 * yScale;
 	return recti(x, y, x2, y2);
 }
 recti Game::ResizeCard(s32 x, s32 y, s32 x2, s32 y2) {
