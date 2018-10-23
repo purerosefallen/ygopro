@@ -1006,6 +1006,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->ClearCardInfo(mcard->controler);
 				}
 			}
+			if(id == TEXT_CARD_LIST_TIP) {
+				mainGame->stCardListTip->setVisible(true);
+			}
 			break;
 		}
 		case irr::gui::EGET_ELEMENT_LEFT: {
@@ -1019,6 +1022,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				int pos = mainGame->scrDisplayList->getPos() / 10;
 				ClientCard* mcard = display_cards[id - BUTTON_DISPLAY_0 + pos];
 				SetShowMark(mcard, false);
+				mainGame->stCardListTip->setVisible(false);
+			}
+			if(id == TEXT_CARD_LIST_TIP) {
 				mainGame->stCardListTip->setVisible(false);
 			}
 			break;
