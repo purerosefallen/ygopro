@@ -195,6 +195,28 @@ bool Game::Initialize() {
 	btnDeckEdit = env->addButton(rect<s32>(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
 	btnModeExit = env->addButton(rect<s32>(10, 170, 270, 200), wMainMenu, BUTTON_MODE_EXIT, dataManager.GetSysString(1210));
 
+<<<<<<< HEAD
+=======
+	env->addStaticText(L"\u6B64\u7248\u672C\u4E3A233\u670D\u6D4B\u8BD5\u7248\u672C\uFF0C", rect<s32>(10, 220, 270, 240), false, false, wMainMenu);
+	env->addStaticText(L"\u9047\u5230\u95EE\u9898\u8BF7\u52A1\u5FC5\u53CD\u9988\uFF0C\u7FA4\uFF1A275986039\u3002", rect<s32>(10, 240, 270, 260), false, false, wMainMenu);
+	env->addStaticText(L"\u4E0D\u8981\u89C9\u5F97\u4F1A\u6709\u522B\u4EBA\u62A5\u544A\uFF0C\u522B\u4EBA\u4E5F\u4F1A\u8FD9\u4E48\u60F3\u3002", rect<s32>(10, 260, 270, 280), false, false, wMainMenu);
+
+	env->addStaticText(L"\u6B64\u7248\u672C\u4F1A\u4E0D\u5B9A\u671F\u66F4\u65B0\uFF0C", rect<s32>(10, 300, 270, 320), false, false, wMainMenu);
+	env->addStaticText(L"\u5EFA\u8BAE\u968F\u65F6\u5728233\u670D\u5B98\u7F51\u4E0B\u8F7D\u6700\u65B0\u7248\u672C\uFF01", rect<s32>(10, 320, 270, 340), false, false, wMainMenu);
+
+	env->addStaticText(L"\u7F51\u5740\uFF1A", rect<s32>(10, 340, 270, 360), false, false, wMainMenu);
+	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
+
+	env->addStaticText(L"\u76EE\u524D\u6D4B\u8BD5\u7684\u5185\u5BB9\uFF1A\n\n\
+\u7A97\u53E3\u7F29\u653E\u3002\n\
+\n\
+\u6295\u964D\u65F6\u786E\u8BA4\u3002\n\
+\n\
+\n\u5DF2\u77E5\u95EE\u9898\uFF1A\n\
+\n\u6548\u679C\u6587\u5185\u82F1\u6587\u6362\u884C\u4F1A\u622A\u65AD\u5355\u8BCD\u3002\n\
+", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
+
+>>>>>>> 3683554b43a5189795ad018b83b87c0247dc3e0c
 	//lan mode
 	wLanWindow = env->addWindow(rect<s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
 	wLanWindow->getCloseButton()->setVisible(false);
