@@ -750,7 +750,7 @@ bool Game::Initialize() {
 	stTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stTip->setVisible(false);
 	//tip for cards in select / display list
-	stCardListTip = env->addStaticText(L"", rect<s32>(0, 0, 150, 150), false, true, wCardSelect, -1, true);
+	stCardListTip = env->addStaticText(L"", rect<s32>(0, 0, 150, 150), false, true, wCardSelect, TEXT_CARD_LIST_TIP, true);
 	stCardListTip->setBackgroundColor(0xc0ffffff);
 	stCardListTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stCardListTip->setVisible(false);
@@ -1954,6 +1954,7 @@ void Game::OnResize() {
 	s32 tabHelperLastY = elmTabHelperLast->getRelativePosition().LowerRightCorner.Y;
 	if(tabHelperLastY > tabHelperPos.LowerRightCorner.Y) {
 		scrTabHelper->setMax(tabHelperLastY - tabHelperPos.LowerRightCorner.Y + 5);
+		scrTabHelper->setPos(0);
 		scrTabHelper->setVisible(true);
 	}
 	else
@@ -1965,6 +1966,7 @@ void Game::OnResize() {
 	s32 tabSystemLastY = elmTabSystemLast->getRelativePosition().LowerRightCorner.Y;
 	if(tabSystemLastY > tabSystemPos.LowerRightCorner.Y) {
 		scrTabSystem->setMax(tabSystemLastY - tabSystemPos.LowerRightCorner.Y + 5);
+		scrTabSystem->setPos(0);
 		scrTabSystem->setVisible(true);
 	} else
 		scrTabSystem->setVisible(false);
