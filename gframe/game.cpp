@@ -270,14 +270,24 @@ bool Game::Initialize() {
 	scrCardText->setSmallStep(1);
 	scrCardText->setVisible(false);
 	//log
-	irr::gui::IGUITab* tabLog =  wInfos->addTab(dataManager.GetSysString(1271));
+	irr::gui::IGUITab* tabLog = wInfos->addTab(dataManager.GetSysString(1271));
 	lstLog = env->addListBox(rect<s32>(10, 10, 290, 290), tabLog, LISTBOX_LOG, false);
 	lstLog->setItemHeight(18);
 	btnClearLog = env->addButton(rect<s32>(160, 300, 260, 325), tabLog, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
 	//helper
-	irr::gui::IGUITab* tabHelper = wInfos->addTab(dataManager.GetSysString(1298));
-	int posX = 20;
-	int posY = 20;
+	irr::gui::IGUITab* _tabHelper = wInfos->addTab(dataManager.GetSysString(1298));
+	_tabHelper->setRelativePosition(recti(16, 49, 299, 362));
+	tabHelper = env->addWindow(recti(0, 0, 250, 300), false, L"", _tabHelper);
+	tabHelper->setDrawTitlebar(false);
+	tabHelper->getCloseButton()->setVisible(false);
+	tabHelper->setDrawBackground(false);
+	tabHelper->setDraggable(false);
+	scrTabHelper = env->addScrollBar(false, rect<s32>(252, 0, 272, 300), _tabHelper, SCROLL_TAB_HELPER);
+	scrTabHelper->setLargeStep(1);
+	scrTabHelper->setSmallStep(1);
+	scrTabHelper->setVisible(false);
+	int posX = 0;
+	int posY = 0;
 	chkMAutoPos = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1274));
 	chkMAutoPos->setChecked(gameConf.chkMAutoPos != 0);
 	posY += 30;
@@ -295,9 +305,20 @@ bool Game::Initialize() {
 	posY += 30;
 	chkQuickAnimation = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
 	chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
+	elmTabHelperLast = chkQuickAnimation;
 	//system
-	irr::gui::IGUITab* tabSystem = wInfos->addTab(dataManager.GetSysString(1273));
-	posY = 20;
+	irr::gui::IGUITab* _tabSystem = wInfos->addTab(dataManager.GetSysString(1273));
+	_tabSystem->setRelativePosition(recti(16, 49, 299, 362));
+	tabSystem = env->addWindow(recti(0, 0, 250, 300), false, L"", _tabSystem);
+	tabSystem->setDrawTitlebar(false);
+	tabSystem->getCloseButton()->setVisible(false);
+	tabSystem->setDrawBackground(false);
+	tabSystem->setDraggable(false);
+	scrTabSystem = env->addScrollBar(false, rect<s32>(252, 0, 272, 300), _tabSystem, SCROLL_TAB_SYSTEM);
+	scrTabSystem->setLargeStep(1);
+	scrTabSystem->setSmallStep(1);
+	scrTabSystem->setVisible(false);
+	posY = 0;
 	chkIgnore1 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
 	chkIgnore1->setChecked(gameConf.chkIgnore1 != 0);
 	posY += 30;
@@ -317,14 +338,14 @@ bool Game::Initialize() {
 	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 120, posY + 28), false, false, tabSystem);
-	btnWinResizeS = env->addButton(rect<s32>(posX + 125, posY, posX + 155, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
-	btnWinResizeM = env->addButton(rect<s32>(posX + 160, posY, posX + 190, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
-	btnWinResizeL = env->addButton(rect<s32>(posX + 195, posY, posX + 225, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
-	btnWinResizeXL = env->addButton(rect<s32>(posX + 230, posY, posX + 260, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
+	btnWinResizeS = env->addButton(rect<s32>(posX + 115, posY, posX + 145, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
+	btnWinResizeM = env->addButton(rect<s32>(posX + 150, posY, posX + 180, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
+	btnWinResizeL = env->addButton(rect<s32>(posX + 185, posY, posX + 215, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
+	btnWinResizeXL = env->addButton(rect<s32>(posX + 220, posY, posX + 250, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
-	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrSoundVolume->setMax(100);
 	scrSoundVolume->setMin(0);
 	scrSoundVolume->setPos(gameConf.sound_volume * 100);
@@ -333,7 +354,7 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnableMusic = env->addCheckBox(gameConf.enable_music, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
 	chkEnableMusic->setChecked(gameConf.enable_music);
-	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 126, posY + 4, posX + 260, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrMusicVolume->setMax(100);
 	scrMusicVolume->setMin(0);
 	scrMusicVolume->setPos(gameConf.music_volume * 100);
@@ -349,6 +370,7 @@ bool Game::Initialize() {
 	env->addStaticText(dataManager.GetSysString(1288), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
 	cbLocale = env->addComboBox(rect<s32>(posX + 160, posY + 4, posX + 260, posY + 21), tabSystem, COMBOBOX_LOCALE);
 	RefreshLocales();
+	elmTabSystemLast = cbLocale;
 	//
 	wHand = env->addWindow(rect<s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1922,9 +1944,35 @@ void Game::OnResize() {
 	stHintMsg->setRelativePosition(ResizeWin(500, 60, 820, 90));
 
 	//sound / music volume bar
+<<<<<<< HEAD
 	scrSoundVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
 	scrMusicVolume->setRelativePosition(recti(20 + 126, 260 + 4, 20 + (300 * xScale) - 40, 260 + 21));
 	cbLocale->setRelativePosition(recti(20 + 160, 350 + 4, 20 + (300 * xScale) - 40, 350 + 21));
+=======
+	//scrSoundVolume->setRelativePosition(recti(20 + 126, 230 + 4, 20 + (300 * xScale) - 40, 230 + 21));
+	//scrMusicVolume->setRelativePosition(recti(20 + 126, 260 + 4, 20 + (300 * xScale) - 40, 260 + 21));
+
+	recti tabHelperPos = recti(0, 0, 300 * xScale - 50, 365 * yScale - 65);
+	tabHelper->setRelativePosition(tabHelperPos);
+	scrTabHelper->setRelativePosition(recti(tabHelperPos.LowerRightCorner.X + 2, 0, tabHelperPos.LowerRightCorner.X + 22, tabHelperPos.LowerRightCorner.Y));
+	s32 tabHelperLastY = elmTabHelperLast->getRelativePosition().LowerRightCorner.Y;
+	if(tabHelperLastY > tabHelperPos.LowerRightCorner.Y) {
+		scrTabHelper->setMax(tabHelperLastY - tabHelperPos.LowerRightCorner.Y + 5);
+		scrTabHelper->setVisible(true);
+	}
+	else
+		scrTabHelper->setVisible(false);
+
+	recti tabSystemPos = recti(0, 0, 300 * xScale - 50, 365 * yScale - 65);
+	tabSystem->setRelativePosition(tabSystemPos);
+	scrTabSystem->setRelativePosition(recti(tabSystemPos.LowerRightCorner.X + 2, 0, tabSystemPos.LowerRightCorner.X + 22, tabSystemPos.LowerRightCorner.Y));
+	s32 tabSystemLastY = elmTabSystemLast->getRelativePosition().LowerRightCorner.Y;
+	if(tabSystemLastY > tabSystemPos.LowerRightCorner.Y) {
+		scrTabSystem->setMax(tabSystemLastY - tabSystemPos.LowerRightCorner.Y + 5);
+		scrTabSystem->setVisible(true);
+	} else
+		scrTabSystem->setVisible(false);
+>>>>>>> 3c8884ade09d573630336c08e3a1ac83340e96a1
 
 	if(gameConf.resize_popup_menu) {
 		int width = 100 * mainGame->xScale;
