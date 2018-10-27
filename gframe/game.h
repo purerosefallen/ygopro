@@ -46,10 +46,14 @@ struct Config {
 	int defaultOT;
 	int enable_bot_mode;
 	int quick_animation;
+<<<<<<< HEAD
 	bool window_maximized;
 	int window_width;
 	int window_height;
 	bool resize_popup_menu;
+=======
+	int auto_save_replay;
+>>>>>>> a5ab7da15d69d9d2f622551c053ae64081f9e1d4
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
@@ -292,9 +296,13 @@ public:
 	irr::gui::IGUICheckBox* chkAutoChain;
 	irr::gui::IGUICheckBox* chkWaitChain;
 	irr::gui::IGUICheckBox* chkQuickAnimation;
+<<<<<<< HEAD
 	irr::gui::IGUIWindow* tabSystem;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
+=======
+	irr::gui::IGUICheckBox* chkAutoSaveReplay;
+>>>>>>> a5ab7da15d69d9d2f622551c053ae64081f9e1d4
 	irr::gui::IGUICheckBox* chkHideSetname;
 	irr::gui::IGUICheckBox* chkHideHintButton;
 	irr::gui::IGUICheckBox* chkIgnoreDeckChanges;

@@ -305,7 +305,10 @@ bool Game::Initialize() {
 	posY += 30;
 	chkQuickAnimation = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
 	chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
-	elmTabHelperLast = chkQuickAnimation;
+	posY += 30;
+	chkAutoSaveReplay = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1375));
+	chkAutoSaveReplay->setChecked(gameConf.auto_save_replay != 0);
+	elmTabHelperLast = chkAutoSaveReplay;
 	//system
 	irr::gui::IGUITab* _tabSystem = wInfos->addTab(dataManager.GetSysString(1273));
 	_tabSystem->setRelativePosition(recti(16, 49, 299, 362));
@@ -1216,6 +1219,7 @@ void Game::LoadConfig() {
 	gameConf.defaultOT = 1;
 	gameConf.enable_bot_mode = 1;
 	gameConf.quick_animation = 0;
+	gameConf.auto_save_replay = 0;
 	gameConf.enable_sound = true;
 	gameConf.sound_volume = 0.5;
 	gameConf.enable_music = true;
@@ -1304,6 +1308,8 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "auto_save_replay")) {
+				gameConf.auto_save_replay = atoi(valbuf);
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1418,6 +1424,8 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
+			} else if(!strcmp(strbuf, "auto_save_replay")) {
+				gameConf.auto_save_replay = atoi(valbuf);
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1538,6 +1546,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
+	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 #ifdef YGOPRO_USE_IRRKLANG
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
