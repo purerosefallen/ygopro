@@ -12,10 +12,8 @@
 /event
 /freetype
 /sqlite3
-/ikpmp3
 /irrklang
 /irrlicht
-/lua
 
 # gframe additionals
 /gframe/ygopro.ico
@@ -77,11 +75,14 @@
 *.log
 /.vscode
 /bak/
+/bug.txt
 /output
 /temp
 [Tt]humbs.cdb
 
 /PrinterData.txt
+/ygopro_*.bat
+/ygopro_*.sh
+
 /*.bat
 /*.sh
-/*.txt
