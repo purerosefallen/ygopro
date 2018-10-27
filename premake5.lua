@@ -55,6 +55,7 @@ solution "ygo"
 
     configuration "vs*"
         vectorextensions "SSE2"
+        buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
     
     configuration "not vs*"
