@@ -46,6 +46,7 @@ struct Config {
 	int draw_field_spell;
 	int separate_clear_button;
 	int auto_search_limit;
+	int search_multiple_keywords;
 	int chkIgnoreDeckChanges;
 	int defaultOT;
 	int enable_bot_mode;
@@ -54,6 +55,7 @@ struct Config {
 	int window_width;
 	int window_height;
 	bool resize_popup_menu;
+	int auto_save_replay;
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
@@ -305,6 +307,7 @@ public:
 	irr::gui::IGUICheckBox* chkAutoChain;
 	irr::gui::IGUICheckBox* chkWaitChain;
 	irr::gui::IGUICheckBox* chkQuickAnimation;
+	irr::gui::IGUICheckBox* chkAutoSaveReplay;
 	irr::gui::IGUIWindow* tabSystem;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
@@ -312,6 +315,7 @@ public:
 	irr::gui::IGUICheckBox* chkHideHintButton;
 	irr::gui::IGUICheckBox* chkIgnoreDeckChanges;
 	irr::gui::IGUICheckBox* chkAutoSearch;
+	irr::gui::IGUICheckBox* chkMultiKeywords;
 	irr::gui::IGUICheckBox* chkEnableSound;
 	irr::gui::IGUICheckBox* chkEnableMusic;
 	irr::gui::IGUIScrollBar* scrSoundVolume;
@@ -729,6 +733,7 @@ extern HostInfo game_info;
 #define SCROLL_TAB_HELPER			350
 #define SCROLL_TAB_SYSTEM			351
 #define CHECKBOX_AUTO_SEARCH		360
+#define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_ENABLE_SOUND		361
 #define CHECKBOX_ENABLE_MUSIC		362
 #define SCROLL_VOLUME				363
