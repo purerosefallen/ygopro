@@ -368,7 +368,7 @@ bool Game::Initialize() {
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1288), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
-	cbLocale = env->addComboBox(rect<s32>(posX + 160, posY + 4, posX + 260, posY + 21), tabSystem, COMBOBOX_LOCALE);
+	cbLocale = env->addComboBox(rect<s32>(posX + 150, posY + 4, posX + 250, posY + 21), tabSystem, COMBOBOX_LOCALE);
 	RefreshLocales();
 	elmTabSystemLast = cbLocale;
 	//
