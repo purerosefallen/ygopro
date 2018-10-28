@@ -6,8 +6,8 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-alpha12-windows.zip
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-alpha13-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
@@ -54,7 +54,7 @@ deploy:
     branch: server
 
 cache:
-  - premake-5.0.0-alpha12-windows.zip
+  - premake-5.0.0-alpha13-windows.zip
   - libevent-2.0.22-stable.tar.gz
   - freetype-2.9.1.tar.bz2
   - irrlicht-1.8.4.zip

@@ -1373,6 +1373,8 @@ void Game::LoadConfig() {
 				gameConf.enable_bot_mode = atoi(valbuf);
 			} else if(!strcmp(strbuf, "quick_animation")) {
 				gameConf.quick_animation = atoi(valbuf);
+			} else if(!strcmp(strbuf, "auto_save_replay")) {
+				gameConf.auto_save_replay = atoi(valbuf);
 			} else if(!strcmp(strbuf, "window_maximized")) {
 				gameConf.window_maximized = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "window_width")) {
@@ -1381,8 +1383,6 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
-			} else if(!strcmp(strbuf, "auto_save_replay")) {
-				gameConf.auto_save_replay = atoi(valbuf);
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1489,6 +1489,8 @@ void Game::LoadConfig() {
 				gameConf.enable_bot_mode = atoi(valbuf);
 			} else if(!strcmp(strbuf, "quick_animation")) {
 				gameConf.quick_animation = atoi(valbuf);
+			} else if(!strcmp(strbuf, "auto_save_replay")) {
+				gameConf.auto_save_replay = atoi(valbuf);
 			} else if(!strcmp(strbuf, "window_maximized")) {
 				gameConf.window_maximized = atoi(valbuf) > 0;
 			} else if(!strcmp(strbuf, "window_width")) {
@@ -1497,8 +1499,6 @@ void Game::LoadConfig() {
 				gameConf.window_height = atoi(valbuf);
 			} else if(!strcmp(strbuf, "resize_popup_menu")) {
 				gameConf.resize_popup_menu = atoi(valbuf) > 0;
-			} else if(!strcmp(strbuf, "auto_save_replay")) {
-				gameConf.auto_save_replay = atoi(valbuf);
 #ifdef YGOPRO_USE_IRRKLANG
 			} else if(!strcmp(strbuf, "enable_sound")) {
 				gameConf.enable_sound = atoi(valbuf) > 0;
@@ -1615,11 +1615,11 @@ void Game::SaveConfig() {
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
 	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
 	fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
+	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
-	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 #ifdef YGOPRO_USE_IRRKLANG
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
