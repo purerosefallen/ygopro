@@ -44,8 +44,9 @@ solution "ygo"
         targetdir "bin/debug"
 
     configuration { "Release", "vs*" }
-        flags { "StaticRuntime", "LinkTimeOptimization" }
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305" }
+        flags { "LinkTimeOptimization" }
+        staticruntime "On"
+        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828" }
 
     configuration { "Release", "not vs*" }
         symbols "On"
@@ -54,10 +55,11 @@ solution "ygo"
 
     configuration { "Debug", "vs*" }
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
-        disablewarnings { "4819" }
+        disablewarnings { "4819", "4828" }
 
     configuration "vs*"
         vectorextensions "SSE2"
+        buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
     
     configuration "not vs*"
