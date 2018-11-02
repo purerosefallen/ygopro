@@ -860,7 +860,7 @@ void SingleMode::SinglePlayReload() {
 	/*len = */query_field_card(pduel, 1, LOCATION_REMOVED, flag, queryBuffer, 0);
 	mainGame->dField.UpdateFieldCard(mainGame->LocalPlayer(1), LOCATION_REMOVED, (char*)queryBuffer);
 }
-byte* SingleMode::::ScriptReaderEx(const char* script_name, int* slen) {
+byte* SingleMode::ScriptReaderEx(const char* script_name, int* slen) {
 	byte* buffer;
 	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
@@ -907,7 +907,8 @@ byte* SingleMode::::ScriptReaderEx(const char* script_name, int* slen) {
 	return ScriptReader(script_name, slen);
 }
 byte* SingleMode::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
-	char sname[256] = path;
+	char sname[256];
+	strcpy(sname, path);
 	strcat(sname, script_name + pre_len);//default script name: ./script/c%d.lua
 	return ScriptReader(sname, slen);
 }

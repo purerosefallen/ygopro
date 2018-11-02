@@ -1552,7 +1552,7 @@ void SingleDuel::RefreshSingle(int player, int location, int sequence, int flag)
 			NetServer::ReSendToPlayer(*pit);
 	}
 }
-byte* SingleDuel::::ScriptReaderEx(const char* script_name, int* slen) {
+byte* SingleDuel::ScriptReaderEx(const char* script_name, int* slen) {
 	byte* buffer;
 	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
@@ -1599,7 +1599,8 @@ byte* SingleDuel::::ScriptReaderEx(const char* script_name, int* slen) {
 	return default_script_reader(script_name, slen);
 }
 byte* SingleDuel::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
-	char sname[256] = path;
+	char sname[256];
+	strcpy(sname, path);
 	strcat(sname, script_name + pre_len);//default script name: ./script/c%d.lua
 	return default_script_reader(sname, slen);
 }

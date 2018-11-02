@@ -1693,7 +1693,7 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 	}
 }
 
-byte* TagDuel::::ScriptReaderEx(const char* script_name, int* slen) {
+byte* TagDuel::ScriptReaderEx(const char* script_name, int* slen) {
 	byte* buffer;
 	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
@@ -1740,7 +1740,8 @@ byte* TagDuel::::ScriptReaderEx(const char* script_name, int* slen) {
 	return default_script_reader(script_name, slen);
 }
 byte* TagDuel::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
-	char sname[256] = path;
+	char sname[256];
+	strcpy(sname, path);
 	strcat(sname, script_name + pre_len);//default script name: ./script/c%d.lua
 	return default_script_reader(sname, slen);
 }
