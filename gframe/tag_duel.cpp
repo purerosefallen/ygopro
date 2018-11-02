@@ -1726,7 +1726,7 @@ byte* TagDuel::ScriptReaderEx(const char* script_name, int* slen) {
 	struct dirent * dirp;
 	if((dir = opendir("./expansions/")) != NULL) {
 		while((dirp = readdir(dir)) != NULL) {
-			if (f->d_type != DT_DIR)
+			if (dirp->d_type != DT_DIR)
 				continue;
 			char filepath[1000];
 			sprintf(filepath, "./expansions/%s/", dirp->d_name);
