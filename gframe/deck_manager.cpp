@@ -50,7 +50,36 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	}
 }
 void DeckManager::LoadLFList() {
-	LoadLFListSingle("expansions/lflist.conf");
+	//LoadLFListSingle("expansions/lflist.conf");
+#ifdef _WIN32
+	char fpath[1000];
+	WIN32_FIND_DATAW fdataw;
+	HANDLE fh = FindFirstFileW(L"./expansions/*", &fdataw);
+	if(fh != INVALID_HANDLE_VALUE) {
+		do {
+			if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				char fname[780];
+				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
+				sprintf(fpath, "./expansions/%s/lflist.conf", fname);
+				LoadLFListSingle(fpath);
+			}
+		} while(FindNextFileW(fh, &fdataw));
+		FindClose(fh);
+	}
+#else
+	DIR * dir;
+	struct dirent * dirp;
+	if((dir = opendir("./expansions/")) != NULL) {
+		while((dirp = readdir(dir)) != NULL) {
+			if (dirp->d_type != DT_DIR)
+				continue;
+			char filepath[1000];
+			sprintf(filepath, "./expansions/%s/lflist.conf", dirp->d_name);
+			LoadLFListSingle(filepath);
+		}
+		closedir(dir);
+	}
+#endif
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
 	myswprintf(nolimit.listName, L"N/A");
