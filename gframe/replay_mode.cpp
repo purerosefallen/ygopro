@@ -939,24 +939,56 @@ void ReplayMode::ReplayReload() {
 	/*len = */query_field_card(pduel, 1, LOCATION_REMOVED, flag, queryBuffer, 0);
 	mainGame->dField.UpdateFieldCard(mainGame->LocalPlayer(1), LOCATION_REMOVED, (char*)queryBuffer);
 }
-byte* ReplayMode::ScriptReaderEx(const char* script_name, int* slen) {
-	char sname[256] = "./specials";
-	strcat(sname, script_name + 8);//default script name: ./script/c%d.lua
-	byte* buffer = default_script_reader(sname, slen);
-	if(!buffer) {
-		char sname[256] = "./expansions";
-		strcat(sname, script_name + 1);
-		buffer = default_script_reader(sname, slen);
-	}
-	if(!buffer) {
-		char sname[256] = "./beta";
-		strcat(sname, script_name + 1);
-		buffer = default_script_reader(sname, slen);
-	}
+byte* ReplayMode::::ScriptReaderEx(const char* script_name, int* slen) {
+	byte* buffer;
+	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
 		return buffer;
-	else
-		return default_script_reader(script_name, slen);
+	buffer = ScriptReaderExDirectry("./expansions", script_name, slen);
+	if(buffer)
+		return buffer;
+	buffer = ScriptReaderExDirectry("./beta", script_name, slen);
+	if(buffer)
+		return buffer;
+#ifdef _WIN32
+	char fpath[1000];
+	WIN32_FIND_DATAW fdataw;
+	HANDLE fh = FindFirstFileW(L"./expansions/*", &fdataw);
+	if(fh != INVALID_HANDLE_VALUE) {
+		do {
+			if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				char fname[780];
+				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
+				sprintf(fpath, "./expansions/%s", fname);
+				buffer = ScriptReaderExDirectry(filepath, script_name, slen);
+				if(buffer)
+					return buffer;
+			}
+		} while(FindNextFileW(fh, &fdataw));
+		FindClose(fh);
+	}
+#else
+	DIR * dir;
+	struct dirent * dirp;
+	if((dir = opendir("./expansions/")) != NULL) {
+		while((dirp = readdir(dir)) != NULL) {
+			if (f->d_type != DT_DIR)
+				continue;
+			char filepath[1000];
+			sprintf(filepath, "./expansions/%s/", dirp->d_name);
+			buffer = ScriptReaderExDirectry(filepath, script_name, slen);
+			if(buffer)
+				return buffer;
+		}
+		closedir(dir);
+	}
+#endif
+	return default_script_reader(script_name, slen);
+}
+byte* ReplayMode::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
+	char sname[256] = path;
+	strcat(sname, script_name + pre_len);//default script name: ./script/c%d.lua
+	return default_script_reader(sname, slen);
 }
 int ReplayMode::MessageHandler(long fduel, int type) {
 	if(!enable_log)
