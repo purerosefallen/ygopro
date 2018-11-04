@@ -108,7 +108,7 @@ void ImageManager::RefreshRandomImageList() {
 void ImageManager::RefreshImageDir(std::wstring path, int image_type) {
 	std::wstring search = L"./textures/" + path;
 	FileSystem::TraversalDir(search.c_str(), [this, &path, image_type](const wchar_t* name, bool isdir) {
-		if(!isdir && (!mywcsncasecmp(wcsrchr(name, '.'), L".jpg", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".png", 4))) {
+		if(!isdir && wcsrchr(name, '.') && (!mywcsncasecmp(wcsrchr(name, '.'), L".jpg", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".png", 4))) {
 			std::wstring filename = path + L"/" + name;
 			ImageList[image_type].push_back(filename);
 		}
