@@ -36,6 +36,7 @@ void SoundManager::RefreshBGMList() {
 	RefershBGMDir(L"win", BGM_WIN);
 	RefershBGMDir(L"lose", BGM_LOSE);
 	RefershBGMDir(L"custom", BGM_CUSTOM);
+#endif
 }
 void SoundManager::RefershBGMDir(std::wstring path, int scene) {
 	std::wstring search = L"./sound/BGM/" + path;
