@@ -1693,7 +1693,9 @@ void Game::AddDebugMsg(const char* msg) {
 		sprintf(msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
+#endif //YGOPRO_SERVER_MODE
 }
+#ifndef YGOPRO_SERVER_MODE
 void Game::ErrorLog(const char* msg) {
 	FILE* fp = fopen("error.log", "at");
 	if(!fp)
@@ -1704,8 +1706,8 @@ void Game::ErrorLog(const char* msg) {
 	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
 	fprintf(fp, "[%s]%s\n", timebuf, msg);
 	fclose(fp);
-#endif //YGOPRO_SERVER_MODE
 }
+#endif //YGOPRO_SERVER_MODE
 void Game::initUtils() {
 	//user files
 	FileSystem::MakeDir("replay");

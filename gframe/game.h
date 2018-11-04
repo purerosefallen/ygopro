@@ -129,8 +129,7 @@ public:
 	void MainTestLoop(int code);
 	void LoadExpansionDB();
 	void LoadBetaDB();
-	void AddDebugMsg(char* msgbuf);
-	bool MakeDirectory(const std::string folder);
+	void AddDebugMsg(const char* msgbuf);
 	void initUtils();
 #else
 	void MainLoop();
