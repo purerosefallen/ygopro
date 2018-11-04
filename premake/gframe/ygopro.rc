@@ -11,11 +11,11 @@ BLOCK "StringFileInfo"
 BEGIN
 BLOCK "080404b0"
 BEGIN
-VALUE "FileDescription", "KoishiPro"
-VALUE "InternalName", "KoishiPro"
+VALUE "FileDescription", "YGOPRO Server Mode ver.Koishi"
+VALUE "InternalName", "YGOPRO Server Mode"
 VALUE "LegalCopyright", "Copyright (C) 2018 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
-VALUE "ProductName", "KoishiPro"
+VALUE "ProductName", "YGOPRO Server Mode"
 VALUE "FileVersion", "1.034.6.Koishi"
 VALUE "ProductVersion", "1.034.6.Koishi"
 END

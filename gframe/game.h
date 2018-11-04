@@ -2,16 +2,21 @@
 #define GAME_H
 
 #include "config.h"
+#ifndef YGOPRO_SERVER_MODE
 #include "client_field.h"
 #include "deck_con.h"
 #include "menu_handler.h"
 #include "CGUISkinSystem/CGUISkinSystem.h"
+#else
+#include "netserver.h"
+#endif //YGOPRO_SERVER_MODE
 #include <unordered_map>
 #include <vector>
 #include <list>
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 struct Config {
 	bool use_d3d;
 	bool use_image_scale;
@@ -92,7 +97,6 @@ struct DuelInfo {
 	wchar_t str_card_count[2][16];
 	video::SColor card_count_color[2];
 	bool isReplaySwapped;
-	std::vector<unsigned int> announce_cache;
 };
 
 struct BotInfo {
@@ -114,11 +118,21 @@ struct FadingUnit {
 	irr::core::vector2di fadingLR;
 	irr::core::vector2di fadingDiff;
 };
+#endif //YGOPRO_SERVER_MODE
 
 class Game {
 
 public:
 	bool Initialize();
+#ifdef YGOPRO_SERVER_MODE
+	void MainServerLoop();
+	void MainTestLoop(int code);
+	void LoadExpansionDB();
+	void LoadBetaDB();
+	void AddDebugMsg(char* msgbuf);
+	bool MakeDirectory(const std::string folder);
+	void initUtils();
+#else
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, f32 left, f32 right, f32 bottom, f32 top, f32 znear, f32 zfar);
@@ -560,9 +574,15 @@ public:
 	irr::gui::IGUIButton* btnChainWhenAvail;
 	//cancel or finish
 	irr::gui::IGUIButton* btnCancelOrFinish;
+#endif //YGOPRO_SERVER_MODE
 };
 
 extern Game* mainGame;
+#ifdef YGOPRO_SERVER_MODE
+extern unsigned short aServerPort;
+extern unsigned short replay_mode;
+extern HostInfo game_info;
+#endif
 
 }
 
@@ -747,7 +767,9 @@ extern Game* mainGame;
 #define TEXTURE_ATTACK				5
 #define TEXTURE_ACTIVATE			6
 
+#ifndef DEFAULT_DUEL_RULE
 #define DEFAULT_DUEL_RULE			4
+#endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
 #endif // GAME_H

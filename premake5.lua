@@ -2,20 +2,11 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    if os.ishost("windows") or os.getenv("USE_IRRKLANG") then
-        USE_IRRKLANG = true
-        if os.getenv("irrklang_pro") then
-            IRRKLANG_PRO = true
-        end
-    end
 
     configurations { "Release", "Debug" }
-    defines { "LUA_COMPAT_5_2" }
+    defines { "LUA_COMPAT_5_2", "LUA_SAFE_MODE" }
     configuration "windows"
-        defines { "WIN32", "_WIN32", "WINVER=0x0501" }
-        libdirs { "$(DXSDK_DIR)Lib/x86" }
-        entrypoint "mainCRTStartup"
-        toolset "v140_xp"
+        defines { "WIN32", "_WIN32" }
         startproject "ygopro"
 
     configuration "bsd"
@@ -35,7 +26,6 @@ solution "ygo"
         buildoptions { "-U_FORTIFY_SOURCE" }
 
     configuration "Release"
-        optimize "Speed"
         targetdir "bin/release"
 
     configuration "Debug"
@@ -44,6 +34,7 @@ solution "ygo"
         targetdir "bin/debug"
 
     configuration { "Release", "vs*" }
+        optimize "Speed"
         flags { "LinkTimeOptimization" }
         staticruntime "On"
         disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828" }
@@ -61,22 +52,19 @@ solution "ygo"
         vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
-    
+
     configuration "not vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-format-security" }
 
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
 
+    startproject "ygopro"
+
     include "lua"
     include "ocgcore"
     include "gframe"
-	if os.ishost("windows") then
-		include "event"
-		include "freetype"
-		include "irrlicht"
-		include "sqlite3"
-	end
-	if USE_IRRKLANG then
-		include "ikpmp3"
-	end
+    if os.ishost("windows") then
+    include "event"
+    include "sqlite3"
+    end

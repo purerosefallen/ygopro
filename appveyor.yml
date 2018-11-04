@@ -1,44 +1,29 @@
 version: '{build}'
 
-environment:
-  irrklang_pro: 1
-  access_token:
-    secure: EQ9miMjfX/QAoBvgc6D+JLmHatLyxOEKZ/uo68QijxWW5Gp4MzB/pOH9+u2GlDVO
+skip_tags: true
 
 install:
   - git submodule update --init --recursive
 
   # environment and system dependency
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-windows.zip ; exit 0"
-  - 7z x -y premake-5.0.0-alpha13-windows.zip
+  - 7z x premake-5.0.0-alpha13-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
   - move libevent-2.0.22-stable event
   - xcopy /E event\WIN32-Code event\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/freetype/freetype-2.9.1.tar.bz2 ; exit 0"
-  - tar xf freetype-2.9.1.tar.bz2
-  - move freetype-2.9.1 freetype
-  
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip ; exit 0"
-  - 7z x -y irrlicht-1.8.4.zip
-  - md irrlicht
-  - move irrlicht-1.8.4\source\Irrlicht irrlicht\src
-  - move irrlicht-1.8.4\include irrlicht\include
-  
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2018/sqlite-amalgamation-3240000.zip ; exit 0"
   - 7z x -y sqlite-amalgamation-3240000.zip
   - move sqlite-amalgamation-3240000 sqlite3
   
-  - git clone --depth=1 https://%access_token%@github.com/purerosefallen/irrklang
+  - appveyor DownloadFile https://github.com/tronkko/dirent/raw/master/include/dirent.h
+  - move dirent.h gframe\
 
   # let premake happy
-  - cp -rf premake/* .
-  
-  # patch irrlicht & ikpmp3
-  - patch -p0 < irrlicht\irrlicht.patch
-
+  - xcopy /E premake\* .
+    
   # premake
   - premake5 vs2015
   
@@ -49,51 +34,24 @@ build:
     parallel: true
 
 after_build:
-  - mv -f bin/release/ygopro.exe .
+  - ps: move bin\release\ygopro.exe .
 
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
-  - 7z x -y WindBot.7z
-
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip ; exit 0"
-  - 7z x -y ygopro222-images-master.zip
-  - mv -f ygopro222-images-master pics
-
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/update-koishipro/archive/master.zip ; exit 0"
-  - 7z x -y update-koishipro-master.zip
-  - mv -f update-koishipro-master update-koishipro
-
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip ; exit 0"
-  - 7z x -y ygopro-starter-pack-master.zip
-  - cp -rf ygopro-starter-pack-master/* .
-
-  - cd sound
-  - bash -c "grep '.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
-  - cd ..
-
-  - rm -rf pics/thumbnail pics/*.db
-
-  - git clone --depth=1 https://github.com/purerosefallen/ygopro-database
-  - mv -f ygopro-database/locales .
-  
-  - git clone --depth=1 https://%access_token%@github.com/purerosefallen/fonts
-
-  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures skin deck single pics sound update-koishipro locales fonts WindBot Bot.exe bot.conf
 
 test: off
 
+artifacts:
+  - path: ygopro.exe
+    name: ygopro server mode
+
 deploy:
+  release: win
   description: 'Automatic build commit $(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
   provider: GitHub
   force_update: true
-  auth_token: $(access_token)
+  auth_token:
+    secure: EQ9miMjfX/QAoBvgc6D+JLmHatLyxOEKZ/uo68QijxWW5Gp4MzB/pOH9+u2GlDVO
   on:
-    appveyor_repo_tag: true
-
-artifacts:
-  - path: ygopro.exe
-    name: ygopro client
-  - path: KoishiPro-$(APPVEYOR_REPO_TAG_NAME).7z
-    name: ygopro full repack
+    branch: server
 
 cache:
   - premake-5.0.0-alpha13-windows.zip

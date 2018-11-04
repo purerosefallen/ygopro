@@ -1,5 +1,10 @@
 #include "config.h"
 #include "game.h"
+#ifdef YGOPRO_SERVER_MODE
+#include "data_manager.h"
+#include "deck_manager.h"
+#include "replay.h"
+#else
 #include "image_manager.h"
 #include "data_manager.h"
 #include "deck_manager.h"
@@ -10,6 +15,7 @@
 #include "netserver.h"
 #include "single_mode.h"
 #include <sstream>
+#endif //YGOPRO_SERVER_MODE
 
 #ifndef _WIN32
 #include <sys/types.h>
@@ -27,6 +33,71 @@ namespace ygo {
 
 Game* mainGame;
 
+#ifdef YGOPRO_SERVER_MODE
+unsigned short aServerPort;
+unsigned short replay_mode;
+HostInfo game_info;
+
+void Game::MainServerLoop() {
+	initUtils();
+	deckManager.LoadLFList();
+	LoadBetaDB();
+	LoadExpansionDB();
+	dataManager.LoadDB("cards.cdb");
+
+	aServerPort = NetServer::StartServer(aServerPort);
+	NetServer::InitDuel();
+	printf("%u\n", aServerPort);
+	fflush(stdout);
+	
+	while(NetServer::net_evbase) {
+#ifdef WIN32
+		Sleep(200);
+#else
+		usleep(200000);
+#endif
+	}
+}
+void Game::MainTestLoop(int code) {
+	LoadBetaDB();
+	LoadExpansionDB();
+	dataManager.LoadDB("cards.cdb");
+	fflush(stdout);
+	NetServer::InitTestCard(code);
+}
+void Game::LoadBetaDB() {
+#ifdef _WIN32
+	char fpath[1000];
+	WIN32_FIND_DATAW fdataw;
+	HANDLE fh = FindFirstFileW(L"./beta/*.cdb", &fdataw);
+	if(fh != INVALID_HANDLE_VALUE) {
+		do {
+			if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				char fname[780];
+				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
+				sprintf(fpath, "./beta/%s", fname);
+				dataManager.LoadDB(fpath);
+			}
+		} while(FindNextFileW(fh, &fdataw));
+		FindClose(fh);
+	}
+#else
+	DIR * dir;
+	struct dirent * dirp;
+	if((dir = opendir("./beta/")) != NULL) {
+		while((dirp = readdir(dir)) != NULL) {
+			size_t len = strlen(dirp->d_name);
+			if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".cdb") != 0)
+				continue;
+			char filepath[1000];
+			sprintf(filepath, "./beta/%s", dirp->d_name);
+			dataManager.LoadDB(filepath);
+		}
+		closedir(dir);
+	}
+#endif
+}
+#else //YGOPRO_SERVER_MODE
 bool Game::Initialize() {
 	srand(time(0));
 	initUtils();
@@ -981,6 +1052,7 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 	dataManager.strBuffer[pbuffer] = 0;
 	pControl->setText(dataManager.strBuffer);
 }
+#endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansionDB() {
 	LoadExpansionDBDirectry("./expansions");
 #ifdef _WIN32
@@ -1086,6 +1158,7 @@ void Game::LoadExpansionStringsDirectry(const char* path) {
 	sprintf(fpath, "%s/strings.conf", path);
 	dataManager.LoadStrings(fpath);
 }
+#ifndef YGOPRO_SERVER_MODE
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
 #ifdef _WIN32
@@ -1797,8 +1870,12 @@ void Game::ClearChatMsg() {
 		chatTiming[i] = 0;
 	}
 }
+#endif //YGOPRO_SERVER_MODE
 void Game::AddDebugMsg(char* msg)
 {
+#ifdef YGOPRO_SERVER_MODE
+	fprintf(stderr, "%s\n", msg);
+#else
 	if (enable_log & 0x1) {
 		wchar_t wbuf[1024];
 		BufferIO::DecodeUTF8(msg, wbuf);
@@ -1809,6 +1886,7 @@ void Game::AddDebugMsg(char* msg)
 		sprintf(msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
+#endif //YGOPRO_SERVER_MODE
 }
 void Game::ErrorLog(char* msg) {
 	FILE* fp = fopen("error.log", "at");
@@ -1845,9 +1923,14 @@ bool Game::MakeDirectory(const std::string folder) {
 void Game::initUtils() {
 	//user files
 	MakeDirectory("replay");
-	MakeDirectory("screenshots");
 	//cards from extra pack
 	MakeDirectory("expansions");
+#ifdef YGOPRO_SERVER_MODE
+	//special scripts
+	MakeDirectory("specials");
+	MakeDirectory("beta");
+#else
+	MakeDirectory("screenshots");
 	//files in ygopro-starter-pack
 	MakeDirectory("deck");
 	MakeDirectory("single");
@@ -1884,7 +1967,9 @@ void Game::initUtils() {
 	//pics
 	MakeDirectory("pics");
 	MakeDirectory("pics/field");
+#endif //YGOPRO_SERVER_MODE
 }
+#ifndef YGOPRO_SERVER_MODE
 void Game::ClearTextures() {
 	matManager.mCard.setTexture(0, 0);
 	imgCard->setImage(imageManager.tCover[0]);
@@ -2287,5 +2372,6 @@ void Game::SetCursor(ECURSOR_ICON icon) {
 		cursor->setActiveIcon(icon);
 	}
 }
+#endif //YGOPRO_SERVER_MODE
 
 }

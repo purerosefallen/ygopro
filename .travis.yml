@@ -1,122 +1,36 @@
 language: cpp
-os:
-- linux
-- osx
-sudo: required
 dist: xenial
-osx_image: xcode8
+git:
+  submodules: false
 addons:
   ssh_known_hosts:
   - github.com
   apt:
+   # sources:
+   #   - ubuntu-toolchain-r-test
     packages:
-      - libfreetype6-dev
+    #  - gcc-6
+    #  - g++-6
       - libevent-dev
       - libsqlite3-dev
-      - libirrlicht-dev
-      - libgl1-mesa-dev
-      - libglu-dev
-      - p7zip-full
 env:
-- USE_IRRKLANG=1
+- DATABASE_FILE=cards.cdb
+
 before_install:
 - git submodule update --init --recursive
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update > /dev/null;
-    brew install freetype libevent sqlite p7zip dylibbundler > /dev/null;
-  fi
-
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-macosx.tar.gz | tar zfx -;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -;
-  fi
-
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
-
-- git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
-
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so .;
-  fi
-
+#- sudo ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
+#- sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++
+#- g++ --version
+- wget -O - https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -
 script:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
+- ./premake5 gmake
 - cd build
-- make config=release ygopro -j4
+- make config=release
+
 - cd ..
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/release/ygopro ./; strip ygopro;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    mkdir -p ygopro.app/Contents/MacOS;
-    mv -f bin/release/ygopro ygopro.app/Contents/MacOS;
-    dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd;
-    strip ygopro.app/Contents/MacOS/ygopro; mkdir ygopro.app/Contents/Resources;
-    mv -f premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
-    defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
-    defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
-    if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-      echo $CERTIFICATE | base64 --decode --output cert.p12;
-      security create-keychain -p "" build.keychain; security unlock-keychain -p "" build.keychain;
-      security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign;
-      codesign --deep --keychain build.keychain --sign "$(security find-identity -v -p
-      codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
-    fi
-  fi
+- mv -f ./bin/release/ygopro .
+- strip ygopro
+- mkdir replay
 
-before_deploy:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libIrrKlang.so;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
-  fi
-
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
-- 7z x -y ygopro222-images-master.zip > /dev/null
-- mv -f ygopro222-images-master pics
-
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- 7z x -y ygopro-starter-pack-master.zip > /dev/null
-- cp -rf ygopro-starter-pack-master/* .
-
-- rm -rf pics/thumbnail pics/*.db
-
-- git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/fonts
-
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z
-- 7z x -y WindBot.7z > /dev/null
-- mv -f WindBot windbot
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/raw/master/BotWrapper/BotWrapper.sh
-- mv -f BotWrapper.sh bot
-- chmod +x bot
-
-- cd sound
-- bash -c "grep '.wav' files.txt | xargs -I {} curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-222DIY-data/raw/master/sound/{} ; exit 0"
-- cd ..
-
-- git clone --depth=1 https://github.com/purerosefallen/ygopro-database
-- mv -f ygopro-database/locales .
-
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro libIrrKlang.so LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures fonts skin deck single pics sound windbot locales bot.conf bot > /dev/null;
-  fi
-
-deploy:
-  provider: releases
-  file:
-  - KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip
-  - KoishiPro-$TRAVIS_OS_NAME-full-$TRAVIS_TAG.zip
-  skip_cleanup: true
-  overwrite: true
-  on:
-    tags: true
-  api-key: $NANAHIRA
+- echo "select id from datas;" | sqlite3 $DATABASE_FILE | xargs -I {} ./ygopro {} 2>&1 | tee ./redtext.txt
+- bash -c "exit $(cat ./redtext.txt | wc -l)"
