@@ -93,12 +93,12 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load card database (cards.cdb)!");
 		return false;
 	}
-	LoadExpansionStrings();
 	if(dataManager.LoadStrings(GetLocaleDir("strings.conf"))) {} else
 	if(!dataManager.LoadStrings("strings.conf")) {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
+	LoadExpansionStrings();
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
