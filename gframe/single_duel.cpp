@@ -4,6 +4,9 @@
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 #include "../ocgcore/mtrandom.h"
+#ifndef _WIN32
+#include <dirent.h>
+#endif
 
 namespace ygo {
 
@@ -1553,8 +1556,7 @@ void SingleDuel::RefreshSingle(int player, int location, int sequence, int flag)
 	}
 }
 byte* SingleDuel::ScriptReaderEx(const char* script_name, int* slen) {
-	byte* buffer;
-	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
+	byte* buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
 		return buffer;
 	buffer = ScriptReaderExDirectry("./expansions", script_name, slen);
