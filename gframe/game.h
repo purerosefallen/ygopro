@@ -128,6 +128,7 @@ public:
 	void MainServerLoop();
 	void MainTestLoop(int code);
 	void LoadExpansionDB();
+	void LoadExpansionDBDirectry(const char* path);
 	void LoadBetaDB();
 	void AddDebugMsg(char* msgbuf);
 	bool MakeDirectory(const std::string folder);
