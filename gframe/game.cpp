@@ -1015,10 +1015,10 @@ void Game::RefreshSingleplay() {
 void Game::RefreshLocales() {
 	cbLocale->clear();
 	cbLocale->addItem(L"default");
-	lstSinglePlayList->clear();
+	cbLocale->clear();
 	FileSystem::TraversalDir(L"./locales", [this](const wchar_t* name, bool isdir) {
 		if(isdir && wcscmp(name, L".") && wcscmp(name, L".."))
-			lstSinglePlayList->addItem(name);
+			cbLocale->addItem(name);
 	});
 	for(size_t i = 0; i < cbLocale->getItemCount(); ++i) {
 		if(!wcscmp(cbLocale->getItem(i), gameConf.locale)) {
