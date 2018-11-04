@@ -1813,7 +1813,6 @@ void Game::AddDebugMsg(char* msg)
 		sprintf(msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
-#endif //YGOPRO_SERVER_MODE
 }
 void Game::ErrorLog(char* msg) {
 	FILE* fp = fopen("error.log", "at");
@@ -1825,6 +1824,7 @@ void Game::ErrorLog(char* msg) {
 	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
 	fprintf(fp, "[%s]%s\n", timebuf, msg);
 	fclose(fp);
+#endif //YGOPRO_SERVER_MODE
 }
 bool Game::MakeDirectory(const std::string folder) {
     std::string folder_builder;
