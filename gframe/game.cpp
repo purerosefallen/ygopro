@@ -1015,31 +1015,11 @@ void Game::RefreshSingleplay() {
 void Game::RefreshLocales() {
 	cbLocale->clear();
 	cbLocale->addItem(L"default");
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./locales/*", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && wcscmp(fdataw.cFileName, L".") && wcscmp(fdataw.cFileName, L".."))
-			cbLocale->addItem(fdataw.cFileName);
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./locales/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		if(!wcscmp(wname, L".") || !wcscmp(wname, L".."))
-			continue;
-		cbLocale->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	lstSinglePlayList->clear();
+	FileSystem::TraversalDir(L"./locales", [this](const wchar_t* name, bool isdir) {
+		if(isdir && wcscmp(name, L".") && wcscmp(name, L".."))
+			lstSinglePlayList->addItem(name);
+	});
 	for(size_t i = 0; i < cbLocale->getItemCount(); ++i) {
 		if(!wcscmp(cbLocale->getItem(i), gameConf.locale)) {
 			cbLocale->setSelected(i);
@@ -2067,6 +2047,8 @@ void Game::FlashWindow() {
 #endif
 }
 void Game::takeScreenshot() {
+	if(!FileSystem::IsDirExists(L"./screenshots") && !FileSystem::MakeDir(L"./screenshots"))
+		return;
 	irr::video::IImage* const image = driver->createScreenShot();
 	if(image) {
 		irr::c8 filename[64];
