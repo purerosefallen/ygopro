@@ -1730,8 +1730,15 @@ void SingleDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 	set_responseb(pduel, resb);
 	players[dp->type]->state = 0xff;
 	if(host_info.time_limit) {
-		if(time_limit[dp->type] >= time_elapsed)
-			time_limit[dp->type] -= time_elapsed;
+		if (time_limit[dp->type] >= time_elapsed) {
+			int timedeplated = time_elapsed - 2;
+			if (time_limit[dp->type]-timedeplated<=180) {
+				time_limit[dp->type] -= timedeplated;
+			}
+			else {
+				time_limit[dp->type] = host_info.time_limit;
+			}
+		}
 		else time_limit[dp->type] = 0;
 		event_del(etimer);
 	}
