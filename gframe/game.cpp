@@ -1088,7 +1088,6 @@ void Game::RefreshSingleplay() {
 void Game::RefreshLocales() {
 	cbLocale->clear();
 	cbLocale->addItem(L"default");
-	cbLocale->clear();
 	FileSystem::TraversalDir(L"./locales", [this](const wchar_t* name, bool isdir) {
 		if(isdir && wcscmp(name, L".") && wcscmp(name, L".."))
 			cbLocale->addItem(name);
