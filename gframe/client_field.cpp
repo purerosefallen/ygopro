@@ -1549,6 +1549,7 @@ void ClientField::RefreshCardCountDisplay() {
 	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
 		mainGame->dInfo.card_count[p] = hand[p].size();
+		mainGame->dInfo.total_attack[p] = 0;
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
 			pcard = *it;
 			if(pcard) {
@@ -1556,6 +1557,8 @@ void ClientField::RefreshCardCountDisplay() {
 					mainGame->dInfo.card_count[p] += pcard->link;
 				else
 					mainGame->dInfo.card_count[p]++;
+				if(pcard->position == POS_FACEUP_ATTACK && pcard->attack > 0 && (p == 1 || mainGame->dInfo.curMsg != MSG_SELECT_BATTLECMD || pcard->cmdFlag & COMMAND_ATTACK))
+					mainGame->dInfo.total_attack[p] += pcard->attack;
 			}
 		}
 		for(auto it = szone[p].begin(); it != szone[p].end(); ++it) {
@@ -1564,6 +1567,7 @@ void ClientField::RefreshCardCountDisplay() {
 				mainGame->dInfo.card_count[p]++;
 		}
 		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
+		myswprintf(mainGame->dInfo.str_total_attack[p], L"%d", mainGame->dInfo.total_attack[p]);
 	}
 	if(mainGame->dInfo.card_count[0] > mainGame->dInfo.card_count[1]) {
 		mainGame->dInfo.card_count_color[0] = 0xffffff00;
@@ -1574,6 +1578,16 @@ void ClientField::RefreshCardCountDisplay() {
 	} else {
 		mainGame->dInfo.card_count_color[0] = 0xffffffff;
 		mainGame->dInfo.card_count_color[1] = 0xffffffff;
+	}
+	if(mainGame->dInfo.total_attack[0] > mainGame->dInfo.total_attack[1]) {
+		mainGame->dInfo.total_attack_color[0] = 0xffffff00;
+		mainGame->dInfo.total_attack_color[1] = 0xffff0000;
+	} else if(mainGame->dInfo.total_attack[1] > mainGame->dInfo.total_attack[0]) {
+		mainGame->dInfo.total_attack_color[1] = 0xffffff00;
+		mainGame->dInfo.total_attack_color[0] = 0xffff0000;
+	} else {
+		mainGame->dInfo.total_attack_color[0] = 0xffffffff;
+		mainGame->dInfo.total_attack_color[1] = 0xffffffff;
 	}
 }
 }
