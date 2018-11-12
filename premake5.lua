@@ -77,6 +77,9 @@ solution "ygo"
 		include "irrlicht"
 		include "sqlite3"
 	end
+	if os.ishost("linux") then
+		include "irrlicht_linux"
+	end
 	if USE_IRRKLANG then
 		include "ikpmp3"
 	end

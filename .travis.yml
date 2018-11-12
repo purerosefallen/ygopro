@@ -13,7 +13,6 @@ addons:
       - libfreetype6-dev
       - libevent-dev
       - libsqlite3-dev
-      - libirrlicht-dev
       - libgl1-mesa-dev
       - libglu-dev
       - p7zip-full
@@ -30,6 +29,7 @@ before_install:
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-macosx.tar.gz | tar zfx -;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    git clone https://github.com/DailyShana/irrlicht irrlicht_linux;
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -;
   fi
 
