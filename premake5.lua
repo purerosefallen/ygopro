@@ -46,7 +46,7 @@ solution "ygo"
     configuration { "Release", "vs*" }
         flags { "LinkTimeOptimization" }
         staticruntime "On"
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828" }
+        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828", "4800" }
 
     configuration { "Release", "not vs*" }
         symbols "On"
@@ -76,6 +76,9 @@ solution "ygo"
 		include "freetype"
 		include "irrlicht"
 		include "sqlite3"
+	end
+	if os.ishost("linux") then
+		include "irrlicht_linux"
 	end
 	if USE_IRRKLANG then
 		include "ikpmp3"

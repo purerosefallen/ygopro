@@ -1,8 +1,5 @@
 #include "image_manager.h"
 #include "game.h"
-#ifndef _WIN32
-#include <dirent.h>
-#endif
 
 namespace ygo {
 
@@ -95,54 +92,27 @@ irr::video::ITexture* ImageManager::GetRandomImage(int image_type, s32 width, s3
 	return GetTextureFromFile(ImageName, width, height);
 }
 void ImageManager::RefreshRandomImageList() {
-	RefreshImageDir(L"bg/", TEXTURE_DUEL);
-	RefreshImageDir(L"bg_duel/", TEXTURE_DUEL);
-	RefreshImageDir(L"bg_deck/", TEXTURE_DECK);
-	RefreshImageDir(L"bg_menu/", TEXTURE_MENU);
-	RefreshImageDir(L"cover/", TEXTURE_COVER_S);
-	RefreshImageDir(L"cover2/", TEXTURE_COVER_O);
-	RefreshImageDir(L"attack/", TEXTURE_ATTACK);
-	RefreshImageDir(L"act/", TEXTURE_ACTIVATE);
+	RefreshImageDir(L"bg", TEXTURE_DUEL);
+	RefreshImageDir(L"bg_duel", TEXTURE_DUEL);
+	RefreshImageDir(L"bg_deck", TEXTURE_DECK);
+	RefreshImageDir(L"bg_menu", TEXTURE_MENU);
+	RefreshImageDir(L"cover", TEXTURE_COVER_S);
+	RefreshImageDir(L"cover2", TEXTURE_COVER_O);
+	RefreshImageDir(L"attack", TEXTURE_ATTACK);
+	RefreshImageDir(L"act", TEXTURE_ACTIVATE);
 
 	for(int i = 0; i < 7; ++ i) {
 		saved_image_id[i] = -1;
 	}
 }
 void ImageManager::RefreshImageDir(std::wstring path, int image_type) {
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	std::wstring search = L"./textures/" + path + L"*.*";
-	HANDLE fh = FindFirstFileW(search.c_str(), &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		size_t len = wcslen(fdataw.cFileName);
-		if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || len < 5
-			|| !(_wcsicmp(fdataw.cFileName + len - 4, L".jpg") == 0 || _wcsicmp(fdataw.cFileName + len - 4, L".png") == 0))
-			continue;
-		std::wstring filename = path + (std::wstring)fdataw.cFileName;
-		ImageList[image_type].push_back(filename);
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	std::wstring wsearchpath = L"./textures/" + path;
-	char searchpath[256];
-	BufferIO::EncodeUTF8(wsearchpath.c_str(), searchpath);
-	if((dir = opendir(searchpath)) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || !(strcasecmp(dirp->d_name + len - 4, ".jpg") == 0 || strcasecmp(dirp->d_name + len - 4, ".png")))
-			continue;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		std::wstring filename = path + (std::wstring)wname;
-		ImageList[image_type].push_back(filename);
-	}
-	closedir(dir);
-#endif
+	std::wstring search = L"./textures/" + path;
+	FileSystem::TraversalDir(search.c_str(), [this, &path, image_type](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && (!mywcsncasecmp(wcsrchr(name, '.'), L".jpg", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".png", 4))) {
+			std::wstring filename = path + L"/" + name;
+			ImageList[image_type].push_back(filename);
+		}
+	});
 }
 void ImageManager::SetDevice(irr::IrrlichtDevice* dev) {
 	device = dev;
