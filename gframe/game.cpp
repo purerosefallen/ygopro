@@ -1045,107 +1045,33 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansionDB() {
 	LoadExpansionDBDirectry("./expansions");
-#ifdef _WIN32
-	char fpath[1000];
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./expansions/*", &fdataw);
-	if(fh != INVALID_HANDLE_VALUE) {
-		do {
-			if(wcscmp(L".",fdataw.cFileName) != 0 && wcscmp(L"..",fdataw.cFileName) != 0 && fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				char fname[780];
-				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
-				sprintf(fpath, "./expansions/%s", fname);
-				LoadExpansionDBDirectry(fpath);
-			}
-		} while(FindNextFileW(fh, &fdataw));
-		FindClose(fh);
-	}
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./expansions/")) != NULL) {
-		while((dirp = readdir(dir)) != NULL) {
-			if (strcmp(".", dirp->d_name) == 0 || strcmp("..", dirp->d_name) == 0 || dirp->d_type != DT_DIR)
-				continue;
-			char filepath[1000];
-			sprintf(filepath, "./expansions/%s/", dirp->d_name);
-			LoadExpansionDBDirectry(filepath);
+	FileSystem::TraversalDir("./expansions", [this](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char subdir[1024];
+			sprintf(subdir, "./expansions/%s", name);
+			LoadExpansionDBDirectry(subdir);
 		}
-		closedir(dir);
-	}
-#endif
+	});
 }
 void Game::LoadExpansionDBDirectry(const char* path) {
-#ifdef _WIN32
-	char fpath[1000];
-	wchar_t wpath1[1000];
-	wchar_t wpath2[1000];
-	BufferIO::DecodeUTF8(path, wpath1);
-	myswprintf(wpath2, L"%ls/*.cdb", wpath1);
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(wpath2, &fdataw);
-	if(fh != INVALID_HANDLE_VALUE) {
-		do {
-			if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-				char fname[780];
-				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
-				sprintf(fpath, "%s/%s", path, fname);
-				dataManager.LoadDB(fpath);
-			}
-		} while(FindNextFileW(fh, &fdataw));
-		FindClose(fh);
-	}
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir(path)) != NULL) {
-		while((dirp = readdir(dir)) != NULL) {
-			size_t len = strlen(dirp->d_name);
-			if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".cdb") != 0)
-				continue;
-			char filepath[1000];
-			sprintf(filepath, "%s/%s", path, dirp->d_name);
-			dataManager.LoadDB(filepath);
+	FileSystem::TraversalDir(path, [path](const char* name, bool isdir) {
+		if(!isdir && strrchr(name, '.') && !mystrncasecmp(strrchr(name, '.'), ".cdb", 4)) {
+			char fpath[1024];
+			sprintf(fpath, "%s/%s", path, name);
+			dataManager.LoadDB(fpath);
 		}
 	});
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::LoadExpansionStrings() {
-	LoadExpansionStringsDirectry("./expansions");
-#ifdef _WIN32
-	char fpath[1000];
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./expansions/*", &fdataw);
-	if(fh != INVALID_HANDLE_VALUE) {
-		do {
-			if(wcscmp(L".",fdataw.cFileName) != 0 && wcscmp(L"..",fdataw.cFileName) != 0 && fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				char fname[780];
-				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
-				sprintf(fpath, "./expansions/%s", fname);
-				LoadExpansionStringsDirectry(fpath);
-			}
-		} while(FindNextFileW(fh, &fdataw));
-		FindClose(fh);
-	}
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./expansions/")) != NULL) {
-		while((dirp = readdir(dir)) != NULL) {
-			if (strcmp(".", dirp->d_name) == 0 || strcmp("..", dirp->d_name) == 0 || dirp->d_type != DT_DIR)
-				continue;
-			char filepath[1000];
-			sprintf(filepath, "./expansions/%s/", dirp->d_name);
-			LoadExpansionStringsDirectry(filepath);
+	dataManager.LoadStrings("./expansions/strings.conf");
+	FileSystem::TraversalDir("./expansions", [](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char fpath[1024];
+			sprintf(fpath, "./expansions/%s/strings.conf", name);
+			dataManager.LoadStrings(fpath);
 		}
-		closedir(dir);
-	}
-#endif
-}
-void Game::LoadExpansionStringsDirectry(const char* path) {
-	char fpath[1000];
-	sprintf(fpath, "%s/strings.conf", path);
-	dataManager.LoadStrings(fpath);
+	});
 }
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();

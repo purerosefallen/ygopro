@@ -144,7 +144,6 @@ public:
 	void LoadExpansionDB();
 	void LoadExpansionDBDirectry(const char* path);
 	void LoadExpansionStrings();
-	void LoadExpansionStringsDirectry(const char* path);
 	void RefreshDeck(irr::gui::IGUIComboBox* cbDeck);
 	void RefreshReplay();
 	void RefreshSingleplay();
