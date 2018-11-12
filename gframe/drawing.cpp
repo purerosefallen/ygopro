@@ -567,6 +567,12 @@ void Game::DrawMisc() {
 		DrawShadowText(numFont, dInfo.str_card_count[0], Resize(550, 31, 575, 50), Resize(0, 1, 2, 0), dInfo.card_count_color[0], 0xff000000, true, false, 0);
 		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(757, 31, 782, 50), Resize(0, 1, 2, 0), dInfo.card_count_color[1], 0xff000000, true, false, 0);
 
+		DrawShadowText(numFont, dInfo.str_total_attack[0], Resize(486, 31, 536, 50), Resize(0, 1, 2, 0), dInfo.total_attack_color[0], 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_total_attack[1], Resize(793, 31, 843, 50), Resize(0, 1, 2, 0), dInfo.total_attack_color[1], 0xff000000, true, false, 0);
+
+		driver->draw2DImage(imageManager.tAttack, ResizeCardMid(477, 32, 486, 50, 486, 41), recti(32, 0, 96, 128), 0, 0, true);
+		driver->draw2DImage(imageManager.tAttack, ResizeCardMid(784, 32, 793, 50, 793, 41), recti(32, 0, 96, 128), 0, 0, true);
+
 /*
 		driver->draw2DRectangle(Resize(525, 34, 525 + dInfo.time_left[0] * 100 / dInfo.time_limit, 44), 0xa0e0e0e0, 0xa0e0e0e0, 0xa0c0c0c0, 0xa0c0c0c0);
 		driver->draw2DRectangleOutline(Resize(525, 34, 625, 44), 0xffffffff);
@@ -580,6 +586,12 @@ void Game::DrawMisc() {
 
 		DrawShadowText(numFont, dInfo.str_card_count[0], Resize(600, 31, 625, 50), Resize(0, 1, 2, 0), dInfo.card_count_color[0], 0xff000000, true, false, 0);
 		DrawShadowText(numFont, dInfo.str_card_count[1], Resize(707, 31, 732, 50), Resize(0, 1, 2, 0), dInfo.card_count_color[1], 0xff000000, true, false, 0);
+
+		DrawShadowText(numFont, dInfo.str_total_attack[0], Resize(536, 31, 586, 50), Resize(0, 1, 2, 0), dInfo.total_attack_color[0], 0xff000000, true, false, 0);
+		DrawShadowText(numFont, dInfo.str_total_attack[1], Resize(743, 31, 793, 50), Resize(0, 1, 2, 0), dInfo.total_attack_color[1], 0xff000000, true, false, 0);
+
+		driver->draw2DImage(imageManager.tAttack, ResizeCardMid(527, 32, 536, 50, 536, 41), recti(32, 0, 96, 128), 0, 0, true);
+		driver->draw2DImage(imageManager.tAttack, ResizeCardMid(734, 32, 743, 50, 743, 41), recti(32, 0, 96, 128), 0, 0, true);
 	}
 	DrawShadowText(numFont, dInfo.strLP[0], Resize(330, 12, 631, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);
 	DrawShadowText(numFont, dInfo.strLP[1], Resize(691, 12, 992, 30), Resize(0, 1, 2, 0), 0xffffff00, 0xff000000, true, false, 0);

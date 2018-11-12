@@ -977,7 +977,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -995,7 +995,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1006,7 +1006,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1017,7 +1017,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(data);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1028,7 +1028,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1234,6 +1234,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dField.attackable_cards.push_back(pcard);
 			pcard->cmdFlag |= COMMAND_ATTACK;
 		}
+		mainGame->dField.RefreshCardCountDisplay();
 		mainGame->gMutex.Lock();
 		if(BufferIO::ReadInt8(pbuf)) {
 			mainGame->btnM2->setVisible(true);
@@ -2405,6 +2406,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->btnShuffle->setVisible(false);
 		mainGame->showcarddif = 30;
 		mainGame->showcardp = 0;
+		mainGame->dField.RefreshCardCountDisplay();
 		switch (phase) {
 		case PHASE_DRAW:
 			mainGame->btnPhaseStatus->setText(L"\xff24\xff30");
