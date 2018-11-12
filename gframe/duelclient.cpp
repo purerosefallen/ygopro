@@ -601,6 +601,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->RefreshTimeDisplay();
 		mainGame->dInfo.time_player = 2;
 		mainGame->dInfo.isReplaySwapped = false;
+		mainGame->dInfo.announce_cache.clear();
 		mainGame->is_building = false;
 		mainGame->wCardImg->setVisible(true);
 		mainGame->wInfos->setVisible(true);
@@ -679,6 +680,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->gMutex.Lock();
 		mainGame->dInfo.isStarted = false;
 		mainGame->dInfo.isFinished = true;
+		mainGame->dInfo.announce_cache.clear();
 		mainGame->is_building = false;
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->btnCreateHost->setEnabled(true);
@@ -728,7 +730,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->actionParam = 1;
 			wchar_t msgbuf[256];
 			myswprintf(msgbuf, dataManager.GetSysString(1376), timetext);
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, msgbuf);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, msgbuf);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(30);
@@ -975,7 +977,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -993,7 +995,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1004,7 +1006,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1015,7 +1017,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(data);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1026,7 +1028,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->lstLog->addItem(textBuffer);
 			mainGame->logParam.push_back(0);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, textBuffer);
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, textBuffer);
 			mainGame->PopupElement(mainGame->wACMessage, 20);
 			mainGame->gMutex.Unlock();
 			mainGame->WaitFrameSignal(40);
@@ -1232,6 +1234,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dField.attackable_cards.push_back(pcard);
 			pcard->cmdFlag |= COMMAND_ATTACK;
 		}
+		mainGame->dField.RefreshCardCountDisplay();
 		mainGame->gMutex.Lock();
 		if(BufferIO::ReadInt8(pbuf)) {
 			mainGame->btnM2->setVisible(true);
@@ -2403,6 +2406,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->btnShuffle->setVisible(false);
 		mainGame->showcarddif = 30;
 		mainGame->showcardp = 0;
+		mainGame->dField.RefreshCardCountDisplay();
 		switch (phase) {
 		case PHASE_DRAW:
 			mainGame->btnPhaseStatus->setText(L"\xff24\xff30");

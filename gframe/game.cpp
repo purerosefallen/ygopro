@@ -17,16 +17,6 @@
 #include <sstream>
 #endif //YGOPRO_SERVER_MODE
 
-#ifndef _WIN32
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#else
-#include <direct.h>
-#include <io.h>
-#endif
-
 unsigned short PRO_VERSION = 0x1346;
 
 namespace ygo {
@@ -1117,9 +1107,7 @@ void Game::LoadExpansionDBDirectry(const char* path) {
 			sprintf(filepath, "%s/%s", path, dirp->d_name);
 			dataManager.LoadDB(filepath);
 		}
-		closedir(dir);
-	}
-#endif
+	});
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::LoadExpansionStrings() {
@@ -1161,37 +1149,15 @@ void Game::LoadExpansionStringsDirectry(const char* path) {
 }
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./deck/*.ydk", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			wchar_t* pf = fdataw.cFileName;
-			while(*pf) pf++;
-			while(*pf != L'.') pf--;
-			*pf = 0;
-			cbDeck->addItem(fdataw.cFileName);
+	FileSystem::TraversalDir(L"./deck", [cbDeck](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".ydk", 4)) {
+			size_t len = wcslen(name);
+			wchar_t deckname[256];
+			wcsncpy(deckname, name, len - 4);
+			deckname[len - 4] = 0;
+			cbDeck->addItem(deckname);
 		}
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./deck/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".ydk") != 0)
-			continue;
-		dirp->d_name[len - 4] = 0;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		cbDeck->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	});
 	for(size_t i = 0; i < cbDeck->getItemCount(); ++i) {
 		if(!wcscmp(cbDeck->getItem(i), gameConf.lastdeck)) {
 			cbDeck->setSelected(i);
@@ -1201,90 +1167,25 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 }
 void Game::RefreshReplay() {
 	lstReplayList->clear();
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./replay/*.yrp", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && Replay::CheckReplay(fdataw.cFileName)) {
-			lstReplayList->addItem(fdataw.cFileName);
-		}
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./replay/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".yrp") != 0)
-			continue;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		if(Replay::CheckReplay(wname))
-			lstReplayList->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	FileSystem::TraversalDir(L"./replay", [this](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".yrp", 4) && Replay::CheckReplay(name))
+			lstReplayList->addItem(name);
+	});
 }
 void Game::RefreshSingleplay() {
 	lstSinglePlayList->clear();
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./single/*.lua", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-			lstSinglePlayList->addItem(fdataw.cFileName);
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./single/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".lua") != 0)
-			continue;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		lstSinglePlayList->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	FileSystem::TraversalDir(L"./single", [this](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".lua", 4))
+			lstSinglePlayList->addItem(name);
+	});
 }
 void Game::RefreshLocales() {
 	cbLocale->clear();
 	cbLocale->addItem(L"default");
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./locales/*", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if((fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && wcscmp(fdataw.cFileName, L".") && wcscmp(fdataw.cFileName, L".."))
-			cbLocale->addItem(fdataw.cFileName);
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./locales/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		if(!wcscmp(wname, L".") || !wcscmp(wname, L".."))
-			continue;
-		cbLocale->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	FileSystem::TraversalDir(L"./locales", [this](const wchar_t* name, bool isdir) {
+		if(isdir && wcscmp(name, L".") && wcscmp(name, L".."))
+			cbLocale->addItem(name);
+	});
 	for(size_t i = 0; i < cbLocale->getItemCount(); ++i) {
 		if(!wcscmp(cbLocale->getItem(i), gameConf.locale)) {
 			cbLocale->setSelected(i);
@@ -1815,7 +1716,7 @@ void Game::ClearCardInfo(int player) {
 	stText->setText(L"");
 	scrCardText->setVisible(false);
 }
-void Game::AddChatMsg(wchar_t* msg, int player) {
+void Game::AddChatMsg(const wchar_t* msg, int player) {
 	for(int i = 7; i > 0; --i) {
 		chatMsg[i] = chatMsg[i - 1];
 		chatTiming[i] = chatTiming[i - 1];
@@ -1871,8 +1772,7 @@ void Game::ClearChatMsg() {
 	}
 }
 #endif //YGOPRO_SERVER_MODE
-void Game::AddDebugMsg(char* msg)
-{
+void Game::AddDebugMsg(const char* msg) {
 #ifdef YGOPRO_SERVER_MODE
 	fprintf(stderr, "%s\n", msg);
 #else
@@ -1886,8 +1786,10 @@ void Game::AddDebugMsg(char* msg)
 		sprintf(msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
+#endif //YGOPRO_SERVER_MODE
 }
-void Game::ErrorLog(char* msg) {
+#ifndef YGOPRO_SERVER_MODE
+void Game::ErrorLog(const char* msg) {
 	FILE* fp = fopen("error.log", "at");
 	if(!fp)
 		return;
@@ -1897,76 +1799,55 @@ void Game::ErrorLog(char* msg) {
 	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
 	fprintf(fp, "[%s]%s\n", timebuf, msg);
 	fclose(fp);
+}
 #endif //YGOPRO_SERVER_MODE
-}
-bool Game::MakeDirectory(const std::string folder) {
-    std::string folder_builder;
-    std::string sub;
-    sub.reserve(folder.size());
-    for(auto it = folder.begin(); it != folder.end(); ++it) {
-        const char c = *it;
-        sub.push_back(c);
-        if(c == '/' || it == folder.end() - 1) {
-            folder_builder.append(sub);
-            if(access(folder_builder.c_str(), 0) != 0)
-#ifdef _WIN32
-                if(mkdir(folder_builder.c_str()) != 0)
-#else
-                if(mkdir(folder_builder.c_str(), 0777) != 0)
-#endif
-                    return false;
-            sub.clear();
-        }
-    }
-    return true;
-}
 void Game::initUtils() {
 	//user files
-	MakeDirectory("replay");
+	FileSystem::MakeDir("replay");
 	//cards from extra pack
-	MakeDirectory("expansions");
+	FileSystem::MakeDir("expansions");
 #ifdef YGOPRO_SERVER_MODE
 	//special scripts
-	MakeDirectory("specials");
-	MakeDirectory("beta");
+	FileSystem::MakeDir("specials");
+	FileSystem::MakeDir("beta");
 #else
-	MakeDirectory("screenshots");
+	FileSystem::MakeDir("screenshots");
 	//files in ygopro-starter-pack
-	MakeDirectory("deck");
-	MakeDirectory("single");
+	FileSystem::MakeDir("deck");
+	FileSystem::MakeDir("single");
 	//original files
-	MakeDirectory("script");
-	MakeDirectory("skin");
-	MakeDirectory("textures");
+	FileSystem::MakeDir("script");
+	FileSystem::MakeDir("skin");
+	FileSystem::MakeDir("textures");
 	//subdirs in textures
-	MakeDirectory("textures/act");
-	MakeDirectory("textures/attack");
-	MakeDirectory("textures/bg");
-	MakeDirectory("textures/bg_deck");
-	MakeDirectory("textures/bg_menu");
-	MakeDirectory("textures/cover");
-	MakeDirectory("textures/cover2");
-	MakeDirectory("textures/pscale");
+	FileSystem::MakeDir("textures/act");
+	FileSystem::MakeDir("textures/attack");
+	FileSystem::MakeDir("textures/bg");
+	FileSystem::MakeDir("textures/bg_deck");
+	FileSystem::MakeDir("textures/bg_menu");
+	FileSystem::MakeDir("textures/cover");
+	FileSystem::MakeDir("textures/cover2");
+	FileSystem::MakeDir("textures/pscale");
 	//sound
 #ifdef YGOPRO_USE_IRRKLANG
-	MakeDirectory("sound");
-	MakeDirectory("sound/BGM");
-	MakeDirectory("sound/BGM/advantage");
-	MakeDirectory("sound/BGM/deck");
-	MakeDirectory("sound/BGM/disadvantage");
-	MakeDirectory("sound/BGM/duel");
-	MakeDirectory("sound/BGM/lose");
-	MakeDirectory("sound/BGM/menu");
-	MakeDirectory("sound/BGM/win");
+	FileSystem::MakeDir("sound");
+	FileSystem::MakeDir("sound/BGM");
+	FileSystem::MakeDir("sound/BGM/advantage");
+	FileSystem::MakeDir("sound/BGM/deck");
+	FileSystem::MakeDir("sound/BGM/disadvantage");
+	FileSystem::MakeDir("sound/BGM/duel");
+	FileSystem::MakeDir("sound/BGM/lose");
+	FileSystem::MakeDir("sound/BGM/menu");
+	FileSystem::MakeDir("sound/BGM/win");
 	//custom sound
-	MakeDirectory("sound/custom");
-	MakeDirectory("sound/BGM/custom");
+	FileSystem::MakeDir("sound/custom");
+	FileSystem::MakeDir("sound/BGM/custom");
 #endif
 	//locales
-	MakeDirectory("locales");
+	FileSystem::MakeDir("locales");
 	//pics
-	MakeDirectory("pics");
-	MakeDirectory("pics/field");
+	FileSystem::MakeDir("pics");
+	FileSystem::MakeDir("pics/field");
 #endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
@@ -2346,6 +2227,8 @@ void Game::FlashWindow() {
 #endif
 }
 void Game::takeScreenshot() {
+	if(!FileSystem::IsDirExists(L"./screenshots") && !FileSystem::MakeDir(L"./screenshots"))
+		return;
 	irr::video::IImage* const image = driver->createScreenShot();
 	if(image) {
 		irr::c8 filename[64];

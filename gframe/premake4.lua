@@ -8,7 +8,7 @@ project "ygopro"
     if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
     files { "gframe.cpp", "config.h",
-            "game.cpp", "game.h",
+            "game.cpp", "game.h", "myfilesystem.h",
             "deck_manager.cpp", "deck_manager.h",
             "data_manager.cpp", "data_manager.h",
             "replay.cpp", "replay.h",

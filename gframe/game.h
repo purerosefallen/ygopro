@@ -79,6 +79,7 @@ struct DuelInfo {
 	int lp[2];
 	int start_lp[2];
 	int card_count[2];
+	int total_attack[2];
 	int duel_rule;
 	int turn;
 	short curMsg;
@@ -95,7 +96,9 @@ struct DuelInfo {
 	wchar_t str_time_left[2][16];
 	video::SColor time_color[2];
 	wchar_t str_card_count[2][16];
+	wchar_t str_total_attack[2][16];
 	video::SColor card_count_color[2];
+	video::SColor total_attack_color[2];
 	bool isReplaySwapped;
 };
 
@@ -130,8 +133,7 @@ public:
 	void LoadExpansionDB();
 	void LoadExpansionDBDirectry(const char* path);
 	void LoadBetaDB();
-	void AddDebugMsg(char* msgbuf);
-	bool MakeDirectory(const std::string folder);
+	void AddDebugMsg(const char* msgbuf);
 	void initUtils();
 #else
 	void MainLoop();
@@ -172,11 +174,10 @@ public:
 	void SaveConfig();
 	void ShowCardInfo(int code, bool resize = false);
 	void ClearCardInfo(int player = 0);
-	void AddChatMsg(wchar_t* msg, int player);
+	void AddChatMsg(const wchar_t* msg, int player);
 	void ClearChatMsg();
-	void AddDebugMsg(char* msgbuf);
-	void ErrorLog(char* msgbuf);
-	bool MakeDirectory(const std::string folder);
+	void AddDebugMsg(const char* msgbuf);
+	void ErrorLog(const char* msgbuf);
 	void initUtils();
 	void ClearTextures();
 	void CloseDuelWindow();

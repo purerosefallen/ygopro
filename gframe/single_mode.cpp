@@ -152,7 +152,7 @@ int SingleMode::SinglePlayThread(void* param) {
 		mainGame->actionParam = 1;
 		wchar_t msgbuf[256];
 		myswprintf(msgbuf, dataManager.GetSysString(1376), timetext);
-		mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->textFont, msgbuf);
+		mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, msgbuf);
 		mainGame->PopupElement(mainGame->wACMessage, 20);
 		mainGame->gMutex.Unlock();
 		mainGame->WaitFrameSignal(30);
@@ -779,7 +779,7 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 			memcpy(msgbuf, begin, len + 1);
 			BufferIO::DecodeUTF8(msgbuf, msg);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stMessage, 310, mainGame->textFont, msg);
+			mainGame->SetStaticText(mainGame->stMessage, 310, mainGame->guiFont, msg);
 			mainGame->PopupElement(mainGame->wMessage);
 			mainGame->gMutex.Unlock();
 			mainGame->actionSignal.Reset();

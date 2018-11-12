@@ -13,7 +13,7 @@
 /freetype
 /sqlite3
 /irrklang
-/irrlicht
+/irrlicht*
 
 # gframe additionals
 /gframe/ygopro.ico
