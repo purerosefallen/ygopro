@@ -38,6 +38,7 @@ project "ygopro"
         links { "event_pthreads", "GL", "dl", "pthread" }
     configuration "linux"
         includedirs { "../irrlicht_linux/include" }
+        links { "X11" }
         if USE_IRRKLANG then
             links { "IrrKlang" }
             linkoptions{ "-Wl,-rpath=./" }
