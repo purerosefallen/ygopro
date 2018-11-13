@@ -88,7 +88,7 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	dataManager.LoadStrings("./expansions/strings.conf");
+	LoadExpansionStrings();
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
@@ -972,11 +972,31 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 	pControl->setText(dataManager.strBuffer);
 }
 void Game::LoadExpansionDB() {
-	FileSystem::TraversalDir("./expansions", [](const char* name, bool isdir) {
+	LoadExpansionDBDirectry("./expansions");
+	FileSystem::TraversalDir("./expansions", [this](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char subdir[1024];
+			sprintf(subdir, "./expansions/%s", name);
+			LoadExpansionDBDirectry(subdir);
+		}
+	});
+}
+void Game::LoadExpansionDBDirectry(const char* path) {
+	FileSystem::TraversalDir(path, [path](const char* name, bool isdir) {
 		if(!isdir && strrchr(name, '.') && !mystrncasecmp(strrchr(name, '.'), ".cdb", 4)) {
 			char fpath[1024];
-			sprintf(fpath, "./expansions/%s", name);
+			sprintf(fpath, "%s/%s", path, name);
 			dataManager.LoadDB(fpath);
+		}
+	});
+}
+void Game::LoadExpansionStrings() {
+	dataManager.LoadStrings("./expansions/strings.conf");
+	FileSystem::TraversalDir("./expansions", [](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char fpath[1024];
+			sprintf(fpath, "./expansions/%s/strings.conf", name);
+			dataManager.LoadStrings(fpath);
 		}
 	});
 }
