@@ -131,6 +131,7 @@ public:
 	void MainServerLoop();
 	void MainTestLoop(int code);
 	void LoadExpansionDB();
+	void LoadExpansionDBDirectry(const char* path);
 	void LoadBetaDB();
 	void AddDebugMsg(const char* msgbuf);
 	void initUtils();
@@ -141,6 +142,8 @@ public:
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	void SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, u32 pos = 0);
 	void LoadExpansionDB();
+	void LoadExpansionDBDirectry(const char* path);
+	void LoadExpansionStrings();
 	void RefreshDeck(irr::gui::IGUIComboBox* cbDeck);
 	void RefreshReplay();
 	void RefreshSingleplay();

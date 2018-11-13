@@ -56,17 +56,18 @@ void Game::MainTestLoop(int code) {
 	NetServer::InitTestCard(code);
 }
 void Game::LoadBetaDB() {
+	LoadExpansionDBDirectry("./beta");
 #ifdef _WIN32
 	char fpath[1000];
 	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./beta/*.cdb", &fdataw);
+	HANDLE fh = FindFirstFileW(L"./beta/*", &fdataw);
 	if(fh != INVALID_HANDLE_VALUE) {
 		do {
-			if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			if(wcscmp(L".",fdataw.cFileName) != 0 && wcscmp(L"..",fdataw.cFileName) != 0 && fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 				char fname[780];
 				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
 				sprintf(fpath, "./beta/%s", fname);
-				dataManager.LoadDB(fpath);
+				LoadExpansionDBDirectry(fpath);
 			}
 		} while(FindNextFileW(fh, &fdataw));
 		FindClose(fh);
@@ -76,12 +77,11 @@ void Game::LoadBetaDB() {
 	struct dirent * dirp;
 	if((dir = opendir("./beta/")) != NULL) {
 		while((dirp = readdir(dir)) != NULL) {
-			size_t len = strlen(dirp->d_name);
-			if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".cdb") != 0)
+			if (strcmp(".", dirp->d_name) == 0 || strcmp("..", dirp->d_name) == 0 || dirp->d_type != DT_DIR)
 				continue;
 			char filepath[1000];
-			sprintf(filepath, "./beta/%s", dirp->d_name);
-			dataManager.LoadDB(filepath);
+			sprintf(filepath, "./beta/%s/", dirp->d_name);
+			LoadExpansionDBDirectry(filepath);
 		}
 		closedir(dir);
 	}
@@ -159,7 +159,7 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	dataManager.LoadStrings("./expansions/strings.conf");
+	LoadExpansionStrings();
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
@@ -1044,15 +1044,35 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansionDB() {
-	FileSystem::TraversalDir("./expansions", [](const char* name, bool isdir) {
+	LoadExpansionDBDirectry("./expansions");
+	FileSystem::TraversalDir("./expansions", [this](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char subdir[1024];
+			sprintf(subdir, "./expansions/%s", name);
+			LoadExpansionDBDirectry(subdir);
+		}
+	});
+}
+void Game::LoadExpansionDBDirectry(const char* path) {
+	FileSystem::TraversalDir(path, [path](const char* name, bool isdir) {
 		if(!isdir && strrchr(name, '.') && !mystrncasecmp(strrchr(name, '.'), ".cdb", 4)) {
 			char fpath[1024];
-			sprintf(fpath, "./expansions/%s", name);
+			sprintf(fpath, "%s/%s", path, name);
 			dataManager.LoadDB(fpath);
 		}
 	});
 }
 #ifndef YGOPRO_SERVER_MODE
+void Game::LoadExpansionStrings() {
+	dataManager.LoadStrings("./expansions/strings.conf");
+	FileSystem::TraversalDir("./expansions", [](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..")) {
+			char fpath[1024];
+			sprintf(fpath, "./expansions/%s/strings.conf", name);
+			dataManager.LoadStrings(fpath);
+		}
+	});
+}
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
 	FileSystem::TraversalDir(L"./deck", [cbDeck](const wchar_t* name, bool isdir) {
