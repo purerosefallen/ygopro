@@ -10,6 +10,7 @@
 #include "netserver.h"
 #include "single_mode.h"
 #include <sstream>
+#include <regex>
 
 unsigned short PRO_VERSION = 0x1346;
 
@@ -2077,6 +2078,22 @@ void Game::takeScreenshot() {
 		image->drop();
 	} else
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
+}
+bool Game::CheckRegEx(const wchar_t* text, const wchar_t* exp, bool exact) {
+	//if(std::wregex(exp) == NULL)
+	//	return false;
+	if(exact)
+		return !!std::regex_match(text, std::wregex(exp));
+	else
+		return !!std::regex_search(text, std::wregex(exp));
+}
+bool Game::CheckRegEx(std::wstring text, const wchar_t* exp, bool exact) {
+	//if(std::wregex(exp) == NULL)
+	//	return false;
+	if(exact)
+		return !!std::regex_match(text, std::wregex(exp));
+	else
+		return !!std::regex_search(text, std::wregex(exp));
 }
 const char* Game::GetLocaleDir(const char* dir) {
 	if(!gameConf.locale || !wcscmp(gameConf.locale, L"default"))
