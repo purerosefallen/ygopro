@@ -1477,7 +1477,7 @@ void ClientField::UpdateDeclarableCodeType(bool enter) {
 			return;
 	}
 	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname, true)) {
+		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname)) {
 			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declarable_type)) {
