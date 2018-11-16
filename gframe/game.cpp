@@ -2082,18 +2082,30 @@ void Game::takeScreenshot() {
 bool Game::CheckRegEx(const wchar_t* text, const wchar_t* exp, bool exact) {
 	//if(std::wregex(exp) == NULL)
 	//	return false;
-	if(exact)
-		return !!std::regex_match(text, std::wregex(exp));
-	else
-		return !!std::regex_search(text, std::wregex(exp));
+	bool result;
+	try {
+		if(exact)
+			result = std::regex_match(text, std::wregex(exp));
+		else
+			result = std::regex_search(text, std::wregex(exp));
+	} catch(...) {
+		result = false;
+	}
+	return result;
 }
 bool Game::CheckRegEx(std::wstring text, const wchar_t* exp, bool exact) {
 	//if(std::wregex(exp) == NULL)
 	//	return false;
-	if(exact)
-		return !!std::regex_match(text, std::wregex(exp));
-	else
-		return !!std::regex_search(text, std::wregex(exp));
+	bool result;
+	try {
+		if(exact)
+			result = std::regex_match(text, std::wregex(exp));
+		else
+			result = std::regex_search(text, std::wregex(exp));
+	} catch(...) {
+		result = false;
+	}
+	return result;
 }
 const char* Game::GetLocaleDir(const char* dir) {
 	if(!gameConf.locale || !wcscmp(gameConf.locale, L"default"))
