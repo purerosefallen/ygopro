@@ -344,6 +344,9 @@ bool Game::Initialize() {
 	chkMultiKeywords = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1377));
 	chkMultiKeywords->setChecked(gameConf.search_multiple_keywords > 0);
 	posY += 30;
+	chkRegex = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_REGEX, dataManager.GetSysString(1378));
+	chkRegex->setChecked(gameConf.search_regex > 0);
+	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 120, posY + 28), false, false, tabSystem);
 	btnWinResizeS = env->addButton(rect<s32>(posX + 115, posY, posX + 145, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
 	btnWinResizeM = env->addButton(rect<s32>(posX + 150, posY, posX + 180, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
@@ -1126,6 +1129,7 @@ void Game::LoadConfig() {
 	gameConf.separate_clear_button = 1;
 	gameConf.auto_search_limit = 0;
 	gameConf.search_multiple_keywords = 1;
+	gameConf.search_regex = 0;
 	gameConf.chkIgnoreDeckChanges = 0;
 	gameConf.defaultOT = 1;
 	gameConf.enable_bot_mode = 1;
@@ -1203,6 +1207,8 @@ void Game::LoadConfig() {
 				gameConf.auto_search_limit = atoi(valbuf);
 			} else if(!strcmp(strbuf, "search_multiple_keywords")) {
 				gameConf.search_multiple_keywords = atoi(valbuf);
+			} else if(!strcmp(strbuf, "search_regex")) {
+				gameConf.search_regex = atoi(valbuf);
 			} else if(!strcmp(strbuf, "ignore_deck_changes")) {
 				gameConf.chkIgnoreDeckChanges = atoi(valbuf);
 			} else if(!strcmp(strbuf, "default_ot")) {
@@ -1319,6 +1325,8 @@ void Game::LoadConfig() {
 				gameConf.auto_search_limit = atoi(valbuf);
 			} else if(!strcmp(strbuf, "search_multiple_keywords")) {
 				gameConf.search_multiple_keywords = atoi(valbuf);
+			} else if(!strcmp(strbuf, "search_regex")) {
+				gameConf.search_regex = atoi(valbuf);
 			} else if(!strcmp(strbuf, "ignore_deck_changes")) {
 				gameConf.chkIgnoreDeckChanges = atoi(valbuf);
 			} else if(!strcmp(strbuf, "default_ot")) {
@@ -1449,6 +1457,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "auto_search_limit = %d\n", gameConf.auto_search_limit);
 	fprintf(fp, "#search_multiple_keywords = 0: Disable. 1: Search mutiple keywords with separator \" \". 2: with separator \"+\"\n");
 	fprintf(fp, "search_multiple_keywords = %d\n", gameConf.search_multiple_keywords);
+	fprintf(fp, "search_regex = %d\n", gameConf.search_regex);
 	fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
 	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
@@ -2080,8 +2089,8 @@ void Game::takeScreenshot() {
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
 }
 bool Game::CheckRegEx(const wchar_t* text, const wchar_t* exp, bool exact) {
-	//if(std::wregex(exp) == NULL)
-	//	return false;
+	if(!gameConf.search_regex)
+		return false;
 	bool result;
 	try {
 		if(exact)
@@ -2094,8 +2103,8 @@ bool Game::CheckRegEx(const wchar_t* text, const wchar_t* exp, bool exact) {
 	return result;
 }
 bool Game::CheckRegEx(std::wstring text, const wchar_t* exp, bool exact) {
-	//if(std::wregex(exp) == NULL)
-	//	return false;
+	if(!gameConf.search_regex)
+		return false;
 	bool result;
 	try {
 		if(exact)
