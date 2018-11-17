@@ -639,6 +639,10 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 	while (pbuf - msgbuffer < (int)len) {
 		offset = pbuf;
 		unsigned char engType = BufferIO::ReadUInt8(pbuf);
+#ifdef YGOPRO_SERVER_MODE
+		if(engType != MSG_RETRY)
+			curMsg = engType;
+#endif
 		switch (engType) {
 		case MSG_RETRY: {
 			WaitforResponse(last_response);
@@ -1800,6 +1804,17 @@ void TagDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 		else time_limit[resp_type] = 0;
 		event_del(etimer);
 	}
+#ifdef YGOPRO_SERVER_MODE
+	int resp_type = dp->type < 2 ? 0 : 1;
+	if(len >= 4 && time_limit[resp_type] < host_info.time_limit) {
+		int resp = *(int*)pdata;
+		if((curMsg == MSG_SELECT_IDLECMD && (resp & 0xffff) != 8)
+		|| (curMsg == MSG_SELECT_BATTLECMD)
+		|| (curMsg == MSG_SELECT_CHAIN && resp != -1)
+		)
+			++time_limit[resp_type];
+	}
+#endif
 	Process();
 }
 void TagDuel::EndDuel() {

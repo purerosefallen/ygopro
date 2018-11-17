@@ -64,6 +64,7 @@ protected:
 	DuelPlayer* replay_recorder;
 	int turn_player;
 	int phase;
+	unsigned char curMsg;
 #endif
 	bool ready[4];
 	Deck pdeck[4];

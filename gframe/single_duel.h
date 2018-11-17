@@ -68,6 +68,7 @@ protected:
 	DuelPlayer* replay_recorder;
 	unsigned char turn_player;
 	unsigned short phase;
+	unsigned char curMsg;
 #endif
 	Replay last_replay;
 	bool match_mode;
