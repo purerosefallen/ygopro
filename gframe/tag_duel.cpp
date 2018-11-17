@@ -1808,8 +1808,9 @@ void TagDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 	int resp_type = dp->type < 2 ? 0 : 1;
 	if(len >= 4 && time_limit[resp_type] < host_info.time_limit) {
 		int resp = *(int*)pdata;
-		if((curMsg == MSG_SELECT_IDLECMD && (resp & 0xffff) != 8)
-		|| (curMsg == MSG_SELECT_BATTLECMD)
+		int rest = resp & 0xffff;
+		if((curMsg == MSG_SELECT_IDLECMD && rest < 6)
+		|| (curMsg == MSG_SELECT_BATTLECMD && rest < 2)
 		|| (curMsg == MSG_SELECT_CHAIN && resp != -1)
 		)
 			++time_limit[resp_type];
