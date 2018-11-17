@@ -48,16 +48,16 @@ script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./premake5 gmake --cc=clang; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./premake5 gmake; fi
 - cd build
-- make config=release ygopro -j4
+- make config=release ygopro
 - cd ..
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv -f bin/release/ygopro ./; strip ygopro;
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv bin/release/ygopro ./; strip ygopro;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     mkdir -p ygopro.app/Contents/MacOS;
-    mv -f bin/release/ygopro ygopro.app/Contents/MacOS;
+    mv bin/release/ygopro ygopro.app/Contents/MacOS;
     dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd;
     strip ygopro.app/Contents/MacOS/ygopro; mkdir ygopro.app/Contents/Resources;
-    mv -f premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
     defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
     defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
@@ -68,7 +68,6 @@ script:
       codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
     fi
   fi
-
 before_deploy:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro libIrrKlang.so;
