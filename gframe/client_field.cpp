@@ -1477,11 +1477,11 @@ void ClientField::UpdateDeclarableCodeType(bool enter) {
 			return;
 	}
 	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos) {
+		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname)) {
 			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declarable_type)) {
-				if(pname == cit->second.name) { //exact match
+				if(pname == cit->second.name || mainGame->CheckRegEx(cit->second.name, pname, true)) { //exact match
 					mainGame->lstANCard->insertItem(0, cit->second.name.c_str(), -1);
 					ancard.insert(ancard.begin(), cit->first);
 				} else {
@@ -1524,11 +1524,11 @@ void ClientField::UpdateDeclarableCodeOpcode(bool enter) {
 			return;
 	}
 	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos) {
+		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname)) {
 			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, opcode)) {
-				if(pname == cit->second.name) { //exact match
+				if(pname == cit->second.name || mainGame->CheckRegEx(cit->second.name, pname, true)) { //exact match
 					mainGame->lstANCard->insertItem(0, cit->second.name.c_str(), -1);
 					ancard.insert(ancard.begin(), cit->first);
 				} else {

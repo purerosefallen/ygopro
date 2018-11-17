@@ -1857,6 +1857,13 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case CHECKBOX_REGEX: {
+				mainGame->gameConf.search_regex = mainGame->chkRegex->isChecked() ? 1 : 0;
+				if(mainGame->is_building && !mainGame->is_siding)
+					mainGame->deckBuilder.InstantSearch();
+				return true;
+				break;
+			}
 #ifdef YGOPRO_USE_IRRKLANG
 			case CHECKBOX_ENABLE_MUSIC: {
 				if(!mainGame->chkEnableMusic->isChecked())

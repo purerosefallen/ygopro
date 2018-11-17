@@ -184,7 +184,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				if(sel == -1)
 					break;
 				mainGame->gMutex.Lock();
-				mainGame->wRenameDeck->setText(dataManager.GetSysString(1367));
+				mainGame->wRenameDeck->setText(dataManager.GetSysString(1376));
 				mainGame->ebREName->setText(mainGame->cbDBDecks->getItem(sel));
 				mainGame->PopupElement(mainGame->wRenameDeck);
 				mainGame->gMutex.Unlock();
@@ -203,7 +203,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					if(DeckManager::RenameDeck(mainGame->cbDBDecks->getItem(prev_sel), newname)) {
 						mainGame->RefreshDeck(mainGame->cbDBDecks);
 						mainGame->cbDBDecks->setSelected(prev_sel);
-						mainGame->stACMessage->setText(dataManager.GetSysString(1366));
+						mainGame->stACMessage->setText(dataManager.GetSysString(1375));
 					        mainGame->PopupElement(mainGame->wACMessage, 20);
 					} else {
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1365));
@@ -944,6 +944,7 @@ void DeckBuilder::FilterCards() {
 				int trycode = BufferIO::GetVal(elements_iterator->c_str());
 				bool tryresult = dataManager.GetData(trycode, 0);
 				if(!tryresult && !CardNameContains(text.name.c_str(), elements_iterator->c_str()) && text.text.find(elements_iterator->c_str()) == std::wstring::npos
+					&& !mainGame->CheckRegEx(text.text, elements_iterator->c_str())
 					&& (!set_code_map[*elements_iterator] || !check_set_code(data, set_code_map[*elements_iterator]))) {
 					is_target = false;
 					break;
@@ -1011,7 +1012,7 @@ void DeckBuilder::SortList() {
 	auto left = results.begin();
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	for(auto it = results.begin(); it != results.end(); ++it) {
-		if(wcscmp(pstr, dataManager.GetName((*it)->first)) == 0) {
+		if(wcscmp(pstr, dataManager.GetName((*it)->first)) == 0 || mainGame->CheckRegEx(dataManager.GetName((*it)->first), pstr, true)) {
 			std::iter_swap(left, it);
 			++left;
 		}
@@ -1059,6 +1060,8 @@ bool DeckBuilder::CardNameContains(const wchar_t *haystack, const wchar_t *needl
 	if (!haystack) {
 		return false;
 	}
+	if(mainGame->CheckRegEx(haystack, needle))
+		return true;
 	int i = 0;
 	int j = 0;
 	while (haystack[i]) {

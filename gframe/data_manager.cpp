@@ -1,4 +1,5 @@
 #include "data_manager.h"
+#include "game.h"
 #include <stdio.h>
 
 namespace ygo {
@@ -195,7 +196,11 @@ const wchar_t* DataManager::GetSetName(int code) {
 unsigned int DataManager::GetSetCode(const wchar_t* setname) {
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
 		auto xpos = csit->second.find_first_of(L'|');//setname|extra info
-		if(csit->second.compare(0, xpos, setname) == 0)
+		if(csit->second.compare(0, xpos, setname) == 0
+#ifndef YGOPRO_SERVER_MODE
+				|| mainGame->CheckRegEx(csit->second, setname, true)
+#endif
+		)
 			return csit->first;
 	}
 	return 0;
