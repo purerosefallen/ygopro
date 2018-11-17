@@ -307,7 +307,7 @@ bool Game::Initialize() {
 	chkQuickAnimation = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
 	chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
 	posY += 30;
-	chkAutoSaveReplay = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1375));
+	chkAutoSaveReplay = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1366));
 	chkAutoSaveReplay->setChecked(gameConf.auto_save_replay != 0);
 	elmTabHelperLast = chkAutoSaveReplay;
 	//system
@@ -341,10 +341,10 @@ bool Game::Initialize() {
 	chkAutoSearch = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
 	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
 	posY += 30;
-	chkMultiKeywords = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1377));
+	chkMultiKeywords = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1378));
 	chkMultiKeywords->setChecked(gameConf.search_multiple_keywords > 0);
 	posY += 30;
-	chkRegex = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_REGEX, dataManager.GetSysString(1378));
+	chkRegex = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_REGEX, dataManager.GetSysString(1379));
 	chkRegex->setChecked(gameConf.search_regex > 0);
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 120, posY + 28), false, false, tabSystem);
@@ -565,10 +565,10 @@ bool Game::Initialize() {
 	scrFilter->setSmallStep(1);
 	scrFilter->setVisible(false);
 	//rename deck
-	wRenameDeck = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1367));
+	wRenameDeck = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1376));
 	wRenameDeck->getCloseButton()->setVisible(false);
 	wRenameDeck->setVisible(false);
-	env->addStaticText(dataManager.GetSysString(1368), rect<s32>(20, 25, 290, 45), false, false, wRenameDeck);
+	env->addStaticText(dataManager.GetSysString(1377), rect<s32>(20, 25, 290, 45), false, false, wRenameDeck);
 	ebREName =  env->addEditBox(L"", rect<s32>(20, 50, 290, 70), true, wRenameDeck, -1);
 	ebREName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	btnREYes = env->addButton(rect<s32>(70, 80, 140, 105), wRenameDeck, BUTTON_RENAME_DECK_SAVE, dataManager.GetSysString(1341));
