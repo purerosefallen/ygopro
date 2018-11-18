@@ -18,7 +18,7 @@
 #include <regex>
 #endif //YGOPRO_SERVER_MODE
 
-unsigned short PRO_VERSION = 0x1346;
+unsigned short PRO_VERSION = 0x1347;
 
 namespace ygo {
 
