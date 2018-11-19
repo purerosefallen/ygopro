@@ -44,6 +44,9 @@ install:
   # premake
   - premake5 vs2017
   
+  # msbuild fix
+  - $msbuildPath = $(cmd /c where msbuild)
+  
 configuration: Release
 
 build: 
