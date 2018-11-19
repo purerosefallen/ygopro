@@ -1,5 +1,6 @@
 version: '{build}'
 skip_tags: true
+image: Visual Studio 2017
 
 environment:
   access_token:
@@ -41,7 +42,7 @@ install:
   - patch -p0 < irrlicht\irrlicht.patch
 
   # premake
-  - premake5 vs2015
+  - premake5 vs2017
   
 configuration: Release
 
