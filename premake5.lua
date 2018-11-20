@@ -13,7 +13,7 @@ solution "ygo"
         libdirs { "$(DXSDK_DIR)Lib/x86" }
         entrypoint "mainCRTStartup"
         toolset "v141_xp"
-        systemversion "10.0.17763.0"
+        systemversion "latest"
         startproject "ygopro"
 
     configuration "bsd"
