@@ -19,10 +19,10 @@ solution "ygo"
         systemversion "latest"
         startproject "ygopro"
 
-    configuration {"windows", "vs2017"}
+    configuration { "windows", "vs2017" }
         toolset "v141_xp"
 
-    configuration {"windows", "not vs2017"}
+    configuration { "windows", "not vs2017" }
         toolset "v140_xp"
 
     configuration "bsd"
