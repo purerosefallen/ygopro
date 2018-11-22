@@ -1,4 +1,5 @@
 version: '{build}'
+image: Visual Studio 2017
 
 skip_tags: true
 
@@ -25,7 +26,7 @@ install:
   - xcopy /E premake\* .
     
   # premake
-  - premake5 vs2015
+  - premake5 vs2017
   
 configuration: Release
 
