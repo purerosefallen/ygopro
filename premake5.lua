@@ -15,9 +15,15 @@ solution "ygo"
         defines { "WIN32", "_WIN32", "WINVER=0x0501" }
         libdirs { "$(DXSDK_DIR)Lib/x86" }
         entrypoint "mainCRTStartup"
-        toolset "v141_xp"
+        --toolset "v141_xp"
         systemversion "latest"
         startproject "ygopro"
+
+    configuration {"windows", "vs2017"}
+        toolset "v141_xp"
+
+    configuration {"windows", "not vs2017"}
+        toolset "v140_xp"
 
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
