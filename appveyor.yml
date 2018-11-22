@@ -1,4 +1,5 @@
 version: '{build}'
+image: Visual Studio 2017
 
 environment:
   irrklang_pro: 1
@@ -40,7 +41,10 @@ install:
   - patch -p0 < irrlicht\irrlicht.patch
 
   # premake
-  - premake5 vs2015
+  - premake5 vs2017
+  
+  # msbuild not fix
+  - where msbuild
   
 configuration: Release
 
