@@ -25,18 +25,16 @@ project "ygopro"
         includedirs { "../irrlicht/include", "../freetype/include", "../event/include", "../sqlite3" }
         if USE_IRRKLANG then
             links { "irrKlang" }
-            --libdirs { "../irrklang/lib/Win32-visualStudio" }
+            if not IRRKLANG_PRO then
+                libdirs { "../irrklang/lib/Win32-visualStudio" }
+            end
         end
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32" }
-    if USE_IRRKLANG then
+    if IRRKLANG_PRO then
         configuration { "windows", "not vs2017" }
             libdirs { "../irrklang/lib/Win32-visualStudio" }
         configuration { "windows", "vs2017" }
-            if IRRKLANG_PRO then
-                libdirs { "../irrklang/lib/Win32-vs2017" }
-            else
-                libdirs { "../irrklang/lib/Win32-visualStudio" }
-            end
+            libdirs { "../irrklang/lib/Win32-vs2017" }
     end
     configuration {"windows", "not vs*"}
         includedirs { "/mingw/include/irrlicht", "/mingw/include/freetype2" }
