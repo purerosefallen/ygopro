@@ -28,20 +28,21 @@ public:
 	virtual void GetResponse(DuelPlayer* dp, void* pdata, unsigned int len);
 	virtual void TimeConfirm(DuelPlayer* dp);
 	virtual void EndDuel();
-	
+
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
 	void RefreshMzone(int player, int flag = 0x881fff, int use_cache = 1);
-	void RefreshSzone(int player, int flag = 0x681fff, int use_cache = 1);
+	void RefreshSzone(int player, int flag = 0xe81fff, int use_cache = 1);
 	void RefreshHand(int player, int flag = 0x781fff, int use_cache = 1);
 	void RefreshGrave(int player, int flag = 0x81fff, int use_cache = 1);
 	void RefreshExtra(int player, int flag = 0x81fff, int use_cache = 1);
 	void RefreshSingle(int player, int location, int sequence, int flag = 0xf81fff);
 
 	static byte* ScriptReaderEx(const char* script_name, int* slen);
+	static byte* ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len = 1);
 	static int MessageHandler(long fduel, int type);
 	static void TagTimer(evutil_socket_t fd, short events, void* arg);
-	
+
 protected:
 	DuelPlayer* players[4];
 	DuelPlayer* pplayer[4];
@@ -62,4 +63,3 @@ protected:
 }
 
 #endif //TAG_DUEL_H
-

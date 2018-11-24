@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!-- Config file for the GUI Skin (CImageGUISkin)                    -->
+<!-- Source border is the border width (in pixels) on the texture.   -->
+<!-- Dest border is the border width on the screen (also in pixels). -->
+<!-- Order of elements dosn't matter -->
+<!-- <NodeNames> are not case sensitive -->
+<!-- attribute= ARE case sensitive -->
+<!-- Texture   = filename              -->
+<!-- SrcBorder = top,left,bottom,right -->
+<!-- DstBorder = top,left,bottom,right -->
+<Skin>
+	<Properties>
+		<Name data="Blue Shine Theme" />
+		<Author data="TheCongressman" />
+		<Version data="2.0.0" />
+		<Date data="July 31th, 2013"/>
+		<Desc data="Blue Shine Theme"/>
+		<Fallback skin="EGST_WINDOWS_CLASSIC" />
+		<Font texture="fontTahoma.png" />
+	</Properties>
+  
+	<Global guialpha="255">
+		<!--<EGDC_3D_DARK_SHADOW a="255" r="255" g="255" b="255" />		-->     	<!-- Dark shadow for three-dimensional display elements.  -->
+		<!--<EGDC_3D_SHADOW a="255" r="255" g="255" b="255" />			-->     	<!-- Shadow color for three-dimensional display elements (for edges facing away from the light source).   -->
+		<EGDC_3D_FACE a="255" r="255" g="255" b="255" />			  				<!-- Face color for three-dimensional display elements and for dialog box backgrounds.   -->
+		<!--<EGDC_3D_HIGH_LIGHT a="255" r="255" g="255" b="255" />		-->			<!-- Highlight color for three-dimensional display elements (for edges facing the light source.).   -->
+		<!--<EGDC_3D_LIGHT a="255" r="255" g="255" b="255" />			-->			<!-- Light color for three-dimensional display elements (for edges facing the light source.). --> 
+		<!--<EGDC_ACTIVE_BORDER a="255" r="255" g="0" b="0" />-->			 		<!-- Active window border.  --> 
+		<EGDC_ACTIVE_CAPTION a="255" r="255" g="255" b="255" />		  					<!-- Active window title bar text --> 
+		<!--<EGDC_APP_WORKSPACE a="255" r="255" g="255" b="255" />-->				<!-- Background color of multiple document interface (MDI) applications. -->  
+		<EGDC_BUTTON_TEXT a="255" r="255" g="255" b="255" />		 		<!-- Text on a button. --> 
+		<EGDC_GRAY_TEXT a="255" r="194" g="0" b="0" />							<!-- Grayed (disabled) text. -->  
+		<!--<EGDC_HIGH_LIGHT a="255" r="255" g="255" b="255" />			-->  		<!-- Item(s) selected in a control. -->  
+		<EGDC_HIGH_LIGHT_TEXT a="255" r="255" g="255" b="255" />	  				<!-- Text of item(s) selected in a control. --> 
+		<!--<EGDC_INACTIVE_BORDER a="255" r="255" g="255" b="255" />	-->  		<!-- Inactive window border. -->  
+		<!--<EGDC_INACTIVE_CAPTION a="255" r="255" g="255" b="255" />	--> 		<!-- Inactive window caption. -->  
+		<!--<EGDC_TOOLTIP a="255" r="255" g="255" b="255" />	-->					<!-- Tool tip text color. -->  
+		<EGDC_TOOLTIP_BACKGROUND a="255" r="255" g="255" b="255" />			<!-- Tool tip background color. -->  
+		<!--<EGDC_SCROLLBAR a="150" r="255" g="255" b="255" />			-->			<!-- Scrollbar gray area. This ONLY applies to the default scrollbar, if you want to change the colors of the graphical one, change the color attributes in the section near the bottom -->  
+		<EGDC_WINDOW a="255" r="255" g="255" b="255" />								<!-- Window background. -->  
+		<EGDC_WINDOW_SYMBOL a="255" r="255" g="255" b="255" />		  					<!-- Window symbols like on close buttons, scroll bars and check boxes.  -->
+		<!--<EGDC_ICON a="255" r="255" g="255" b="255" />				-->			<!-- Icons in a list or tree. -->  
+		<!--<EGDC_ICON_HIGH_LIGHT a="255" r="255" g="255" b="255" />	-->			<!-- Selected icons in a list or tree. -->
+		
+		<Caption tbardistancex="2" tbardistancey="9" />
+		<WindowButton width="24" />
+		<CheckBoxColor a="-31" r="6" g="195" b="236" />
+	</Global>
+  
+	<Button texture="button.png">
+		<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+		<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+		<Pressed texture="ButtonPressed.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+			<Color r="255" g="255" b="255" a="255" />
+		</Pressed>
+		<ButtonDisabled texture="ButtonDisabled.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+			<Color r="255" g="255" b="255" a="255" />
+		</ButtonDisabled>
+	</Button>
+
+	<MenuBar texture="MenuBar.png">
+		<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+		<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+		<MenuPane texture="MenuPane.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+			<Color r="255" g="255" b="255" a="255" />
+		</MenuPane>
+		<MenuPressed texture="MenuPressed.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+			<Color r="255" g="255" b="255" a="255" />
+		</MenuPressed>
+	</MenuBar>
+
+	<CheckBox texture="CheckBox.png">
+		<SrcBorder tlx="1" tly="1" brx="1" bry="1" />
+		<DstBorder tlx="1" tly="1" brx="1" bry="1" />
+		<CheckBoxDisabled texture="CheckBoxDisabled.png">
+			<SrcBorder tlx="1" tly="1" brx="1" bry="1" />
+			<DstBorder tlx="1" tly="1" brx="1" bry="1" />
+		</CheckBoxDisabled>
+	</CheckBox>
+
+	<ComboBox texture="sunkenpane.png">
+		<SrcBorder tlx="1" tly="1" brx="1" bry="1" />
+		<DstBorder tlx="1" tly="1" brx="1" bry="1" />
+		<ComboBoxDisabled texture="CheckBoxDisabled.png">
+			<SrcBorder tlx="1" tly="1" brx="1" bry="1" />
+			<DstBorder tlx="1" tly="1" brx="1" bry="1" />
+		</ComboBoxDisabled>
+	</ComboBox>
+
+	<SunkenPane texture="sunkenpane.png">
+		<SrcBorder tlx="10" tly="10" brx="10" bry="10" />
+		<DstBorder tlx="10" tly="10" brx="10" bry="10" />
+	</SunkenPane>
+
+	<TabControl texture="TabControl.png">
+		<SrcBorder tlx="10" tly="10" brx="10" bry="10" />
+		<DstBorder tlx="10" tly="10" brx="10" bry="10" />
+		<TabButton texture="TabButton.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+		</TabButton>
+		<TabButtonPressed texture="TabButtonPressed.png">
+			<SrcBorder tlx="3" tly="3" brx="3" bry="3" />
+			<DstBorder tlx="3" tly="3" brx="3" bry="3" />
+		</TabButtonPressed>
+	</TabControl>
+  
+	<Window texture="windowbg.png">
+		<SrcBorder tlx="25" tly="10" brx="10" bry="10" />
+		<DstBorder tlx="25" tly="10" brx="10" bry="10" />
+	</Window>
+	
+	<ProgressBar texture="gauge1.png">
+		<SrcBorder tlx="16" tly="16" brx="16" bry="16" />
+		<DstBorder tlx="16" tly="16" brx="16" bry="16" />
+		<Color a="255" r="255" g="255" b="255"/>
+		<Filled texture="gauge2.png">
+			<SrcBorder tlx="16" tly="16" brx="16" bry="16" />
+			<DstBorder tlx="16" tly="16" brx="16" bry="16" />
+			<Color a="255" r="255" g="255" b="255" />
+		</Filled>
+  </ProgressBar>
+</Skin>
