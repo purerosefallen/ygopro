@@ -365,32 +365,32 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->lstHostList->clear();
 		hosts_srvpro.clear();
 		unsigned short count = BufferIO::ReadUInt16(pdata);
-		unsigned short temp1[20];
-		unsigned short temp2[41];
+		char temp1[64];
+		char temp2[128];
 		for(unsigned short i = 0; i < count; ++i) {
-			wchar_t roomname[20];
-			wchar_t player1[41];
-			wchar_t player2[41];
+			wchar_t roomname[32];
+			wchar_t player1[64];
+			wchar_t player2[64];
 			wchar_t hoststr[1024];
 
-			memcpy(temp1, pdata, 40);
-			pdata += 40;
-			BufferIO::CopyWStr(roomname, temp1, 20);
+			memcpy(temp1, pdata, 64);
+			pdata += 64;
+			BufferIO::DecodeUTF8(temp1, roomname);
 
 			unsigned char room_status = BufferIO::ReadUInt8(pdata);
 			char room_duel_count = BufferIO::ReadInt8(pdata);
 			char room_turn_count = BufferIO::ReadInt8(pdata);
 
-			memcpy(temp2, pdata, 82);
-			pdata += 82;
-			BufferIO::CopyWStr(player1, temp2, 41);
+			memcpy(temp2, pdata, 128);
+			pdata += 128;
+			BufferIO::DecodeUTF8(temp2, player1);
 
 			char player1_score = BufferIO::ReadInt8(pdata);
 			int player1_lp = BufferIO::ReadInt32(pdata);
 
-			memcpy(temp2, pdata, 82);
-			pdata += 82;
-			BufferIO::CopyWStr(player2, temp2, 41);
+			memcpy(temp2, pdata, 128);
+			pdata += 128;
+			BufferIO::DecodeUTF8(temp2, player2);
 
 			char player2_score = BufferIO::ReadInt8(pdata);
 			int player2_lp = BufferIO::ReadInt32(pdata);
