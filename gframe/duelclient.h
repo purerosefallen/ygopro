@@ -79,6 +79,8 @@ protected:
 	static std::set<unsigned int> remotes;
 public:
 	static std::vector<HostPacket> hosts;
+	static std::vector<std::wstring> hosts_srvpro;
+	static bool is_srvpro;
 	static void BeginRefreshHost();
 	static int RefreshThread(void* arg);
 	static void BroadcastReply(evutil_socket_t fd, short events, void* arg);

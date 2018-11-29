@@ -37,6 +37,7 @@ unsigned int DuelClient::temp_ip = 0;
 unsigned short DuelClient::temp_port = 0;
 unsigned short DuelClient::temp_ver = 0;
 bool DuelClient::try_needed = false;
+bool DuelClient::is_srvpro = false;
 
 bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_game) {
 	if(connect_state)
@@ -355,6 +356,62 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			break;
 		}
 		}
+		break;
+	}
+	case STOC_SRVPRO_ROOMLIST: {
+		is_srvpro = true;
+		mainGame->gMutex.Lock();
+		mainGame->lstHostList->clear();
+		hosts_srvpro.clear();
+		unsigned short count = BufferIO::ReadUInt16(pdata);
+		unsigned short temp1[20];
+		unsigned short temp2[41];
+		for(unsigned short i = 0; i < count; ++i) {
+			wchar_t roomname[20];
+			wchar_t player1[41];
+			wchar_t player2[41];
+			wchar_t hoststr[1024];
+
+			memcpy(temp1, pdata, 40);
+			pdata += 40;
+			BufferIO::CopyWStr(roomname, temp1, 20);
+
+			unsigned char room_status = BufferIO::ReadUInt8(pdata);
+			char room_duel_count = BufferIO::ReadInt8(pdata);
+			char room_turn_count = BufferIO::ReadInt8(pdata);
+
+			memcpy(temp2, pdata, 82);
+			pdata += 82;
+			BufferIO::CopyWStr(player1, temp2, 41);
+
+			char player1_score = BufferIO::ReadInt8(pdata);
+			int player1_lp = BufferIO::ReadInt32(pdata);
+
+			memcpy(temp2, pdata, 82);
+			pdata += 82;
+			BufferIO::CopyWStr(player2, temp2, 41);
+
+			char player2_score = BufferIO::ReadInt8(pdata);
+			int player2_lp = BufferIO::ReadInt32(pdata);
+
+			hosts_srvpro.push_back(std::wstring(roomname));
+			switch(room_status) {
+				case 0: {
+					myswprintf(hoststr, L"[SRVPro][Waiting][%ls] %ls VS %ls", roomname, player1, player2);
+					break;
+				}
+				case 1: {
+					myswprintf(hoststr, L"[SRVPro][G%d,T%d][%ls] (%d,LP%d)%ls VS %ls(%d,LP%d)", room_duel_count, room_turn_count, roomname, player1_score, player1_lp, player1, player2, player2_score, player2_lp);
+					break;
+				}
+				case 2: {
+					myswprintf(hoststr, L"[SRVPro][G%d,Siding][%ls] (%d)%ls VS %ls(%d)", room_duel_count, roomname, player1_score, player1, player2, player2_score);
+					break;
+				}
+			}
+			mainGame->lstHostList->addItem(hoststr);
+		}
+		mainGame->gMutex.Unlock();
 		break;
 	}
 	case STOC_SELECT_HAND: {
@@ -3922,6 +3979,7 @@ void DuelClient::BeginRefreshHost() {
 	if(is_refreshing)
 		return;
 	is_refreshing = true;
+	DuelClient::is_srvpro = false;
 	mainGame->btnLanRefresh->setEnabled(false);
 	mainGame->lstHostList->clear();
 	remotes.clear();
