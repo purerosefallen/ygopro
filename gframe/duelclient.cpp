@@ -402,11 +402,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 					break;
 				}
 				case 1: {
-					myswprintf(hoststr, L"[SRVPro][G%d,T%d][%ls] (%d,LP%d)%ls VS %ls(%d,LP%d)", room_duel_count, room_turn_count, roomname, player1_score, player1_lp, player1, player2, player2_score, player2_lp);
+					myswprintf(hoststr, L"[SRVPro][G%d,T%d][%ls] (%d,LP%d) %ls VS %ls (%d,LP%d)", room_duel_count, room_turn_count, roomname, player1_score, player1_lp, player1, player2, player2_score, player2_lp);
 					break;
 				}
 				case 2: {
-					myswprintf(hoststr, L"[SRVPro][G%d,Siding][%ls] (%d)%ls VS %ls(%d)", room_duel_count, roomname, player1_score, player1, player2, player2_score);
+					myswprintf(hoststr, L"[SRVPro][G%d,Siding][%ls] (%d) %ls VS %ls (%d)", room_duel_count, roomname, player1_score, player1, player2, player2_score);
 					break;
 				}
 			}
