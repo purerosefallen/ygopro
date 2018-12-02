@@ -449,6 +449,14 @@ irr::video::ITexture* ImageManager::GetTextureField(int code) {
 			img = GetTextureExpansions(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
+			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+		}
+		if(img == NULL) {
+			sprintf(file, mainGame->GetLocaleDir("pics/field/%d.jpg"), code);
+			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+		}
+		if(img == NULL) {
 			sprintf(file, "pics/field/%d.png", code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
