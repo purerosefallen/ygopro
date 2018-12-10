@@ -1806,7 +1806,7 @@ void TagDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 	}
 #ifdef YGOPRO_SERVER_MODE
 	int resp_type = dp->type < 2 ? 0 : 1;
-	if(len >= 4 && time_limit[resp_type] < host_info.time_limit) {
+	if(host_info.time_limit && len >= 4 && time_limit[resp_type] < host_info.time_limit) {
 		int resp = *(int*)pdata;
 		int rest = resp & 0xffff;
 		if((curMsg == MSG_SELECT_IDLECMD && rest < 6)

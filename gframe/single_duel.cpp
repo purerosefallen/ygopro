@@ -1736,7 +1736,7 @@ void SingleDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 		event_del(etimer);
 	}
 #ifdef YGOPRO_SERVER_MODE
-	if(len >= 4 && time_limit[dp->type] < host_info.time_limit) {
+	if(host_info.time_limit && len >= 4 && time_limit[dp->type] < host_info.time_limit) {
 		int resp = *(int*)pdata;
 		int rest = resp & 0xffff;
 		if((curMsg == MSG_SELECT_IDLECMD && rest < 6)
