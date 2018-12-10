@@ -358,7 +358,7 @@ byte* DataManager::ScriptReaderExDirectry(const char* path, const char* script_n
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	FILE *fp;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(YGOPRO_SERVER_MODE)
 	wchar_t fname[256];
 	BufferIO::DecodeUTF8(script_name, fname);
 	fp = _wfopen(fname, L"rb");
