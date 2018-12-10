@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
 	enable_log = 1;
 	ygo::aServerPort = 7911;
 	ygo::replay_mode = 0;
+	ygo::extend_time = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
 	ygo::game_info.mode = 0;
@@ -101,6 +102,7 @@ int main(int argc, char* argv[]) {
 		ygo::game_info.draw_count = atoi(argv[10]);
 		ygo::game_info.time_limit = atoi(argv[11]);
 		ygo::replay_mode = atoi(argv[12]);
+		ygo::extend_time = atoi(argv[13]);
 	}
 	ygo::mainGame = &_game;
 	ygo::mainGame->MainServerLoop();

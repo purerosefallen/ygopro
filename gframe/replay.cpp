@@ -9,6 +9,7 @@ namespace ygo {
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short aServerPort;
 extern unsigned short replay_mode;
+extern unsigned int extend_time;
 #endif
 Replay::Replay() {
 	is_recording = false;

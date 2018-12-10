@@ -25,6 +25,7 @@ Game* mainGame;
 #ifdef YGOPRO_SERVER_MODE
 unsigned short aServerPort;
 unsigned short replay_mode;
+unsigned int extend_time;
 HostInfo game_info;
 
 void Game::MainServerLoop() {

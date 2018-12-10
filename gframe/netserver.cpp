@@ -15,6 +15,7 @@ unsigned short NetServer::last_sent = 0;
 
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short replay_mode;
+extern unsigned int extend_time;
 extern HostInfo game_info;
 
 void NetServer::InitDuel()

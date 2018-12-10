@@ -495,6 +495,7 @@ extern Game* mainGame;
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short aServerPort;
 extern unsigned short replay_mode;
+extern unsigned int extend_time;
 extern HostInfo game_info;
 #endif
 

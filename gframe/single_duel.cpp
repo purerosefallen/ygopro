@@ -9,6 +9,7 @@ namespace ygo {
 
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short replay_mode;
+extern unsigned int extend_time;
 #endif
 SingleDuel::SingleDuel(bool is_match) {
 	game_started = false;
@@ -1743,7 +1744,7 @@ void SingleDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 		|| (curMsg == MSG_SELECT_BATTLECMD && rest < 2)
 		|| (curMsg == MSG_SELECT_CHAIN && resp != -1)
 		)
-			++time_limit[dp->type];
+			time_limit[dp->type] += extend_time;
 	}
 #endif
 	Process();
