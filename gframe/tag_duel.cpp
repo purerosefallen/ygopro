@@ -506,7 +506,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
-	set_script_reader((script_reader)ScriptReaderEx);
+	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)TagDuel::MessageHandler);
 	rnd.reset(seed);
@@ -2279,37 +2279,6 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 #endif
 		}
 	}
-}
-
-byte* TagDuel::ScriptReaderEx(const char* script_name, int* slen) {
-	byte* buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
-	if(buffer)
-		return buffer;
-	buffer = ScriptReaderExDirectry("./expansions", script_name, slen);
-	if(buffer)
-		return buffer;
-	buffer = ScriptReaderExDirectry("./beta", script_name, slen);
-	if(buffer)
-		return buffer;
-	bool find = false;
-	FileSystem::TraversalDir("./expansions", [script_name, slen, &buffer, &find](const char* name, bool isdir) {
-		if(!find && isdir && strcmp(name, ".") && strcmp(name, "..") && strcmp(name, "pics") && strcmp(name, "script")) {
-			char subdir[1024];
-			sprintf(subdir, "./expansions/%s", name);
-			buffer = ScriptReaderExDirectry(subdir, script_name, slen);
-			if(buffer)
-				find = true;
-		}
-	});
-	if(find)
-		return buffer;
-	return default_script_reader(script_name, slen);
-}
-byte* TagDuel::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
-	char sname[256];
-	strcpy(sname, path);
-	strcat(sname, script_name + pre_len);//default script name: ./script/c%d.lua
-	return default_script_reader(sname, slen);
 }
 int TagDuel::MessageHandler(long fduel, int type) {
 	if(!enable_log)
