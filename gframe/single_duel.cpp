@@ -2162,7 +2162,7 @@ void SingleDuel::TestCard(int code) {
 	time_t seed = time(0);
 	mtrandom rnd;
 	rnd.reset(seed);
-	set_script_reader((script_reader)ScriptReaderEx);
+	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
 	rnd.reset(seed);
