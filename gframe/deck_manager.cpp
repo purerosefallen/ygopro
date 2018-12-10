@@ -10,7 +10,13 @@ DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
 	LFList* cur = NULL;
+#ifdef _WIN32
+	wchar_t fname[1024];
+	BufferIO::DecodeUTF8(path, fname);
+	FILE* fp = _wfopen(fname, L"r");
+#else
 	FILE* fp = fopen(path, "r");
+#endif // _WIN32
 	char linebuf[256];
 	wchar_t strBuffer[256];
 	if(fp) {
@@ -51,12 +57,36 @@ void DeckManager::LoadLFListSingle(const char* path) {
 }
 void DeckManager::LoadLFList() {
 	LoadLFListSingle("expansions/lflist.conf");
+	FileSystem::TraversalDir("./expansions", [this](const char* name, bool isdir) {
+		if(isdir && strcmp(name, ".") && strcmp(name, "..") && strcmp(name, "pics") && strcmp(name, "script")) {
+			char fpath[1024];
+			sprintf(fpath, "./expansions/%s/lflist.conf", name);
+			LoadLFListSingle(fpath);
+		}
+	});
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
 	myswprintf(nolimit.listName, L"N/A");
 	nolimit.hash = 0;
 	nolimit.content = new std::unordered_map<int, int>;
 	_lfList.push_back(nolimit);
+}
+bool DeckManager::RenameDeck(const wchar_t* oldname, const wchar_t* newname) {
+	wchar_t oldfname[256];
+	wchar_t newfname[256];
+	myswprintf(oldfname, L"./deck/%ls.ydk", oldname);
+	myswprintf(newfname, L"./deck/%ls.ydk", newname);
+#ifdef WIN32
+	BOOL result = MoveFileW(oldfname, newfname);
+	return !!result;
+#else
+	char oldfilefn[256];
+	char newfilefn[256];
+	BufferIO::EncodeUTF8(oldfname, oldfilefn);
+	BufferIO::EncodeUTF8(newfname, newfilefn);
+	int result = rename(oldfilefn, newfilefn);
+	return result == 0;
+#endif
 }
 wchar_t* DeckManager::GetLFListName(int lfhash) {
 	for(size_t i = 0; i < _lfList.size(); ++i) {
@@ -265,5 +295,14 @@ bool DeckManager::DeleteDeck(Deck& deck, const wchar_t* name) {
 	int result = unlink(filefn);
 	return result == 0;
 #endif
+}
+int DeckManager::TypeCount(std::vector<code_pointer> list, unsigned int ctype) {
+	int res = 0;
+	for(size_t i = 0; i < list.size(); ++i) {
+		code_pointer cur = list[i];
+		if(cur->second.type & ctype)
+			res++;
+	}
+	return res;
 }
 }

@@ -40,10 +40,14 @@ int SingleMode::SinglePlayThread(void* param) {
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)MessageHandler);
 	pduel = create_duel(rnd.rand());
+	preload_script(pduel, "./script/special.lua", 0);
+	preload_script(pduel, "./script/init.lua", 0);
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
+	mainGame->dInfo.start_lp[0] = start_lp;
+	mainGame->dInfo.start_lp[1] = start_lp;
 	myswprintf(mainGame->dInfo.strLP[0], L"%d", mainGame->dInfo.lp[0]);
 	myswprintf(mainGame->dInfo.strLP[1], L"%d", mainGame->dInfo.lp[1]);
 	BufferIO::CopyWStr(mainGame->ebNickName->getText(), mainGame->dInfo.hostname, 20);
@@ -767,7 +771,7 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 			memcpy(msgbuf, begin, len + 1);
 			BufferIO::DecodeUTF8(msgbuf, msg);
 			mainGame->gMutex.Lock();
-			mainGame->SetStaticText(mainGame->stMessage, 310, mainGame->textFont, msg);
+			mainGame->SetStaticText(mainGame->stMessage, 310, mainGame->guiFont, msg);
 			mainGame->PopupElement(mainGame->wMessage);
 			mainGame->gMutex.Unlock();
 			mainGame->actionSignal.Reset();

@@ -138,6 +138,9 @@ public:
 	virtual void RequestField(DuelPlayer* dp) {}
 #endif
 	virtual void EndDuel() {};
+#ifdef YGOPRO_SERVER_MODE
+	virtual void TestCard(int code) {};
+#endif
 
 public:
 	event* etimer;
@@ -205,6 +208,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 #define STOC_FIELD_FINISH	0x30
 #endif
+#define STOC_SRVPRO_ROOMLIST	0x31
 
 #define PLAYERCHANGE_OBSERVE	0x8
 #define PLAYERCHANGE_READY		0x9

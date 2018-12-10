@@ -31,19 +31,22 @@ public:
 	virtual void RequestField(DuelPlayer* dp);
 #endif
 	virtual void EndDuel();
-	
+#ifdef YGOPRO_SERVER_MODE
+	virtual void TestCard(int code);
+#endif
+
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
 #ifdef YGOPRO_SERVER_MODE
 	void RefreshMzone(int player, int flag = 0x881fff, int use_cache = 1, DuelPlayer* dp = 0);
-	void RefreshSzone(int player, int flag = 0x681fff, int use_cache = 1, DuelPlayer* dp = 0);
+	void RefreshSzone(int player, int flag = 0xe81fff, int use_cache = 1, DuelPlayer* dp = 0);
 	void RefreshHand(int player, int flag = 0x781fff, int use_cache = 1, DuelPlayer* dp = 0);
 	void RefreshGrave(int player, int flag = 0x81fff, int use_cache = 1, DuelPlayer* dp = 0);
 	void RefreshExtra(int player, int flag = 0x81fff, int use_cache = 1, DuelPlayer* dp = 0);
 	void RefreshRemoved(int player, int flag = 0x81fff, int use_cache = 1, DuelPlayer* dp = 0);
 #else
 	void RefreshMzone(int player, int flag = 0x881fff, int use_cache = 1);
-	void RefreshSzone(int player, int flag = 0x681fff, int use_cache = 1);
+	void RefreshSzone(int player, int flag = 0xe81fff, int use_cache = 1);
 	void RefreshHand(int player, int flag = 0x781fff, int use_cache = 1);
 	void RefreshGrave(int player, int flag = 0x81fff, int use_cache = 1);
 	void RefreshExtra(int player, int flag = 0x81fff, int use_cache = 1);
@@ -52,7 +55,7 @@ public:
 
 	static int MessageHandler(long fduel, int type);
 	static void SingleTimer(evutil_socket_t fd, short events, void* arg);
-	
+
 protected:
 	DuelPlayer* players[2];
 	DuelPlayer* pplayer[2];
@@ -83,4 +86,3 @@ protected:
 }
 
 #endif //SINGLE_DUEL_H
-

@@ -34,6 +34,11 @@ private:
 	static wchar_t event_string[256];
 	static mtrandom rnd;
 public:
+	static unsigned int temp_ip;
+	static unsigned short temp_port;
+	static unsigned short temp_ver;
+	static bool try_needed;
+	
 	static bool StartClient(unsigned int ip, unsigned short port, bool create_game = true);
 	static void ConnectTimeout(evutil_socket_t fd, short events, void* arg);
 	static void StopClient(bool is_exiting = false);
@@ -74,6 +79,8 @@ protected:
 	static std::set<unsigned int> remotes;
 public:
 	static std::vector<HostPacket> hosts;
+	static std::vector<std::wstring> hosts_srvpro;
+	static bool is_srvpro;
 	static void BeginRefreshHost();
 	static int RefreshThread(void* arg);
 	static void BroadcastReply(evutil_socket_t fd, short events, void* arg);

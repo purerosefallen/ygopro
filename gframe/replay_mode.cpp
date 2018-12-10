@@ -150,9 +150,8 @@ bool ReplayMode::StartDuel() {
 		cur_replay.ReadName(mainGame->dInfo.clientname);
 	}
 	pduel = create_duel(rnd.rand());
-#ifdef YGOPRO_SERVER_MODE
 	preload_script(pduel, "./script/special.lua", 0);
-#endif
+	preload_script(pduel, "./script/init.lua", 0);
 	int start_lp = cur_replay.ReadInt32();
 	int start_hand = cur_replay.ReadInt32();
 	int draw_count = cur_replay.ReadInt32();
@@ -163,6 +162,8 @@ bool ReplayMode::StartDuel() {
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
+	mainGame->dInfo.start_lp[0] = start_lp;
+	mainGame->dInfo.start_lp[1] = start_lp;
 	myswprintf(mainGame->dInfo.strLP[0], L"%d", mainGame->dInfo.lp[0]);
 	myswprintf(mainGame->dInfo.strLP[1], L"%d", mainGame->dInfo.lp[1]);
 	mainGame->dInfo.turn = 0;

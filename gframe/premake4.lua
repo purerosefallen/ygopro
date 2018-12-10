@@ -4,6 +4,8 @@ project "ygopro"
     kind "ConsoleApp"
 	
     defines { "YGOPRO_SERVER_MODE" }
+    local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
+    if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
     files { "gframe.cpp", "config.h",
             "game.cpp", "game.h", "myfilesystem.h",
@@ -22,6 +24,6 @@ project "ygopro"
         links { "ws2_32" }
 
     configuration "not vs*"
-        buildoptions { "-std=c++14", "-fno-rtti" }
+        buildoptions { "-std=c++1y", "-fno-rtti" }
     configuration "not windows"
         links { "event_pthreads", "dl", "pthread" }

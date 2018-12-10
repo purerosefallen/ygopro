@@ -56,6 +56,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			return;
 		}
 		CTOS_JoinGame* pkt = (CTOS_JoinGame*)pdata;
+		/* disabled version check
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_VERERROR;
@@ -64,6 +65,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			NetServer::DisconnectPlayer(dp);
 			return;
 		}
+		*/
 		wchar_t jpass[20];
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 #ifdef YGOPRO_SERVER_MODE
@@ -533,9 +535,8 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
 	rnd.reset(seed);
 	pduel = create_duel(rnd.rand());
-#ifdef YGOPRO_SERVER_MODE
 	preload_script(pduel, "./script/special.lua", 0);
-#endif
+	preload_script(pduel, "./script/init.lua", 0);
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	int opt = (int)host_info.duel_rule << 16;
@@ -735,7 +736,10 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 #endif
 				break;
 			}
-			case 10: {
+			case 10:
+			case 11:
+			case 12:
+			case 13: {
 				NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 				NetServer::SendBufferToPlayer(players[1], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1097,7 +1101,7 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 			RefreshHand(0);
 			RefreshHand(1);
 #ifdef YGOPRO_SERVER_MODE
-			turn_player = BufferIO::ReadInt8(pbuf);
+			turn_player = BufferIO::ReadInt8(pbuf) & 0x1;
 #else
 			pbuf++;
 #endif
@@ -2169,5 +2173,23 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 		event_del(sd->etimer);
 	}
 }
+#ifdef YGOPRO_SERVER_MODE
+void SingleDuel::TestCard(int code) {
+	time_t seed = time(0);
+	mtrandom rnd;
+	rnd.reset(seed);
+	set_script_reader((script_reader)DataManager::ScriptReaderEx);
+	set_card_reader((card_reader)DataManager::CardReader);
+	set_message_handler((message_handler)SingleDuel::MessageHandler);
+	rnd.reset(seed);
+	unsigned long tduel = create_duel(rnd.rand());
+	preload_script(tduel, "./script/special.lua", 0);
+	preload_script(tduel, "./script/init.lua", 0);
+	set_player_info(tduel, 0, 8000, 5, 1);
+	set_player_info(tduel, 1, 8000, 5, 1);
+	new_card(tduel, code, 0, 0, LOCATION_DECK, 0, POS_FACEUP_ATTACK);
+	end_duel(tduel);
+}
+#endif
 
 }

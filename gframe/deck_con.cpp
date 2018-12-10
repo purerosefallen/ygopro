@@ -104,6 +104,7 @@ void DeckBuilder::Terminate() {
 	mainGame->device->setEventReceiver(&mainGame->menuHandler);
 	mainGame->wACMessage->setVisible(false);
 	mainGame->ClearTextures();
+	mainGame->showingcode = 0;
 	mainGame->scrFilter->setVisible(false);
 	int sel = mainGame->cbDBDecks->getSelected();
 	if(sel >= 0)
@@ -129,7 +130,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			switch(id) {
 			case BUTTON_CLEAR_DECK: {
 				mainGame->gMutex.Lock();
-				mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->textFont, dataManager.GetSysString(1339));
+				mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->guiFont, dataManager.GetSysString(1339));
 				mainGame->PopupElement(mainGame->wQuery);
 				mainGame->gMutex.Unlock();
 				prev_operation = id;
@@ -178,6 +179,46 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
+			case BUTTON_RENAME_DECK: {
+				int sel = mainGame->cbDBDecks->getSelected();
+				if(sel == -1)
+					break;
+				mainGame->gMutex.Lock();
+				mainGame->wRenameDeck->setText(dataManager.GetSysString(1376));
+				mainGame->ebREName->setText(mainGame->cbDBDecks->getItem(sel));
+				mainGame->PopupElement(mainGame->wRenameDeck);
+				mainGame->gMutex.Unlock();
+				prev_operation = id;
+				prev_sel = sel;
+				break;
+			}
+			case BUTTON_RENAME_DECK_SAVE: {
+				mainGame->HideElement(mainGame->wRenameDeck);
+				if(prev_operation == BUTTON_RENAME_DECK) {
+					wchar_t newname[256];
+					BufferIO::CopyWStr(mainGame->ebREName->getText(), newname, 256);
+					if(mywcsncasecmp(newname + wcslen(newname) - 4, L"", 4)) {
+						myswprintf(newname, L"%ls", mainGame->ebREName->getText());
+					}
+					if(DeckManager::RenameDeck(mainGame->cbDBDecks->getItem(prev_sel), newname)) {
+						mainGame->RefreshDeck(mainGame->cbDBDecks);
+						mainGame->cbDBDecks->setSelected(prev_sel);
+						mainGame->stACMessage->setText(dataManager.GetSysString(1375));
+					        mainGame->PopupElement(mainGame->wACMessage, 20);
+					} else {
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1365));
+					}
+				}
+				prev_operation = 0;
+				prev_sel = -1;
+				break;
+			}
+			case BUTTON_RENAME_DECK_CANCEL: {
+				mainGame->HideElement(mainGame->wRenameDeck);
+				prev_operation = 0;
+				prev_sel = -1;
+				break;
+			}
 			case BUTTON_DELETE_DECK: {
 				int sel = mainGame->cbDBDecks->getSelected();
 				if(sel == -1)
@@ -185,7 +226,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->gMutex.Lock();
 				wchar_t textBuffer[256];
 				myswprintf(textBuffer, L"%ls\n%ls", mainGame->cbDBDecks->getItem(sel), dataManager.GetSysString(1337));
-				mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->textFont, textBuffer);
+				mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->guiFont, textBuffer);
 				mainGame->PopupElement(mainGame->wQuery);
 				mainGame->gMutex.Unlock();
 				prev_operation = id;
@@ -195,7 +236,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			case BUTTON_LEAVE_GAME: {
 				if(is_modified && !mainGame->chkIgnoreDeckChanges->isChecked()) {
 					mainGame->gMutex.Lock();
-					mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->textFont, dataManager.GetSysString(1356));
+					mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->guiFont, dataManager.GetSysString(1356));
 					mainGame->PopupElement(mainGame->wQuery);
 					mainGame->gMutex.Unlock();
 					prev_operation = id;
@@ -362,7 +403,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			case COMBOBOX_DBDECKS: {
 				if(is_modified && !mainGame->chkIgnoreDeckChanges->isChecked()) {
 					mainGame->gMutex.Lock();
-					mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->textFont, dataManager.GetSysString(1356));
+					mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->guiFont, dataManager.GetSysString(1356));
 					mainGame->PopupElement(mainGame->wQuery);
 					mainGame->gMutex.Unlock();
 					prev_operation = id;
@@ -682,8 +723,9 @@ void DeckBuilder::GetHoveredCard() {
 	irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 	if(root->getElementFromPoint(mouse_pos) != root)
 		return;
-	int x = mouse_pos.X;
-	int y = mouse_pos.Y;
+	position2di pos = mainGame->ResizeReverse(mouse_pos.X, mouse_pos.Y);
+	int x = pos.X;
+	int y = pos.Y;
 	is_lastcard = 0;
 	if(x >= 314 && x <= 794) {
 		if(y >= 164 && y <= 435) {
@@ -749,8 +791,8 @@ void DeckBuilder::GetHoveredCard() {
 		}
 	}
 	if(is_draging) {
-		dragx = x;
-		dragy = y;
+		dragx = mouse_pos.X;
+		dragy = mouse_pos.Y;
 	}
 	if(!is_draging && pre_code != hovered_code) {
 		if(hovered_code)
@@ -933,6 +975,7 @@ void DeckBuilder::FilterCards() {
 				if(!tryresult) {
 					match = CardNameContains(text.name.c_str(), elements_iterator->keyword.c_str())
 						|| text.text.find(elements_iterator->keyword) != std::wstring::npos
+						|| mainGame->CheckRegEx(text.text, elements_iterator->keyword)
 						|| (elements_iterator->setcode && check_set_code(data, elements_iterator->setcode));
 				} else {
 					match = data.code == trycode || data.alias == trycode;
@@ -1001,7 +1044,7 @@ void DeckBuilder::SortList() {
 	auto left = results.begin();
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	for(auto it = results.begin(); it != results.end(); ++it) {
-		if(wcscmp(pstr, dataManager.GetName((*it)->first)) == 0) {
+		if(wcscmp(pstr, dataManager.GetName((*it)->first)) == 0 || mainGame->CheckRegEx(dataManager.GetName((*it)->first), pstr, true)) {
 			std::iter_swap(left, it);
 			++left;
 		}
@@ -1049,6 +1092,8 @@ bool DeckBuilder::CardNameContains(const wchar_t *haystack, const wchar_t *needl
 	if (!haystack) {
 		return false;
 	}
+	if(mainGame->CheckRegEx(haystack, needle))
+		return true;
 	int i = 0;
 	int j = 0;
 	while (haystack[i]) {

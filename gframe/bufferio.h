@@ -12,8 +12,18 @@ public:
 		p += 4;
 		return ret;
 	}
+	inline static unsigned int ReadUInt32(char*& p) {
+		unsigned int ret = *(unsigned int*)p;
+		p += 4;
+		return ret;
+	}
 	inline static short ReadInt16(char*& p) {
 		short ret = *(short*)p;
+		p += 2;
+		return ret;
+	}
+	inline static unsigned short ReadUInt16(char*& p) {
+		unsigned short ret = *(unsigned short*)p;
 		p += 2;
 		return ret;
 	}
