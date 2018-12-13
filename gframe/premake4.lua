@@ -35,10 +35,12 @@ project "ygopro"
     configuration "not vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
-        includedirs { "/usr/include/irrlicht", "/usr/include/freetype2" }
+        includedirs { "/usr/include/freetype2" }
         excludes { "COSOperator.*" }
         links { "event_pthreads", "GL", "dl", "pthread" }
     configuration "linux"
+        includedirs { "../irrlicht_linux/include" }
+        links { "X11", "Xxf86vm" }
         if USE_IRRKLANG then
             defines { "YGOPRO_USE_IRRKLANG" }
             links { "IrrKlang" }
@@ -46,3 +48,5 @@ project "ygopro"
             libdirs { "../irrklang/bin/linux-gcc-64" }
             includedirs { "../irrklang/include" }
         end
+    configuration "macosx"
+        includedirs { "/usr/include/irrlicht" }

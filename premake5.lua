@@ -84,3 +84,6 @@ solution "ygo"
     include "ikpmp3"
     end
     end
+    if os.ishost("linux") then
+    include "irrlicht_linux"
+    end
