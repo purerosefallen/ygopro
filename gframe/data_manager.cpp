@@ -329,11 +329,13 @@ int DataManager::CardReader(int code, void* pData) {
 }
 byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	byte* buffer;
+#ifndef YGOPRO_SERVER_MODE
 	if(!mainGame->gameConf.prefer_expansion_script) {
 		buffer = ScriptReaderExDirectry(".", script_name, slen);
 		if(buffer)
 			return buffer;
 	}
+#endif
 	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
 		return buffer;
