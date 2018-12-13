@@ -328,7 +328,13 @@ int DataManager::CardReader(int code, void* pData) {
 	return 0;
 }
 byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
-	byte* buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
+	byte* buffer;
+	if(!mainGame->gameConf.prefer_expansion_script) {
+		buffer = ScriptReaderExDirectry(".", script_name, slen);
+		if(buffer)
+			return buffer;
+	}
+	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
 	if(buffer)
 		return buffer;
 	buffer = ScriptReaderExDirectry("./expansions", script_name, slen);
