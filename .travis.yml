@@ -29,7 +29,7 @@ before_install:
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz | tar zfx -;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    git clone https://github.com/DailyShana/irrlicht irrlicht_linux;
+    git clone --depth=1 https://github.com/DailyShana/irrlicht irrlicht_linux;
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -;
   fi
 
