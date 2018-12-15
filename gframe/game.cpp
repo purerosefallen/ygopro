@@ -116,6 +116,7 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"目前测试的内容：\n\n\
 窗口缩放。\n\
+扩展卡包支持ZIP压缩包。\n\
 投降时确认。\n\
 \n\
 \n已知问题：\n\
