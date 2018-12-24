@@ -78,7 +78,7 @@ after_build:
   
   - git clone --depth=1 https://%access_token%@github.com/purerosefallen/fonts
 
-  - 7z a -mx9 -xr!.git* KoishiPro-%APPVEYOR_REPO_TAG_NAME%.7z ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures skin deck single pics sound update-koishipro locales fonts WindBot Bot.exe bot.conf
+  - 7z a -mx9 -xr!.git* KoishiPro-mat.7z premake5.exe event freetype irrlicht sqlite3 irrklang
 
 test: off
 
@@ -93,8 +93,8 @@ deploy:
 artifacts:
   - path: ygopro.exe
     name: ygopro client
-  - path: KoishiPro-$(APPVEYOR_REPO_TAG_NAME).7z
-    name: ygopro full repack
+  - path: KoishiPro-mat.7z
+    name: KoishiPro-mat
 
 cache:
   - premake-5.0.0-alpha13-windows.zip
