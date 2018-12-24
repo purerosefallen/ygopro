@@ -873,7 +873,13 @@ void Game::LoadExpansions() {
 		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".zip", 4)) {
 			wchar_t fpath[1024];
 			myswprintf(fpath, L"./expansions/%ls", name);
+#ifdef _WIN32
 			dataManager.FileSystem->addFileArchive(fpath, true, false);
+#else
+			char fpath_utf8[1024];
+			BufferIO::EncodeUTF8(fpath, fpath_utf8);
+			dataManager.FileSystem->addFileArchive(fpath_utf8, true, false);
+#endif
 		}
 	});
 	for(u32 i = 0; i < DataManager::FileSystem->getFileArchiveCount(); ++i) {
