@@ -2,8 +2,7 @@ include "lzma/."
 
 project "ygopro"
     kind "ConsoleApp"
-	
-    defines { "YGOPRO_SERVER_MODE" }
+
     local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
     if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
