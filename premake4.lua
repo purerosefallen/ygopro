@@ -5,7 +5,7 @@ solution "ygo"
     --startproject "ygopro"
 
     configurations { "Release", "Debug" }
-    defines { "LUA_COMPAT_5_2", "LUA_SAFE_MODE", "YGOPRO_SERVER_MODE" }
+    defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE", "YGOPRO_LUA_SAVE" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
 
