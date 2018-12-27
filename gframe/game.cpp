@@ -1507,6 +1507,10 @@ void Game::LoadConfig() {
 				myswprintf(mainGame->gameConf.locale, L"%ls", L"ko-KR");
 				break;
 			}
+			case 0x16: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"pt-BR");
+				break;
+			}
 		}
 	}
 }
