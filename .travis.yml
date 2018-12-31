@@ -11,7 +11,6 @@ addons:
   apt:
     packages:
       - libfreetype6-dev
-      - libevent-dev
       - libsqlite3-dev
       - libgl1-mesa-dev
       - libglu-dev
@@ -22,7 +21,7 @@ before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update > /dev/null;
-    brew install freetype libevent sqlite p7zip dylibbundler > /dev/null;
+    brew install freetype sqlite p7zip dylibbundler > /dev/null;
   fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -34,6 +33,10 @@ before_install:
   fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.4.zip; unzip irrlicht-1.8.4.zip ; cd irrlicht-1.8.4/ ; cp ../premake/irrlicht/irrlicht-mac.patch . ; patch -p1 < irrlicht-mac.patch ; cd source/Irrlicht/MacOSX/ ; xcodebuild -project MacOSX.xcodeproj ; cp build/Release/libIrrlicht.a /usr/local/lib/ ;  cp -r ../../../include /usr/local/include/irrlicht ; cd ../../../../ ; fi
+
+- wget 'https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz' --no-check-certificate -O - | tar zfx - ; cd  libevent-2.0.22-stable/ ;  ./configure ; make ; sudo make install ; cd ..
+
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo bash -c "ln -s /usr/local/lib/libevent-2.0.so.5 /usr/lib/libevent-2.0.so.5; ln -s /usr/local/lib/libevent-2.0.so.5 /usr/lib64/libevent-2.0.so.5; ln -s /usr/local/lib/libevent_pthreads-2.0.so.5 /usr/lib/libevent_pthreads-2.0.so.5; ln -s /usr/local/lib/libevent_pthreads-2.0.so.5 /usr/lib64/libevent_pthreads-2.0.so.5; exit 0" ;  fi
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
 
