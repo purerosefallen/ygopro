@@ -21,7 +21,7 @@ before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update > /dev/null;
-    brew install freetype openssl sqlite p7zip dylibbundler > /dev/null;
+    brew install freetype libssl sqlite p7zip dylibbundler > /dev/null;
   fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
