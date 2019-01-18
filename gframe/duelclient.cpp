@@ -367,12 +367,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		unsigned short count = BufferIO::ReadUInt16(pdata);
 		char temp1[64];
 		char temp2[128];
+		wchar_t roomname[32];
+		wchar_t player1[64];
+		wchar_t player2[64];
+		wchar_t hoststr[1024];
 		for(unsigned short i = 0; i < count; ++i) {
-			wchar_t roomname[32];
-			wchar_t player1[64];
-			wchar_t player2[64];
-			wchar_t hoststr[1024];
-
 			memcpy(temp1, pdata, 64);
 			pdata += 64;
 			BufferIO::DecodeUTF8(temp1, roomname);

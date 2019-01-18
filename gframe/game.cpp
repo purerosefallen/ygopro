@@ -1457,9 +1457,36 @@ void Game::LoadConfig() {
 			}
 		}
 		fclose(fp_user);
-	} else {
+	} else
+#else // YGOPRO_COMPAT_MYCARD
+	if(!gameConf.locale || wcslen(gameConf.locale) <= 0)
+#endif
+	{
+		unsigned int lcid = 0;
 #ifdef _WIN32
-		unsigned int lcid = ((unsigned int)GetSystemDefaultLangID()) & 0xff;
+		lcid = ((unsigned int)GetSystemDefaultLangID()) & 0xff;
+#else
+		char* locale_str = getenv("LANG");
+		if(locale_str) {
+			if(strstr(locale_str, "zh"))
+				lcid = 0x04;
+			else
+			if(strstr(locale_str, "en"))
+				lcid = 0x09;
+			else
+			if(strstr(locale_str, "es"))
+				lcid = 0x0a;
+			else
+			if(strstr(locale_str, "ja"))
+				lcid = 0x11;
+			else
+			if(strstr(locale_str, "ko"))
+				lcid = 0x12;
+			else
+			if(strstr(locale_str, "pt"))
+				lcid = 0x16;
+		}
+#endif
 		switch(lcid) {
 			case 0x04: {
 				myswprintf(mainGame->gameConf.locale, L"%ls", L"zh-CN");
@@ -1481,11 +1508,12 @@ void Game::LoadConfig() {
 				myswprintf(mainGame->gameConf.locale, L"%ls", L"ko-KR");
 				break;
 			}
+			case 0x16: {
+				myswprintf(mainGame->gameConf.locale, L"%ls", L"pt-BR");
+				break;
+			}
 		}
-#endif
-		//SaveConfig();
 	}
-#endif //YGOPRO_COMPAT_MYCARD
 }
 void Game::SaveConfig() {
 #ifdef YGOPRO_COMPAT_MYCARD
