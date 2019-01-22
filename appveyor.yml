@@ -54,7 +54,7 @@ after_build:
   - mv windbot_ windbot # Windows NTFS does not support case sensitive, so renaming the folder twice.
   - rm -rf WindBot.7z
   - cp  ../cards.cdb windbot/
-  - mkdir ygopro
+  - mkdir ygopro decks_save
   - cp -rf ../ygopro.exe ygopro/
   - mv ../cards.cdb ygopro/
   - mv ../lflist.conf ygopro/
