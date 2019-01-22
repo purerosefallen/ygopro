@@ -63,7 +63,7 @@ after_build:
   - mkdir gframe
   - cp -rf ../../gframe/game.cpp gframe/ # Toss game.cpp in for version detection
   # - cp -rf config_build config
-  - cd ..
+  - cd ../..
 
   # start script
   - bash -c "echo '@echo off' >> run.bat ; echo 'start redis/redis-server.exe' >> run.bat ; echo 'cd ygopro-server/windbot' >> run.bat ; echo 'start WindBot.exe servermode=true serverport=2399' >> run.bat ; echo 'cd ..' >> run.bat ; echo '../node/node.exe ygopro-server.js' >> run.bat"
