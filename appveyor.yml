@@ -59,6 +59,8 @@ after_build:
   - mv ../cards.cdb ygopro/
   - mv ../lflist.conf ygopro/
   - mv ../script ygopro/
+  - mkdir ygopro/gframe
+  - mv ../gframe/game.cpp ygopro/gframe/ # Toss game.cpp in for version detection
   - cp -rf config_build config
   - cd ..
 
