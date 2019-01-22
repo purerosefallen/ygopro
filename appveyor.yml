@@ -40,7 +40,7 @@ after_build:
 
   # nodejs
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v10.15.0/node-v10.15.0-win-x64.zip ; exit 0"
-  - 7z -x -y node-v10.15.0-win-x64.zip
+  - 7z x -y node-v10.15.0-win-x64.zip
   - mv node-v10.15.0-win-x64 node
 
   # srvpro
