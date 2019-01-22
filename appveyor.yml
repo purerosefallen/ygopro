@@ -51,6 +51,7 @@ after_build:
   - rm -rf Bot.exe bot.conf
   - mv WindBot windbot_
   - mv windbot_ windbot # Windows NTFS does not support case sensitive, so renaming the folder twice.
+  - rm -rf WindBot.7z
   - cp  ../cards.cdb windbot/
   - mkdir ygopro
   - cp -rf ../ygopro.exe ygopro/
