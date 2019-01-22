@@ -18,9 +18,6 @@ install:
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2018/sqlite-amalgamation-3240000.zip ; exit 0"
   - 7z x -y sqlite-amalgamation-3240000.zip
   - move sqlite-amalgamation-3240000 sqlite3
-  
-  - appveyor DownloadFile https://github.com/tronkko/dirent/raw/master/include/dirent.h
-  - move dirent.h gframe\
 
   # let premake happy
   - xcopy /E premake\* .
