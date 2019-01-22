@@ -111,10 +111,12 @@ public:
 		return MakeDir(dir);
 	}
 
+#ifndef YGOPRO_SERVER_MODE
 	struct file_unit {
 		std::string filename;
 		bool is_dir;
 	};
+#endif
 
 	static void TraversalDir(const char* path, const std::function<void(const char*, bool)>& cb) {
 		DIR* dir = nullptr;
@@ -122,25 +124,36 @@ public:
 		if((dir = opendir(path)) == nullptr)
 			return;
 		struct stat fileStat;
+#ifndef YGOPRO_SERVER_MODE
 		std::vector<file_unit> file_list;
+#endif
 		while ((dirp = readdir(dir)) != nullptr)
 		{
+#ifndef YGOPRO_SERVER_MODE
 			file_unit funit;
+#endif
 			char fname[1024];
 			strcpy(fname, path);
 			strcat(fname, "/");
 			strcat(fname, dirp->d_name);
 			stat(fname, &fileStat);
+#ifdef YGOPRO_SERVER_MODE
+			cb(dirp->d_name, S_ISDIR(fileStat.st_mode));
+#else
 			funit.filename = std::string(dirp->d_name);
 			funit.is_dir = S_ISDIR(fileStat.st_mode);
 			file_list.push_back(funit);
+#endif
 		}
 		closedir(dir);
+#ifndef YGOPRO_SERVER_MODE
 		std::sort(file_list.begin(), file_list.end(), TraversalDirSort);
 		for (file_unit funit : file_list)
 			cb(funit.filename.c_str(), funit.is_dir);
+#endif
 	}
 
+#ifndef YGOPRO_SERVER_MODE
 	static bool TraversalDirSort(file_unit file1, file_unit file2) {
 		if(file1.is_dir != file2.is_dir) {
 			return file1.is_dir;
@@ -148,6 +161,7 @@ public:
 			return file1.filename < file2.filename;
 		}
 	}
+#endif
 
 	static void TraversalDir(const wchar_t* wpath, const std::function<void(const wchar_t*, bool)>& cb) {
 		char path[1024];
