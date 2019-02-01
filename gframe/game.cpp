@@ -588,15 +588,23 @@ bool Game::Initialize() {
 	wCategories->setDraggable(false);
 	wCategories->setVisible(false);
 	btnCategoryOK = env->addButton(rect<s32>(150, 210, 250, 235), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
-	int catewidth = 0;
+	unsigned int catewidth[4];
+	for(int i = 0; i < 3; ++i)
+		catewidth[i] = 0;
 	for(int i = 0; i < 32; ++i) {
+		unsigned char col = i % 4;
 		irr::core::dimension2d<unsigned int> dtxt = mainGame->guiFont->getDimension(dataManager.GetSysString(1100 + i));
-		if(dtxt.Width + 40 > catewidth)
-			catewidth = dtxt.Width + 40;
+		if(dtxt.Width + 40 > catewidth[col])
+			catewidth[col] = dtxt.Width + 40; // aefaweaw
 	}
-	for(int i = 0; i < 32; ++i)
-		chkCategory[i] = env->addCheckBox(false, recti(10 + (i % 4) * catewidth, 5 + (i / 4) * 25, 10 + (i % 4 + 1) * catewidth, 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
-	int wcatewidth = catewidth * 4 + 16;
+	for(int i = 0; i < 32; ++i) {
+		unsigned char col = i % 4;
+		unsigned int left_size = 0;
+		for (int j = 0; j < col; ++j)
+			left_size += catewidth[j];
+		chkCategory[i] = env->addCheckBox(false, recti(10 + left_size, 5 + (i / 4) * 25, 10 + left_size + catewidth[col], 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
+	}
+	unsigned int wcatewidth = catewidth[0] + catewidth[1] + catewidth[2] + catewidth[3] + 16;
 	wCategories->setRelativePosition(rect<s32>(1000 - wcatewidth, 60, 1000, 305));
 	btnCategoryOK->setRelativePosition(recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
 	btnMarksFilter = env->addButton(rect<s32>(60, 80 + 125 / 6, 190, 100 + 125 / 6), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
