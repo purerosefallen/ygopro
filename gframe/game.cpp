@@ -595,7 +595,7 @@ bool Game::Initialize() {
 		unsigned char col = i % 4;
 		irr::core::dimension2d<unsigned int> dtxt = mainGame->guiFont->getDimension(dataManager.GetSysString(1100 + i));
 		if(dtxt.Width + 40 > catewidth[col])
-			catewidth[col] = dtxt.Width + 40; // aefaweaw
+			catewidth[col] = dtxt.Width + 40;
 	}
 	for(int i = 0; i < 32; ++i) {
 		unsigned char col = i % 4;
