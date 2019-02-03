@@ -2,6 +2,7 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
+    defines { "LUA_COMPAT_5_2" }
 
     configurations { "Debug", "Release" }
 
