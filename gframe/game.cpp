@@ -710,23 +710,23 @@ bool Game::Initialize() {
 	wCategories->setDraggable(false);
 	wCategories->setVisible(false);
 	btnCategoryOK = env->addButton(rect<s32>(150, 210, 250, 235), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
-	unsigned int catewidth[4];
+	int catewidth[4];
 	for(int i = 0; i < 3; ++i)
 		catewidth[i] = 0;
 	for(int i = 0; i < 32; ++i) {
-		unsigned char col = i % 4;
+		int col = i % 4;
 		irr::core::dimension2d<unsigned int> dtxt = mainGame->guiFont->getDimension(dataManager.GetSysString(1100 + i));
 		if(dtxt.Width + 40 > catewidth[col])
 			catewidth[col] = dtxt.Width + 40;
 	}
 	for(int i = 0; i < 32; ++i) {
-		unsigned char col = i % 4;
-		unsigned int left_size = 0;
+		int col = i % 4;
+		int left_size = 0;
 		for (int j = 0; j < col; ++j)
 			left_size += catewidth[j];
 		chkCategory[i] = env->addCheckBox(false, recti(10 + left_size, 5 + (i / 4) * 25, 10 + left_size + catewidth[col], 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
 	}
-	unsigned int wcatewidth = catewidth[0] + catewidth[1] + catewidth[2] + catewidth[3] + 16;
+	int wcatewidth = catewidth[0] + catewidth[1] + catewidth[2] + catewidth[3] + 16;
 	wCategories->setRelativePosition(rect<s32>(1000 - wcatewidth, 60, 1000, 305));
 	btnCategoryOK->setRelativePosition(recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
 	btnMarksFilter = env->addButton(rect<s32>(60, 80 + 125 / 6, 190, 100 + 125 / 6), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
@@ -2010,7 +2010,8 @@ void Game::OnResize() {
 	wANAttribute->setRelativePosition(ResizeWin(500, 200, 830, 285));
 	wANRace->setRelativePosition(ResizeWin(480, 200, 850, 410));
 	wReplaySave->setRelativePosition(ResizeWin(510, 200, 820, 320));
-	stHintMsg->setRelativePosition(ResizeWin(500, 60, 820, 90));
+
+	stHintMsg->setRelativePosition(ResizeWin(660 - 160 * xScale, 60, 660 + 160 * xScale, 90));
 
 	//sound / music volume bar
 	scrSoundVolume->setRelativePosition(recti(scrSoundVolume->getRelativePosition().UpperLeftCorner.X, scrSoundVolume->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, scrSoundVolume->getRelativePosition().LowerRightCorner.Y));
@@ -2057,8 +2058,8 @@ void Game::OnResize() {
 		btnReset->setRelativePosition(recti(1, 1, width, height));
 	}
 
-	wCardImg->setRelativePosition(ResizeCard(1, 1, 20, 18));
-	imgCard->setRelativePosition(ResizeCard(10, 9, 0, 0));
+	wCardImg->setRelativePosition(ResizeCardImgWin(1, 1, 20, 18));
+	imgCard->setRelativePosition(ResizeCardImgWin(10, 9, 0, 0));
 	wInfos->setRelativePosition(Resize(1, 275, 301, 639));
 	stName->setRelativePosition(recti(10, 10, 300 * xScale - 13, 10 + 22));
 	lstLog->setRelativePosition(Resize(10, 10, 290, 290));
@@ -2072,7 +2073,7 @@ void Game::OnResize() {
 	btnM2->setRelativePosition(Resize(160, 0, 210, 20));
 	btnEP->setRelativePosition(Resize(320, 0, 370, 20));
 
-	wChat->setRelativePosition(ResizeWin(wInfos->getRelativePosition().LowerRightCorner.X + 6, 615, 1020, 640, true));
+	wChat->setRelativePosition(recti(wInfos->getRelativePosition().LowerRightCorner.X + 6, window_size.Height - 25, window_size.Width, window_size.Height));
 	ebChatInput->setRelativePosition(recti(3, 2, window_size.Width - wChat->getRelativePosition().UpperLeftCorner.X - 6, 22));
 
 	btnLeaveGame->setRelativePosition(Resize(205, 5, 295, 80));
@@ -2115,19 +2116,13 @@ position2di Game::ResizeReverse(s32 x, s32 y) {
 	y = y / yScale;
 	return position2di(x, y);
 }
-recti Game::ResizeWin(s32 x, s32 y, s32 x2, s32 y2, bool chat) {
-	s32 sx = x2 - x;
-	s32 sy = y2 - y;
-	if(chat) {
-		y = window_size.Height - sy;
-		x2 = window_size.Width;
-		y2 = y + sy;
-		return recti(x, y, x2, y2);
-	}
-	x = (x + sx / 2) * xScale - sx / 2;
-	y = (y + sy / 2) * yScale - sy / 2;
-	x2 = sx + x;
-	y2 = sy + y;
+recti Game::ResizeWin(s32 x, s32 y, s32 x2, s32 y2) {
+	s32 w = x2 - x;
+	s32 h = y2 - y;
+	x = (x + w / 2) * xScale - w / 2;
+	y = (y + h / 2) * yScale - h / 2;
+	x2 = w + x;
+	y2 = h + y;
 	return recti(x, y, x2, y2);
 }
 recti Game::ResizePhaseHint(s32 x, s32 y, s32 x2, s32 y2, s32 width) {
@@ -2137,17 +2132,15 @@ recti Game::ResizePhaseHint(s32 x, s32 y, s32 x2, s32 y2, s32 width) {
 	y2 = y2 * yScale;
 	return recti(x, y, x2, y2);
 }
-recti Game::ResizeCard(s32 x, s32 y, s32 x2, s32 y2) {
+recti Game::ResizeCardImgWin(s32 x, s32 y, s32 mx, s32 my) {
 	float mul = xScale;
 	if(xScale > yScale)
 		mul = yScale;
-	s32 sx = CARD_IMG_WIDTH * mul + x2 * xScale;
-	s32 sy = CARD_IMG_HEIGHT * mul + y2 * yScale;
+	s32 w = CARD_IMG_WIDTH * mul + mx * xScale;
+	s32 h = CARD_IMG_HEIGHT * mul + my * yScale;
 	x = x * xScale;
 	y = y * yScale;
-	x2 = sx + x;
-	y2 = sy + y;
-	return recti(x, y, x2, y2);
+	return recti(x, y, x + w, y + h);
 }
 recti Game::ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2) {
 	return ResizeCardMid(x, y, x2, y2, (x + x2) * 0.5, (y + y2) * 0.5);
