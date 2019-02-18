@@ -4,7 +4,11 @@ solution "ygo"
     objdir "obj"
 
     configurations { "Release", "Debug" }
+if os.getenv("YGOPRO_NO_LUA_SAVE") then
+    defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE" }
+else
     defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE", "YGOPRO_LUA_SAVE" }
+end
     configuration "windows"
         defines { "WIN32", "_WIN32" }
         startproject "ygopro"
