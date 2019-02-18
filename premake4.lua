@@ -5,7 +5,7 @@ solution "ygo"
     --startproject "ygopro"
 
     configurations { "Release", "Debug" }
-if os.getenv("YGOPRO_NO_LUA_SAVE") then
+if os.getenv("YGOPRO_NO_LUA_SAFE") then
     defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE" }
 else
     defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE", "YGOPRO_LUA_SAFE" }
