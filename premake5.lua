@@ -13,6 +13,14 @@ end
         defines { "WIN32", "_WIN32" }
         startproject "ygopro"
 
+if os.getenv("YGOPRO_USE_XP_TOOLSET") then
+    configuration { "windows", "vs2017" }
+        toolset "v141_xp"
+
+    configuration { "windows", "not vs2017" }
+        toolset "v140_xp"
+end
+
     configuration "bsd"
         defines { "LUA_USE_POSIX" }
         includedirs { "/usr/local/include" }
