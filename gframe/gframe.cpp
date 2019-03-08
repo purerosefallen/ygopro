@@ -10,6 +10,7 @@
 int enable_log = 0;
 #ifndef YGOPRO_SERVER_MODE
 bool exit_on_return = false;
+bool auto_watch_mode = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
@@ -168,6 +169,8 @@ int main(int argc, char* argv[]) {
 		} else if(!wcscmp(wargv[i], L"-k")) { // Keep on return
 			exit_on_return = false;
 			keep_on_return = true;
+		} else if(!wcscmp(wargv[i], L"--auto-watch")) { // Auto watch mode
+			auto_watch_mode = true;
 		} else if(!wcscmp(wargv[i], L"-d")) { // Deck
 			++i;
 			if(i + 1 < wargc) { // select deck
