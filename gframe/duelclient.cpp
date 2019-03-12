@@ -233,6 +233,8 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			}
 		}
 		event_base_loopexit(client_base, 0);
+		if(exit_on_return && auto_watch_mode)
+			mainGame->device->closeDevice();
 	}
 }
 int DuelClient::ClientThread(void* param) {
