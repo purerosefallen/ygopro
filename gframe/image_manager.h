@@ -26,6 +26,8 @@ public:
 	irr::video::IVideoDriver* driver;
 	irr::video::ITexture* tCover[4];
 	irr::video::ITexture* tUnknown;
+	irr::video::ITexture* tUnknownFit;
+	irr::video::ITexture* tUnknownThumb;
 	irr::video::ITexture* tAct;
 	irr::video::ITexture* tAttack;
 	irr::video::ITexture* tNegated;
