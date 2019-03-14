@@ -2,8 +2,7 @@
 #include "duelclient.h"
 #include "game.h"
 #include "single_mode.h"
-#include "../ocgcore/duel.h"
-#include "../ocgcore/field.h"
+#include "../ocgcore/common.h"
 #include "../ocgcore/mtrandom.h"
 
 namespace ygo {
@@ -64,15 +63,9 @@ int ReplayMode::ReplayThread(void* param) {
 	mainGame->dInfo.isSingleMode = !!(rh.flag & REPLAY_SINGLE_MODE);
 	mainGame->dInfo.tag_player[0] = false;
 	mainGame->dInfo.tag_player[1] = false;
-	if(mainGame->dInfo.isSingleMode) {
-		set_script_reader((script_reader)SingleMode::ScriptReader);
-		set_card_reader((card_reader)DataManager::CardReader);
-		set_message_handler((message_handler)MessageHandler);
-	} else {
-		set_script_reader(default_script_reader);
-		set_card_reader((card_reader)DataManager::CardReader);
-		set_message_handler((message_handler)MessageHandler);
-	}
+	set_script_reader((script_reader)DataManager::ScriptReaderEx);
+	set_card_reader((card_reader)DataManager::CardReader);
+	set_message_handler((message_handler)MessageHandler);
 	if(!StartDuel()) {
 		EndDuel();
 		return 0;
@@ -106,6 +99,7 @@ int ReplayMode::ReplayThread(void* param) {
 			get_message(pduel, (byte*)engineBuffer);
 			is_continuing = ReplayAnalyze(engineBuffer, len);
 			if(is_restarting) {
+				mainGame->gMutex.Lock();
 				is_restarting = false;
 				int step = current_step - 1;
 				if(step < 0)
@@ -218,7 +212,7 @@ bool ReplayMode::StartDuel() {
 		size_t slen = cur_replay.ReadInt16();
 		cur_replay.ReadData(filename, slen);
 		filename[slen] = 0;
-		if(!preload_script(pduel, filename, slen)) {
+		if(!preload_script(pduel, filename, 0)) {
 			return false;
 		}
 	}
@@ -280,7 +274,6 @@ void ReplayMode::Undo() {
 		return;
 	mainGame->dInfo.isReplaySkiping = true;
 	Restart(false);
-	mainGame->gMutex.Lock();
 	Pause(false, false);
 }
 bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
