@@ -115,12 +115,10 @@ bool Game::Initialize() {
 	env->addStaticText(L"https://ygo233.com/", rect<s32>(10, 360, 270, 380), false, false, wMainMenu);
 
 	env->addStaticText(L"目前测试的内容：\n\n\
-窗口缩放。\n\
-扩展卡包支持ZIP压缩包。\n\
 投降时确认。\n\
 \n\
 \n已知问题：\n\
-\n效果文内英文换行会截断单词。\n\
+\n鸽了，爽\n\
 ", rect<s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
