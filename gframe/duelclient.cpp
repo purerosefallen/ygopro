@@ -2959,6 +2959,11 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				mainGame->WaitFrameSignal(3);
 			}
 		}
+		if (auto_watch_mode) {
+			int code = mainGame->dField.chains[ct - 1].chain_card->code;
+			if (code > 0)
+				mainGame->ShowCardInfo(code);
+		}
 		mainGame->dField.last_chain = false;
 		return true;
 	}
@@ -3029,6 +3034,9 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			int s = BufferIO::ReadInt8(pbuf);
 			/*int ss = */BufferIO::ReadInt8(pbuf);
 			ClientCard* pcard = mainGame->dField.GetCard(c, l, s);
+			if (auto_watch_mode && i == 0 && pcard->code > 0 ) {
+				mainGame->ShowCardInfo(pcard->code);
+			}
 			pcard->is_highlighting = true;
 			mainGame->dField.current_chain.target.insert(pcard);
 			if(pcard->location & LOCATION_ONFIELD) {
@@ -3393,6 +3401,9 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				mainGame->atk_r = vector3df(0, 0, 3.1415926 - atan((xd - xa) / (yd - ya)));
 		}
 		matManager.GenArrow(sy);
+		if (auto_watch_mode) {
+			mainGame->ShowCardInfo(mainGame->dField.attacker->code);
+		}
 		mainGame->attack_sv = 0;
 		mainGame->is_attacking = true;
 		mainGame->WaitFrameSignal(40);
