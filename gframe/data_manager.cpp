@@ -7,10 +7,19 @@ namespace ygo {
 const wchar_t* DataManager::unknown_string = L"???";
 wchar_t DataManager::strBuffer[4096];
 byte DataManager::scriptBuffer[0x20000];
+#ifndef YGOPRO_SERVER_MODE
 IFileSystem* DataManager::FileSystem;
+#endif
 DataManager dataManager;
 
 bool DataManager::LoadDB(const wchar_t* wfile) {
+#ifdef YGOPRO_SERVER_MODE
+	char file[256];
+	BufferIO::EncodeUTF8(wfile, file);
+	sqlite3* pDB;
+	if(sqlite3_open_v2(file, &pDB, SQLITE_OPEN_READONLY, 0) != SQLITE_OK)
+		return Error(pDB);
+#else
 	IReadFile* reader = FileSystem->createAndOpenFile(wfile);
 	if(reader == NULL)
 		return false;
@@ -27,6 +36,7 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	if(spmemvfs_open_db(&db, file, mem) != SQLITE_OK)
 		return Error(&db);
 	sqlite3* pDB = db.handle;
+#endif //YGOPRO_SERVER_MODE
 	sqlite3_stmt* pStmt;
 #ifdef YGOPRO_SERVER_MODE
 	const char* sql = "select * from datas";
@@ -34,14 +44,22 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	const char* sql = "select * from datas,texts where datas.id=texts.id";
 #endif
 	if(sqlite3_prepare_v2(pDB, sql, -1, &pStmt, 0) != SQLITE_OK)
+#ifdef YGOPRO_SERVER_MODE
+		return Error(pDB);
+#else
 		return Error(&db);
+#endif
 	CardDataC cd;
 	CardString cs;
 	int step = 0;
 	do {
 		step = sqlite3_step(pStmt);
 		if(step == SQLITE_BUSY || step == SQLITE_ERROR || step == SQLITE_MISUSE)
+#ifdef YGOPRO_SERVER_MODE
+			return Error(pDB, pStmt);
+#else
 			return Error(&db, pStmt);
+#endif
 		else if(step == SQLITE_ROW) {
 			cd.code = sqlite3_column_int(pStmt, 0);
 			cd.ot = sqlite3_column_int(pStmt, 1);
@@ -83,8 +101,12 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 		}
 	} while(step != SQLITE_DONE);
 	sqlite3_finalize(pStmt);
+#ifdef YGOPRO_SERVER_MODE
+	sqlite3_close(pDB);
+#else
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
+#endif
 	return true;
 }
 bool DataManager::LoadStrings(const char* file) {
@@ -100,6 +122,7 @@ bool DataManager::LoadStrings(const char* file) {
 		myswprintf(numStrings[i], L"%d", i);
 	return true;
 }
+#ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(IReadFile* reader) {
 	char ch[2] = " ";
 	char linebuf[256] = "";
@@ -115,6 +138,7 @@ bool DataManager::LoadStrings(IReadFile* reader) {
 	reader->drop();
 	return true;
 }
+#endif //YGOPRO_SERVER_MODE
 void DataManager::ReadStringConfLine(const char* linebuf) {
 	if(linebuf[0] != '!')
 		return;
@@ -139,6 +163,15 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 		_setnameStrings[value] = strBuffer;
 	}
 }
+#ifdef YGOPRO_SERVER_MODE
+bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
+	BufferIO::DecodeUTF8(sqlite3_errmsg(pDB), strBuffer);
+	if(pStmt)
+		sqlite3_finalize(pStmt);
+	sqlite3_close(pDB);
+	return false;
+}
+#else
 bool DataManager::Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt) {
 	BufferIO::DecodeUTF8(sqlite3_errmsg(pDB->handle), strBuffer);
 	if(pStmt)
@@ -147,6 +180,7 @@ bool DataManager::Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt) {
 	spmemvfs_env_fini();
 	return false;
 }
+#endif
 bool DataManager::GetData(int code, CardData* pData) {
 	auto cdit = _datas.find(code);
 	if(cdit == _datas.end())
@@ -381,6 +415,17 @@ byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_nam
 	return ScriptReader(sname, slen);
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
+	FILE *fp;
+#ifdef YGOPRO_SERVER_MODE
+	fp = fopen(script_name, "rb");
+	if(!fp)
+		return 0;
+	int len = fread(scriptBuffer, 1, sizeof(scriptBuffer), fp);
+	fclose(fp);
+	if(len >= sizeof(scriptBuffer))
+		return 0;
+	*slen = len;
+#else
 	wchar_t fname[256];
 	BufferIO::DecodeUTF8(script_name, fname);
 	IReadFile* reader = FileSystem->createAndOpenFile(fname);
@@ -394,6 +439,7 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	reader->read(scriptBuffer, size);
 	reader->drop();
 	*slen = size;
+#endif //YGOPRO_SERVER_MODE
 	return scriptBuffer;
 }
 

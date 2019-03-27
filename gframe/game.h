@@ -132,9 +132,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	void MainServerLoop();
 	void MainTestLoop(int code);
-	void LoadExpansionDB();
-	void LoadExpansionDBDirectry(const char* path);
-	void LoadBetaDB();
+	void LoadExpansions();
 	void AddDebugMsg(const char* msgbuf);
 	void initUtils();
 #else

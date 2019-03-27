@@ -32,10 +32,9 @@ HostInfo game_info;
 void Game::MainServerLoop() {
 	initUtils();
 	deckManager.LoadLFList();
-	LoadBetaDB();
-	LoadExpansionDB();
-	dataManager.LoadDB("cards.cdb");
-
+	LoadExpansions();
+	dataManager.LoadDB(L"cards.cdb");
+	
 	aServerPort = NetServer::StartServer(aServerPort);
 	NetServer::InitDuel();
 	printf("%u\n", aServerPort);
@@ -50,43 +49,10 @@ void Game::MainServerLoop() {
 	}
 }
 void Game::MainTestLoop(int code) {
-	LoadBetaDB();
-	LoadExpansionDB();
-	dataManager.LoadDB("cards.cdb");
+	LoadExpansions();
+	dataManager.LoadDB(L"cards.cdb");
 	fflush(stdout);
 	NetServer::InitTestCard(code);
-}
-void Game::LoadBetaDB() {
-	LoadExpansionDBDirectry("./beta");
-#ifdef _WIN32
-	char fpath[1000];
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./beta/*", &fdataw);
-	if(fh != INVALID_HANDLE_VALUE) {
-		do {
-			if(wcscmp(L".",fdataw.cFileName) != 0 && wcscmp(L"..",fdataw.cFileName) != 0 && fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				char fname[780];
-				BufferIO::EncodeUTF8(fdataw.cFileName, fname);
-				sprintf(fpath, "./beta/%s", fname);
-				LoadExpansionDBDirectry(fpath);
-			}
-		} while(FindNextFileW(fh, &fdataw));
-		FindClose(fh);
-	}
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./beta/")) != NULL) {
-		while((dirp = readdir(dir)) != NULL) {
-			if (strcmp(".", dirp->d_name) == 0 || strcmp("..", dirp->d_name) == 0 || dirp->d_type != DT_DIR)
-				continue;
-			char filepath[1000];
-			sprintf(filepath, "./beta/%s/", dirp->d_name);
-			LoadExpansionDBDirectry(filepath);
-		}
-		closedir(dir);
-	}
-#endif
 }
 #else //YGOPRO_SERVER_MODE
 bool Game::Initialize() {
@@ -1061,6 +1027,9 @@ void Game::LoadExpansions() {
 			myswprintf(fpath, L"./expansions/%ls", name);
 			dataManager.LoadDB(fpath);
 		}
+#ifdef YGOPRO_SERVER_MODE
+	});
+#else
 		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".zip", 4)) {
 			wchar_t fpath[1024];
 			myswprintf(fpath, L"./expansions/%ls", name);
@@ -1085,6 +1054,7 @@ void Game::LoadExpansions() {
 			}
 		}
 	}
+#endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
