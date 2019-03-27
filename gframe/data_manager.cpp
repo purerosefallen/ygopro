@@ -73,13 +73,7 @@ bool DataManager::LoadDB(const char* file) {
 	return true;
 }
 bool DataManager::LoadStrings(const char* file) {
-#ifdef _WIN32
-	wchar_t fname[1024];
-	BufferIO::DecodeUTF8(file, fname);
-	FILE* fp = _wfopen(fname, L"r");
-#else
 	FILE* fp = fopen(file, "r");
-#endif // _WIN32
 	if(!fp)
 		return false;
 	char linebuf[256];
@@ -331,35 +325,23 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	byte* buffer;
 #ifndef YGOPRO_SERVER_MODE
 	if(!mainGame->gameConf.prefer_expansion_script) {
-		buffer = ScriptReaderExDirectry(".", script_name, slen);
+		buffer = ScriptReaderExSingle(".", script_name, slen);
 		if(buffer)
 			return buffer;
 	}
 #endif
-	buffer = ScriptReaderExDirectry("./specials", script_name, slen, 8);
+	buffer = ScriptReaderExSingle("./specials", script_name, slen, 8);
 	if(buffer)
 		return buffer;
-	buffer = ScriptReaderExDirectry("./expansions", script_name, slen);
+	buffer = ScriptReaderExSingle("./expansions", script_name, slen);
 	if(buffer)
 		return buffer;
-	buffer = ScriptReaderExDirectry("./beta", script_name, slen);
+	buffer = ScriptReaderExSingle("./beta", script_name, slen);
 	if(buffer)
-		return buffer;
-	bool find = false;
-	FileSystem::TraversalDir("./expansions", [script_name, slen, &buffer, &find](const char* name, bool isdir) {
-		if(!find && isdir && strcmp(name, ".") && strcmp(name, "..") && strcmp(name, "pics") && strcmp(name, "script")) {
-			char subdir[1024];
-			sprintf(subdir, "./expansions/%s", name);
-			buffer = ScriptReaderExDirectry(subdir, script_name, slen);
-			if(buffer)
-				find = true;
-		}
-	});
-	if(find)
 		return buffer;
 	return ScriptReader(script_name, slen);
 }
-byte* DataManager::ScriptReaderExDirectry(const char* path, const char* script_name, int* slen, int pre_len) {
+byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
 	char sname[256];
 	sprintf(sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 	return ScriptReader(sname, slen);

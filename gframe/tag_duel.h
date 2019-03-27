@@ -31,7 +31,7 @@ public:
 	virtual void RequestField(DuelPlayer* dp);
 #endif
 	virtual void EndDuel();
-
+	
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
 #ifdef YGOPRO_SERVER_MODE
@@ -52,7 +52,7 @@ public:
 
 	static int MessageHandler(long fduel, int type);
 	static void TagTimer(evutil_socket_t fd, short events, void* arg);
-
+	
 protected:
 	DuelPlayer* players[4];
 	DuelPlayer* pplayer[4];

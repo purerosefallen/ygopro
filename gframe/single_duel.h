@@ -55,7 +55,7 @@ public:
 
 	static int MessageHandler(long fduel, int type);
 	static void SingleTimer(evutil_socket_t fd, short events, void* arg);
-
+	
 protected:
 	DuelPlayer* players[2];
 	DuelPlayer* pplayer[2];

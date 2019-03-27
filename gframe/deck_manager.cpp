@@ -10,13 +10,7 @@ DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
 	LFList* cur = NULL;
-#ifdef _WIN32
-	wchar_t fname[1024];
-	BufferIO::DecodeUTF8(path, fname);
-	FILE* fp = _wfopen(fname, L"r");
-#else
 	FILE* fp = fopen(path, "r");
-#endif // _WIN32
 	char linebuf[256];
 	wchar_t strBuffer[256];
 	if(fp) {
@@ -57,13 +51,6 @@ void DeckManager::LoadLFListSingle(const char* path) {
 }
 void DeckManager::LoadLFList() {
 	LoadLFListSingle("expansions/lflist.conf");
-	FileSystem::TraversalDir("./expansions", [this](const char* name, bool isdir) {
-		if(isdir && strcmp(name, ".") && strcmp(name, "..") && strcmp(name, "pics") && strcmp(name, "script")) {
-			char fpath[1024];
-			sprintf(fpath, "./expansions/%s/lflist.conf", name);
-			LoadLFListSingle(fpath);
-		}
-	});
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
 	myswprintf(nolimit.listName, L"N/A");
