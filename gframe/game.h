@@ -129,7 +129,7 @@ public:
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, f32 left, f32 right, f32 bottom, f32 top, f32 znear, f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	void SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, u32 pos = 0);
-	void LoadExpansionDB();
+	void LoadExpansions();
 	void RefreshDeck(irr::gui::IGUIComboBox* cbDeck);
 	void RefreshReplay();
 	void RefreshSingleplay();
@@ -170,6 +170,7 @@ public:
 	int LocalPlayer(int player);
 	const wchar_t* LocalName(int local_player);
 	const char* GetLocaleDir(const char* dir);
+	const wchar_t* GetLocaleDirWide(const char* dir);
 	bool CheckRegEx(const std::wstring& text, const std::wstring& exp, bool exact = false);
 
 	bool HasFocus(EGUI_ELEMENT_TYPE type) const {
@@ -250,6 +251,8 @@ public:
 	float yScale;
 
 	CGUISkinSystem *skinSystem;
+	wchar_t locale_buf[256];
+	wchar_t orig_dir[64];
 	char locale_buf_utf8[256];
 
 	ClientField dField;
