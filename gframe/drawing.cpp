@@ -984,6 +984,9 @@ void Game::DrawSpec() {
 			break;
 		}
 		}
+		if (auto_watch_mode & showcardcode < 8 && showcardcode > 0) {
+			mainGame->ShowCardInfo(showcardcode);
+		}
 	}
 	if(is_attacking) {
 		irr::core::matrix4 matk;
