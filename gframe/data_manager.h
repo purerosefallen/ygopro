@@ -63,7 +63,7 @@ public:
 	static const wchar_t* unknown_string;
 	static int CardReader(int, void*);
 	static byte* ScriptReaderEx(const char* script_name, int* slen);
-	static byte* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 1);
+	static byte* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 2);
 	static byte* ScriptReader(const char* script_name, int* slen);
 #ifndef YGOPRO_SERVER_MODE
 	static IFileSystem* FileSystem;
