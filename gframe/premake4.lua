@@ -1,4 +1,5 @@
 include "lzma/."
+include "spmemvfs/."
 
 project "ygopro"
     kind "ConsoleApp"
