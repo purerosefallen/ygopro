@@ -123,8 +123,7 @@ public:
 			return;
 		struct stat fileStat;
 		std::vector<file_unit> file_list;
-		while ((dirp = readdir(dir)) != nullptr)
-		{
+		while((dirp = readdir(dir)) != nullptr) {
 			file_unit funit;
 			char fname[1024];
 			strcpy(fname, path);
@@ -143,7 +142,7 @@ public:
 
 	static bool TraversalDirSort(file_unit file1, file_unit file2) {
 		if(file1.is_dir != file2.is_dir) {
-			return file1.is_dir;
+			return file2.is_dir;
 		} else {
 			return file1.filename < file2.filename;
 		}
