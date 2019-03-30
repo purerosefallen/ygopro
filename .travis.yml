@@ -4,7 +4,7 @@ os:
 - osx
 sudo: required
 dist: xenial
-osx_image: xcode8
+osx_image: xcode9.4
 addons:
   ssh_known_hosts:
   - github.com
@@ -16,11 +16,23 @@ addons:
       - libgl1-mesa-dev
       - libglu-dev
       - p7zip-full
+  homebrew:
+    packages:
+      - freetype
+      - libevent
+      - sqlite
+      - dylibbundler
+      - p7zip
 env:
 - USE_IRRKLANG=1
 before_install:
 - git submodule update --init --recursive
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install freetype libevent sqlite dylibbundler p7zip; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+  sudo rm -rf /usr/local/include/unistring;
+  sudo rm -rf /usr/local/include/lzma;
+  sudo rm -f /usr/local/include/CGAL/stddef.h; fi
+
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cp libIrrlicht.a /usr/local/lib/ ; sudo cp -r include /usr/local/include/irrlicht ; cd .. ; fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz | tar zfx -;
@@ -29,8 +41,6 @@ before_install:
     git clone --depth=1 https://github.com/DailyShana/irrlicht irrlicht_linux;
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -;
   fi
-
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cp libIrrlicht.a /usr/local/lib/ ; sudo cp -r include /usr/local/include/irrlicht ; cd .. ; fi
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang
 
@@ -49,7 +59,7 @@ script:
 - cd ..
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv bin/release/ygopro ./; strip ygopro;
   fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     mkdir -p ygopro.app/Contents/MacOS;
     mv bin/release/ygopro ygopro.app/Contents/MacOS;
     dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd;
@@ -59,10 +69,10 @@ script:
     defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
       echo $CERTIFICATE | base64 --decode --output cert.p12;
-      security create-keychain -p "" build.keychain; security unlock-keychain -p "" build.keychain;
-      security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign;
-      codesign --deep --keychain build.keychain --sign "$(security find-identity -v -p
-      codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
+      security create-keychain -p "" build.keychain; security default-keychain -s build.keychain; security unlock-keychain -p "" build.keychain;
+      security import cert.p12 -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign;
+      security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain;
+      codesign --deep --sign "$(security find-identity -v -p codesigning build.keychain | head -1 | grep -o '".*"' | tr -d '"')" ygopro.app;
     fi
   fi
 before_deploy:
