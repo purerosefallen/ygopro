@@ -13,15 +13,13 @@ IFileSystem* DataManager::FileSystem;
 DataManager dataManager;
 
 bool DataManager::LoadDB(const wchar_t* wfile) {
-#ifdef YGOPRO_SERVER_MODE
 	char file[256];
 	BufferIO::EncodeUTF8(wfile, file);
+#ifdef YGOPRO_SERVER_MODE
 	sqlite3* pDB;
 	if(sqlite3_open_v2(file, &pDB, SQLITE_OPEN_READONLY, 0) != SQLITE_OK)
 		return Error(pDB);
 #else
-	char file[256];
-	BufferIO::EncodeUTF8(wfile, file);
 #ifdef _WIN32
 	IReadFile* reader = FileSystem->createAndOpenFile(wfile);
 #else
