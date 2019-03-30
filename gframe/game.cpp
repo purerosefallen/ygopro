@@ -116,6 +116,7 @@ bool Game::Initialize() {
 
 	env->addStaticText(L"目前测试的内容：\n\n\
 投降时确认。\n\
+更换卡组和录像文件的排序方式。\n\
 \n\
 \n已知问题：\n\
 \n鸽了，爽\n\
