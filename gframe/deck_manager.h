@@ -48,6 +48,8 @@ public:
 	static bool RenameDeck(const wchar_t* oldname, const wchar_t* newname);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
+	bool LoadDeckFromCode(Deck& deck, const char *code, int len);
+	int SaveDeckToCode(Deck &deck, char *code);
 };
 
 extern DeckManager deckManager;
