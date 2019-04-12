@@ -500,11 +500,17 @@ public:
 	irr::gui::IGUIButton* btnSideReload;
 	irr::gui::IGUIEditBox* ebDeckname;
 	irr::gui::IGUIButton* btnRenameDeck;
+	irr::gui::IGUIButton* btnDeckCode;
 	//deck rename
 	irr::gui::IGUIWindow* wRenameDeck;
 	irr::gui::IGUIEditBox* ebREName;
 	irr::gui::IGUIButton* btnREYes;
 	irr::gui::IGUIButton* btnRENo;
+	//deck code
+	irr::gui::IGUIWindow* wDeckCode;
+	irr::gui::IGUIEditBox* ebDeckCode;
+	irr::gui::IGUIButton* btnDeckCodeYes;
+	irr::gui::IGUIButton* btnDeckCodeNo;
   //
 	irr::gui::IGUIStaticText* stBanlist;
 	irr::gui::IGUIStaticText* stDeck;
@@ -746,6 +752,10 @@ extern Game* mainGame;
 #define BUTTON_RENAME_DECK			386
 #define BUTTON_RENAME_DECK_SAVE		387
 #define BUTTON_RENAME_DECK_CANCEL	388
+
+#define BUTTON_DECK_CODE			389
+#define BUTTON_DECK_CODE_SAVE		390
+#define BUTTON_DECK_CODE_CANCEL		391
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1
