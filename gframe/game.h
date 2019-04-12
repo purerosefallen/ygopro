@@ -500,11 +500,17 @@ public:
 	irr::gui::IGUIButton* btnSideReload;
 	irr::gui::IGUIEditBox* ebDeckname;
 	irr::gui::IGUIButton* btnRenameDeck;
+	irr::gui::IGUIButton* btnDeckCode;
 	//deck rename
 	irr::gui::IGUIWindow* wRenameDeck;
 	irr::gui::IGUIEditBox* ebREName;
 	irr::gui::IGUIButton* btnREYes;
 	irr::gui::IGUIButton* btnRENo;
+	//deck code
+	irr::gui::IGUIWindow* wDeckCode;
+	irr::gui::IGUIEditBox* ebDeckCode;
+	irr::gui::IGUIButton* btnDeckCodeYes;
+	irr::gui::IGUIButton* btnDeckCodeNo;
   //
 	irr::gui::IGUIStaticText* stBanlist;
 	irr::gui::IGUIStaticText* stDeck;

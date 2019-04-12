@@ -304,7 +304,7 @@ bool DeckManager::LoadDeckFromCode(Deck& deck, const char *code, int len) {
 	return (errorcode == 0);
 }
 int DeckManager::SaveDeckToCode(Deck& deck, char* code) {
-	char deckbuf[1024], pdeck = deckbuf;
+	char deckbuf[1024], *pdeck = deckbuf;
 	BufferIO::WriteInt32(pdeck, deck.main.size() + deck.extra.size());
 	BufferIO::WriteInt32(pdeck, deck.side.size());
 	for(size_t i = 0; i < deck.main.size(); ++i)
