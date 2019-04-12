@@ -747,6 +747,10 @@ extern Game* mainGame;
 #define BUTTON_RENAME_DECK_SAVE		387
 #define BUTTON_RENAME_DECK_CANCEL	388
 
+#define BUTTON_DECK_CODE			389
+#define BUTTON_DECK_CODE_SAVE		390
+#define BUTTON_DECK_CODE_CANCEL		391
+
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1
 #define TEXTURE_MENU				2
