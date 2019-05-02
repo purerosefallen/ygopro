@@ -321,7 +321,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					NetServer::StopServer();
 					break;
 				}
-				STARTUPINFO si;
+				STARTUPINFOW si;
 				PROCESS_INFORMATION pi;
 				ZeroMemory(&si, sizeof(si));
 				si.cb = sizeof(si);
