@@ -843,6 +843,13 @@ bool Game::Initialize() {
 		col.setAlpha(224);
 		env->getSkin()->setColor((EGUI_DEFAULT_COLOR)i, col);
 	}
+	dimension2du size = driver->getScreenSize();
+	if(window_size != size) {
+		window_size = size;
+		xScale = window_size.Width / 1024.0;
+		yScale = window_size.Height / 640.0;
+		OnResize();
+	}
 	hideChat = false;
 	hideChatTimer = 0;
 	return true;
@@ -1696,6 +1703,13 @@ void Game::ClearCardInfo(int player) {
 	stText->setText(L"");
 	scrCardText->setVisible(false);
 }
+void Game::AddLog(const wchar_t* msg, int param) {
+	logParam.push_back(param);
+	lstLog->addItem(msg);
+	if(!env->hasFocus(lstLog)) {
+		lstLog->setSelected(-1);
+	}
+}
 void Game::AddChatMsg(const wchar_t* msg, int player) {
 	for(int i = 7; i > 0; --i) {
 		chatMsg[i] = chatMsg[i - 1];
@@ -1743,8 +1757,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatMsg[0].append(msg);
 	wchar_t msg_front[256];
 	myswprintf(msg_front, L"[Chat]%ls", chatMsg[0].c_str());
-	lstLog->addItem(msg_front);
-	logParam.push_back(0);
+	AddLog(msg_front);
 }
 void Game::ClearChatMsg() {
 	for(int i = 7; i >= 0; --i) {
