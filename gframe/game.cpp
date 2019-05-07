@@ -1714,8 +1714,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatMsg[0].append(msg);
 	wchar_t msg_front[256];
 	myswprintf(msg_front, L"[Chat]%ls", chatMsg[0].c_str());
-	lstLog->addItem(msg_front);
-	logParam.push_back(0);
+	AddLog(msg_front);
 }
 void Game::ClearChatMsg() {
 	for(int i = 7; i >= 0; --i) {
