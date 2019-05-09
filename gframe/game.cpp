@@ -560,22 +560,12 @@ bool Game::Initialize() {
 	btnSideSort->setVisible(false);
 	btnSideReload = env->addButton(rect<s32>(440, 100, 500, 130), 0, BUTTON_SIDE_RELOAD, dataManager.GetSysString(1309));
 	btnSideReload->setVisible(false);
-	btnRenameDeck = env->addButton(rect<s32>(170, 99, 220, 120), wDeckEdit, BUTTON_RENAME_DECK, dataManager.GetSysString(1362));
 	btnDeckCode = env->addButton(rect<s32>(5, 65, 75, 90), wDeckEdit, BUTTON_DECK_CODE, dataManager.GetSysString(1387));
 	//
 	scrFilter = env->addScrollBar(false, recti(999, 161, 1019, 629), 0, SCROLL_FILTER);
 	scrFilter->setLargeStep(10);
 	scrFilter->setSmallStep(1);
 	scrFilter->setVisible(false);
-	//rename deck
-	wRenameDeck = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1376));
-	wRenameDeck->getCloseButton()->setVisible(false);
-	wRenameDeck->setVisible(false);
-	env->addStaticText(dataManager.GetSysString(1377), rect<s32>(20, 25, 290, 45), false, false, wRenameDeck);
-	ebREName =  env->addEditBox(L"", rect<s32>(20, 50, 290, 70), true, wRenameDeck, -1);
-	ebREName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	btnREYes = env->addButton(rect<s32>(70, 80, 140, 105), wRenameDeck, BUTTON_RENAME_DECK_SAVE, dataManager.GetSysString(1341));
-	btnRENo = env->addButton(rect<s32>(170, 80, 240, 105), wRenameDeck, BUTTON_RENAME_DECK_CANCEL, dataManager.GetSysString(1212));
 	//deck code
 	wDeckCode = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1387));
 	wDeckCode->getCloseButton()->setVisible(false);
@@ -1934,7 +1924,6 @@ void Game::OnResize() {
 	btnSideSort->setRelativePosition(Resize(375, 100, 435, 130));
 	btnSideReload->setRelativePosition(Resize(440, 100, 500, 130));
 	btnDeleteDeck->setRelativePosition(Resize(225, 95, 290, 120));
-	btnRenameDeck->setRelativePosition(Resize(170, 99, 220, 120));
 	btnDeckCode->setRelativePosition(Resize(5, 65, 75, 90));
 
 	wLanWindow->setRelativePosition(ResizeWin(220, 100, 800, 520));
@@ -1957,7 +1946,7 @@ void Game::OnResize() {
 	wANAttribute->setRelativePosition(ResizeWin(500, 200, 830, 285));
 	wANRace->setRelativePosition(ResizeWin(480, 200, 850, 410));
 	wReplaySave->setRelativePosition(ResizeWin(510, 200, 820, 320));
-	wRenameDeck->setRelativePosition(ResizeWin(510, 200, 820, 320));
+	wDeckCode->setRelativePosition(ResizeWin(510, 200, 820, 320));
 
 	stHintMsg->setRelativePosition(ResizeWin(660 - 160 * xScale, 60, 660 + 160 * xScale, 90));
 
