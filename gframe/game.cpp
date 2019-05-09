@@ -257,10 +257,12 @@ bool Game::Initialize() {
 	}
 	btnHostPrepOB = env->addButton(rect<s32>(10, 180, 110, 205), wHostPrepare, BUTTON_HP_OBSERVER, dataManager.GetSysString(1252));
 	myswprintf(dataManager.strBuffer, L"%ls%d", dataManager.GetSysString(1253), 0);
-	stHostPrepOB = env->addStaticText(dataManager.strBuffer, rect<s32>(10, 210, 270, 230), false, false, wHostPrepare);
+	stHostPrepOB = env->addStaticText(dataManager.strBuffer, rect<s32>(10, 285, 270, 305), false, false, wHostPrepare);
 	stHostPrepRule = env->addStaticText(L"", rect<s32>(280, 30, 460, 230), false, true, wHostPrepare);
-	env->addStaticText(dataManager.GetSysString(1254), rect<s32>(10, 235, 110, 255), false, false, wHostPrepare);
-	cbDeckSelect = env->addComboBox(rect<s32>(120, 230, 270, 255), wHostPrepare);
+	env->addStaticText(dataManager.GetSysString(1254), rect<s32>(10, 210, 110, 230), false, false, wHostPrepare);
+	cbCategorySelect = env->addComboBox(rect<s32>(10, 230, 138, 255), wHostPrepare, COMBOBOX_HP_CATEGORY);
+	cbCategorySelect->setMaxSelectionRows(10);
+	cbDeckSelect = env->addComboBox(rect<s32>(142, 230, 340, 255), wHostPrepare);
 	cbDeckSelect->setMaxSelectionRows(10);
 	btnHostPrepReady = env->addButton(rect<s32>(170, 180, 270, 205), wHostPrepare, BUTTON_HP_READY, dataManager.GetSysString(1218));
 	btnHostPrepNotReady = env->addButton(rect<s32>(170, 180, 270, 205), wHostPrepare, BUTTON_HP_NOTREADY, dataManager.GetSysString(1219));
@@ -573,14 +575,56 @@ bool Game::Initialize() {
 	//deck edit
 	wDeckEdit = env->addStaticText(L"", rect<s32>(309, 5, 605, 130), true, false, 0, -1, true);
 	wDeckEdit->setVisible(false);
-	stBanlist = env->addStaticText(dataManager.GetSysString(1300), rect<s32>(10, 9, 100, 29), false, false, wDeckEdit);
-	cbDBLFList = env->addComboBox(rect<s32>(80, 5, 220, 30), wDeckEdit, COMBOBOX_DBLFLIST);
-	cbDBLFList->setMaxSelectionRows(10);
+	btnManageDeck = env->addButton(rect<s32>(225, 5, 290, 30), wDeckEdit, BUTTON_MANAGE_DECK, dataManager.GetSysString(1328));
+	//deck manage
+	wDeckManage = env->addWindow(rect<s32>(310, 135, 800, 465), false, dataManager.GetSysString(1460), 0, WINDOW_DECK_MANAGE);
+	wDeckManage->setVisible(false);
+	lstCategories = env->addListBox(rect<s32>(10, 30, 140, 320), wDeckManage, LISTBOX_CATEGORIES, true);
+	lstDecks = env->addListBox(rect<s32>(150, 30, 340, 320), wDeckManage, LISTBOX_DECKS, true);
+	posY = 30;
+	btnNewCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_NEW_CATEGORY, dataManager.GetSysString(1461));
+	posY += 30;
+	btnRenameCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_RENAME_CATEGORY, dataManager.GetSysString(1462));
+	posY += 30;
+	btnDeleteCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_DELETE_CATEGORY, dataManager.GetSysString(1463));
+	posY += 30;
+	btnNewDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_NEW_DECK, dataManager.GetSysString(1464));
+	posY += 30;
+	btnRenameDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_RENAME_DECK, dataManager.GetSysString(1465));
+	posY += 30;
+	btnDMDeleteDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_DELETE_DECK_DM, dataManager.GetSysString(1466));
+	posY += 30;
+	btnMoveDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_MOVE_DECK, dataManager.GetSysString(1467));
+	posY += 30;
+	btnCopyDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_COPY_DECK, dataManager.GetSysString(1468));
+	posY += 55;
+	cbLFList = env->addComboBox(rect<s32>(350, posY, 480, posY + 25), wDeckManage, COMBOBOX_LFLIST);
+	cbLFList->setMaxSelectionRows(10);
+	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
+		cbLFList->addItem(deckManager._lfList[i].listName);
+	//deck manage query
+	wDMQuery = env->addWindow(rect<s32>(400, 200, 710, 320), false, dataManager.GetSysString(1460));
+	wDMQuery->getCloseButton()->setVisible(false);
+	wDMQuery->setVisible(false);
+	stDMMessage = env->addStaticText(L"", rect<s32>(20, 25, 290, 45), false, false, wDMQuery);
+	stDMMessage2 = env->addStaticText(L"", rect<s32>(20, 50, 290, 70), false, false, wDMQuery, -1, true);
+	stDMMessage2->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	ebDMName = env->addEditBox(L"", rect<s32>(20, 50, 290, 70), true, wDMQuery, -1);
+	ebDMName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	cbDMCategory = env->addComboBox(rect<s32>(20, 50, 290, 70), wDMQuery, -1);
+	stDMMessage2->setVisible(false);
+	ebDMName->setVisible(false);
+	cbDMCategory->setVisible(false);
+	cbDMCategory->setMaxSelectionRows(10);
+	btnDMOK = env->addButton(rect<s32>(70, 80, 140, 105), wDMQuery, BUTTON_DM_OK, dataManager.GetSysString(1211));
+	btnDMCancel = env->addButton(rect<s32>(170, 80, 240, 105), wDMQuery, BUTTON_DM_CANCEL, dataManager.GetSysString(1212));
+
+	stDBCategory = env->addStaticText(dataManager.GetSysString(1300), rect<s32>(10, 9, 100, 29), false, false, wDeckEdit);
+	cbDBCategory = env->addComboBox(rect<s32>(80, 5, 220, 30), wDeckEdit, COMBOBOX_DBCATEGORY);
+	cbDBCategory->setMaxSelectionRows(15);
 	stDeck = env->addStaticText(dataManager.GetSysString(1301), rect<s32>(10, 39, 100, 59), false, false, wDeckEdit);
 	cbDBDecks = env->addComboBox(rect<s32>(80, 35, 220, 60), wDeckEdit, COMBOBOX_DBDECKS);
 	cbDBDecks->setMaxSelectionRows(15);
-	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbDBLFList->addItem(deckManager._lfList[i].listName);
 	btnSaveDeck = env->addButton(rect<s32>(225, 35, 290, 60), wDeckEdit, BUTTON_SAVE_DECK, dataManager.GetSysString(1302));
 	ebDeckname = env->addEditBox(L"", rect<s32>(80, 65, 220, 90), true, wDeckEdit, -1);
 	ebDeckname->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -597,22 +641,12 @@ bool Game::Initialize() {
 	btnSideSort->setVisible(false);
 	btnSideReload = env->addButton(rect<s32>(440, 100, 500, 130), 0, BUTTON_SIDE_RELOAD, dataManager.GetSysString(1309));
 	btnSideReload->setVisible(false);
-	btnRenameDeck = env->addButton(rect<s32>(170, 99, 220, 120), wDeckEdit, BUTTON_RENAME_DECK, dataManager.GetSysString(1362));
 	btnDeckCode = env->addButton(rect<s32>(5, 65, 75, 90), wDeckEdit, BUTTON_DECK_CODE, dataManager.GetSysString(1387));
 	//
 	scrFilter = env->addScrollBar(false, recti(999, 161, 1019, 629), 0, SCROLL_FILTER);
 	scrFilter->setLargeStep(10);
 	scrFilter->setSmallStep(1);
 	scrFilter->setVisible(false);
-	//rename deck
-	wRenameDeck = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1376));
-	wRenameDeck->getCloseButton()->setVisible(false);
-	wRenameDeck->setVisible(false);
-	env->addStaticText(dataManager.GetSysString(1377), rect<s32>(20, 25, 290, 45), false, false, wRenameDeck);
-	ebREName =  env->addEditBox(L"", rect<s32>(20, 50, 290, 70), true, wRenameDeck, -1);
-	ebREName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	btnREYes = env->addButton(rect<s32>(70, 80, 140, 105), wRenameDeck, BUTTON_RENAME_DECK_SAVE, dataManager.GetSysString(1341));
-	btnRENo = env->addButton(rect<s32>(170, 80, 240, 105), wRenameDeck, BUTTON_RENAME_DECK_CANCEL, dataManager.GetSysString(1212));
 	//deck code
 	wDeckCode = env->addWindow(rect<s32>(510, 200, 820, 320), false, dataManager.GetSysString(1387));
 	wDeckCode->getCloseButton()->setVisible(false);
@@ -1088,9 +1122,44 @@ void Game::LoadExpansions() {
 #endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
-void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
+void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {
+	cbCategory->clear();
+	cbCategory->addItem(dataManager.GetSysString(1450));
+	cbCategory->addItem(dataManager.GetSysString(1451));
+	cbCategory->addItem(dataManager.GetSysString(1452));
+	cbCategory->addItem(dataManager.GetSysString(1453));
+	FileSystem::TraversalDir(L"./deck", [cbCategory](const wchar_t* name, bool isdir) {
+		if(isdir) {
+			cbCategory->addItem(name);
+		}
+	});
+	cbCategory->setSelected(2);
+	if(selectlastused) {
+		for(size_t i = 0; i < cbCategory->getItemCount(); ++i) {
+			if(!wcscmp(cbCategory->getItem(i), gameConf.lastcategory)) {
+				cbCategory->setSelected(i);
+				break;
+			}
+		}
+	}
+	RefreshDeck(cbCategory, cbDeck);
+	if(selectlastused) {
+		for(size_t i = 0; i < cbDeck->getItemCount(); ++i) {
+			if(!wcscmp(cbDeck->getItem(i), gameConf.lastdeck)) {
+				cbDeck->setSelected(i);
+				break;
+			}
+		}
+	}
+}
+void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck) {
+	wchar_t catepath[256];
+	deckManager.GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
+	RefreshDeck(catepath, cbDeck);
+}
+void Game::RefreshDeck(const wchar_t* deckpath, irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
-	FileSystem::TraversalDir(L"./deck", [cbDeck](const wchar_t* name, bool isdir) {
+	FileSystem::TraversalDir(deckpath, [cbDeck](const wchar_t* name, bool isdir) {
 		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".ydk", 4)) {
 			size_t len = wcslen(name);
 			wchar_t deckname[256];
@@ -1099,12 +1168,6 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 			cbDeck->addItem(deckname);
 		}
 	});
-	for(size_t i = 0; i < cbDeck->getItemCount(); ++i) {
-		if(!wcscmp(cbDeck->getItem(i), gameConf.lastdeck)) {
-			cbDeck->setSelected(i);
-			break;
-		}
-	}
 }
 void Game::RefreshReplay() {
 	lstReplayList->clear();
@@ -1193,6 +1256,8 @@ void Game::LoadConfig() {
 	gameConf.textfontsize = 12;
 	gameConf.nickname[0] = 0;
 	gameConf.gamename[0] = 0;
+	gameConf.bot_deck_path[0] = 0;
+	gameConf.lastcategory[0] = 0;
 	gameConf.lastdeck[0] = 0;
 	gameConf.numfont[0] = 0;
 	gameConf.textfont[0] = 0;
@@ -1340,6 +1405,12 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "gamename")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.gamename, 20);
+				} else if (!strcmp(strbuf, "bot_deck_path")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.bot_deck_path, 64);
+				} else if (!strcmp(strbuf, "lastcategory")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.lastcategory, 64);
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
@@ -1460,6 +1531,12 @@ void Game::LoadConfig() {
 				} else if (!strcmp(strbuf, "gamename")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.gamename, 20);
+				} else if (!strcmp(strbuf, "bot_deck_path")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.bot_deck_path, 64);
+				} else if (!strcmp(strbuf, "lastcategory")) {
+					BufferIO::DecodeUTF8(valbuf, wstr);
+					BufferIO::CopyWStr(wstr, gameConf.lastcategory, 64);
 				} else if (!strcmp(strbuf, "lastdeck")) {
 					BufferIO::DecodeUTF8(valbuf, wstr);
 					BufferIO::CopyWStr(wstr, gameConf.lastdeck, 64);
@@ -1546,6 +1623,8 @@ void Game::SaveConfig() {
 	fprintf(fp, "nickname = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.gamename, linebuf);
 	fprintf(fp, "gamename = %s\n", linebuf);
+	BufferIO::EncodeUTF8(gameConf.lastcategory, linebuf);
+	fprintf(fp, "lastcategory = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastdeck, linebuf);
 	fprintf(fp, "lastdeck = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.textfont, linebuf);
@@ -1579,6 +1658,8 @@ void Game::SaveConfig() {
 	fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
 	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
 	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
+	BufferIO::EncodeUTF8(gameConf.bot_deck_path, linebuf);
+	fprintf(fp, "bot_deck_path = %s\n", linebuf);
 	fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
 	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 	fprintf(fp, "prefer_expansion_script = %d\n", gameConf.prefer_expansion_script);
@@ -1938,7 +2019,6 @@ void Game::OnResize() {
 
 	wMainMenu->setRelativePosition(ResizeWin(370, 200, 650, 415));
 	wDeckEdit->setRelativePosition(Resize(309, 5, 605, 130));
-	cbDBLFList->setRelativePosition(Resize(80, 5, 220, 30));
 	cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
 	btnClearDeck->setRelativePosition(Resize(115, 99, 165, 120));
 	btnSortDeck->setRelativePosition(Resize(60, 99, 110, 120));
@@ -1946,6 +2026,9 @@ void Game::OnResize() {
 	btnSaveDeck->setRelativePosition(Resize(225, 35, 290, 60));
 	btnSaveDeckAs->setRelativePosition(Resize(225, 65, 290, 90));
 	ebDeckname->setRelativePosition(Resize(80, 65, 220, 90));
+	cbDBCategory->setRelativePosition(Resize(80, 5, 220, 30));
+	btnManageDeck->setRelativePosition(Resize(225, 5, 290, 30));
+	wDeckManage->setRelativePosition(ResizeWin(310, 135, 800, 465));
 
 	wSort->setRelativePosition(Resize(930, 132, 1020, 156));
 	cbSortType->setRelativePosition(Resize(10, 2, 85, 22));
@@ -1975,7 +2058,7 @@ void Game::OnResize() {
 		btncatepos.LowerRightCorner.Y - btncatepos.getHeight() / 2 + 245));
 
 	wLinkMarks->setRelativePosition(ResizeWin(700, 30, 820, 150));
-	stBanlist->setRelativePosition(Resize(10, 9, 100, 29));
+	stDBCategory->setRelativePosition(Resize(10, 9, 100, 29));
 	stDeck->setRelativePosition(Resize(10, 39, 100, 59));
 	stCategory->setRelativePosition(Resize(10, 2 + 25 / 6, 70, 22 + 25 / 6));
 	stLimit->setRelativePosition(Resize(205, 2 + 25 / 6, 280, 22 + 25 / 6));
@@ -1991,7 +2074,6 @@ void Game::OnResize() {
 	btnSideSort->setRelativePosition(Resize(375, 100, 435, 130));
 	btnSideReload->setRelativePosition(Resize(440, 100, 500, 130));
 	btnDeleteDeck->setRelativePosition(Resize(225, 95, 290, 120));
-	btnRenameDeck->setRelativePosition(Resize(170, 99, 220, 120));
 	btnDeckCode->setRelativePosition(Resize(5, 65, 75, 90));
 
 	wLanWindow->setRelativePosition(ResizeWin(220, 100, 800, 520));
@@ -2014,7 +2096,8 @@ void Game::OnResize() {
 	wANAttribute->setRelativePosition(ResizeWin(500, 200, 830, 285));
 	wANRace->setRelativePosition(ResizeWin(480, 200, 850, 410));
 	wReplaySave->setRelativePosition(ResizeWin(510, 200, 820, 320));
-	wRenameDeck->setRelativePosition(ResizeWin(510, 200, 820, 320));
+	wDeckCode->setRelativePosition(ResizeWin(510, 200, 820, 320));
+	wDMQuery->setRelativePosition(ResizeWin(400, 200, 710, 320));
 
 	stHintMsg->setRelativePosition(ResizeWin(660 - 160 * xScale, 60, 660 + 160 * xScale, 90));
 

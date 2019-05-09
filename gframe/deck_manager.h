@@ -41,15 +41,22 @@ public:
 	int CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tcg);
 	int LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec);
 	bool LoadSide(Deck& deck, int* dbuf, int mainc, int sidec);
+#ifndef YGOPRO_SERVER_MODE
+	void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
+	void GetDeckFile(wchar_t* ret, irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck);
+	bool LoadDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck);
+#endif
 	FILE* OpenDeckFile(const wchar_t * file, const char * mode);
 	bool LoadDeck(const wchar_t* file);
-	bool SaveDeck(Deck& deck, const wchar_t* name);
-	bool DeleteDeck(Deck& deck, const wchar_t* name);
-	static bool RenameDeck(const wchar_t* oldname, const wchar_t* newname);
+	bool SaveDeck(Deck& deck, const wchar_t* file);
+	bool DeleteDeck(const wchar_t* file);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const char *code, int len);
 	int SaveDeckToCode(Deck &deck, char *code);
+	bool CreateCategory(const wchar_t* name);
+	bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
+	bool DeleteCategory(const wchar_t* name);
 };
 
 extern DeckManager deckManager;
