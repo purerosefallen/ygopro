@@ -1883,7 +1883,6 @@ void Game::initUtils() {
 #ifdef YGOPRO_SERVER_MODE
 	//special scripts
 	FileSystem::MakeDir("specials");
-	FileSystem::MakeDir("beta");
 #else
 	FileSystem::MakeDir("screenshots");
 	//files in ygopro-starter-pack
