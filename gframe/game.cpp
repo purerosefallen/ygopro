@@ -12,7 +12,7 @@
 #include <sstream>
 #include <regex>
 
-#define KOISHI_VERNAME	"Overture"
+#define KOISHI_VERNAME	"Hameln"
 
 unsigned short PRO_VERSION = 0x134A;
 
