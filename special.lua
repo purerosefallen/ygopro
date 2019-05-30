@@ -32,7 +32,7 @@ function aux.PreloadUds()
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EVENT_DAMAGE)
 	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
-		return ep~=rp
+		return ep~=rp and r&REASON_EFFECT>0
 	end)
 	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
 		burn_counter[rp]=burn_counter[rp]+ev
