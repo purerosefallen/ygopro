@@ -79,14 +79,16 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < 40 || deck.main.size() > 60)
+	if(deck.main.size() < 20 || deck.main.size() > 30)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 15)
+	if(deck.extra.size() > 5)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > 15)
+	if(deck.side.size() > 5)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 
-	for(size_t i = 0; i < deck.main.size(); ++i) {
+	int used_limited = 0, used_semi = 0;
+	for (size_t i = 0; i < deck.main.size(); ++i)
+	{
 		code_pointer cit = deck.main[i];
 		if(!allow_ocg && (cit->second.ot == 0x1))
 			return (DECKERROR_OCGONLY << 28) + cit->first;
@@ -100,8 +102,25 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end()) {
+			switch(it->second) {
+				case 0: {
+					return (DECKERROR_LFLIST << 28) + cit->first;
+				}
+				case 1: {
+					++used_limited;
+					if(used_limited > 1)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+				case 2: {
+					++used_semi;
+					if(used_semi > 2)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+			}
+		}
 	}
 	for(size_t i = 0; i < deck.extra.size(); ++i) {
 		code_pointer cit = deck.extra[i];
@@ -115,8 +134,25 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end()) {
+			switch(it->second) {
+				case 0: {
+					return (DECKERROR_LFLIST << 28) + cit->first;
+				}
+				case 1: {
+					++used_limited;
+					if(used_limited > 1)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+				case 2: {
+					++used_semi;
+					if(used_semi > 2)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+			}
+		}
 	}
 	for(size_t i = 0; i < deck.side.size(); ++i) {
 		code_pointer cit = deck.side[i];
@@ -130,8 +166,25 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end()) {
+			switch(it->second) {
+				case 0: {
+					return (DECKERROR_LFLIST << 28) + cit->first;
+				}
+				case 1: {
+					++used_limited;
+					if(used_limited > 1)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+				case 2: {
+					++used_semi;
+					if(used_semi > 2)
+						return (DECKERROR_LFLIST << 28) + cit->first;
+					break;
+				}
+			}
+		}
 	}
 	return 0;
 }
