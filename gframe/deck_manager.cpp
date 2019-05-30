@@ -81,7 +81,7 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 	int dc = 0;
 	if(deck.main.size() < 20 || deck.main.size() > 30)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 5)
+	if(deck.extra.size() > 6)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
 	if(deck.side.size() > 5)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
