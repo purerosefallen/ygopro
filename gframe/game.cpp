@@ -18,9 +18,9 @@
 #include <regex>
 #endif //YGOPRO_SERVER_MODE
 
-#define KOISHI_VERNAME	"Overture"
+#define KOISHI_VERNAME	"Hameln"
 
-unsigned short PRO_VERSION = 0x1349;
+unsigned short PRO_VERSION = 0x134A;
 
 namespace ygo {
 
