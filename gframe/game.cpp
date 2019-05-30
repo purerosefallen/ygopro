@@ -14,7 +14,7 @@
 
 #define KOISHI_VERNAME	"Overture"
 
-unsigned short PRO_VERSION = 0x1349;
+unsigned short PRO_VERSION = 0x134A;
 
 namespace ygo {
 
