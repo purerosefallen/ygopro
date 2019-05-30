@@ -43,7 +43,7 @@ function aux.PreloadUds()
 	Duel.RegisterEffect(e2,0)
 	local function f(c)
 		local p=c:GetReasonPlayer()
-		return c:GetPreviousControler()==1-p and c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(1-p)
+		return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(1-p)
 	end
 	local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -55,8 +55,8 @@ function aux.PreloadUds()
 		local g=eg:Filter(f,nil)
 		for tc in aux.Next(g) do
 			local p=tc:GetReasonPlayer()
-			burn_counter[p]=burn_counter[p]+1
-			if burn_counter[p]>=2000 then
+			deckdes_counter[p]=deckdes_counter[p]+1
+			if deckdes_counter[p]>=6 then
 				Duel.Win(1-p,1)
 			end
 		end
