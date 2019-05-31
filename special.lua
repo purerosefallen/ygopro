@@ -24,7 +24,7 @@ function aux.PreloadUds()
 	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
 		for p=0,1 do
 			burn_counter[p]=0
-			deckdes_counter[p]=0
+	--		deckdes_counter[p]=0
 		end
 	end)
 	Duel.RegisterEffect(e2,0)
