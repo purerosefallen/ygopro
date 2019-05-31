@@ -1,4 +1,4 @@
-burn_counter={[0]=0,[1]=0}
+--burn_counter={[0]=0,[1]=0}
 deckdes_counter={[0]=0,[1]=0}
 function aux.PreloadUds()
 	local e2=Effect.GlobalEffect()
@@ -18,7 +18,21 @@ function aux.PreloadUds()
 		return 0x11111111
 	end)
 	Duel.RegisterEffect(e2,0)
-	local e2=Effect.GlobalEffect()
+    local e2=Effect.GlobalEffect()
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e2:SetTargetRange(1,1)
+	e2:SetCode(EFFECT_CHANGE_DAMAGE)
+	e2:SetValue(function(e,re,ev,r,rp,rc)
+		if r&REASON_EFFECT>0 and ev>=2000 then
+            return 0
+        else
+            return ev
+        end
+	end)
+	Duel.RegisterEffect(e2,0)
+
+--[[	local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EVENT_PHASE_START+PHASE_DRAW)
 	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
@@ -40,7 +54,8 @@ function aux.PreloadUds()
 			Duel.Win(1-rp,1)
 		end
 	end)
-	Duel.RegisterEffect(e2,0)
+	Duel.RegisterEffect(e2,0)]]
+    local e
 	local function f(c)
 		local p=c:GetReasonPlayer()
 		return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(1-p)
