@@ -56,6 +56,9 @@
 /sound/*.wav
 /sound/custom
 /sound/BGM
+/sound/README.md
+/sound/LICENSE
+/sound/,*
 /update
 /update*
 /locales
