@@ -15,7 +15,7 @@ function aux.PreloadUds()
 	e2:SetCode(EFFECT_DISABLE_FIELD)
 	e2:SetProperty(EFFECT_FLAG_REPEAT)
 	e2:SetOperation(function()
-		return 0x11111111
+		return 0x0a110a11
 	end)
 	Duel.RegisterEffect(e2,0)
     local e2=Effect.GlobalEffect()
