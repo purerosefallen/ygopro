@@ -175,7 +175,7 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 			unsigned char wbuf[3];
 			wbuf[0] = MSG_WIN;
 			wbuf[1] = 1 - dp->type;
-			wbuf[2] = 0;
+			wbuf[2] = 0x4;
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, wbuf, 3);
 			NetServer::ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -292,7 +292,7 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, void* pdata, unsigned int len) {
 	if((unsigned)mainc + (unsigned)sidec > (len - 8) / 4) {
 		STOC_ErrorMsg scem;
 		scem.msg = ERRMSG_DECKERROR;
-		scem.code = DECKERROR_MAINCOUNT << 28;
+		scem.code = 0;
 		NetServer::SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
 		return;
 	}
