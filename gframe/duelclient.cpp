@@ -987,11 +987,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len, bool retry) {
 		mainGame->dInfo.time_player = 2;
 	switch(mainGame->dInfo.curMsg) {
 	case MSG_RETRY: {
-<<<<<<< HEAD
-		if(!retry && last_successful_msg_length) {
-			mainGame->gMutex.Lock();
-			mainGame->stMessage->setText(dataManager.GetDesc(1422));
-=======
 		if(last_successful_msg_length) {
 			char* p = last_successful_msg;
 			auto last_msg = BufferIO::ReadUInt8(p);
@@ -1006,7 +1001,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len, bool retry) {
 			}
 			mainGame->gMutex.Lock();
 			mainGame->stMessage->setText(dataManager.GetDesc(err_desc));
->>>>>>> retry_fh
 			mainGame->PopupElement(mainGame->wMessage);
 			mainGame->gMutex.Unlock();
 			mainGame->actionSignal.Reset();
