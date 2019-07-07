@@ -179,7 +179,7 @@ void TagDuel::LeaveGame(DuelPlayer* dp) {
 			NetServer::StopServer();
 			return;
 		}
-		if(!game_started) {
+		if(duel_stage == DUEL_STAGE_BEGIN) {
 			ready[host_pos] = false;
 			STOC_TypeChange sctc;
 			sctc.type = 0x10 | host_pos;
@@ -640,8 +640,10 @@ void TagDuel::DuelEndProc() {
 		NetServer::ReSendToPlayer(*oit);
 #ifdef YGOPRO_SERVER_MODE
 	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
-#endif
 	NetServer::StopServer();
+#else
+	duel_stage = DUEL_STAGE_END;
+#endif
 }
 void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
