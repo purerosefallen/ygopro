@@ -29,6 +29,7 @@ private:
 	static char duel_client_read[0x2000];
 	static char duel_client_write[0x2000];
 	static bool is_closing;
+	static bool is_swapping;
 	static int select_hint;
 	static int select_unselect_hint;
 	static int last_select_hint;
@@ -49,7 +50,8 @@ public:
 	static void ClientEvent(bufferevent *bev, short events, void *ctx);
 	static int ClientThread(void* param);
 	static void HandleSTOCPacketLan(char* data, unsigned int len);
-	static int ClientAnalyze(char* msg, unsigned int len, bool retry = false);
+	static int ClientAnalyze(char* msg, unsigned int len);
+	static void SwapField();
 	static void SetResponseI(int respI);
 	static void SetResponseB(void* respB, unsigned char len);
 	static void SendResponse();
