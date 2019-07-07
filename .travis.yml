@@ -16,18 +16,13 @@ addons:
       - libgl1-mesa-dev
       - libglu-dev
       - p7zip-full
-  homebrew:
-    packages:
-      - freetype
-      - libevent
-      - sqlite
-      - dylibbundler
-      - p7zip
 env:
 - USE_IRRKLANG=1
 before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+  brew update;
+  brew install freetype libevent sqlite dylibbundler;
   sudo rm -rf /usr/local/include/unistring;
   sudo rm -rf /usr/local/include/lzma;
   sudo rm -f /usr/local/include/CGAL/stddef.h; fi
