@@ -641,8 +641,9 @@ void TagDuel::DuelEndProc() {
 #ifdef YGOPRO_SERVER_MODE
 	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 	NetServer::StopServer();
-#endif
+#else
 	duel_stage = DUEL_STAGE_END;
+#endif
 }
 void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
