@@ -634,9 +634,8 @@ void SingleDuel::DuelEndProc() {
 #ifdef YGOPRO_SERVER_MODE
 		NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 		NetServer::StopServer();
-#else
-		duel_stage = DUEL_STAGE_END;
 #endif
+		duel_stage = DUEL_STAGE_END;
 	} else {
 		int winc[3] = {0, 0, 0};
 		for(int i = 0; i < duel_count; ++i)
@@ -652,9 +651,8 @@ void SingleDuel::DuelEndProc() {
 #ifdef YGOPRO_SERVER_MODE
 			NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 			NetServer::StopServer();
-#else
-			duel_stage = DUEL_STAGE_END;
 #endif
+			duel_stage = DUEL_STAGE_END;
 		} else {
 			if(players[0] != pplayer[0]) {
 				players[0] = pplayer[0];
