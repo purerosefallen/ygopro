@@ -41,11 +41,7 @@ void Game::MainServerLoop() {
 	fflush(stdout);
 	
 	while(NetServer::net_evbase) {
-#ifdef WIN32
-		Sleep(200);
-#else
-		usleep(200000);
-#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 }
 void Game::MainTestLoop(int code) {
@@ -967,11 +963,7 @@ void Game::MainLoop() {
 		fps++;
 		cur_time = timer->getTime();
 		if(cur_time < fps * 17 - 20)
-#ifdef _WIN32
-			Sleep(20);
-#else
-			usleep(20000);
-#endif
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		if(cur_time >= 1000) {
 			myswprintf(cap, L"KoishiPro FPS: %d", fps);
 			device->setWindowCaption(cap);
@@ -992,11 +984,7 @@ void Game::MainLoop() {
 	DuelClient::StopClient(true);
 	if(dInfo.isSingleMode)
 		SingleMode::StopPlay(true);
-#ifdef _WIN32
-	Sleep(500);
-#else
-	usleep(500000);
-#endif
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	SaveConfig();
 //	device->drop();
 }
