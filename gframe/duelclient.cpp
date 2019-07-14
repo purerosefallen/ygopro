@@ -74,7 +74,7 @@ bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_g
 		event* resp_event = event_new(client_base, 0, EV_TIMEOUT, ConnectTimeout, 0);
 		event_add(resp_event, &timeout);
 	}
-	Thread::NewThread(ClientThread, 0);
+	std::thread(ClientThread).detach();
 	return true;
 }
 void DuelClient::ConnectTimeout(evutil_socket_t fd, short events, void* arg) {
@@ -241,7 +241,7 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			mainGame->device->closeDevice();
 	}
 }
-int DuelClient::ClientThread(void* param) {
+int DuelClient::ClientThread() {
 	event_base_dispatch(client_base);
 	bufferevent_free(client_bev);
 	event_base_free(client_base);
@@ -4069,7 +4069,7 @@ void DuelClient::BeginRefreshHost() {
 	timeval timeout = {3, 0};
 	resp_event = event_new(broadev, reply, EV_TIMEOUT | EV_READ | EV_PERSIST, BroadcastReply, broadev);
 	event_add(resp_event, &timeout);
-	Thread::NewThread(RefreshThread, broadev);
+	std::thread(RefreshThread, broadev).detach();
 	//send request
 	SOCKADDR_IN local;
 	local.sin_family = AF_INET;
@@ -4098,8 +4098,7 @@ void DuelClient::BeginRefreshHost() {
 		closesocket(sSend);
 	}
 }
-int DuelClient::RefreshThread(void * arg) {
-	event_base* broadev = (event_base*)arg;
+int DuelClient::RefreshThread(event_base* broadev) {
 	event_base_dispatch(broadev);
 	evutil_socket_t fd;
 	event_get_assignment(resp_event, 0, &fd, 0, 0, 0);
