@@ -215,8 +215,7 @@ public:
 	void takeScreenshot();
 	void SetCursor(ECURSOR_ICON icon);
 
-	Mutex gMutex;
-	Mutex gBuffer;
+	std::mutex gMutex;
 	Signal frameSignal;
 	Signal actionSignal;
 	Signal replaySignal;

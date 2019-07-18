@@ -16,8 +16,8 @@ VALUE "InternalName", "YGOPRO Server Mode"
 VALUE "LegalCopyright", "Copyright (C) 2018 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "YGOPRO Server Mode"
-VALUE "FileVersion", "Ayakashi"
-VALUE "ProductVersion", "Ayakashi"
+VALUE "FileVersion", "Hanabi"
+VALUE "ProductVersion", "Hanabi"
 END
 END
 BLOCK "VarFileInfo"

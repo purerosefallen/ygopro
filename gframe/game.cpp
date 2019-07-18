@@ -41,11 +41,7 @@ void Game::MainServerLoop() {
 	fflush(stdout);
 	
 	while(NetServer::net_evbase) {
-#ifdef WIN32
-		Sleep(200);
-#else
-		usleep(200000);
-#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 }
 void Game::MainTestLoop(int code) {
@@ -153,7 +149,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Ayakashi", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Hanabi", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -916,7 +912,7 @@ void Game::MainLoop() {
 		atkframe += 0.1f;
 		atkdy = (float)sin(atkframe);
 		driver->beginScene(true, true, SColor(0, 0, 0, 0));
-		gMutex.Lock();
+		gMutex.lock();
 		if(dInfo.isStarted) {
 			if(dInfo.isFinished && showcardcode == 1)
 				soundManager.PlayBGM(BGM_WIN);
@@ -945,7 +941,7 @@ void Game::MainLoop() {
 		}
 		DrawGUI();
 		DrawSpec();
-		gMutex.Unlock();
+		gMutex.unlock();
 		if(signalFrame > 0) {
 			signalFrame--;
 			if(!signalFrame)
@@ -962,16 +958,12 @@ void Game::MainLoop() {
 			}
 		}
 		driver->endScene();
-		if(closeSignal.Wait(0))
+		if(closeSignal.Wait(1))
 			CloseDuelWindow();
 		fps++;
 		cur_time = timer->getTime();
 		if(cur_time < fps * 17 - 20)
-#ifdef _WIN32
-			Sleep(20);
-#else
-			usleep(20000);
-#endif
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		if(cur_time >= 1000) {
 			myswprintf(cap, L"KoishiPro FPS: %d", fps);
 			device->setWindowCaption(cap);
@@ -992,11 +984,7 @@ void Game::MainLoop() {
 	DuelClient::StopClient(true);
 	if(dInfo.isSingleMode)
 		SingleMode::StopPlay(true);
-#ifdef _WIN32
-	Sleep(500);
-#else
-	usleep(500000);
-#endif
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	SaveConfig();
 //	device->drop();
 }
