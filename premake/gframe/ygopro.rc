@@ -13,11 +13,11 @@ BLOCK "080404b0"
 BEGIN
 VALUE "FileDescription", "KoishiPro"
 VALUE "InternalName", "KoishiPro"
-VALUE "LegalCopyright", "Copyright (C) 2018 Nanahira"
+VALUE "LegalCopyright", "Copyright (C) 2019 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "KoishiPro"
-VALUE "FileVersion", "Hanabi"
-VALUE "ProductVersion", "Hanabi"
+VALUE "FileVersion", "Rosarium"
+VALUE "ProductVersion", "Rosarium"
 END
 END
 BLOCK "VarFileInfo"
