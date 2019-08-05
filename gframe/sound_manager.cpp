@@ -257,8 +257,8 @@ void SoundManager::PlayCustomSound(char* SoundName) {
 #ifdef YGOPRO_USE_IRRKLANG
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
-	engineSound->play2D(SoundName);
 	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
+	engineSound->play2D(SoundName);
 #endif
 }
 void SoundManager::StopBGM() {
