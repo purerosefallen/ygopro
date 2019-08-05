@@ -52,6 +52,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 #ifdef YGOPRO_USE_IRRKLANG
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
+	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
 	switch(sound) {
 	case SOUND_SUMMON: {
 		engineSound->play2D("./sound/summon.wav");
@@ -180,7 +181,6 @@ void SoundManager::PlaySoundEffect(int sound) {
 	default:
 		break;
 	}
-	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
 #endif
 }
 void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
@@ -212,8 +212,8 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		return;
 	if(!engineMusic->isCurrentlyPlaying(song)) {
 		engineMusic->stopAllSounds();
-		soundBGM = engineMusic->play2D(song, loop, false, true);
 		engineMusic->setSoundVolume(mainGame->gameConf.music_volume);
+		soundBGM = engineMusic->play2D(song, loop, false, true);
 	}
 #endif
 }
@@ -257,8 +257,8 @@ void SoundManager::PlayCustomSound(char* SoundName) {
 #ifdef YGOPRO_USE_IRRKLANG
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
-	engineSound->play2D(SoundName);
 	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
+	engineSound->play2D(SoundName);
 #endif
 }
 void SoundManager::StopBGM() {
