@@ -83,7 +83,7 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
 	if(deck.extra.size() > 6)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > 5)
+	if(deck.side.size() > 6)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 
 	int used_limited = 0, used_semi = 0;
@@ -201,9 +201,9 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && deck.extra.size() < 15) {
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && deck.extra.size() < 6) {
 			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
-		} else if(deck.main.size() < 60) {
+		} else if(deck.main.size() < 30) {
 			deck.main.push_back(dataManager.GetCodePointer(code));
 		}
 	}
@@ -215,7 +215,7 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		if(deck.side.size() < 15)
+		if(deck.side.size() < 6)
 			deck.side.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 	}
 	return errorcode;
