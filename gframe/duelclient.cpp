@@ -253,6 +253,9 @@ int DuelClient::ClientThread() {
 void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 	char* pdata = data;
 	unsigned char pktType = BufferIO::ReadUInt8(pdata);
+#ifdef YGOPRO_MESSAGE_DEBUG
+	printf("STOC: %d Length: %d\n", pktType, len);
+#endif
 	switch(pktType) {
 	case STOC_GAME_MSG: {
 		ClientAnalyze(pdata, len - 1);
@@ -960,6 +963,9 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	char* pbuf = msg;
 	wchar_t textBuffer[256];
 	mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
+#ifdef YGOPRO_MESSAGE_DEBUG
+	printf("MSG: %d Length: %d\n", mainGame->dInfo.curMsg, len);
+#endif
 	if(mainGame->dInfo.curMsg != MSG_RETRY) {
 		memcpy(last_successful_msg, msg, len);
 		last_successful_msg_length = len;

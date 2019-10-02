@@ -19,6 +19,9 @@ project "ygopro"
     if os.getenv("YGOPRO_COMPAT_MYCARD") then
         defines { "YGOPRO_COMPAT_MYCARD" }
     end
+    if os.getenv("YGOPRO_MESSAGE_DEBUG") then
+        defines { "YGOPRO_MESSAGE_DEBUG" }
+    end
     local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
     if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
