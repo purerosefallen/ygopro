@@ -55,7 +55,7 @@ after_build:
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
   - 7z x -y WindBot.7z
 
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip ; exit 0"
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro222-images/archive/master.zip ; exit 0"
   - 7z x -y ygopro222-images-master.zip
   - mv -f ygopro222-images-master pics
 

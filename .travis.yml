@@ -79,7 +79,7 @@ before_deploy:
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
   fi
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro222-images/archive/master.zip
 - 7z x -y ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 
