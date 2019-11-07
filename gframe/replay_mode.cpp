@@ -238,7 +238,13 @@ void ReplayMode::EndDuel() {
 			mainGame->HideElement(mainGame->wCardSelect);
 		mainGame->PopupElement(mainGame->wMessage);
 		mainGame->gMutex.unlock();
-		mainGame->actionSignal.Wait();
+		if(auto_watch_mode) {
+			mainGame->actionSignal.Wait(2000);
+			mainGame->device->closeDevice();
+		}
+		else {
+			mainGame->actionSignal.Wait();
+		}
 		mainGame->gMutex.lock();
 		mainGame->dInfo.isStarted = false;
 		mainGame->dInfo.isFinished = true;
@@ -315,7 +321,13 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			mainGame->PopupElement(mainGame->wMessage);
 			mainGame->gMutex.unlock();
 			mainGame->actionSignal.Reset();
-			mainGame->actionSignal.Wait();
+			if (auto_watch_mode){
+				mainGame->actionSignal.Wait(2000);
+				mainGame->device->closeDevice();
+			}
+			else{
+				mainGame->actionSignal.Wait();
+			}
 			return false;
 		}
 		case MSG_HINT: {
