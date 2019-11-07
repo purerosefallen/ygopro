@@ -984,7 +984,7 @@ void Game::DrawSpec() {
 			break;
 		}
 		}
-		if (auto_watch_mode && showcardcode < 8 && showcardcode > 0) {
+		if (auto_watch_mode && showcardp < 8 && showcardp > 0 && showcardcode > 100) {
 			mainGame->ShowCardInfo(showcardcode);
 		}
 	}

@@ -3033,8 +3033,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		}
 		if (auto_watch_mode) {
 			int code = mainGame->dField.chains[ct - 1].chain_card->code;
-			if (code > 0)
-				mainGame->ShowCardInfo(code);
+			mainGame->ShowCardInfo(code);
 		}
 		mainGame->dField.last_chain = false;
 		return true;
@@ -3106,7 +3105,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			int s = BufferIO::ReadInt8(pbuf);
 			/*int ss = */BufferIO::ReadInt8(pbuf);
 			ClientCard* pcard = mainGame->dField.GetCard(c, l, s);
-			if (auto_watch_mode && i == 0 && pcard->code > 0 ) {
+			if (auto_watch_mode && i == 0) {
 				mainGame->ShowCardInfo(pcard->code);
 			}
 			pcard->is_highlighting = true;
