@@ -984,7 +984,7 @@ void Game::DrawSpec() {
 			break;
 		}
 		}
-		if (auto_watch_mode && showcardcode > 9999) {
+		if (auto_watch_mode && showcardcode > 9999 && (showcardcode & 0xFFFCFFFC) > 0) {
 			mainGame->ShowCardInfo(showcardcode);
 		}
 	}

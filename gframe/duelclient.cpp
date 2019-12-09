@@ -190,6 +190,10 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 				soundManager.PlaySoundEffect(SOUND_INFO);
 				mainGame->env->addMessageBox(L"", dataManager.GetSysString(1400));
 				mainGame->gMutex.unlock();
+				if (auto_watch_mode) {
+					mainGame->actionSignal.Wait(2000);
+					mainGame->device->closeDevice();
+				}
 			} else if(connect_state == 0x7) {
 				if(!mainGame->dInfo.isStarted && !mainGame->is_building) {
 					mainGame->btnCreateHost->setEnabled(true);
@@ -209,6 +213,10 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1401));
 					else mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
 					mainGame->gMutex.unlock();
+					if (auto_watch_mode) {
+						mainGame->actionSignal.Wait(2000);
+						mainGame->device->closeDevice();
+					}
 				} else {
 					mainGame->gMutex.lock();
 					soundManager.PlaySoundEffect(SOUND_INFO);
@@ -220,6 +228,10 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					mainGame->btnBotCancel->setEnabled(true);
 					mainGame->stTip->setVisible(false);
 					mainGame->gMutex.unlock();
+					if (auto_watch_mode) {
+						mainGame->actionSignal.Wait(2000);
+						mainGame->device->closeDevice();
+					}
 					mainGame->closeDoneSignal.Reset();
 					mainGame->closeSignal.Set();
 					mainGame->closeDoneSignal.Wait();
@@ -237,8 +249,6 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			}
 		}
 		event_base_loopexit(client_base, 0);
-		if(exit_on_return && auto_watch_mode)
-			mainGame->device->closeDevice();
 	}
 }
 int DuelClient::ClientThread() {
@@ -280,6 +290,10 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			else if(pkt->code == 2)
 				mainGame->env->addMessageBox(L"", dataManager.GetSysString(1405));
 			mainGame->gMutex.unlock();
+			if (auto_watch_mode) {
+				mainGame->actionSignal.Wait(2000);
+				mainGame->device->closeDevice();
+			}
 			event_base_loopbreak(client_base);
 			break;
 		}
@@ -736,16 +750,20 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->dInfo.isReplaySkiping = false;
 		mainGame->wSurrender->setVisible(false);
 		mainGame->stMessage->setText(dataManager.GetSysString(1500));
-		if(!auto_watch_mode) {
-			mainGame->PopupElement(mainGame->wMessage);
-			mainGame->gMutex.unlock();
+		mainGame->PopupElement(mainGame->wMessage);
+		mainGame->gMutex.unlock();
+		if (auto_watch_mode) {
+			mainGame->actionSignal.Wait(2000);
+			mainGame->device->closeDevice();
+		}
+		else {
 			mainGame->actionSignal.Reset();
 			mainGame->actionSignal.Wait();
-			mainGame->closeDoneSignal.Reset();
-			mainGame->closeSignal.Set();
-			mainGame->closeDoneSignal.Wait();
-			mainGame->gMutex.lock();
 		}
+		mainGame->closeDoneSignal.Reset();
+		mainGame->closeSignal.Set();
+		mainGame->closeDoneSignal.Wait();
+		mainGame->gMutex.lock();
 		mainGame->dInfo.isStarted = false;
 		mainGame->dInfo.isFinished = true;
 		mainGame->dInfo.announce_cache.clear();
