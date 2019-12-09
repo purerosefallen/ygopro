@@ -3002,6 +3002,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dField.current_chain.chain_pos.X += 0.35f;
 		else
 			mainGame->dField.current_chain.chain_pos.Y += chc * 0.25f;
+		if (auto_watch_mode && (mainGame->dField.current_chain.chain_card->location & LOCATION_ONFIELD))
+			mainGame->ShowCardInfo(mainGame->dField.current_chain.chain_card->code);
 		return true;
 	}
 	case MSG_CHAINED: {
@@ -3105,7 +3107,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			int s = BufferIO::ReadInt8(pbuf);
 			/*int ss = */BufferIO::ReadInt8(pbuf);
 			ClientCard* pcard = mainGame->dField.GetCard(c, l, s);
-			if (auto_watch_mode && i == 0) {
+			if (auto_watch_mode && i == 0 && (pcard->position & POS_FACEUP)) {
 				mainGame->ShowCardInfo(pcard->code);
 			}
 			pcard->is_highlighting = true;
