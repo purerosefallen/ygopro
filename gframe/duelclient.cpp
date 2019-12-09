@@ -3107,7 +3107,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			int s = BufferIO::ReadInt8(pbuf);
 			/*int ss = */BufferIO::ReadInt8(pbuf);
 			ClientCard* pcard = mainGame->dField.GetCard(c, l, s);
-			if (auto_watch_mode && i == 0 && (pcard->position & POS_FACEUP)) {
+			if (auto_watch_mode && i == 0 && (pcard->position & POS_FACEUP) && (pcard->location & LOCATION_ONFIELD)) {
 				mainGame->ShowCardInfo(pcard->code);
 			}
 			pcard->is_highlighting = true;
