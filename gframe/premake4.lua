@@ -3,8 +3,18 @@ include "lzma/."
 project "ygopro"
     kind "ConsoleApp"
 
-    local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
-    if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
+    local params={
+        "DEFAULT_DUEL_RULE",
+        "DECKCOUNT_MAIN_MIN",
+        "DECKCOUNT_MAIN_MAX",
+        "DECKCOUNT_SIDE",
+        "DECKCOUNT_EXTRA",
+    }
+
+    for _,param in ipairs(params) do
+        local val=os.getenv("YGOPRO_"..param)
+        if val and tonumber(val) then defines { param.."="..tonumber(val) } end
+    end
 
     files { "gframe.cpp", "config.h",
             "game.cpp", "game.h", "myfilesystem.h",

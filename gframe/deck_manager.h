@@ -64,4 +64,24 @@ extern DeckManager deckManager;
 
 }
 
+#ifdef YGOPRO_SERVER_MODE
+
+#ifndef DECKCOUNT_MAIN_MIN
+#define DECKCOUNT_MAIN_MIN 40
+#endif
+
+#ifndef DECKCOUNT_MAIN_MAX
+#define DECKCOUNT_MAIN_MAX 60
+#endif
+
+#ifndef DECKCOUNT_SIDE
+#define DECKCOUNT_SIDE 15
+#endif
+
+#ifndef DECKCOUNT_EXTRA
+#define DECKCOUNT_EXTRA 15
+#endif
+
+#endif //YGOPRO_SERVER_MODE
+
 #endif //DECKMANAGER_H
