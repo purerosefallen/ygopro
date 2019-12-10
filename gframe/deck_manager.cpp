@@ -79,12 +79,21 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < 20 || deck.main.size() > 30)
+#ifdef YGOPRO_SERVER_MODE
+	if(deck.main.size() < DECKCOUNT_MAIN_MIN || deck.main.size() > DECKCOUNT_MAIN_MAX)
+		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
+	if(deck.extra.size() > DECKCOUNT_SIDE)
+		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
+	if(deck.side.size() > DECKCOUNT_EXTRA)
+		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
+#else
+	if(deck.main.size() < 40 || deck.main.size() > 60)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
 	if(deck.extra.size() > 6)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
 	if(deck.side.size() > 6)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
+#endif
 
 	int used_limited = 0, used_semi = 0;
 	for (size_t i = 0; i < deck.main.size(); ++i)
@@ -201,9 +210,21 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && deck.extra.size() < 6) {
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && 
+#ifdef YGOPRO_SERVER_MODE
+		deck.extra.size() < DECKCOUNT_EXTRA
+#else
+		deck.extra.size() < 15
+#endif
+		) {
 			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
-		} else if(deck.main.size() < 30) {
+		} else 
+#ifdef YGOPRO_SERVER_MODE
+		if(deck.main.size() < DECKCOUNT_MAIN_MAX)
+#else
+		if(deck.main.size() < 60)
+#endif
+		{
 			deck.main.push_back(dataManager.GetCodePointer(code));
 		}
 	}
@@ -215,7 +236,11 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		if(deck.side.size() < 6)
+#ifdef YGOPRO_SERVER_MODE
+		if(deck.side.size() < DECKCOUNT_SIDE)
+#else
+		if(deck.side.size() < 15)
+#endif
 			deck.side.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 	}
 	return errorcode;
