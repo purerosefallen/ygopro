@@ -806,11 +806,13 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		wcsftime(timetext, 40, L"%Y-%m-%d %H-%M-%S", localedtime);
 		mainGame->ebRSName->setText(timetext);
 		if(!mainGame->chkAutoSaveReplay->isChecked()) {
-			mainGame->wReplaySave->setText(dataManager.GetSysString(1340));
-			mainGame->PopupElement(mainGame->wReplaySave);
-			mainGame->gMutex.unlock();
-			mainGame->replaySignal.Reset();
-			mainGame->replaySignal.Wait();
+			if (!auto_watch_mode) {
+				mainGame->wReplaySave->setText(dataManager.GetSysString(1340));
+				mainGame->PopupElement(mainGame->wReplaySave);
+				mainGame->gMutex.unlock();
+				mainGame->replaySignal.Reset();
+				mainGame->replaySignal.Wait();
+			}
 		}
 		else {
 			mainGame->actionParam = 1;
