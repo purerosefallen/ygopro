@@ -86,6 +86,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 						soundManager.PlaySoundEffect(SOUND_INFO);
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
 						mainGame->gMutex.unlock();
+						if (auto_watch_mode) {
+							mainGame->actionSignal.Wait(2000);
+							mainGame->device->closeDevice();
+						}
 						break;
 					} else {
 						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
