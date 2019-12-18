@@ -22,7 +22,7 @@ before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
   brew update;
-  brew install freetype libevent sqlite dylibbundler;
+  brew install freetype libevent sqlite dylibbundler p7zip;
   sudo cp -r /usr/local/include/freetype2 ./freetype2;
   sudo cp -r /usr/local/include/event2 ./event2;
   sudo rm -rf /usr/local/include/*;
