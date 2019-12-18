@@ -2,7 +2,6 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    --startproject "ygopro"
 
     configurations { "Release", "Debug" }
 if os.getenv("YGOPRO_NO_LUA_SAFE") then
