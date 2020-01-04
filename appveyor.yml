@@ -94,5 +94,3 @@ cache:
   - freetype-2.9.1.tar.bz2
   - irrlicht-1.8.4.zip
   - sqlite-amalgamation-3240000.zip
-  - Redis-x64-3.2.100.zip
-  - node-v12.14.0-win-x64.zip
