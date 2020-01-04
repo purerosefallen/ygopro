@@ -39,9 +39,9 @@ after_build:
   - 7z x -y -oredis Redis-x64-3.2.100.zip
 
   # nodejs
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v10.15.3/node-v10.15.3-win-x64.zip ; exit 0"
-  - 7z x -y node-v10.15.3-win-x64.zip
-  - mv node-v10.15.3-win-x64 node
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v12.14.0/node-v12.14.0-win-x64.zip ; exit 0"
+  - 7z x -y node-v12.14.0-win-x64.zip
+  - mv node-v12.14.0-win-x64 node
 
   # srvpro
   - git clone https://github.com/purerosefallen/ygopro-server
