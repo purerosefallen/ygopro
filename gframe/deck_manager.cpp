@@ -165,7 +165,8 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 			deck.extra.size() >= 15
 #endif
 			)
-			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
+				continue;
+			deck.extra.push_back(dataManager.GetCodePointer(code)); //verified by GetData()
 		} else 
 #ifdef YGOPRO_SERVER_MODE
 		if(deck.main.size() < DECKCOUNT_MAIN_MAX)
