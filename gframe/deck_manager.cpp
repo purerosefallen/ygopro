@@ -157,13 +157,14 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && 
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
+			if(
 #ifdef YGOPRO_SERVER_MODE
-		deck.extra.size() < DECKCOUNT_EXTRA
+			deck.extra.size() >= DECKCOUNT_EXTRA
 #else
-		deck.extra.size() < 15
+			deck.extra.size() >= 15
 #endif
-		) {
+			)
 			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 		} else 
 #ifdef YGOPRO_SERVER_MODE
