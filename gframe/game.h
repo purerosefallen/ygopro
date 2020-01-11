@@ -37,6 +37,7 @@ struct Config {
 	int chkWaitChain;
 	int chkIgnore1;
 	int chkIgnore2;
+	int default_rule;
 	int hide_setname;
 	int hide_hint_button;
 	int control_mode;
@@ -108,6 +109,7 @@ struct BotInfo {
 	wchar_t desc[256];
 	bool support_master_rule_3;
 	bool support_new_master_rule;
+	bool support_master_rule_2020;
 };
 
 struct FadingUnit {
@@ -392,7 +394,7 @@ public:
 	irr::gui::IGUIStaticText* stBotInfo;
 	irr::gui::IGUIButton* btnStartBot;
 	irr::gui::IGUIButton* btnBotCancel;
-	irr::gui::IGUICheckBox* chkBotOldRule;
+	irr::gui::IGUIComboBox* cbBotRule;
 	irr::gui::IGUICheckBox* chkBotHand;
 	irr::gui::IGUICheckBox* chkBotNoCheckDeck;
 	irr::gui::IGUICheckBox* chkBotNoShuffleDeck;
@@ -667,7 +669,7 @@ extern Game* mainGame;
 #define BUTTON_CANCEL_SINGLEPLAY	152
 #define LISTBOX_BOT_LIST			153
 #define BUTTON_BOT_START			154
-#define CHECKBOX_BOT_OLD_RULE		155
+#define COMBOBOX_BOT_RULE			155
 #define EDITBOX_CHAT				199
 
 #define BUTTON_MSG_OK				200
@@ -772,7 +774,6 @@ extern Game* mainGame;
 #define BUTTON_MARKS_FILTER			322
 #define BUTTON_MARKERS_OK			323
 #define COMBOBOX_SORTTYPE			324
-
 #define WINDOW_DECK_MANAGE			330
 #define BUTTON_NEW_CATEGORY			331
 #define BUTTON_RENAME_CATEGORY		332
@@ -821,7 +822,7 @@ extern Game* mainGame;
 #define TEXTURE_ACTIVATE			6
 
 #ifndef DEFAULT_DUEL_RULE
-#define DEFAULT_DUEL_RULE			4
+#define DEFAULT_DUEL_RULE			5
 #endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
