@@ -78,6 +78,9 @@ bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_g
 	return true;
 }
 void DuelClient::ConnectTimeout(evutil_socket_t fd, short events, void* arg) {
+	if (auto_watch_mode) {
+		mainGame->device->closeDevice();
+	}
 	if(connect_state == 0x7)
 		return;
 	if(!is_closing) {
