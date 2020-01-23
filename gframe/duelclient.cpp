@@ -1192,7 +1192,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			break;
 		}
 		//playing custom bgm
-		case 11: { //HINT_MUSIC
+		case 21: { //HINT_MUSIC
 			char BGMName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.mp3", dataManager.GetDesc(data));			
@@ -1204,7 +1204,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			break;
 		}
 		//playing custom sound effect
-		case 12: { //HINT_SOUND
+		case 22: { //HINT_SOUND
 			char SoundName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/custom/%ls.wav", dataManager.GetDesc(data));
@@ -1216,7 +1216,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			break;
 		}
 		//playing custom bgm in ogg format
-		case 13: { //HINT_MUSIC_OGG
+		case 23: { //HINT_MUSIC_OGG
 			char BGMName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.ogg", dataManager.GetDesc(data));			
