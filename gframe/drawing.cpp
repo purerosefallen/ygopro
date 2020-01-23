@@ -126,7 +126,7 @@ void Game::DrawBackGround() {
 	driver->drawVertexPrimitiveList(matManager.vField, 4, matManager.iRectangle, 2);
 	driver->setMaterial(matManager.mBackLine);
 	//select field
-	if(dInfo.curMsg == MSG_SELECT_PLACE || dInfo.curMsg == MSG_SELECT_DISFIELD) {
+	if(dInfo.curMsg == MSG_SELECT_PLACE || dInfo.curMsg == MSG_SELECT_DISFIELD || dInfo.curMsg == MSG_HINT) {
 		float cv[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 		unsigned int filter = 0x1;
 		for (int i = 0; i < 7; ++i, filter <<= 1) {
@@ -1095,10 +1095,16 @@ void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
 		for(int i = 0; i < 5; ++i)
 			btnCardSelect[i]->setDrawImage(false);
 		dField.conti_selecting = false;
+		stCardListTip->setVisible(false);
+		for(auto& pcard : dField.selectable_cards)
+			dField.SetShowMark(pcard, false);
 	}
 	if(win == wCardDisplay) {
 		for(int i = 0; i < 5; ++i)
 			btnCardDisplay[i]->setDrawImage(false);
+		stCardListTip->setVisible(false);
+		for(auto& pcard : dField.display_cards)
+			dField.SetShowMark(pcard, false);
 	}
 	fadingList.push_back(fu);
 }
