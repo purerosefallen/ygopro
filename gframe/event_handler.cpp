@@ -744,7 +744,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					ShowSelectSum(true);
 					break;
 				}
-				case MSG_SORT_CHAIN:
 				case MSG_SORT_CARD: {
 					int offset = mainGame->scrCardList->getPos() / 10;
 					int sel_seq = id - BUTTON_CARD_0 + offset;
@@ -2550,7 +2549,6 @@ void ClientField::CancelOrFinish() {
 		}
 		break;
 	}
-	case MSG_SORT_CHAIN:
 	case MSG_SORT_CARD: {
 		if(mainGame->wCardSelect->isVisible()) {
 			DuelClient::SetResponseI(-1);
