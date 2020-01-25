@@ -3,7 +3,6 @@
 #include "network.h"
 #include "game.h"
 #include "base64.h"
-#include <algorithm>
 
 namespace ygo {
 
