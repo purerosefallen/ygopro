@@ -2164,7 +2164,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			pcard->is_moving = true;
 			pcard->aniFrame = 5;
 			if (auto_watch_mode && code > 0) {
-				mainGame->showcardcode = code;
+				mainGame->showcardcode = pcard->code;
 				mainGame->showcarddif = 0;
 				mainGame->showcardp = 0;
 				mainGame->showcard = 4;
@@ -2209,8 +2209,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			pcard->dRot = irr::core::vector3df(0, 3.14159f / 5.0f, 0);
 			pcard->is_moving = true;
 			pcard->aniFrame = 5;
-			if (auto_watch_mode && code > 0) {
-				mainGame->showcardcode = code;
+			if (auto_watch_mode && pcard->code > 0) {
+				mainGame->showcardcode = pcard->code;
 				mainGame->showcarddif = 0;
 				mainGame->showcardp = 0;
 				mainGame->showcard = 4;
@@ -2264,8 +2264,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 					else pcard->dRot = irr::core::vector3df(0, 3.14159f / 5.0f, 0);
 					pcard->is_moving = true;
 					pcard->aniFrame = 5;
-					if (auto_watch_mode && code > 0) {
-						mainGame->showcardcode = code;
+					if (auto_watch_mode && pcard->code > 0) {
+						mainGame->showcardcode = pcard->code;
 						mainGame->showcarddif = 0;
 						mainGame->showcardp = 0;
 						mainGame->showcard = 4;
@@ -2313,8 +2313,8 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 					pcard->aniFrame = 5;
 				}
 			}
-			if (auto_watch_mode && code > 0) {
-				mainGame->showcardcode = code;
+			if (auto_watch_mode && pcard->code > 0) {
+				mainGame->showcardcode = pcard->code;
 				mainGame->showcarddif = 0;
 				mainGame->showcardp = 0;
 				mainGame->showcard = 4;
