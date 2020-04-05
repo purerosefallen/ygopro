@@ -77,9 +77,6 @@ bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_g
 	return true;
 }
 void DuelClient::ConnectTimeout(evutil_socket_t fd, short events, void* arg) {
-	if (auto_watch_mode) {
-		mainGame->device->closeDevice();
-	}
 	if(connect_state == 0x7)
 		return;
 	if(!is_closing) {
@@ -192,6 +189,10 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 				soundManager.PlaySoundEffect(SOUND_INFO);
 				mainGame->env->addMessageBox(L"", dataManager.GetSysString(1400));
 				mainGame->gMutex.unlock();
+				if (auto_watch_mode) {
+					mainGame->actionSignal.Wait(2000);
+					mainGame->device->closeDevice();
+				}
 			} else if(connect_state == 0x7) {
 				if(!mainGame->dInfo.isStarted && !mainGame->is_building) {
 					mainGame->btnCreateHost->setEnabled(true);
