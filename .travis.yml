@@ -25,9 +25,11 @@ before_install:
   brew install freetype libevent sqlite dylibbundler p7zip;
   sudo cp -r /usr/local/include/freetype2 ./freetype2;
   sudo cp -r /usr/local/include/event2 ./event2;
+  sudo cp -r /usr/local/include/lua ./lua;
   sudo rm -rf /usr/local/include/*;
   sudo cp -r ./freetype2 /usr/local/include/freetype2;
   sudo cp -r ./event2 /usr/local/include/event2;
+  sudo cp -r ./lua /usr/local/include/lua;
   fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cp libIrrlicht.a /usr/local/lib/ ; sudo cp -r include /usr/local/include/irrlicht ; cd .. ; fi
@@ -37,7 +39,7 @@ before_install:
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     git clone --depth=1 https://github.com/DailyShana/irrlicht irrlicht_linux;
-    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-linux.tar.gz | tar zfx -;
+    curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -;
   fi
 
 - git clone --depth=1 https://$NANAHIRA@github.com/purerosefallen/irrklang

@@ -24,11 +24,14 @@ end
         startproject "ygopro"
 
 if not os.getenv("YGOPRO_NO_XP_TOOLSET") then
+    configuration { "windows", "vs2015" }
+        toolset "v140_xp"
+
     configuration { "windows", "vs2017" }
         toolset "v141_xp"
 
-    configuration { "windows", "not vs2017" }
-        toolset "v140_xp"
+    configuration { "windows", "vs2019" }
+        toolset "v141_xp"
 end
 
     configuration "bsd"
