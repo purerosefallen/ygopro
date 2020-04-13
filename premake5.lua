@@ -83,10 +83,10 @@ end
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
 
-    include "lua"
     include "ocgcore"
     include "gframe"
-	if os.ishost("windows") then
+    if os.ishost("windows") then
+        include "lua"
 		include "event"
 		include "freetype"
 		include "irrlicht"
