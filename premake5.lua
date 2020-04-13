@@ -51,19 +51,10 @@ end
     configuration { "Release", "vs*" }
         optimize "Speed"
         flags { "LinkTimeOptimization" }
-<<<<<<< HEAD
 if not os.ishost("macosx") then
         staticruntime "On"
 end
-<<<<<<< HEAD
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828", "4800" }
-=======
-        staticruntime "On"
         disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800" }
->>>>>>> c2bd783e73660d7357546b44aaf3a9dfe1dee030
-=======
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800" }
->>>>>>> master
 
     configuration { "Release", "not vs*" }
         symbols "On"
@@ -85,7 +76,6 @@ end
     configuration {"not vs*", "windows"}
         buildoptions { "-static-libgcc" }
 
-<<<<<<< HEAD
     startproject "ygopro"
 
     include "ocgcore"
@@ -95,20 +85,3 @@ end
     include "event"
     include "sqlite3"
     end
-=======
-    include "ocgcore"
-    include "gframe"
-    if os.ishost("windows") then
-        include "lua"
-		include "event"
-		include "freetype"
-		include "irrlicht"
-		include "sqlite3"
-	end
-	if os.ishost("linux") then
-		include "irrlicht_linux"
-	end
-	if USE_IRRKLANG then
-		include "ikpmp3"
-	end
->>>>>>> master
