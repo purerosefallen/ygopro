@@ -51,10 +51,10 @@ end
         --flags { "OptimizeSpeed" }
         targetdir "bin/release"
 
-    include "lua"
     include "ocgcore"
     include "gframe"
     if os.is("windows") then
+    include "lua"
     include "event"
     include "freetype"
     include "irrlicht"
