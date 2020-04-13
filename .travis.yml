@@ -16,13 +16,14 @@ addons:
       - libgl1-mesa-dev
       - libglu-dev
       - p7zip-full
+      - liblua5.3-dev
 env:
 - USE_IRRKLANG=1
 before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
   brew update;
-  brew install freetype libevent sqlite dylibbundler p7zip;
+  brew install freetype libevent sqlite dylibbundler p7zip lua;
   sudo cp -r /usr/local/include/freetype2 ./freetype2;
   sudo cp -r /usr/local/include/event2 ./event2;
   sudo cp -r /usr/local/include/lua ./lua;
