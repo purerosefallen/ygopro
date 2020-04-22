@@ -249,6 +249,7 @@ void ReplayMode::EndDuel() {
 		mainGame->dInfo.isStarted = false;
 		mainGame->dInfo.isFinished = true;
 		mainGame->dInfo.isReplay = false;
+		mainGame->dInfo.isSingleMode = false;
 		mainGame->gMutex.unlock();
 		mainGame->closeDoneSignal.Reset();
 		mainGame->closeSignal.Set();
