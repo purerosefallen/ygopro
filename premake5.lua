@@ -10,7 +10,7 @@ solution "ygo"
     end
 
     configurations { "Release", "Debug" }
-if os.getenv("YGOPRO_LUA_SAVE") then
+if os.getenv("YGOPRO_LUA_SAFE") then
     defines { "LUA_COMPAT_5_2", "YGOPRO_LUA_SAFE" }
 else
     defines { "LUA_COMPAT_5_2" }
