@@ -12,7 +12,7 @@
 #include <sstream>
 #include <regex>
 
-unsigned short PRO_VERSION = 0x1350;
+unsigned short PRO_VERSION = 0x1351;
 
 namespace ygo {
 
