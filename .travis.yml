@@ -23,14 +23,15 @@ before_install:
 - git submodule update --init --recursive
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
   brew update;
-  brew install freetype libevent sqlite dylibbundler p7zip lua;
+  brew install freetype libevent sqlite dylibbundler p7zip;
   sudo cp -r /usr/local/include/freetype2 ./freetype2;
   sudo cp -r /usr/local/include/event2 ./event2;
-  sudo cp -r /usr/local/include/lua ./lua;
   sudo rm -rf /usr/local/include/*;
   sudo cp -r ./freetype2 /usr/local/include/freetype2;
   sudo cp -r ./event2 /usr/local/include/event2;
-  sudo cp -r ./lua /usr/local/include/lua;
+  curl --retry 5 --location https://www.lua.org/ftp/lua-5.3.5.tar.gz | tar zfx -;
+  mv lua-5.3.5/src lua;
+  cp premake/lua/premake4.lua lua/;
   fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cp libIrrlicht.a /usr/local/lib/ ; sudo cp -r include /usr/local/include/irrlicht ; cd .. ; fi

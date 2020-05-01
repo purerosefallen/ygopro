@@ -97,6 +97,9 @@ end
 	end
 	if os.ishost("linux") then
 		include "irrlicht_linux"
+    end
+    if os.ishost("macosx") then
+		include "lua"
 	end
 	if USE_IRRKLANG then
 		include "ikpmp3"
