@@ -3,7 +3,6 @@
 #include "network.h"
 #include "game.h"
 #include "base64.h"
-#include <algorithm>
 
 namespace ygo {
 
@@ -210,14 +209,16 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && 
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
+			if(
 #ifdef YGOPRO_SERVER_MODE
-		deck.extra.size() < DECKCOUNT_EXTRA
+			deck.extra.size() >= DECKCOUNT_EXTRA
 #else
-		deck.extra.size() < 15
+			deck.extra.size() >= 15
 #endif
-		) {
-			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
+			)
+				continue;
+			deck.extra.push_back(dataManager.GetCodePointer(code)); //verified by GetData()
 		} else 
 #ifdef YGOPRO_SERVER_MODE
 		if(deck.main.size() < DECKCOUNT_MAIN_MAX)
@@ -293,9 +294,15 @@ void DeckManager::GetCategoryPath(wchar_t* ret, int index, const wchar_t* text) 
 void DeckManager::GetDeckFile(wchar_t* ret, irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck) {
 	wchar_t filepath[256];
 	wchar_t catepath[256];
-	GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
-	myswprintf(filepath, L"%ls/%ls.ydk", catepath, cbDeck->getItem(cbDeck->getSelected()));
-	BufferIO::CopyWStr(filepath, ret, 256);
+	wchar_t* deckname = (wchar_t*)cbDeck->getItem(cbDeck->getSelected());
+	if(deckname != NULL) {
+		GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
+		myswprintf(filepath, L"%ls/%ls.ydk", catepath, deckname);
+		BufferIO::CopyWStr(filepath, ret, 256);
+	}
+	else {
+		BufferIO::CopyWStr(L"", ret, 256);
+	}
 }
 bool DeckManager::LoadDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck) {
 	wchar_t filepath[256];
