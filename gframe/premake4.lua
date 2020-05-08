@@ -9,6 +9,7 @@ project "ygopro"
         "DECKCOUNT_MAIN_MAX",
         "DECKCOUNT_SIDE",
         "DECKCOUNT_EXTRA",
+        "NO_SIDE_CHECK"
     }
 
     for _,param in ipairs(params) do
