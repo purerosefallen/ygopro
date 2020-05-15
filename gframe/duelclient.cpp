@@ -396,6 +396,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->deckBuilder.pre_mainc = deckManager.current_deck.main.size();
 		mainGame->deckBuilder.pre_extrac = deckManager.current_deck.extra.size();
 		mainGame->deckBuilder.pre_sidec = deckManager.current_deck.side.size();
+		mainGame->deckBuilder.LoadSideDeck(mainGame->LocalPlayer(1));
 		mainGame->device->setEventReceiver(&mainGame->deckBuilder);
 		mainGame->gMutex.unlock();
 		break;
@@ -598,6 +599,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->btnSideShuffle->setVisible(false);
 		mainGame->btnSideSort->setVisible(false);
 		mainGame->btnSideReload->setVisible(false);
+		mainGame->scrFilter->setVisible(false);
 		mainGame->btnPhaseStatus->setVisible(false);
 		mainGame->btnBP->setVisible(false);
 		mainGame->btnM2->setVisible(false);
@@ -720,14 +722,42 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->gMutex.unlock();
 			mainGame->WaitFrameSignal(30);
 		}
-		if(mainGame->actionParam || !is_host) {
-			prep += sizeof(ReplayHeader);
-			memcpy(new_replay.comp_data, prep, len - sizeof(ReplayHeader) - 1);
-			new_replay.comp_size = len - sizeof(ReplayHeader) - 1;
-			if(mainGame->actionParam)
-				new_replay.SaveReplay(mainGame->ebRSName->getText());
-			else new_replay.SaveReplay(L"_LastReplay");
+		prep += sizeof(ReplayHeader);
+		memcpy(new_replay.comp_data, prep, len - sizeof(ReplayHeader) - 1);
+		new_replay.comp_size = len - sizeof(ReplayHeader) - 1;
+		const wchar_t* save_name = mainGame->actionParam ? mainGame->ebRSName->getText() : L"auto_saved_replay";
+		new_replay.SaveReplay(save_name);
+		//side deck
+		Replay side_replay;
+		if(!side_replay.OpenReplay(save_name))
+			break;
+		if(!!(side_replay.pheader.flag & REPLAY_TAG))
+			break;
+		//skip player names
+		wchar_t dark_hole[20];
+		for(int i = 0; i < 2; ++i)
+			side_replay.ReadName(dark_hole);
+		//skip pre infos
+		for(int i = 0; i < 4; ++i)
+			side_replay.ReadInt32();
+		//clear deck
+		for(int i = 0; i < 2; ++i) {
+			mainGame->sidedeck_main[i].clear();
+			mainGame->sidedeck_extra[i].clear();				
 		}
+		int main = side_replay.ReadInt32();
+		for(int i = 0; i < main; ++i)
+			mainGame->sidedeck_main[0].push_back(side_replay.ReadInt32());
+		int extra = side_replay.ReadInt32();
+		for(int i = 0; i < extra; ++i)
+			mainGame->sidedeck_extra[0].push_back(side_replay.ReadInt32());
+		main = side_replay.ReadInt32();
+		for(int i = 0; i < main; ++i)
+			mainGame->sidedeck_main[1].push_back(side_replay.ReadInt32());
+		extra = side_replay.ReadInt32();
+		for(int i = 0; i < extra; ++i)
+			mainGame->sidedeck_extra[1].push_back(side_replay.ReadInt32());
+		mainGame->sidedeck_available = true;
 		break;
 	}
 	case STOC_TIME_LIMIT: {
@@ -1176,6 +1206,12 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->showcard = 101;
 		mainGame->WaitFrameSignal(40);
 		mainGame->showcard = 0;
+		//clear side deck
+		mainGame->sidedeck_available = false;
+		for(int i = 0; i < 2; ++i) {
+			mainGame->sidedeck_main[i].clear();
+			mainGame->sidedeck_extra[i].clear();				
+		}
 		mainGame->gMutex.lock();
 		mainGame->dField.Clear();
 		int playertype = BufferIO::ReadInt8(pbuf);

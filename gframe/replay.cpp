@@ -160,6 +160,17 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		fp = fopen(fname2, "rb");
 #endif
 	}
+	if(!fp) {
+		wchar_t fname[256];
+		myswprintf(fname, L"./replay/%ls.yrp", name);
+#ifdef WIN32
+		fp = _wfopen(fname, L"rb");
+#else
+		char fname2[256];
+		BufferIO::EncodeUTF8(fname, fname2);
+		fp = fopen(fname2, "rb");
+#endif
+	}
 	if(!fp)
 		return false;
 	if(fread(&pheader, sizeof(pheader), 1, fp) < 1) {

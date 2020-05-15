@@ -30,6 +30,8 @@ public:
 	void pop_extra(int seq);
 	void pop_side(int seq);
 	bool check_limit(code_pointer pointer);
+	//side deck
+	void LoadSideDeck(int p);
 
 	long long filter_effect;
 	unsigned int filter_type;

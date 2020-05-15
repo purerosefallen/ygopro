@@ -198,6 +198,11 @@ public:
 	std::wstring chatMsg[8];
 	std::vector<BotInfo> botInfo;
 
+	//deck view
+	std::vector<int> sidedeck_main[2];
+	std::vector<int> sidedeck_extra[2];
+	bool sidedeck_available;
+
 	int hideChatTimer;
 	bool hideChat;
 	int chatTiming[8];
