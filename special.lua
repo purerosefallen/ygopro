@@ -1,15 +1,7 @@
-function aux.CannotSetCondFilter(c)
-	return c:IsFacedown() and c:GetSequence()<5
-end
-
-function aux.CannotSetCond(e,c)
-	return Duel.IsExistingMatchingCard(aux.CannotSetCondFilter,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil) and not c:IsType(TYPE_FIELD)
-end
-
 function aux.aclimit(e,re,tp)
 	if not re:IsHasType(EFFECT_TYPE_ACTIVATE) or not re:IsActiveType(TYPE_SPELL)
 	   or re:IsActiveType(TYPE_FIELD) then return false end
-	return Duel.IsExistingMatchingCard(aux.CannotSetCondFilter,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil)
+	return Duel.IsExistingMatchingCard(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil)
 end
 function aux.SZoneLimit(tp)
 	--from ダーク・シムルグ
@@ -17,7 +9,7 @@ function aux.SZoneLimit(tp)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_SSET)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetCondition(aux.CannotSetCond)
+	e1:SetTarget(aux.CannotSetCond)
 	e1:SetTargetRange(1,0)
 	Duel.RegisterEffect(e1,tp)
 	--from 魔封じの芳香
@@ -39,7 +31,7 @@ function aux.SZoneLimit(tp)
 end
 
 function aux.CannotSetCond(e,c)
-	return Duel.IsExistingMatchingCard(aux.CannotSetCondFilter,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil) and not c:IsType(TYPE_FIELD)
+	return Duel.IsExistingMatchingCard(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil) and not c:IsType(TYPE_FIELD)
 end
 
 function aux.MZoneLimit(tp)
