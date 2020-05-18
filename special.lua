@@ -1,6 +1,6 @@
 function aux.aclimit(e,re,tp)
 	if not re:IsHasType(EFFECT_TYPE_ACTIVATE) or not re:IsActiveType(TYPE_SPELL)
-	   or re:IsActiveType(TYPE_FIELD) then return false end
+    or re:IsActiveType(TYPE_FIELD) or re:GetHandler():IsOnField() then return false end
 	return Duel.IsExistingMatchingCard(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil)
 end
 function aux.SZoneLimit(tp)
