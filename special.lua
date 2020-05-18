@@ -44,7 +44,7 @@ function aux.MZoneLimit(tp)
 		local a,g,count = Duel.GetOperationInfo(0,CATEGORY_SPECIAL_SUMMON)
 		if not a then return _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
 		local availZone = 3 - Duel.GetMatchingGroup(aux.SummonConditionFilter,tp,LOCATION_MZONE,0,nil):GetCount()
-		if type(g)=="Card" then return availZone > 0 and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
+		if aux.GetValueType(g)=="Card" then return availZone > 0 and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
 		if not g then return availZone >= count and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
 		local g1=g:Clone()
 		g1:Remove(Card.IsLocation,nil,LOCATION_EXTRA)
@@ -79,7 +79,7 @@ function aux.MZoneLimit(tp)
 		if not zone then zone = 0xff end
 		local extraCards = Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_EXTRA,LOCATION_EXTRA,1,nil)
 		if not targets then
-		elseif type(targets)=="Card" then
+		elseif aux.GetValueType(targets)=="Card" then
 			extraCards:RemoveCard(targets)
 		else
 			local extraCard = targets:GetFirst()
@@ -120,6 +120,14 @@ function aux.MZoneLimit(tp)
 	e4:SetCondition(aux.SummonCondition)
 	e4:SetOperation(aux.DisableMonsterZone)
 	Duel.RegisterEffect(e4,tp)
+	--max mzone
+	local e5=Effect.GlobalEffect()
+	e5:SetType(EFFECT_TYPE_FIELD)
+	e5:SetCode(EFFECT_MAX_MZONE)
+	e5:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e5:SetTargetRange(1,0)
+	e5:SetValue(4)
+	Duel.RegisterEffect(e5,tp)
 end
 function aux.SequenceToZone(seq)
 	if seq==0 then return 1 end
@@ -130,7 +138,7 @@ function aux.SequenceToZone(seq)
 	return 0
 end
 function aux.DisableMonsterZone(e,tp)
-	local g=Duel.GetMatchingGroup(aux.SummonConditionFilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,nil)
+	local g=Duel.GetMatchingGroup(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_MZONE,0,nil)
 	local zone=0x1f
 	local c = g:GetFirst()
 	while c do
@@ -139,12 +147,9 @@ function aux.DisableMonsterZone(e,tp)
 	end
 	return zone
 end
-function aux.SummonConditionFilter(c)
-	return c:GetSequence()<5
-end
 
 function aux.SummonCondition(e,c,sump,sumtype,sumpos,targetp,se)
-	return Duel.IsExistingMatchingCard(aux.SummonConditionFilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,3,nil) and (not c or not c:IsLocation(LOCATION_EXTRA))
+	return Duel.IsExistingMatchingCard(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_MZONE,0,3,nil) and (not c or not c:IsLocation(LOCATION_EXTRA))
 end
 
 function aux.EffectNegate(tp)
@@ -160,6 +165,10 @@ function aux.NeedEx(c)
 	return c:IsLocation(LOCATION_EXTRA) and (c:IsType(TYPE_PENDULUM) or c:IsType(TYPE_LINK))
 end
 
+function aux.CanToEx(c)
+	return c:IsLocation(LOCATION_EXTRA) and not (c:IsType(TYPE_PENDULUM) or c:IsType(TYPE_LINK))
+end
+
 function aux.NoneEffect(e)
  
 end
@@ -170,25 +179,32 @@ function aux.EffectNegateOperation(e,tp,eg,ep,ev,re,r,rp)
 	if OriginalEffects[re] then re:SetOperation(OriginalEffects[re]) end
 	if not re:IsHasCategory(CATEGORY_SPECIAL_SUMMON) then return end
 	local a,g,count,dp,dv = Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
-	local mainAvailable = 3-Duel.GetMatchingGroupCount(aux.SummonConditionFilter,tp,LOCATION_MZONE,0,nil)
-	local extraAvailable = Duel.GetMatchingGroupCount(aux.TRUE,tp,LOCATION_EXTRA,0,nil)==0
-	if type(g)=="Card" then g=Group.FromCards(g) end
+	local mainAvailable = 3-Duel.GetMatchingGroupCount(aux.IsAtMainZone,tp,LOCATION_MZONE,0,nil)
+	local extraAvailable = Duel.GetMatchingGroupCount(aux.IsExtraMonster,tp,LOCATION_MZONE,0,nil)==0
+	local needMain = 0
+	if g and aux.GetValueType(g)=="Card" then g=Group.FromCards(g) end
 	if g then
 		local g2 = g:Clone():Filter(aux.NeedEx,nil)
+		local g3 = g:Clone():Filter(aux.CanToEx,nil)
 		local needEx = g2:GetCount()
-		local needMain = g:GetCount() - g2:GetCount()
+		local canToEx = g3:GetCount()
+		needMain = g:GetCount() - g2:GetCount()
+		local mainMin = needMain
+		local mainMax = needMain + canToEx
+		local extraMin = needEx
+		local extraMax = needEx + canToEx
 		local exZoneCount = Duel.GetLocationCountFromEx(tp)
-		if exZoneCount < needEx then return end
-		if extraAvailable then
-			needMain = needMain + needEx - 1
-		else
-			needMain = needMain + needEx
-		end
+		if exZoneCount >= extraMin and mainAvailable >= mainMin then return end
 	else
-		needMain = count
+		if count then
+			needMain = count
+			if dv == LOCATION_EXTRA and extraAvailable then needMain = needMain - 1 end
+		else
+			needMain = 0
+		end
 	end
 	if mainAvailable < needMain then
-		if not re.OriginalEffect then
+		if not OriginalEffects[re] then
 			OriginalEffects[re] = re:GetOperation()
 		end
 		re:SetOperation(aux.NoneEffect)
@@ -228,32 +244,24 @@ end
 function aux.AdjustOperationMonster(e,tp,eg,ep,ev,re,r,rp)
 	local phase=Duel.GetCurrentPhase()
 	if (phase==PHASE_DAMAGE and not Duel.IsDamageCalculated()) or phase==PHASE_DAMAGE_CAL then return end
-	local c1=Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)
-	local c2=Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)
-	local extra1 = Duel.GetMatchingGroup(aux.IsExtraMonster,tp,LOCATION_MZONE,0,nil):GetFirst()
-	local extra2 = Duel.GetMatchingGroup(aux.IsExtraMonster,tp,0,LOCATION_MZONE,nil):GetFirst()
-	if extra1 then c1=c1-1 end
-	if extra2 then c2=c2-1 end
-	
+	local g1=Duel.GetMatchingGroup(aux.IsAtMainZone,tp,LOCATION_MZONE,0,nil)
+	local g2=Duel.GetMatchingGroup(aux.IsAtMainZone,tp,0,LOCATION_MZONE,nil)
+	local c1=g1:GetCount()
+	local c2=g2:GetCount()
+
 	if c1>3 or c2>3 then
 		local g=Group.CreateGroup()
 		if c1>3 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-			local g1=Duel.SelectMatchingCard(tp,aux.IsAtMainZone,tp,LOCATION_MZONE,0,c1-3,c1-3,extra1)
+			local g1 = g1:RandomSelect(tp,c1-3)
 			g:Merge(g1)
 		end
 		if c2>3 then
-			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_TOGRAVE)
-			local g2=Duel.SelectMatchingCard(1-tp,aux.IsAtMainZone,1-tp,LOCATION_MZONE,0,c2-3,c2-3,extra2)
+			local g2 = g2:RandomSelect(tp,c2-3)
 			g:Merge(g2)
 		end
 		local c = g:GetFirst()
 		while c do
-			if c:IsType(TYPE_TOKEN) then
-				Duel.Exile(c,REASON_RULE)
-			else
-				Duel.SendtoGrave(c,REASON_RULE)
-			end
+			Duel.Exile(c,REASON_RULE)
 			c = g:GetNext()
 		end
 		Duel.Readjust()
@@ -267,23 +275,24 @@ end
 function aux.AdjustOperation(e,tp,eg,ep,ev,re,r,rp)
 	local phase=Duel.GetCurrentPhase()
 	if (phase==PHASE_DAMAGE and not Duel.IsDamageCalculated()) or phase==PHASE_DAMAGE_CAL then return end
-	local c1=Duel.GetMatchingGroupCount(aux.IsAtMainZone,tp,LOCATION_SZONE,0,nil)
-	local c2=Duel.GetMatchingGroupCount(aux.IsAtMainZone,tp,0,LOCATION_SZONE,nil)
+	local g1=Duel.GetMatchingGroup(aux.IsAtMainZone,tp,LOCATION_SZONE,0,nil)
+	local g2=Duel.GetMatchingGroup(aux.IsAtMainZone,tp,0,LOCATION_SZONE,nil)
+	local c1=g1:GetCount()
+	local c2=g2:GetCount()
+
 	if c1>3 or c2>3 then
 		local g=Group.CreateGroup()
 		if c1>3 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-			local g1=Duel.SelectMatchingCard(tp,aux.IsAtMainZone,tp,LOCATION_SZONE,0,c1-3,c1-3,nil)
+			local g1 = g1:RandomSelect(tp,c1-3)
 			g:Merge(g1)
 		end
 		if c2>3 then
-			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_TOGRAVE)
-			local g2=Duel.SelectMatchingCard(1-tp,aux.IsAtMainZone,1-tp,LOCATION_SZONE,0,c2-3,c2-3,nil)
+			local g2 = g2:RandomSelect(tp,c2-3)
 			g:Merge(g2)
 		end
 		local c = g:GetFirst()
 		while c do
-			Duel.SendtoGrave(c,REASON_RULE)
+			Duel.Exile(c,REASON_RULE)
 			c = g:GetNext()
 		end
 		Duel.Readjust()
@@ -299,7 +308,6 @@ function aux.SkipM2()
 	e1:SetCode(EFFECT_SKIP_M2)
 	Duel.RegisterEffect(e1,0)
 end
-
 function aux.AutoWin()
  local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD)
