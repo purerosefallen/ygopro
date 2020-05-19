@@ -358,9 +358,20 @@ for code in ipairs({EVENT_TO_GRAVE,EVENT_REMOVE,EVENT_TO_HAND,EVENT_DRAW}) do
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(code)
 	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
+    if code==EVENT_DRAW then
+      return rp~=ep
+    end
 		return eg:IsExists(f,1,nil)
 	end)
 	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
+    if code==EVENT_DRAW then
+      local p=rp
+			deckdes_counter[p]=deckdes_counter[p]+1
+			if deckdes_counter[p]>=6 then
+				Duel.Win(1-p,1)
+			end
+      return
+    end
 		local g=eg:Filter(f,nil)
 		for tc in aux.Next(g) do
 			local p=tc:GetReasonPlayer()
@@ -372,6 +383,17 @@ for code in ipairs({EVENT_TO_GRAVE,EVENT_REMOVE,EVENT_TO_HAND,EVENT_DRAW}) do
 	end)
 	Duel.RegisterEffect(e2,0)
 end
+
+        local e2=Effect.GlobalEffect()
+        e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+        e2:SetCode(EVENT_PHASE_START+PHASE_DRAW)
+        e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
+                for p=0,1 do
+        --                burn_counter[p]=0
+                      deckdes_counter[p]=0
+                end
+        end)
+        Duel.RegisterEffect(e2,0)
 
 end
 
