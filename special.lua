@@ -308,6 +308,8 @@ function aux.SkipM2()
 	e1:SetCode(EFFECT_SKIP_M2)
 	Duel.RegisterEffect(e1,0)
 end
+
+deckdes_counter={[0]=0,[1]=0}
 function aux.AutoWin()
  local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD)
