@@ -1,6 +1,6 @@
 function aux.aclimit(e,re,tp)
-	if not re:IsHasType(EFFECT_TYPE_ACTIVATE) or not re:IsActiveType(TYPE_SPELL)
-    or re:IsActiveType(TYPE_FIELD) or re:GetHandler():IsOnField() then return false end
+	if not re:IsHasType(EFFECT_TYPE_ACTIVATE) or not re:IsActiveType(TYPE_PENDULUM)
+	   or re:IsActiveType(TYPE_FIELD) then return false end
 	return Duel.IsExistingMatchingCard(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_SZONE,0,3,nil)
 end
 function aux.SZoneLimit(tp)
@@ -35,69 +35,6 @@ function aux.CannotSetCond(e,c)
 end
 
 function aux.MZoneLimit(tp)
---[[
-	local _special = Card.IsCanBeSpecialSummoned
-	Card.IsCanBeSpecialSummoned=function(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone)
-		if not sumpos then sumpos = POS_FACEUP end
-		if not toplayer then toplayer = sumplayer end
-		if not zone then zone = 0xff end
-		local a,g,count = Duel.GetOperationInfo(0,CATEGORY_SPECIAL_SUMMON)
-		if not a then return _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
-		local availZone = 3 - Duel.GetMatchingGroup(aux.SummonConditionFilter,tp,LOCATION_MZONE,0,nil):GetCount()
-		if aux.GetValueType(g)=="Card" then return availZone > 0 and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
-		if not g then return availZone >= count and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone) end
-		local g1=g:Clone()
-		g1:Remove(Card.IsLocation,nil,LOCATION_EXTRA)
-		return availZone >= g1:GetCount() and _special(c,e,sumtype,sumplayer,nocheck,nolimit,sumpos,toplayer,zone)
-	end
-
-	local _mzoneCount = Duel.GetMZoneCount
-	Duel.GetMZoneCount=function(player,targets,use_player,reason,zone)
-		if not targets then targets = Group.CreateGroup() end
-		if not use_player then use_player = player end
-		if not reason then reason = LOCATION_REASON_TOFIELD end
-		if not zone then zone = 0xff end
-		return _mzoneCount(player,targets,use_player,reason,zone) - 2
-	end
-
-	local _locationCount = Duel.GetLocationCount
-	Duel.GetLocationCount=function(player,location,targets,use_player,reason,zone)
-		Debug.Message("GetLocationCount:".._locationCount(player,location))
-		if not targets then targets = Group.CreateGroup() end
-		if not use_player then use_player = player end
-		if not reason then reason = LOCATION_REASON_TOFIELD end
-		if not zone then zone = 0xff end
-		return _locationCount(player,location,targets,use_player,reason,zone) - 2
-	end
-
-	local _locationCountEx = Duel.GetLocationCountFromEx
-	Duel.GetLocationCountFromEx=function(player,location,targets,use_player,reason,zone)
-		Debug.Message("GetLocationCountFromEx:".._locationCountEx(player,location))
-		if not targets then targets = Group.CreateGroup() end
-		if not use_player then use_player = player end
-		if not reason then reason = LOCATION_REASON_TOFIELD end
-		if not zone then zone = 0xff end
-		local extraCards = Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_EXTRA,LOCATION_EXTRA,1,nil)
-		if not targets then
-		elseif aux.GetValueType(targets)=="Card" then
-			extraCards:RemoveCard(targets)
-		else
-			local extraCard = targets:GetFirst()
-			while extraCard do
-				extraCards:RemoveCard(extraCard)
-				extraCard = targets:GetNext()
-			end
-		end
-		local extraAvailable = extraCards:GetCount() > 0
-		
-		if extraAvailable then return _locationCountEx(player,location,targets,use_player,reason,zone) end
-		local origCount = _locationCountEx(player,location,targets,use_player,reason,zone)
-		local monsterCount = Duel.GetMatchingGroupCount(aux.SummonConditionFilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,nil)
-		if origCount > 3 - monsterCount then return 3-monsterCount end
-		return origCount
-	end
-	end]]--
-
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_SUMMON)
@@ -170,15 +107,17 @@ function aux.CanToEx(c)
 end
 
 function aux.NoneEffect(e)
- 
+	if OriginalEffects[e] then e:SetOperation(OriginalEffects[e]) end
 end
 
 OriginalEffects = {}
 
 function aux.EffectNegateOperation(e,tp,eg,ep,ev,re,r,rp)
-	if OriginalEffects[re] then re:SetOperation(OriginalEffects[re]) end
 	if not re:IsHasCategory(CATEGORY_SPECIAL_SUMMON) then return end
+	if re:GetHandlerPlayer()~=tp then return end
 	local a,g,count,dp,dv = Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
+	local code=re:GetHandler():GetOriginalCode()
+	if code==43434803 or code==58551308 or code==22404675 or code==99330325 then return end
 	local mainAvailable = 3-Duel.GetMatchingGroupCount(aux.IsAtMainZone,tp,LOCATION_MZONE,0,nil)
 	local extraAvailable = Duel.GetMatchingGroupCount(aux.IsExtraMonster,tp,LOCATION_MZONE,0,nil)==0
 	local needMain = 0
@@ -309,94 +248,56 @@ function aux.SkipM2()
 	Duel.RegisterEffect(e1,0)
 end
 
-deckdes_counter={[0]=0,[1]=0}
-function aux.AutoWin()
- local e2=Effect.GlobalEffect()
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetTargetRange(1,1)
-	e2:SetCode(EFFECT_CHANGE_DAMAGE)
-	e2:SetValue(function(e,re,ev,r,rp,rc)
-		if r&REASON_EFFECT>0 and ev>=2000 then
-            return 0
-        else
-            return ev
-        end
-	end)
-	Duel.RegisterEffect(e2,0)
-
---[[	local e2=Effect.GlobalEffect()
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_PHASE_START+PHASE_DRAW)
-	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-		for p=0,1 do
-			burn_counter[p]=0
-	--		deckdes_counter[p]=0
-		end
-	end)
-	Duel.RegisterEffect(e2,0)
-	local e2=Effect.GlobalEffect()
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_DAMAGE)
-	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
-		return ep~=rp and r&REASON_EFFECT>0
-	end)
-	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-		burn_counter[rp]=burn_counter[rp]+ev
-		if burn_counter[rp]>=2000 then
-			Duel.Win(1-rp,1)
-		end
-	end)
-	Duel.RegisterEffect(e2,0)]]
-    local e
-	local function f(c)
-		local p=c:GetReasonPlayer()
-		return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(1-p)
+function aux.DisableBigDamage()
+	--avoid damage
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_CHANGE_DAMAGE)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e1:SetTargetRange(1,1)
+	e1:SetValue(aux.DisableBigDamageValue)
+	Duel.RegisterEffect(e1,0)
+end
+function aux.DisableBigDamageValue(e,re,val,r,rp,rc)
+	if val>=2000 then return 0 else return val end
+end
+function aux.CheckDesDeckFilter(c,tp)
+	return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(tp)
+end
+aux.DeckDesCount={}
+function aux.CheckDesDeckCondition(e,tp,eg,ep,ev,re,r,rp)
+	return bit.band(r,REASON_EFFECT)~=0 and re:GetHandler():GetOwner()~=tp
+		and eg:IsExists(aux.CheckDesDeckFilter,1,nil,tp)
+end
+function aux.CheckDesDeckOperation(e,tp,eg,ep,ev,re,r,rp)
+	local g=eg:Filter(aux.CheckDesDeckFilter,nil,tp)
+	aux.DeckDesCount[tp] = aux.DeckDesCount[tp] + g:GetCount()
+	if aux.DeckDesCount[tp] >= 6 then
+		Duel.SetLP(1-tp,0)
 	end
-for code in ipairs({EVENT_TO_GRAVE,EVENT_REMOVE,EVENT_TO_HAND,EVENT_DRAW}) do
-	local e2=Effect.GlobalEffect()
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(code)
-	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
-    if code==EVENT_DRAW then
-      return rp~=ep
-    end
-		return eg:IsExists(f,1,nil)
-	end)
-	e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-    if code==EVENT_DRAW then
-      local p=rp
-			deckdes_counter[p]=deckdes_counter[p]+1
-			if deckdes_counter[p]>=6 then
-				Duel.Win(1-p,1)
-			end
-      return
-    end
-		local g=eg:Filter(f,nil)
-		for tc in aux.Next(g) do
-			local p=tc:GetReasonPlayer()
-			deckdes_counter[p]=deckdes_counter[p]+1
-			if deckdes_counter[p]>=6 then
-				Duel.Win(1-p,1)
-			end
-		end
-	end)
+end
+function aux.CheckDesDeck()
+	aux.DeckDesCount[0]=0
+	aux.DeckDesCount[1]=0
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_TO_GRAVE)
+	e1:SetCondition(aux.CheckDesDeckCondition)
+	e1:SetOperation(aux.CheckDesDeckOperation)
+	Duel.RegisterEffect(e1,0)
+	local e=e1:Clone()
+	Duel.RegisterEffect(e,1)
+	local e2=e1:Clone()
+	e2:SetCode(EVENT_REMOVE)
 	Duel.RegisterEffect(e2,0)
+	e=e2:Clone()
+	Duel.RegisterEffect(e,1)
+	local e3=e1:Clone()
+	e3:SetCode(EVENT_TO_HAND)
+	Duel.RegisterEffect(e3,0)
+	e=e3:Clone()
+	Duel.RegisterEffect(e,1)
 end
-
-        local e2=Effect.GlobalEffect()
-        e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-        e2:SetCode(EVENT_PHASE_START+PHASE_DRAW)
-        e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp)
-                for p=0,1 do
-        --                burn_counter[p]=0
-                      deckdes_counter[p]=0
-                end
-        end)
-        Duel.RegisterEffect(e2,0)
-
-end
-
 function aux.PreloadUds()
 	aux.SZoneLimit(0)
 	aux.SZoneLimit(1)
@@ -406,5 +307,6 @@ function aux.PreloadUds()
 	aux.EffectNegate(1)
 	aux.AdjustRegist()
 	aux.SkipM2()
-  aux.AutoWin()
+	aux.DisableBigDamage()
+	aux.CheckDesDeck()
 end
