@@ -353,9 +353,10 @@ function aux.AutoWin()
 		local p=c:GetReasonPlayer()
 		return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(1-p)
 	end
+for code in ipairs({EVENT_TO_GRAVE,EVENT_REMOVE,EVENT_TO_HAND,EVENT_DRAW}) do
 	local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_TO_GRAVE)
+	e2:SetCode(code)
 	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp)
 		return eg:IsExists(f,1,nil)
 	end)
@@ -370,6 +371,8 @@ function aux.AutoWin()
 		end
 	end)
 	Duel.RegisterEffect(e2,0)
+end
+
 end
 
 function aux.PreloadUds()
