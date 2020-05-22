@@ -259,7 +259,7 @@ function aux.DisableBigDamage()
 	Duel.RegisterEffect(e1,0)
 end
 function aux.DisableBigDamageValue(e,re,val,r,rp,rc)
-	if val>=2000 then return 0 else return val end
+	if (r&REASON_EFFECT)>0 and  val>=2000 then return 0 else return val end
 end
 function aux.CheckDesDeckFilter(c,tp)
 	return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(tp)
