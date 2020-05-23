@@ -590,6 +590,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->dInfo.time_left[1] = 0;
 		mainGame->dInfo.time_player = 2;
 		mainGame->dInfo.isReplaySwapped = false;
+		mainGame->dInfo.isReconnected = false;
 		mainGame->is_building = false;
 		mainGame->wCardImg->setVisible(true);
 		mainGame->wInfos->setVisible(true);
@@ -666,6 +667,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->gMutex.lock();
 		mainGame->dInfo.isStarted = false;
 		mainGame->dInfo.isFinished = true;
+		mainGame->dInfo.isReconnected = false;
 		mainGame->is_building = false;
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->btnCreateHost->setEnabled(true);
@@ -733,8 +735,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 	case STOC_TIME_LIMIT: {
 		STOC_TimeLimit* pkt = (STOC_TimeLimit*)pdata;
 		int lplayer = mainGame->LocalPlayer(pkt->player);
-		if(lplayer == 0)
+		if(lplayer == 0 && mainGame->dInfo.isReconnected)
+		{
+			mainGame->dInfo.isReconnected = false;
 			DuelClient::SendPacketToServer(CTOS_TIME_CONFIRM);
+		}
 		mainGame->dInfo.time_player = lplayer;
 		mainGame->dInfo.time_left[lplayer] = pkt->left_time;
 		break;
@@ -3766,6 +3771,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->gMutex.lock();
 		mainGame->dField.Clear();
 		mainGame->dInfo.duel_rule = BufferIO::ReadInt8(pbuf);
+		mainGame->dInfo.isReconnected = true;
 		int val = 0;
 		for(int i = 0; i < 2; ++i) {
 			int p = mainGame->LocalPlayer(i);
@@ -3936,6 +3942,7 @@ void DuelClient::SendResponse() {
 		mainGame->singleSignal.Set();
 	} else {
 		mainGame->dInfo.time_player = 2;
+		SendPacketToServer(CTOS_TIME_CONFIRM);
 		SendBufferToServer(CTOS_RESPONSE, response_buf, response_len);
 	}
 }
