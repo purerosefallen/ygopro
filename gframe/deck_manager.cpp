@@ -3,7 +3,6 @@
 #include "network.h"
 #include "game.h"
 #include "base64.h"
-#include <algorithm>
 
 namespace ygo {
 
@@ -79,12 +78,21 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < 20 || deck.main.size() > 30)
+#ifdef YGOPRO_SERVER_MODE
+	if(deck.main.size() < DECKCOUNT_MAIN_MIN || deck.main.size() > DECKCOUNT_MAIN_MAX)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 6)
+	if(deck.extra.size() > DECKCOUNT_SIDE)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > 6)
+	if(deck.side.size() > DECKCOUNT_EXTRA)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
+#else
+	if(deck.main.size() < 40 || deck.main.size() > 60)
+		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
+	if(deck.extra.size() > 15)
+		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
+	if(deck.side.size() > 15)
+		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
+#endif
 
 	int used_limited = 0, used_semi = 0;
 	for (size_t i = 0; i < deck.main.size(); ++i)
@@ -201,9 +209,23 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK) && deck.extra.size() < 6) {
-			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
-		} else if(deck.main.size() < 30) {
+		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
+			if(
+#ifdef YGOPRO_SERVER_MODE
+			deck.extra.size() >= DECKCOUNT_EXTRA
+#else
+			deck.extra.size() >= 15
+#endif
+			)
+				continue;
+			deck.extra.push_back(dataManager.GetCodePointer(code)); //verified by GetData()
+		} else 
+#ifdef YGOPRO_SERVER_MODE
+		if(deck.main.size() < DECKCOUNT_MAIN_MAX)
+#else
+		if(deck.main.size() < 60)
+#endif
+		{
 			deck.main.push_back(dataManager.GetCodePointer(code));
 		}
 	}
@@ -215,7 +237,11 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		if(deck.side.size() < 6)
+#ifdef YGOPRO_SERVER_MODE
+		if(deck.side.size() < DECKCOUNT_SIDE)
+#else
+		if(deck.side.size() < 15)
+#endif
 			deck.side.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 	}
 	return errorcode;
@@ -231,17 +257,21 @@ bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 		pcount[deck.side[i]->first]++;
 	Deck ndeck;
 	LoadDeck(ndeck, dbuf, mainc, sidec);
+#ifndef NO_SIDE_CHECK
 	if(ndeck.main.size() != deck.main.size() || ndeck.extra.size() != deck.extra.size())
 		return false;
+#endif
 	for(size_t i = 0; i < ndeck.main.size(); ++i)
 		ncount[ndeck.main[i]->first]++;
 	for(size_t i = 0; i < ndeck.extra.size(); ++i)
 		ncount[ndeck.extra[i]->first]++;
 	for(size_t i = 0; i < ndeck.side.size(); ++i)
 		ncount[ndeck.side[i]->first]++;
+#ifndef NO_SIDE_CHECK
 	for(auto cdit = ncount.begin(); cdit != ncount.end(); ++cdit)
 		if(cdit->second != pcount[cdit->first])
 			return false;
+#endif
 	deck = ndeck;
 	return true;
 }
@@ -268,9 +298,15 @@ void DeckManager::GetCategoryPath(wchar_t* ret, int index, const wchar_t* text) 
 void DeckManager::GetDeckFile(wchar_t* ret, irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck) {
 	wchar_t filepath[256];
 	wchar_t catepath[256];
-	GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
-	myswprintf(filepath, L"%ls/%ls.ydk", catepath, cbDeck->getItem(cbDeck->getSelected()));
-	BufferIO::CopyWStr(filepath, ret, 256);
+	wchar_t* deckname = (wchar_t*)cbDeck->getItem(cbDeck->getSelected());
+	if(deckname != NULL) {
+		GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
+		myswprintf(filepath, L"%ls/%ls.ydk", catepath, deckname);
+		BufferIO::CopyWStr(filepath, ret, 256);
+	}
+	else {
+		BufferIO::CopyWStr(L"", ret, 256);
+	}
 }
 bool DeckManager::LoadDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck) {
 	wchar_t filepath[256];

@@ -3,8 +3,19 @@ include "lzma/."
 project "ygopro"
     kind "ConsoleApp"
 
-    local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
-    if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
+    local params={
+        "DEFAULT_DUEL_RULE",
+        "DECKCOUNT_MAIN_MIN",
+        "DECKCOUNT_MAIN_MAX",
+        "DECKCOUNT_SIDE",
+        "DECKCOUNT_EXTRA",
+        "NO_SIDE_CHECK"
+    }
+
+    for _,param in ipairs(params) do
+        local val=os.getenv("YGOPRO_"..param)
+        if val and tonumber(val) then defines { param.."="..tonumber(val) } end
+    end
 
     files { "gframe.cpp", "config.h",
             "game.cpp", "game.h", "myfilesystem.h",
@@ -15,14 +26,13 @@ project "ygopro"
             "single_duel.cpp", "single_duel.h",
             "tag_duel.cpp", "tag_duel.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "sqlite3", "lua" , "event"}
+    links { "ocgcore", "clzma", "sqlite3", "event"}
 
     configuration "windows"
         files "ygopro.rc"
         includedirs { "../event/include", "../sqlite3" }
-        links { "ws2_32" }
-
+        links { "ws2_32", "lua" }
     configuration "not vs*"
-        buildoptions { "-std=c++1y", "-fno-rtti" }
+        buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
-        links { "event_pthreads", "dl", "pthread" }
+        links { "lua5.3-c++", "event_pthreads", "dl", "pthread" }

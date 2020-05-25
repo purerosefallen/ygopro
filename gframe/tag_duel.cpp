@@ -407,6 +407,22 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 		replay_recorder->state = CTOS_LEAVE_GAME;
 	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
+	char deckbuff[12];
+	char* pbuf = deckbuff;
+	BufferIO::WriteInt16(pbuf, pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, pdeck[0].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[0].side.size());
+	BufferIO::WriteInt16(pbuf, pdeck[2].main.size());
+	BufferIO::WriteInt16(pbuf, pdeck[2].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[2].side.size());
+	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
+	NetServer::ReSendToPlayer(players[1]);
+	char tempbuff[6];
+	memcpy(tempbuff, deckbuff, 6);
+	memcpy(deckbuff, deckbuff + 6, 6);
+	memcpy(deckbuff + 6, tempbuff, 6);
+	NetServer::SendBufferToPlayer(players[2], STOC_DECK_COUNT, deckbuff, 12);
+	NetServer::ReSendToPlayer(players[3]);
 	NetServer::SendPacketToPlayer(players[0], STOC_SELECT_HAND);
 	NetServer::ReSendToPlayer(players[2]);
 	hand_result[0] = 0;
@@ -490,6 +506,11 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	rh.flag = REPLAY_TAG;
 	time_t seed = time(0);
 	rh.seed = seed;
+#ifdef YGOPRO_SERVER_MODE
+	if(pre_seed[0] > 0) {
+		seed = pre_seed[0];
+	}
+#endif
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
 	rnd.reset(seed);
@@ -686,8 +707,7 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 			case 1:
 			case 2:
 			case 3:
-			case 5:
-			case 10: {
+			case 5: {
 				NetServer::SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, pbuf - offset);
 				break;
 			}
@@ -695,7 +715,8 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 			case 6:
 			case 7:
 			case 8:
-			case 9: {
+			case 9:
+			case 11: {
 				for(int i = 0; i < 4; ++i)
 					if(players[i] != cur_player[player])
 						NetServer::SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
@@ -706,9 +727,10 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #endif
 				break;
 			}
-			case 11:
-			case 12:
-			case 13: {
+			case 21:
+			case 22:
+			case 23:
+			case 10: {
 				for(int i = 0; i < 4; ++i)
 					NetServer::SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -889,8 +911,7 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 			NetServer::SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, pbuf - offset);
 			return 1;
 		}
-		case MSG_SORT_CARD:
-		case MSG_SORT_CHAIN: {
+		case MSG_SORT_CARD: {
 			player = BufferIO::ReadInt8(pbuf);
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 7;

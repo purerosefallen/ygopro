@@ -42,6 +42,7 @@ struct Config {
 	int chkWaitChain;
 	int chkIgnore1;
 	int chkIgnore2;
+	int default_rule;
 	int hide_setname;
 	int hide_hint_button;
 	int control_mode;
@@ -112,6 +113,7 @@ struct BotInfo {
 	wchar_t desc[256];
 	bool support_master_rule_3;
 	bool support_new_master_rule;
+	bool support_master_rule_2020;
 };
 
 struct FadingUnit {
@@ -193,6 +195,12 @@ public:
 	bool HasFocus(EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
 		return focus && focus->hasType(type);
+	}
+
+	void TrimText(irr::gui::IGUIElement* editbox) const {
+		irr::core::stringw text(editbox->getText());
+		text.trim();
+		editbox->setText(text.c_str());
 	}
 
 	void OnResize();
@@ -404,7 +412,7 @@ public:
 	irr::gui::IGUIStaticText* stBotInfo;
 	irr::gui::IGUIButton* btnStartBot;
 	irr::gui::IGUIButton* btnBotCancel;
-	irr::gui::IGUICheckBox* chkBotOldRule;
+	irr::gui::IGUIComboBox* cbBotRule;
 	irr::gui::IGUICheckBox* chkBotHand;
 	irr::gui::IGUICheckBox* chkBotNoCheckDeck;
 	irr::gui::IGUICheckBox* chkBotNoShuffleDeck;
@@ -465,6 +473,7 @@ public:
 	//announce number
 	irr::gui::IGUIWindow* wANNumber;
 	irr::gui::IGUIComboBox* cbANNumber;
+	irr::gui::IGUIButton* btnANNumber[12];
 	irr::gui::IGUIButton* btnANNumberOK;
 	//announce card
 	irr::gui::IGUIWindow* wANCard;
@@ -618,8 +627,8 @@ extern Game* mainGame;
 extern unsigned short aServerPort;
 extern unsigned short replay_mode;
 extern HostInfo game_info;
+extern time_t pre_seed[3];
 #endif
-
 }
 
 #define CARD_IMG_WIDTH		177
@@ -684,7 +693,7 @@ extern HostInfo game_info;
 #define BUTTON_CANCEL_SINGLEPLAY	152
 #define LISTBOX_BOT_LIST			153
 #define BUTTON_BOT_START			154
-#define CHECKBOX_BOT_OLD_RULE		155
+#define COMBOBOX_BOT_RULE			155
 #define EDITBOX_CHAT				199
 
 #define BUTTON_MSG_OK				200
@@ -741,9 +750,18 @@ extern HostInfo game_info;
 #define BUTTON_CHAIN_WHENAVAIL		266
 #define BUTTON_CANCEL_OR_FINISH		267
 #define BUTTON_PHASE				268
-#define BUTTON_CLEAR_LOG			270
-#define LISTBOX_LOG					271
-#define SCROLL_CARDTEXT				280
+#define BUTTON_ANNUMBER_1			270
+#define BUTTON_ANNUMBER_2			271
+#define BUTTON_ANNUMBER_3			272
+#define BUTTON_ANNUMBER_4			273
+#define BUTTON_ANNUMBER_5			274
+#define BUTTON_ANNUMBER_6			275
+#define BUTTON_ANNUMBER_7			276
+#define BUTTON_ANNUMBER_8			277
+#define BUTTON_ANNUMBER_9			278
+#define BUTTON_ANNUMBER_10			279
+#define BUTTON_ANNUMBER_11			280
+#define BUTTON_ANNUMBER_12			281
 #define BUTTON_DISPLAY_0			290
 #define BUTTON_DISPLAY_1			291
 #define BUTTON_DISPLAY_2			292
@@ -780,7 +798,7 @@ extern HostInfo game_info;
 #define BUTTON_MARKS_FILTER			322
 #define BUTTON_MARKERS_OK			323
 #define COMBOBOX_SORTTYPE			324
-
+#define EDITBOX_INPUTS				325
 #define WINDOW_DECK_MANAGE			330
 #define BUTTON_NEW_CATEGORY			331
 #define BUTTON_RENAME_CATEGORY		332
@@ -796,6 +814,9 @@ extern HostInfo game_info;
 #define BUTTON_DM_CANCEL			342
 #define COMBOBOX_LFLIST				349
 
+#define BUTTON_CLEAR_LOG			350
+#define LISTBOX_LOG					351
+#define SCROLL_CARDTEXT				352
 #define CHECKBOX_AUTO_SEARCH		360
 #define CHECKBOX_ENABLE_SOUND		361
 #define CHECKBOX_ENABLE_MUSIC		362
@@ -826,7 +847,7 @@ extern HostInfo game_info;
 #define TEXTURE_ACTIVATE			6
 
 #ifndef DEFAULT_DUEL_RULE
-#define DEFAULT_DUEL_RULE			4
+#define DEFAULT_DUEL_RULE			5
 #endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10

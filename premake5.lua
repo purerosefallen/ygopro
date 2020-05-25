@@ -14,11 +14,14 @@ end
         startproject "ygopro"
 
 if os.getenv("YGOPRO_USE_XP_TOOLSET") then
+    configuration { "windows", "vs2015" }
+        toolset "v140_xp"
+
     configuration { "windows", "vs2017" }
         toolset "v141_xp"
 
-    configuration { "windows", "not vs2017" }
-        toolset "v140_xp"
+    configuration { "windows", "vs2019" }
+        toolset "v141_xp"
 end
 
     configuration "bsd"
@@ -51,7 +54,7 @@ end
 if not os.ishost("macosx") then
         staticruntime "On"
 end
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4305", "4828", "4800" }
+        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800" }
 
     configuration { "Release", "not vs*" }
         symbols "On"
@@ -75,10 +78,10 @@ end
 
     startproject "ygopro"
 
-    include "lua"
     include "ocgcore"
     include "gframe"
     if os.ishost("windows") then
+    include "lua"
     include "event"
     include "sqlite3"
     end

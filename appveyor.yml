@@ -1,5 +1,5 @@
 version: '{build}'
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 skip_tags: true
 
@@ -7,23 +7,27 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-alpha13-windows.zip
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip ; exit 0"
+  - 7z x -y premake-5.0.0-alpha14-windows.zip
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
   - move libevent-2.0.22-stable event
   - xcopy /E event\WIN32-Code event\include
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2018/sqlite-amalgamation-3240000.zip ; exit 0"
-  - 7z x -y sqlite-amalgamation-3240000.zip
-  - move sqlite-amalgamation-3240000 sqlite3
-
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.5.tar.gz ; exit 0"
+  - tar xf lua-5.3.5.tar.gz
+  - move lua-5.3.5\src lua
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2020/sqlite-amalgamation-3310100.zip ; exit 0"
+  - 7z x -y sqlite-amalgamation-3310100.zip
+  - move sqlite-amalgamation-3310100 sqlite3
+  
   # let premake happy
   - xcopy /E premake\* .
     
   # premake
-  - premake5 vs2017
+  - premake5 vs2019
   
 configuration: Release
 
@@ -39,9 +43,9 @@ after_build:
   - 7z x -y -oredis Redis-x64-3.2.100.zip
 
   # nodejs
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v10.15.3/node-v10.15.3-win-x64.zip ; exit 0"
-  - 7z x -y node-v10.15.3-win-x64.zip
-  - mv node-v10.15.3-win-x64 node
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v12.14.0/node-v12.14.0-win-x64.zip ; exit 0"
+  - 7z x -y node-v12.14.0-win-x64.zip
+  - mv node-v12.14.0-win-x64 node
 
   # srvpro
   - git clone https://github.com/purerosefallen/ygopro-server
@@ -89,8 +93,9 @@ deploy:
     branch: server
 
 cache:
-  - premake-5.0.0-alpha13-windows.zip
+  - premake-5.0.0-alpha14-windows.zip
   - libevent-2.0.22-stable.tar.gz
-  - freetype-2.9.1.tar.bz2
+  - freetype-2.10.1.tar.gz
+  - lua-5.3.5.tar.gz 
   - irrlicht-1.8.4.zip
-  - sqlite-amalgamation-3240000.zip
+  - sqlite-amalgamation-3310100.zip
