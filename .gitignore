@@ -94,3 +94,5 @@ core*
 /patch.exe.manifest
 /patch.exe
 /diff.exe
+/lua/Makefile
+/out/build/x64-Debug
