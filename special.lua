@@ -35,6 +35,7 @@ function aux.CannotSetCond(e,c)
 end
 
 function aux.MZoneLimit(tp)
+	--[[
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_SUMMON)
@@ -49,7 +50,7 @@ function aux.MZoneLimit(tp)
 	e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e3:SetCondition(aux.TRUE)
 	e3:SetTarget(aux.SummonCondition)
-	Duel.RegisterEffect(e3,tp)
+	Duel.RegisterEffect(e3,tp)]]--
 	local e4=Effect.GlobalEffect()
 	e4:SetType(EFFECT_TYPE_FIELD)
 	e4:SetCode(EFFECT_DISABLE_FIELD)
@@ -67,12 +68,7 @@ function aux.MZoneLimit(tp)
 	Duel.RegisterEffect(e5,tp)
 end
 function aux.SequenceToZone(seq)
-	if seq==0 then return 1 end
-	if seq==1 then return 2 end
-	if seq==2 then return 4 end
-	if seq==3 then return 8 end
-	if seq==4 then return 16 end
-	return 0
+	return 1 << seq
 end
 function aux.DisableMonsterZone(e,tp)
 	local g=Duel.GetMatchingGroup(aux.IsAtMainZone,e:GetHandlerPlayer(),LOCATION_MZONE,0,nil)
@@ -259,7 +255,8 @@ function aux.DisableBigDamage()
 	Duel.RegisterEffect(e1,0)
 end
 function aux.DisableBigDamageValue(e,re,val,r,rp,rc)
-	if (r&REASON_EFFECT)>0 and  val>=2000 then return 0 else return val end
+	if r&REASON_EFFECT==REASON_EFFECT and val>=2000 then return 0 end
+	return val
 end
 function aux.CheckDesDeckFilter(c,tp)
 	return c:IsPreviousLocation(LOCATION_DECK) and c:IsControler(tp)
