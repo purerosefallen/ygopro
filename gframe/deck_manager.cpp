@@ -81,9 +81,9 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, bool allow_ocg, bool allow_tc
 #ifdef YGOPRO_SERVER_MODE
 	if(deck.main.size() < DECKCOUNT_MAIN_MIN || deck.main.size() > DECKCOUNT_MAIN_MAX)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > DECKCOUNT_SIDE)
+	if(deck.extra.size() > DECKCOUNT_EXTRA)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > DECKCOUNT_EXTRA)
+	if(deck.side.size() > DECKCOUNT_SIDE)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 #else
 	if(deck.main.size() < 40 || deck.main.size() > 60)

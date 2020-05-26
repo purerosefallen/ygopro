@@ -129,13 +129,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->dInfo.isStarted = false;
 					mainGame->dInfo.isFinished = false;
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
-					mainGame->stTip->setVisible(false);
-					mainGame->wCardImg->setVisible(false);
-					mainGame->wInfos->setVisible(false);
-					mainGame->wPhase->setVisible(false);
-					mainGame->btnLeaveGame->setVisible(false);
-					mainGame->btnSpectatorSwap->setVisible(false);
-					mainGame->wChat->setVisible(false);
+					mainGame->CloseDuelWindow();
 					mainGame->btnCreateHost->setEnabled(true);
 					mainGame->btnJoinHost->setEnabled(true);
 					mainGame->btnJoinCancel->setEnabled(true);
@@ -1461,8 +1455,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				mainGame->chain_when_avail = false;
 				UpdateChainButtons();
 			}
-			if(mainGame->wSurrender->isVisible())
-				mainGame->HideElement(mainGame->wSurrender);
+			mainGame->HideElement(mainGame->wSurrender);
 			mainGame->wCmdMenu->setVisible(false);
 			if(mainGame->fadingList.size())
 				break;
@@ -1907,6 +1900,11 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case CHECKBOX_DRAW_SINGLE_CHAIN: {
+				mainGame->gameConf.draw_single_chain = mainGame->chkDrawSingleChain->isChecked() ? 1 : 0;
+				return true;
+				break;
+			}
 			case CHECKBOX_PREFER_EXPANSION: {
 				mainGame->gameConf.prefer_expansion_script = mainGame->chkPreferExpansionScript->isChecked() ? 1 : 0;
 				return true;
@@ -2041,6 +2039,46 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			if(!event.KeyInput.PressedDown && !mainGame->HasFocus(EGUIET_EDIT_BOX))
 				mainGame->takeScreenshot();
 			return true;
+			break;
+		}
+		default: break;
+		}
+		break;
+	}
+	case irr::EET_MOUSE_INPUT_EVENT: {
+		switch(event.MouseInput.Event) {
+		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
+			IGUIElement* root = mainGame->env->getRootGUIElement();
+			position2di mousepos = position2di(event.MouseInput.X, event.MouseInput.Y);
+			if(root->getElementFromPoint(mousepos) == mainGame->stText) {
+				if(!mainGame->scrCardText->isVisible()) {
+					break;
+				}
+				is_dragging_cardtext = true;
+				dragging_cardtext_start_pos = mainGame->scrCardText->getPos();
+				dragging_cardtext_start_y = event.MouseInput.Y;
+				return true;
+			}
+			break;
+		}
+		case irr::EMIE_LMOUSE_LEFT_UP: {
+			is_dragging_cardtext = false;
+			break;
+		}
+		case irr::EMIE_MOUSE_MOVED: {
+			if(is_dragging_cardtext) {
+				if(!mainGame->scrCardText->isVisible()) {
+					is_dragging_cardtext = false;
+					break;
+				}
+				int step = mainGame->guiFont->getDimension(L"A").Height + mainGame->guiFont->getKerningHeight();
+				int pos = dragging_cardtext_start_pos + (dragging_cardtext_start_y - event.MouseInput.Y) / step;
+				int max = mainGame->scrCardText->getMax();
+				if(pos < 0) pos = 0;
+				if(pos > max) pos = max;
+				mainGame->scrCardText->setPos(pos);
+				mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth() - 25, mainGame->guiFont, mainGame->showingtext, pos);
+			}
 			break;
 		}
 		default: break;
