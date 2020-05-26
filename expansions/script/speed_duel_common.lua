@@ -64,7 +64,11 @@ function aux.SpeedDuelMoveCardToFieldCommonOperation(e,tp,eg,ep,ev,re,r,rp)
 	if (c:IsType(TYPE_MONSTER)) then
 		Duel.MoveToField(c,tp,tp,LOCATION_MZONE,POS_FACEUP,true)
 	else
-		Duel.MoveToField(c,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+		if c:IsType(TYPE_FIELD) then
+			Duel.MoveToField(c,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+		else
+			Duel.MoveToField(c,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+		end
 	end
 	e:Reset()
 end
