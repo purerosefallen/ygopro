@@ -55,6 +55,7 @@ struct Config {
 	int window_height;
 	bool resize_popup_menu;
 	int auto_save_replay;
+	int draw_single_chain;
 	int prefer_expansion_script;
 	bool enable_sound;
 	bool enable_music;
@@ -172,6 +173,8 @@ public:
 	void ErrorLog(const char* msgbuf);
 	void initUtils();
 	void ClearTextures();
+	void CloseGameButtons();
+	void CloseGameWindow();
 	void CloseDuelWindow();
 
 	int LocalPlayer(int player);
@@ -315,6 +318,7 @@ public:
 	irr::gui::IGUICheckBox* chkWaitChain;
 	irr::gui::IGUICheckBox* chkQuickAnimation;
 	irr::gui::IGUICheckBox* chkAutoSaveReplay;
+	irr::gui::IGUICheckBox* chkDrawSingleChain;
 	irr::gui::IGUIWindow* tabSystem;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
@@ -813,8 +817,9 @@ extern Game* mainGame;
 #define SCROLL_TAB_SYSTEM			371
 #define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_PREFER_EXPANSION	373
-#define CHECKBOX_REGEX				374
-#define COMBOBOX_LOCALE				375
+#define CHECKBOX_DRAW_SINGLE_CHAIN	374
+#define CHECKBOX_REGEX				375
+#define COMBOBOX_LOCALE				376
 
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
