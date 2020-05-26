@@ -267,6 +267,8 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 #endif
 	switch(pktType) {
 	case STOC_GAME_MSG: {
+		if(!mainGame->dInfo.isStarted)
+			break;
 		ClientAnalyze(pdata, len - 1);
 		break;
 	}
@@ -466,24 +468,17 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->dField.Clear();
 		mainGame->is_building = true;
 		mainGame->is_siding = true;
+		mainGame->CloseGameWindow();
 		mainGame->wChat->setVisible(false);
-		mainGame->wPhase->setVisible(false);
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->wFilter->setVisible(false);
 		mainGame->wSort->setVisible(false);
-		mainGame->stTip->setVisible(false);
+		if(mainGame->dInfo.player_type < 7)
+			mainGame->btnLeaveGame->setVisible(false);
 		mainGame->btnSideOK->setVisible(true);
 		mainGame->btnSideShuffle->setVisible(true);
 		mainGame->btnSideSort->setVisible(true);
 		mainGame->btnSideReload->setVisible(true);
-		if(mainGame->dInfo.player_type < 7)
-			mainGame->btnLeaveGame->setVisible(false);
-		mainGame->btnSpectatorSwap->setVisible(false);
-		mainGame->btnChainIgnore->setVisible(false);
-		mainGame->btnChainAlways->setVisible(false);
-		mainGame->btnChainWhenAvail->setVisible(false);
-		mainGame->btnCancelOrFinish->setVisible(false);
-		mainGame->btnShuffle->setVisible(false);
 		mainGame->deckBuilder.result_string[0] = L'0';
 		mainGame->deckBuilder.result_string[1] = 0;
 		mainGame->deckBuilder.results.clear();
@@ -586,12 +581,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->RefreshCategoryDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
 		mainGame->cbCategorySelect->setEnabled(true);
 		mainGame->cbDeckSelect->setEnabled(true);
-		if(mainGame->wCreateHost->isVisible())
-			mainGame->HideElement(mainGame->wCreateHost);
-		else if(mainGame->wLanWindow->isVisible())
-			mainGame->HideElement(mainGame->wLanWindow);
-		else if(mainGame->wSinglePlay->isVisible())
-			mainGame->HideElement(mainGame->wSinglePlay);
+		mainGame->HideElement(mainGame->wCreateHost);
+		mainGame->HideElement(mainGame->wLanWindow);
+		mainGame->HideElement(mainGame->wSinglePlay);
 		mainGame->ShowElement(mainGame->wHostPrepare);
 		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
@@ -753,14 +745,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->gMutex.lock();
 		if(mainGame->dInfo.player_type < 7)
 			mainGame->btnLeaveGame->setVisible(false);
-		mainGame->btnSpectatorSwap->setVisible(false);
-		mainGame->btnChainIgnore->setVisible(false);
-		mainGame->btnChainAlways->setVisible(false);
-		mainGame->btnChainWhenAvail->setVisible(false);
-		mainGame->btnCancelOrFinish->setVisible(false);
 		if(!mainGame->dInfo.isReplay && mainGame->dInfo.isReplaySkiping)
 			mainGame->dInfo.isReplaySkiping = false;
-		mainGame->wSurrender->setVisible(false);
+		mainGame->CloseGameButtons();
 		mainGame->stMessage->setText(dataManager.GetSysString(1500));
 		mainGame->PopupElement(mainGame->wMessage);
 		mainGame->gMutex.unlock();
@@ -801,14 +788,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 	case STOC_REPLAY: {
 		mainGame->gMutex.lock();
 		mainGame->wPhase->setVisible(false);
-		mainGame->wSurrender->setVisible(false);
 		if(mainGame->dInfo.player_type < 7)
 			mainGame->btnLeaveGame->setVisible(false);
-		mainGame->btnChainIgnore->setVisible(false);
-		mainGame->btnChainAlways->setVisible(false);
-		mainGame->btnChainWhenAvail->setVisible(false);
-		mainGame->btnCancelOrFinish->setVisible(false);
-		mainGame->btnShuffle->setVisible(false);
+		mainGame->CloseGameButtons();
 		char* prep = pdata;
 		Replay new_replay;
 		memcpy(&new_replay.pheader, prep, sizeof(ReplayHeader));
@@ -2610,8 +2592,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dInfo.is_swapped = !mainGame->dInfo.is_swapped;
 			return true;
 		}
-		if(mainGame->wSurrender->isVisible())
-			mainGame->HideElement(mainGame->wSurrender);
+		mainGame->HideElement(mainGame->wSurrender);
 		if(!mainGame->dInfo.isReplay && mainGame->dInfo.player_type < 7) {
 			mainGame->btnLeaveGame->setText(dataManager.GetSysString(1351));
 			mainGame->btnLeaveGame->setVisible(true);
@@ -3143,7 +3124,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				mainGame->WaitFrameSignal(11);
 			}
 		}
-		if (mainGame->dField.chains.size() > 1) {
+		if(mainGame->dField.chains.size() > 1 || mainGame->gameConf.draw_single_chain) {
 			if (mainGame->dField.last_chain)
 				mainGame->WaitFrameSignal(11);
 			for(int i = 0; i < 5; ++i) {

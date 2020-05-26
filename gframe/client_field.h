@@ -117,6 +117,9 @@ public:
 	void RefreshCardCountDisplay();
 
 	irr::gui::IGUIElement* panel;
+	bool is_dragging_cardtext;
+	int dragging_cardtext_start_pos;
+	int dragging_cardtext_start_y;
 	std::vector<int> ancard;
 	int hovered_controler;
 	int hovered_location;

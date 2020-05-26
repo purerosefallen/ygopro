@@ -496,7 +496,7 @@ void Game::DrawMisc() {
 		driver->setTransform(irr::video::ETS_WORLD, im);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
-	if(dField.chains.size() > 1) {
+	if(dField.chains.size() > 1 || mainGame->gameConf.draw_single_chain) {
 		for(size_t i = 0; i < dField.chains.size(); ++i) {
 			if(dField.chains[i].solved)
 				break;
@@ -1072,6 +1072,8 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 	fadingList.push_back(fu);
 }
 void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
+	if(!win->isVisible() && !set_action)
+		return;
 	FadingUnit fu;
 	fu.fadingSize = win->getRelativePosition();
 	for(auto fit = fadingList.begin(); fit != fadingList.end(); ++fit)
@@ -1287,8 +1289,13 @@ void Game::DrawDeckBd() {
 	DrawShadowText(numFont, deckBuilder.result_string, Resize(875, 137, 935, 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	driver->draw2DRectangle(Resize(805, 160, 1020, 630), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(804, 159, 1020, 630));
-	for(size_t i = 0; i < 7 && i + scrFilter->getPos() < deckBuilder.results.size(); ++i) {
+	for(size_t i = 0; i < 9 && i + scrFilter->getPos() < deckBuilder.results.size(); ++i) {
 		code_pointer ptr = deckBuilder.results[i + scrFilter->getPos()];
+		if(i >= 7)
+		{
+			imageManager.GetTextureThumb(ptr->second.code);
+			break;
+		}
 		if(deckBuilder.hovered_pos == 4 && deckBuilder.hovered_seq == (int)i)
 			driver->draw2DRectangle(0x80000000, Resize(806, 164 + i * 66, 1019, 230 + i * 66));
 		DrawThumb(ptr, position2di(810, 165 + i * 66), deckBuilder.filterList);
