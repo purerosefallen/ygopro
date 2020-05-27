@@ -6,17 +6,17 @@ function c100730025.initial_effect(c)
 end
 function c100730025.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_MONSTER)<7 then
+	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_MONSTER)<6 then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730025,0))
 		e:Reset()
 		return
 	end
-	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_SPELL)<7 then
+	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_SPELL)<6 then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730025,1))
 		e:Reset()
 		return
 	end
-	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_TRAP)<7 then
+	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_TRAP)<6 then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730025,2))
 		e:Reset()
 		return
