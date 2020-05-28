@@ -48,7 +48,6 @@ function c100730031.skill(e,tp)
 		local e5=e1:Clone()
 		e5:SetCode(EFFECT_UNRELEASABLE_NONSUM)
 		c:RegisterEffect(e5)
-		Duel.RaiseEvent(c,EVENT_SPSUMMON,e,REASON_RULE,tp,tp,0)
 		num=num-1
 	end
 	e:Reset()
