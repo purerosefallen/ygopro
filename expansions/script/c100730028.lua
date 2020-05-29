@@ -6,9 +6,9 @@ function c100730028.initial_effect(c)
 end
 function c100730028.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local g=GetDecktopGroup(tp,1)
+	local g=Duel.GetDecktopGroup(tp,1)
 	aux.SpeedDuelSendToHandWithExile(tp,g)
-	local g2=GetDecktopGroup(1-tp,1)
+	local g2=Duel.GetDecktopGroup(1-tp,1)
 	aux.SpeedDuelSendToHandWithExile(1-tp,g2)
 
 	local count=1
@@ -24,12 +24,21 @@ function c100730028.skill(e,tp)
 	e1:SetTargetRange(1,0)
 	Duel.RegisterEffect(e1,tp,true)
 
-	local e2=Effect.CreateEffect(e:GetHandler())
+	local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
 	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e2:SetTargetRange(1,0)
+	e2:SetCondition(c100730028.limcon)
+	e2:SetValue(c100730028.limval)
 	e2:SetReset(RESET_PHASE+PHASE_END,count)
 	Duel.RegisterEffect(e2,tp)
 
+end
+function c100730028.limcon(e)
+	if count==2 then return Duel.GetTurnCount()==2 end
+	return true
+end
+function c100730028.limval(e,re,rp)
+	return true
 end

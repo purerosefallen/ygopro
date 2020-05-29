@@ -74,6 +74,7 @@ function aux.SpeedDuelMoveCardToFieldCommon(id,c)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_PREDRAW)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
 	e1:SetOperation(aux.SpeedDuelMoveCardToFieldCommonOperation)
 	e1:SetLabel(id)
 	e1:SetLabelObject(c)
@@ -98,6 +99,7 @@ function aux.SpeedDuelBeforeDraw(c,op)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_PHASE_START+PHASE_DRAW)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
 	e1:SetOperation(op)
 	e1:SetLabelObject(c)
 	Duel.RegisterEffect(e1,0,true)
@@ -112,6 +114,7 @@ function aux.SpeedDuelMoveCardToDeckCommon(id,c)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_PHASE_START+PHASE_DRAW)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
 	e1:SetOperation(aux.SpeedDuelMoveCardToDeckCommonOperation)
 	e1:SetLabel(id)
 	e1:SetLabelObject(c)
@@ -120,6 +123,7 @@ function aux.SpeedDuelMoveCardToDeckCommon(id,c)
 	local e2=Effect.GlobalEffect()
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EVENT_PREDRAW)
+	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetOperation(aux.SpeedDuelRedraw)
 	e2:SetLabelObject(c)
@@ -187,6 +191,35 @@ function aux.SpeedDuelSendToDeckWithExile(tp,g)
 	Duel.SendtoDeck(g2,nil,-1,REASON_RULE)
 	return count
 end
+function aux.DontExileThisSkillCard(c)
+	if not aux.SpeedDuelDontExile then aux.SpeedDuelDontExile=Group.CreateGroup() end
+	aux.SpeedDuelDontExile:KeepAlive()
+	aux.SpeedDuelDontExile:AddCard(c)
+end
+function aux.SpeedDuelAtMainPhaseNoCountLimit(c,op,con,desc)
+	aux.DontExileThisSkillCard(c)
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
+	e1:SetDescription(desc)
+	if con then
+		e1:SetCondition(con)
+	else
+		e1:SetCondition(aux.SpeedDuelAtMainPhaseCondition)
+	end
+	e1:SetLabelObject(c)
+	e1:SetOperation(op)
+	Duel.RegisterEffect(e1,0)
+	local e2=e1:Clone()
+	Duel.RegisterEffect(e2,1)
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_SINGLE)
+	e3:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_CANNOT_DISABLE)
+	e3:SetCode(EFFECT_CANNOT_REMOVE)
+	e3:SetRange(LOCATION_EXTRA)
+	c:RegisterEffect(e3)
+end
 function aux.SpeedDuelAtMainPhase(c,op,con,desc)
 	if not aux.SpeedDuelDontExile then aux.SpeedDuelDontExile=Group.CreateGroup() end
 	aux.SpeedDuelDontExile:KeepAlive()
@@ -194,6 +227,7 @@ function aux.SpeedDuelAtMainPhase(c,op,con,desc)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
 	e1:SetDescription(desc)
 	e1:SetCountLimit(1,c:GetOriginalCode())
 	if con then
@@ -216,4 +250,26 @@ end
 function aux.SpeedDuelAtMainPhaseCondition(e,tp)
 	tp=(e:GetLabelObject()):GetOwner()
 	return Duel.GetTurnPlayer()==tp and Duel.GetCurrentChain()==0 and Duel.GetCurrentPhase()==PHASE_MAIN1
+end
+function aux.SpeedDuelCalculateDecreasedLP()
+	if aux.DecreasedLP then return end
+	aux.DecreasedLP={}
+	aux.DecreasedLP[0]=0
+	aux.DecreasedLP[1]=0
+	--calculate damage
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_DAMAGE)
+	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_NEGATE)
+	e1:SetOperation(aux.damcal)
+	e1:SetLabelObject(c)
+	Duel.RegisterEffect(e1,0)
+	local e2=e1:Clone()
+	e2:SetCode(EVENT_PAY_LPCOST)
+	e2:SetLabelObject(c)
+	Duel.RegisterEffect(e2,0)
+end
+
+function aux.damcal(e,tp,eg,ep,ev,re,r,rp)
+	aux.DecreasedLP[ep] = aux.DecreasedLP[ep] + ev
 end

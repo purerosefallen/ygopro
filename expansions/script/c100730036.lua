@@ -1,11 +1,14 @@
---高速决斗技能-魔法专家
+--高速决斗技能-我的怪兽卡
 Duel.LoadScript("speed_duel_common.lua")
-function c100730030.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730030.skill)
+function c100730036.initial_effect(c)
+	aux.SpeedDuelBeforeDraw(c,c100730036.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730030.filter(c,g)
-	if not c:IsType(TYPE_SPELL) then return false end
+function c100730036.monfilter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsLevelBelow(4)
+end
+function c100730036.filter(c,g)
+	if not c100730036.monfilter(c) then return false end
 	local tc=g:GetFirst()
 	while tc do
 		if c:GetOriginalCode()==tc:GetOriginalCode() then
@@ -16,11 +19,11 @@ function c100730030.filter(c,g)
 	g:AddCard(c)
 	return true
 end
-function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730036.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730030.filter,tp,LOCATION_DECK+LOCATION_HAND,0,4,nil,g) then
-		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730030,0))
+	if not Duel.IsExistingMatchingCard(c100730036.filter,tp,LOCATION_DECK+LOCATION_HAND,0,4,nil,g) then
+		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730036,0))
 		e:Reset()
 		return
 	end
@@ -31,14 +34,14 @@ function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
 	local gDeck=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_DECK,0,nil)
 	gA=gDeck:RandomSelect(tp,2)
 	gDeck:Sub(gA)
-	gB=gDeck:RandomSelect(tp,4)
+	gB=gDeck:RandomSelect(tp,5)
 	gDeck:Sub(gB)
 	local gBFinal=Group.CreateGroup()
-	if (not gA:IsExists(Card.IsType,1,nil,TYPE_SPELL)) and (gB:IsExists(Card.IsType,1,nil,TYPE_SPELL)) then
+	if (not gA:IsExists(c100730036.monfilter,1,nil)) and (gB:IsExists(c100730036.monfilter,1,nil)) then
 		local tc=gB:GetFirst()
 		local sp=nil
 		while tc do
-			if tc:IsType(TYPE_SPELL) and sp==nil then
+			if c100730036.monfilter(tc) and sp==nil then
 				sp=tc
 				gBFinal:Merge(gA)
 				gA:Clear()
