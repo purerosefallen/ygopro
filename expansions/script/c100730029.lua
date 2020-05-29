@@ -6,7 +6,7 @@ function c100730029.initial_effect(c)
 		c100730029.turn={}
 		c100730029.used={}
 	end
-	aux.SpeedDuelBeforeDraw(c100730029.skill)
+	aux.SpeedDuelBeforeDraw(c,c100730029.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 

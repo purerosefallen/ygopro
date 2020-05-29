@@ -1,7 +1,7 @@
 --高速决斗技能-准备决斗！
 Duel.LoadScript("speed_duel_common.lua")
 function c100730028.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c100730028.skill)
+	aux.SpeedDuelBeforeDraw(c,c100730028.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730028.skill(e,tp)
