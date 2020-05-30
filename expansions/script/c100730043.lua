@@ -6,8 +6,10 @@ function c100730043.initial_effect(c)
 end
 
 function c100730043.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
 	return Duel.GetTurnCount()>=3 and Duel.GetCurrentChain()==0
 		and Duel.IsExistingMatchingCard(c100730043.filter,tp,0,LOCATION_ONFIELD,1,nil)
+		and Duel.GetLP(tp)>=3000
 end
 
 function c100730043.filter(c)

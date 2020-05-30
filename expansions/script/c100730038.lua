@@ -24,7 +24,7 @@ end
 function c100730038.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	local g1=Duel.GetMatchingGroup(c100730038.filter1,tp,LOCATION_GRAVE,0,nil)
-	local g2=Duel.GetMatchingGroup(c100730038.filter1,tp,LOCATION_GRAVE,0,nil)
+	local g2=Duel.GetMatchingGroup(c100730038.filter2,tp,LOCATION_GRAVE,0,nil)
 	if not (g1 and g1:GetCount()>0 and g2 and g2:GetCount()>0) then return end
 	local g3=g1:RandomSelect(tp,1)
 	g2:Sub(g3)

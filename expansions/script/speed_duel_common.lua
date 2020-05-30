@@ -273,3 +273,17 @@ end
 function aux.damcal(e,tp,eg,ep,ev,re,r,rp)
 	aux.DecreasedLP[ep] = aux.DecreasedLP[ep] + ev
 end
+
+function aux.SpeedDuelReplaceDraw(c,op,con,desc)
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_PREDRAW)
+	if con then
+		e1:SetCondition(con)
+	end
+	if op then
+		e1:SetOperation(op)
+	end
+	e1:SetLabelObject(c)
+	Duel.RegisterEffect(e1,tp)
+end
