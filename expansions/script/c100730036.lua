@@ -47,7 +47,7 @@ function c100730036.skill(e,tp,eg,ep,ev,re,r,rp)
 				gA:Clear()
 				gA:AddCard(tc)
 				tc=gB:GetNext()
-				if not tc then tc=gDeck:RandomSelect(tp,1) end
+				if not tc then tc=gDeck:RandomSelect(tp,1):GetFirst() end
 				gA:AddCard(tc)
 			else
 				gBFinal:AddCard(tc)

@@ -5,14 +5,12 @@ function aux.RegisterSpeedDuelSkillCardCommon()
 
 	local orig_announce=Duel.AnnounceCard
 	Duel.AnnounceCard=
-		function(tp,typ)
-			if not typ then typ=TYPE_MONSTER|TYPE_SPELL|TYPE_TRAP end
-			local code=orig_announce(tp,typ)
+		function(tp,...)
+			local code=orig_announce(tp,...)
 			while code>100730000 and code<100740000 do
-				code=orig_announce(tp,typ)
+				code=orig_announce(tp,...)
 			end
 		end
-	
 	aux.ExiledSpeedDuelSkillCardCount={}
 	aux.ExiledSpeedDuelSkillCardCount[0]=0
 	aux.ExiledSpeedDuelSkillCardCount[1]=0
