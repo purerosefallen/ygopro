@@ -19,7 +19,7 @@ end
 function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730030.filter,tp,LOCATION_DECK+LOCATION_HAND,0,4,nil,g) then
+	if not Duel.IsExistingMatchingCard(c100730030.filter,tp,LOCATION_DECK+LOCATION_HAND,0,5,nil,g) then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730030,0))
 		e:Reset()
 		return
@@ -44,7 +44,10 @@ function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
 				gA:Clear()
 				gA:AddCard(tc)
 				tc=gB:GetNext()
-				if not tc then tc=gDeck:RandomSelect(tp,1):GetFirst() end
+				if not tc then
+					tc=gDeck:RandomSelect(tp,1):GetFirst()
+					break
+				end
 				gA:AddCard(tc)
 			else
 				gBFinal:AddCard(tc)
@@ -52,17 +55,21 @@ function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
 			tc=gB:GetNext()
 		end
 	end
-	if gA:GetCount()+gB:GetCount()<count then
-		local add=count-gA:GetCount()-gB:GetCount()
+	if gA:GetCount()+gBFinal:GetCount()<count then
+		local add=count-gA:GetCount()-gBFinal:GetCount()
 		local gtmp=gDeck:RandomSelect(tp,add)
-		gB:Merge(gtmp)
+		gBFinal:Merge(gtmp)
 	end
-	count=count-gA:GetCount()
-	aux.SpeedDuelSendToHandWithExile(tp,gA)
-	local fc=gB:GetFirst()
+	local fc=gA:GetFirst()
 	while count>0 and fc do
 		aux.SpeedDuelSendToHandWithExile(tp,fc)
-		fc=gB:GetNext()
+		fc=gA:GetNext()
+		count=count-1
+	end
+	fc=gBFinal:GetFirst()
+	while count>0 and fc do
+		aux.SpeedDuelSendToHandWithExile(tp,fc)
+		fc=gBFinal:GetNext()
 		count=count-1
 	end
 	e:Reset()
