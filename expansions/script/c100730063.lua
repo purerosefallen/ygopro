@@ -20,6 +20,7 @@ function c100730063.skill(e,tp)
 	Duel.Hint(HINT_CARD,1-tp,100730063)
 
 	local g=Duel.SelectMatchingCard(tp,c100730063.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	local tc=g:GetFirst()
 	local val=tc:GetFlagEffectLabel(36690018)
 	tc:SetFlagEffectLabel(36690018,1-val)
 end

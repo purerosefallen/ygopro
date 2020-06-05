@@ -9,7 +9,7 @@ function c100730054.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	e:Reset()
 	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	local ct=Duel.GetCount(g)
+	local ct=g:GetCount()
 	if ct==0 then return end
 	if not Duel.SelectYesNo(tp,aux.Stringid(100730054,0)) then return end
 	aux.SpeedDuelSendToDeckWithExile(tp,g)

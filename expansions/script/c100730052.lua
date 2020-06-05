@@ -23,6 +23,7 @@ function c100730052.skill(e,tp)
 	Duel.Hint(HINT_CARD,1-tp,100730052)
 	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
 	if not g then return end
-	Duel.SendtoDeck(g,nil,2,REASON_RULE)
+	Duel.SendtoDeck(g,nil,0,REASON_RULE)
+	Duel.ShuffleDeck(tp)
 	Duel.Draw(tp,1,REASON_RULE)
 end

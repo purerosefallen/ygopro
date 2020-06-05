@@ -1,7 +1,6 @@
 --高速决斗技能-扰乱怪泛滥
 Duel.LoadScript("speed_duel_common.lua")
 function c100730061.initial_effect(c)
-	aux.SpeedDuelCalculateDecreasedLP()
 	aux.SpeedDuelAtMainPhase(c,c100730061.skill,c100730061.con,aux.Stringid(100730061,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -10,7 +9,7 @@ function c100730061.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetMZoneCount(1-tp)>0
-		and aux.DecreasedLP[tp]>=1800
+		and Duel.GetLP(tp)<=500
 end
 
 function c100730061.skill(e,tp)

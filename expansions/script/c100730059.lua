@@ -2,7 +2,7 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730059.initial_effect(c)
 	if not c100730059.UsedLP then
-		c100730059.UsedLP=[]
+		c100730059.UsedLP={}
 		c100730059.UsedLP[0]=0
 		c100730059.UsedLP[1]=0
 	end

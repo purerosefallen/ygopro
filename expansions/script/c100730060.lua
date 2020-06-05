@@ -15,7 +15,7 @@ end
 
 function c100730060.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local token=Duel.CreateToken(tp,14470846)
+	local token=Duel.CreateToken(1-tp,14470846)
 	Duel.MoveToField(token,tp,1-tp,LOCATION_MZONE,POS_FACEUP_DEFENSE,true)
 	e:Reset()
 end

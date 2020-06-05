@@ -10,6 +10,7 @@ function aux.RegisterSpeedDuelSkillCardCommon()
 			while code>100730000 and code<100740000 do
 				code=orig_announce(tp,...)
 			end
+			return code
 		end
 	aux.ExiledSpeedDuelSkillCardCount={}
 	aux.ExiledSpeedDuelSkillCardCount[0]=0
