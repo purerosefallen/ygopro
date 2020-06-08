@@ -173,7 +173,7 @@ function aux.CheckDesDeckFilter(c,tp)
 end
 aux.DeckDesCount={}
 function aux.CheckDesDeckCondition(e,tp,eg,ep,ev,re,r,rp)
-	return bit.band(r,REASON_EFFECT)~=0 and re:GetHandler():GetOwner()~=tp
+	return re and bit.band(r,REASON_EFFECT)~=0 and re:GetHandler():GetOwner()~=tp
 		and eg:IsExists(aux.CheckDesDeckFilter,1,nil,tp)
 end
 function aux.CheckDesDeckOperation(e,tp,eg,ep,ev,re,r,rp)

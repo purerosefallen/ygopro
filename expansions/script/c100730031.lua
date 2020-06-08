@@ -14,14 +14,14 @@ function c100730031.con(e,tp)
 	local num=math.floor((4000-Duel.GetLP(tp))/1000)
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetLP(tp)<=3000
-		and (3-Duel.GetMatchingGroupCount(c100730031.filter,tp,LOCATION_MZONE,0,nil))>=num
-		and Duel.GetMZoneCount(tp)>=num
+		and Duel.GetMZoneCount(tp)>0
 end
 function c100730031.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730031,0))
-	Duel.Hint(HINT_MESSAGE,1-tp,aux.Stringid(100730031,0))
+	Duel.Hint(HINT_CARD,1-tp,100730031)
 	local num=math.floor((4000-Duel.GetLP(tp))/1000)
+	local max=3-Duel.GetMatchingGroupCount(c100730031.filter,tp,LOCATION_MZONE,0,nil)
+	if num>max then num=max end
 	while num>0 do
 		local c=Duel.CreateToken(tp,26439287)
 		Duel.MoveToField(c,tp,tp,LOCATION_MZONE,POS_FACEUP_ATTACK,true)
