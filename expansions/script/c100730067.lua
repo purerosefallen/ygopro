@@ -10,6 +10,7 @@ end
 function c100730067.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.GetLP(tp)<=2400
 		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK,0,1,nil,6172122)
 		and (Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_HAND,0,1,nil,0x3b)
 		or (Duel.GetLP(tp)==2400 and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,74677422)))
