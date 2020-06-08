@@ -27,6 +27,14 @@ function c100730068.skill(e,tp,eg,ep,ev,re,r,rp)
 			e2:SetReset(RESET_EVENT+RESETS_STANDARD)
 			token:RegisterEffect(e2,true)
 		end
+		Duel.SkipPhase(tp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1)
+		local e3=Effect.GlobalEffect()
+		e3:SetType(EFFECT_TYPE_FIELD)
+		e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+		e3:SetTargetRange(1,0)
+		e3:SetCode(EFFECT_CANNOT_BP)
+		e3:SetReset(RESET_PHASE+PHASE_END)
+		Duel.RegisterEffect(e3,tp)
 		e:Reset()
 	end
 end

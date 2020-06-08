@@ -4,9 +4,6 @@ function c100730067.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730067.skill,c100730067.con,aux.Stringid(100730067,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730067.filter(c)
-	return c:IsCode(6172122)
-end
 function c100730067.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
@@ -15,7 +12,6 @@ function c100730067.con(e,tp)
 		and (Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_HAND,0,1,nil,0x3b)
 		or (Duel.GetLP(tp)==2400 and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,74677422)))
 end
-
 function c100730067.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730067)
