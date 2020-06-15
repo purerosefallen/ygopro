@@ -14,7 +14,7 @@ function c100730054.skill(e,tp,eg,ep,ev,re,r,rp)
 	if not Duel.SelectYesNo(tp,aux.Stringid(100730054,0)) then return end
 	aux.SpeedDuelSendToDeckWithExile(tp,g)
 	local g2=Duel.GetFieldGroup(tp,LOCATION_DECK,0)
-	g2=g2:RandomSelect(ct)
+	g2=g2:RandomSelect(tp,ct)
 	aux.SpeedDuelSendToHandWithExile(tp,g2)
 	
 	local e1=Effect.GlobalEffect()
