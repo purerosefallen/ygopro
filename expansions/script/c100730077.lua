@@ -20,7 +20,7 @@ function c100730077.skill(e,tp)
 		77637979,79016563,79130389,80088625,85243784,86066372,87871125,88000953,88093706,89238128,94207108,96380700,97383507,97677329,
 		98978921,99111753}
 	local g=CreateGroup()
-	for i,code in cards
+	for i,code in cards do
 		g:AddCard(Duel.CreateToken(tp,code))
 	end
 	local g2=g:RandomSelect(tp,1)
