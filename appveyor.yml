@@ -1,5 +1,5 @@
 version: '{build}'
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 environment:
   irrklang_pro: 1
@@ -45,7 +45,7 @@ install:
   - patch -p0 < irrlicht\irrlicht.patch
 
   # premake
-  - premake5 vs2017
+  - premake5 vs2019
   
 configuration: Release
 
