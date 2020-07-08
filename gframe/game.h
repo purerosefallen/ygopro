@@ -624,6 +624,13 @@ public:
 	irr::gui::IGUIButton* btnChainWhenAvail;
 	//cancel or finish
 	irr::gui::IGUIButton* btnCancelOrFinish;
+	//big picture
+	irr::gui::IGUIWindow* wBigCard;
+	irr::gui::IGUIImage* imgBigCard;
+	irr::gui::IGUIButton* btnBigCardOriginalSize;
+	irr::gui::IGUIButton* btnBigCardZoomIn;
+	irr::gui::IGUIButton* btnBigCardZoomOut;
+	irr::gui::IGUIButton* btnBigCardClose;
 #endif //YGOPRO_SERVER_MODE
 };
 
@@ -839,6 +846,11 @@ extern time_t pre_seed[3];
 #define CHECKBOX_DRAW_SINGLE_CHAIN	374
 #define CHECKBOX_REGEX				375
 #define COMBOBOX_LOCALE				376
+
+#define BUTTON_BIG_CARD_CLOSE		380
+#define BUTTON_BIG_CARD_ZOOM_IN		381
+#define BUTTON_BIG_CARD_ZOOM_OUT	382
+#define BUTTON_BIG_CARD_ORIG_SIZE	383
 
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
