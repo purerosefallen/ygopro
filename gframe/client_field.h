@@ -63,7 +63,8 @@ public:
 	int announce_count;
 	int select_counter_count;
 	int select_counter_type;
-	std::vector<ClientCard*> selectable_cards;
+	int current_mset_param;
+	std::vector<ClientCard *> selectable_cards;
 	std::vector<ClientCard*> selected_cards;
 	std::set<ClientCard*> selectsum_cards;
 	std::vector<ClientCard*> selectsum_all;

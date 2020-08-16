@@ -348,6 +348,9 @@ bool Game::Initialize() {
 	chkDrawSingleChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_DRAW_SINGLE_CHAIN, dataManager.GetSysString(1287));
 	chkDrawSingleChain->setChecked(gameConf.draw_single_chain != 0);
 	posY += 30;
+	chkAskMSet = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_ASK_MSET, dataManager.GetSysString(1268));
+	chkAskMSet->setChecked(gameConf.ask_mset != 0);
+	posY += 30;
 	chkAutoSaveReplay = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1366));
 	chkAutoSaveReplay->setChecked(gameConf.auto_save_replay != 0);
 	elmTabHelperLast = chkAutoSaveReplay;
@@ -1353,6 +1356,8 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.draw_single_chain = atoi(valbuf);
 		} else if(!strcmp(strbuf, "prefer_expansion_script")) {
 			gameConf.prefer_expansion_script = atoi(valbuf);
+		} else if(!strcmp(strbuf, "ask_mset")) {
+			gameConf.ask_mset = atoi(valbuf);
 		} else if(!strcmp(strbuf, "window_maximized")) {
 			gameConf.window_maximized = atoi(valbuf) > 0;
 		} else if(!strcmp(strbuf, "window_width")) {
@@ -1443,6 +1448,7 @@ void Game::LoadConfig() {
 	gameConf.auto_save_replay = 0;
 	gameConf.draw_single_chain = 0;
 	gameConf.prefer_expansion_script = 0;
+	gameConf.ask_mset = 0;
 	gameConf.enable_sound = true;
 	gameConf.sound_volume = 0.5;
 	gameConf.enable_music = true;
@@ -1579,6 +1585,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 	fprintf(fp, "draw_single_chain = %d\n", gameConf.draw_single_chain);
 	fprintf(fp, "prefer_expansion_script = %d\n", gameConf.prefer_expansion_script);
+	fprintf(fp, "ask_mset = %d\n", gameConf.ask_mset);
 	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
