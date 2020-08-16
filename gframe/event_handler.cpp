@@ -219,6 +219,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					}
 					break;
 				}
+				case MSG_SELECT_IDLECMD: {
+					mainGame->HideElement(mainGame->wQuery);
+					if(current_mset_param) {
+						DuelClient::SetResponseI(current_mset_param);
+						DuelClient::SendResponse();
+					}
+				}
 				default: {
 					mainGame->HideElement(mainGame->wQuery);
 					break;
@@ -505,8 +512,16 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					break;
 				for(size_t i = 0; i < msetable_cards.size(); ++i) {
 					if(msetable_cards[i] == clicked_card) {
-						DuelClient::SetResponseI((i << 16) + 3);
-						DuelClient::SendResponse();
+						current_mset_param = (i << 16) + 3;
+						if(mainGame->gameConf.ask_mset) {
+							wchar_t wbuf[256];
+							myswprintf(wbuf, dataManager.GetSysString(1355), dataManager.GetName(clicked_card->code));
+							mainGame->stQMessage->setText(wbuf);
+							mainGame->PopupElement(mainGame->wQuery);
+						} else {
+							DuelClient::SetResponseI(current_mset_param);
+							DuelClient::SendResponse();
+						}
 						break;
 					}
 				}
@@ -1912,6 +1927,11 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			}
 			case CHECKBOX_PREFER_EXPANSION: {
 				mainGame->gameConf.prefer_expansion_script = mainGame->chkPreferExpansionScript->isChecked() ? 1 : 0;
+				return true;
+				break;
+			}
+			case CHECKBOX_ASK_MSET: {
+				mainGame->gameConf.ask_mset = mainGame->chkAskMSet->isChecked() ? 1 : 0;
 				return true;
 				break;
 			}

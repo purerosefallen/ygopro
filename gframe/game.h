@@ -57,6 +57,7 @@ struct Config {
 	int auto_save_replay;
 	int draw_single_chain;
 	int prefer_expansion_script;
+	int ask_mset;
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
@@ -320,6 +321,7 @@ public:
 	irr::gui::IGUICheckBox* chkQuickAnimation;
 	irr::gui::IGUICheckBox* chkAutoSaveReplay;
 	irr::gui::IGUICheckBox* chkDrawSingleChain;
+	irr::gui::IGUICheckBox* chkAskMSet;
 	irr::gui::IGUIWindow* tabSystem;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
@@ -828,6 +830,7 @@ extern Game* mainGame;
 #define CHECKBOX_DRAW_SINGLE_CHAIN	374
 #define CHECKBOX_REGEX				375
 #define COMBOBOX_LOCALE				376
+#define CHECKBOX_ASK_MSET			377
 
 #define BUTTON_BIG_CARD_CLOSE		380
 #define BUTTON_BIG_CARD_ZOOM_IN		381
