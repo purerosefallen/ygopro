@@ -59,7 +59,7 @@ after_build:
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
   - 7z x -y WindBot.7z
 
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://cdn01.moecube.com/images/ygopro-images-zh-CN.zip ; exit 0"
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://s.my-card.in:444/images/ygopro-images-zh-CN.zip ; exit 0"
   - 7z x -y -opics ygopro-images-zh-CN.zip
 
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/update-koishipro/archive/master.zip ; exit 0"

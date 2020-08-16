@@ -4,7 +4,7 @@ os:
 - osx
 sudo: required
 dist: bionic
-osx_image: xcode9.4
+osx_image: xcode10.3
 addons:
   ssh_known_hosts:
   - github.com
@@ -86,7 +86,7 @@ before_deploy:
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
   fi
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://cdn01.moecube.com/images/ygopro-images-zh-CN.zip
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://s.my-card.in:444/images/ygopro-images-zh-CN.zip
 - 7z x -y -opics ygopro-images-zh-CN.zip > /dev/null
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
