@@ -16,8 +16,8 @@ VALUE "InternalName", "KoishiPro"
 VALUE "LegalCopyright", "Copyright (C) 2019 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "KoishiPro"
-VALUE "FileVersion", "Kitasaitama"
-VALUE "ProductVersion", "Kitasaitama"
+VALUE "FileVersion", "IZANA"
+VALUE "ProductVersion", "IZANA"
 END
 END
 BLOCK "VarFileInfo"
