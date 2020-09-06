@@ -1011,7 +1011,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	}
 	switch(mainGame->dInfo.curMsg) {
 	case MSG_RESET_TIME: {
-		pbuf += 2;
+		pbuf += 3;
 		break;
 	}
 	case MSG_RETRY: {

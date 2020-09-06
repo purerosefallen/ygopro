@@ -182,7 +182,7 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 		mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
 		switch (mainGame->dInfo.curMsg) {
 		case MSG_RESET_TIME: {
-			pbuf += 2;
+			pbuf += 3;
 			break;
 		}
 		case MSG_RETRY: {
