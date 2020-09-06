@@ -310,6 +310,10 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 		bool pauseable = true;
 		mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
 		switch (mainGame->dInfo.curMsg) {
+		case MSG_RESET_TIME: {
+			pbuf += 2;
+			break;
+		}
 		case MSG_RETRY: {
 			if(mainGame->dInfo.isReplaySkiping) {
 				mainGame->dInfo.isReplaySkiping = false;

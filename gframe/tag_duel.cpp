@@ -550,6 +550,17 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 		offset = pbuf;
 		unsigned char engType = BufferIO::ReadUInt8(pbuf);
 		switch (engType) {
+		case MSG_RESET_TIME: {
+			player = BufferIO::ReadInt8(pbuf);
+			int time = BufferIO::ReadInt8(pbuf);
+			if(host_info.time_limit) {
+				if(time)
+					time_limit[player] = time;
+				else
+					time_limit[player] = host_info.time_limit;				
+			}
+			break;			
+		}
 		case MSG_RETRY: {
 			WaitforResponse(last_response);
 			NetServer::SendBufferToPlayer(cur_player[last_response], STOC_GAME_MSG, offset, pbuf - offset);

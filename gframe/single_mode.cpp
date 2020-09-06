@@ -182,6 +182,10 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 		offset = pbuf;
 		mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
 		switch (mainGame->dInfo.curMsg) {
+		case MSG_RESET_TIME: {
+			pbuf += 2;
+			break;
+		}
 		case MSG_RETRY: {
 			if(!DuelClient::ClientAnalyze(offset, pbuf - offset)) {
 				mainGame->singleSignal.Reset();
