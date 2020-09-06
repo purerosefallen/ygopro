@@ -1010,6 +1010,10 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		is_swapping = false;
 	}
 	switch(mainGame->dInfo.curMsg) {
+	case MSG_RESET_TIME: {
+		pbuf += 2;
+		break;
+	}
 	case MSG_RETRY: {
 		if(last_successful_msg_length) {
 			char* p = last_successful_msg;
