@@ -6,7 +6,6 @@
 #include "sound_manager.h"
 #include "game.h"
 #include "duelclient.h"
-#include <algorithm>
 
 namespace ygo {
 
@@ -79,22 +78,23 @@ inline void refreshDeckList() {
 	});
 }
 inline void refreshReadonly(int catesel) {
+	bool hasDeck = mainGame->cbDBDecks->getItemCount() != 0;
 	mainGame->deckBuilder.readonly = catesel < 2;
 	mainGame->btnSaveDeck->setEnabled(!mainGame->deckBuilder.readonly);
-	mainGame->btnDeleteDeck->setEnabled(!mainGame->deckBuilder.readonly);
+	mainGame->btnDeleteDeck->setEnabled(hasDeck && !mainGame->deckBuilder.readonly);
 	mainGame->btnRenameCategory->setEnabled(catesel > 3);
 	mainGame->btnDeleteCategory->setEnabled(catesel > 3);
 	mainGame->btnNewDeck->setEnabled(!mainGame->deckBuilder.readonly);
-	mainGame->btnRenameDeck->setEnabled(!mainGame->deckBuilder.readonly);
-	mainGame->btnDMDeleteDeck->setEnabled(!mainGame->deckBuilder.readonly);
-	mainGame->btnMoveDeck->setEnabled(!mainGame->deckBuilder.readonly);
-	mainGame->btnCopyDeck->setEnabled(!mainGame->deckBuilder.readonly);
+	mainGame->btnRenameDeck->setEnabled(hasDeck && !mainGame->deckBuilder.readonly);
+	mainGame->btnDMDeleteDeck->setEnabled(hasDeck && !mainGame->deckBuilder.readonly);
+	mainGame->btnMoveDeck->setEnabled(hasDeck && !mainGame->deckBuilder.readonly);
+	mainGame->btnCopyDeck->setEnabled(hasDeck);
 }
 inline void changeCategory(int catesel) {
-	refreshReadonly(catesel);
 	mainGame->RefreshDeck(mainGame->cbDBCategory, mainGame->cbDBDecks);
 	mainGame->cbDBDecks->setSelected(0);
 	deckManager.LoadDeck(mainGame->cbDBCategory, mainGame->cbDBDecks);
+	refreshReadonly(catesel);
 	mainGame->deckBuilder.is_modified = false;
 	mainGame->deckBuilder.prev_category = catesel;
 	mainGame->deckBuilder.prev_deck = 0;
@@ -116,12 +116,58 @@ inline void showDeckManage() {
 		}
 	});
 	lstCategories->setSelected(mainGame->deckBuilder.prev_category);
-	refreshReadonly(mainGame->deckBuilder.prev_category);
 	refreshDeckList();
+	refreshReadonly(mainGame->deckBuilder.prev_category);
 	mainGame->lstDecks->setSelected(mainGame->deckBuilder.prev_deck);
 	mainGame->PopupElement(mainGame->wDeckManage);
 }
 
+inline void ShowBigCard(int code, float zoom) {
+	mainGame->deckBuilder.bigcard_code = code;
+	mainGame->deckBuilder.bigcard_zoom = zoom;
+	ITexture* img = imageManager.GetBigPicture(code, zoom);
+	mainGame->imgBigCard->setImage(img);
+	auto size = img->getSize();
+	s32 left = mainGame->window_size.Width / 2 - size.Width / 2;
+	s32 top = mainGame->window_size.Height / 2 - size.Height / 2;
+	mainGame->imgBigCard->setRelativePosition(recti(0, 0, size.Width, size.Height));
+	mainGame->wBigCard->setRelativePosition(recti(left, top, left + size.Width, top + size.Height));
+	mainGame->gMutex.lock();
+	mainGame->btnBigCardOriginalSize->setVisible(true);
+	mainGame->btnBigCardZoomIn->setVisible(true);
+	mainGame->btnBigCardZoomOut->setVisible(true);
+	mainGame->btnBigCardClose->setVisible(true);
+	mainGame->ShowElement(mainGame->wBigCard);
+	mainGame->env->getRootGUIElement()->bringToFront(mainGame->wBigCard);
+	mainGame->gMutex.unlock();
+}
+inline void ZoomBigCard(s32 centerx = -1, s32 centery = -1) {
+	if(mainGame->deckBuilder.bigcard_zoom >= 4)
+		mainGame->deckBuilder.bigcard_zoom = 4;
+	if(mainGame->deckBuilder.bigcard_zoom <= 0.2)
+		mainGame->deckBuilder.bigcard_zoom = 0.2;
+	ITexture* img = imageManager.GetBigPicture(mainGame->deckBuilder.bigcard_code, mainGame->deckBuilder.bigcard_zoom);
+	mainGame->imgBigCard->setImage(img);
+	auto size = img->getSize();
+	auto pos = mainGame->wBigCard->getRelativePosition();
+	if(centerx == -1) {
+		centerx = pos.UpperLeftCorner.X + pos.getWidth() / 2;
+		centery = pos.UpperLeftCorner.Y + pos.getHeight() * 0.444f;
+	}
+	float posx = (float)(centerx - pos.UpperLeftCorner.X) / pos.getWidth();
+	float posy = (float)(centery - pos.UpperLeftCorner.Y) / pos.getHeight();
+	s32 left = centerx - size.Width * posx;
+	s32 top = centery - size.Height * posy;
+	mainGame->imgBigCard->setRelativePosition(recti(0, 0, size.Width, size.Height));
+	mainGame->wBigCard->setRelativePosition(recti(left, top, left + size.Width, top + size.Height));
+}
+inline void CloseBigCard() {
+	mainGame->HideElement(mainGame->wBigCard);
+	mainGame->btnBigCardOriginalSize->setVisible(false);
+	mainGame->btnBigCardZoomIn->setVisible(false);
+	mainGame->btnBigCardZoomOut->setVisible(false);
+	mainGame->btnBigCardClose->setVisible(false);
+}
 void DeckBuilder::Initialize() {
 	mainGame->is_building = true;
 	mainGame->is_siding = false;
@@ -167,6 +213,11 @@ void DeckBuilder::Terminate() {
 	mainGame->wCardImg->setVisible(false);
 	mainGame->wInfos->setVisible(false);
 	mainGame->btnLeaveGame->setVisible(false);
+	mainGame->wBigCard->setVisible(false);
+	mainGame->btnBigCardOriginalSize->setVisible(false);
+	mainGame->btnBigCardZoomIn->setVisible(false);
+	mainGame->btnBigCardZoomOut->setVisible(false);
+	mainGame->btnBigCardClose->setVisible(false);
 	mainGame->PopupElement(mainGame->wMainMenu);
 	mainGame->device->setEventReceiver(&mainGame->menuHandler);
 	mainGame->wACMessage->setVisible(false);
@@ -626,6 +677,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 							mainGame->cbDBDecks->setSelected(decksel);
 							deckManager.LoadDeck(mainGame->cbDBCategory, mainGame->cbDBDecks);
 						}
+						refreshReadonly(prev_category);
 						prev_deck = decksel;
 					} else {
 						mainGame->stACMessage->setText(dataManager.GetSysString(1476));
@@ -753,6 +805,24 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				deckManager.LoadDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
 				break;
 			}
+			case BUTTON_BIG_CARD_ORIG_SIZE: {
+				ShowBigCard(bigcard_code, 1);
+				break;
+			}
+			case BUTTON_BIG_CARD_ZOOM_IN: {
+				bigcard_zoom += 0.2;
+				ZoomBigCard();
+				break;
+			}
+			case BUTTON_BIG_CARD_ZOOM_OUT: {
+				bigcard_zoom -= 0.2;
+				ZoomBigCard();
+				break;
+			}
+			case BUTTON_BIG_CARD_CLOSE: {
+				CloseBigCard();
+				break;
+			}
 			case BUTTON_MSG_OK: {
 				mainGame->HideElement(mainGame->wMessage);
 				mainGame->actionSignal.Set();
@@ -853,6 +923,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		}
 		case irr::gui::EGET_EDITBOX_ENTER: {
 			switch(id) {
+			case EDITBOX_INPUTS:
 			case EDITBOX_KEYWORD: {
 				StartFilter();
 				break;
@@ -1009,6 +1080,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				}
+				mainGame->env->setFocus(0);
 				InstantSearch();
 				break;
 			}
@@ -1026,13 +1098,16 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 						mainGame->ebDefense->setEnabled(true);
 					}
 				}
+				mainGame->env->setFocus(0);
 				InstantSearch();
 				break;
 			}
 			case COMBOBOX_ATTRIBUTE:
 			case COMBOBOX_RACE:
 			case COMBOBOX_LIMIT:
+				mainGame->env->setFocus(0);
 				InstantSearch();
+				break;
 			}
 		}
 		case irr::gui::EGET_LISTBOX_CHANGED: {
@@ -1104,6 +1179,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		}
 		case irr::EMIE_LMOUSE_LEFT_UP: {
 			is_starting_dragging = false;
+			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
+				ShowBigCard(mainGame->showingcode, 1);
+				break;
+			}
 			if(!is_draging)
 				break;
 			soundManager.PlaySoundEffect(SOUND_CARD_DROP);
@@ -1127,6 +1207,14 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			is_draging = false;
 			break;
 		}
+		case irr::EMIE_LMOUSE_DOUBLE_CLICK: {
+			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == root && hovered_code) {
+				ShowBigCard(hovered_code, 1);
+				break;
+			}
+			break;
+		}
 		case irr::EMIE_RMOUSE_LEFT_UP: {
 			if(mainGame->is_siding) {
 				if(is_draging)
@@ -1147,6 +1235,10 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					if(push_extra(pointer) || push_main(pointer))
 						pop_side(hovered_seq);
 				}
+				break;
+			}
+			if(mainGame->wBigCard->isVisible()) {
+				CloseBigCard();
 				break;
 			}
 			if(havePopupWindow())
@@ -1231,11 +1323,16 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			break;
 		}
 		case irr::EMIE_MOUSE_WHEEL: {
+			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			if(root->getElementFromPoint(mouse_pos) == mainGame->imgBigCard) {
+				bigcard_zoom += 0.1f * event.MouseInput.Wheel;
+				ZoomBigCard(mouse_pos.X, mouse_pos.Y);
+				break;
+			}
 			if(!mainGame->scrFilter->isVisible())
 				break;
 			if(mainGame->env->hasFocus(mainGame->scrFilter))
 				break;
-			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(root->getElementFromPoint(mouse_pos) != root)
 				break;
 			if(event.MouseInput.Wheel < 0) {
@@ -1467,8 +1564,8 @@ void DeckBuilder::FilterCards() {
 			}
 			if(filter_scltype) {
 				if((filter_scltype == 1 && data.lscale != filter_scl) || (filter_scltype == 2 && data.lscale < filter_scl)
-				        || (filter_scltype == 3 && data.lscale <= filter_scl) || (filter_scltype == 4 && (data.lscale > filter_scl || data.lscale == 0))
-				        || (filter_scltype == 5 && (data.lscale >= filter_scl || data.lscale == 0)) || filter_scltype == 6
+				        || (filter_scltype == 3 && data.lscale <= filter_scl) || (filter_scltype == 4 && (data.lscale > filter_scl))
+				        || (filter_scltype == 5 && (data.lscale >= filter_scl)) || filter_scltype == 6
 				        || !(data.type & TYPE_PENDULUM))
 					continue;
 			}
@@ -1650,6 +1747,7 @@ bool DeckBuilder::CardNameContains(const wchar_t *haystack, const wchar_t *needl
 				return true;
 			}
 		} else {
+			i -= j;
 			j = 0;
 		}
 		i++;

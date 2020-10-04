@@ -447,6 +447,20 @@ void SingleDuel::StartDuel(DuelPlayer* dp) {
 		replay_recorder->state = CTOS_LEAVE_GAME;
 	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
+	char deckbuff[12];
+	char* pbuf = deckbuff;
+	BufferIO::WriteInt16(pbuf, pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, pdeck[0].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[0].side.size());
+	BufferIO::WriteInt16(pbuf, pdeck[1].main.size());
+	BufferIO::WriteInt16(pbuf, pdeck[1].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[1].side.size());
+	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
+	char tempbuff[6];
+	memcpy(tempbuff, deckbuff, 6);
+	memcpy(deckbuff, deckbuff + 6, 6);
+	memcpy(deckbuff + 6, tempbuff, 6);
+	NetServer::SendBufferToPlayer(players[1], STOC_DECK_COUNT, deckbuff, 12);
 	NetServer::SendPacketToPlayer(players[0], STOC_SELECT_HAND);
 	NetServer::ReSendToPlayer(players[1]);
 	hand_result[0] = 0;
@@ -523,6 +537,11 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	rh.version = PRO_VERSION;
 	rh.flag = 0;
 	time_t seed = time(0);
+#ifdef YGOPRO_SERVER_MODE
+	if(pre_seed[duel_count] > 0) {
+		seed = pre_seed[duel_count];
+	}
+#endif
 	rh.seed = seed;
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
@@ -608,6 +627,15 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	RefreshExtra(0);
 	RefreshExtra(1);
 	start_duel(pduel, opt);
+	if(host_info.time_limit) {
+		time_elapsed = 0;
+#ifdef YGOPRO_SERVER_MODE
+		time_compensator[0] = host_info.time_limit;
+		time_compensator[1] = host_info.time_limit;
+#endif
+		timeval timeout = { 1, 0 };
+		event_add(etimer, &timeout);
+	}
 	Process();
 }
 void SingleDuel::Process() {
@@ -719,6 +747,17 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 		offset = pbuf;
 		unsigned char engType = BufferIO::ReadUInt8(pbuf);
 		switch (engType) {
+		case MSG_RESET_TIME: {
+			player = BufferIO::ReadInt8(pbuf);
+			short time = BufferIO::ReadInt16(pbuf);
+			if(host_info.time_limit) {
+				if(time)
+					time_limit[player] = time;
+				else
+					time_limit[player] = host_info.time_limit;				
+			}
+			break;			
+		}
 		case MSG_RETRY: {
 			WaitforResponse(last_response);
 			NetServer::SendBufferToPlayer(players[last_response], STOC_GAME_MSG, offset, pbuf - offset);
@@ -740,7 +779,8 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 			case 6:
 			case 7:
 			case 8:
-			case 9: {
+			case 9:
+			case 11: {
 				NetServer::SendBufferToPlayer(players[1 - player], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 					NetServer::ReSendToPlayer(*oit);
@@ -750,9 +790,9 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 				break;
 			}
 			case 10:
-			case 11:
-			case 12:
-			case 13: {
+			case 21:
+			case 22:
+			case 23: {
 				NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 				NetServer::SendBufferToPlayer(players[1], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -941,8 +981,7 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 			NetServer::SendBufferToPlayer(players[player], STOC_GAME_MSG, offset, pbuf - offset);
 			return 1;
 		}
-		case MSG_SORT_CARD:
-		case MSG_SORT_CHAIN: {
+		case MSG_SORT_CARD: {
 			player = BufferIO::ReadInt8(pbuf);
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 7;
@@ -1120,6 +1159,10 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 #endif
 			time_limit[0] = host_info.time_limit;
 			time_limit[1] = host_info.time_limit;
+#ifdef YGOPRO_SERVER_MODE
+			time_compensator[0] = host_info.time_limit;
+			time_compensator[1] = host_info.time_limit;
+#endif
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 			NetServer::ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1744,7 +1787,7 @@ void SingleDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 		if(time_limit[dp->type] >= time_elapsed)
 			time_limit[dp->type] -= time_elapsed;
 		else time_limit[dp->type] = 0;
-		event_del(etimer);
+		time_elapsed = 0;
 	}
 	Process();
 }
@@ -1769,6 +1812,7 @@ void SingleDuel::EndDuel() {
 		NetServer::ReSendToPlayer(*oit);
 #endif //YGOPRO_SERVER_MODE
 	end_duel(pduel);
+	event_del(etimer);
 	pduel = 0;
 }
 void SingleDuel::WaitforResponse(int playerid) {
@@ -1855,9 +1899,19 @@ void SingleDuel::TimeConfirm(DuelPlayer* dp) {
 	if(dp->type != last_response)
 		return;
 	players[last_response]->state = CTOS_RESPONSE;
-	time_elapsed = 0;
-	timeval timeout = {1, 0};
-	event_add(etimer, &timeout);
+#ifdef YGOPRO_SERVER_MODE
+	if(time_elapsed < 10 && time_elapsed <= time_compensator[dp->type]){
+		time_compensator[dp->type] -= time_elapsed;
+		time_elapsed = 0;
+	}
+	else {
+		time_limit[dp->type] -= time_elapsed;
+		time_elapsed = 0;
+	}
+#else
+	if(time_elapsed < 10)
+		time_elapsed = 0;
+#endif //YGOPRO_SERVER_MODE
 }
 #ifdef YGOPRO_SERVER_MODE
 void SingleDuel::RefreshMzone(int player, int flag, int use_cache, DuelPlayer* dp)
@@ -2167,7 +2221,10 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 		sd->EndDuel();
 		sd->DuelEndProc();
 		event_del(sd->etimer);
+		return;
 	}
+	timeval timeout = { 1, 0 };
+	event_add(sd->etimer, &timeout);
 }
 #ifdef YGOPRO_SERVER_MODE
 void SingleDuel::TestCard(int code) {

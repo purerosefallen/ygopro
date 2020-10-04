@@ -25,7 +25,7 @@ else ()
     add_executable (ygopro ${AUTO_FILES_RESULT})
 endif ()
 
-target_link_libraries (ygopro ocgcore lua clzma)
+target_link_libraries (ygopro ocgcore clzma)
 
 if (MSVC)
     target_link_libraries (ygopro irrlicht freetype sqlite3 event)
@@ -46,6 +46,12 @@ else ()
         ${OPENGL_INCLUDE_DIR}
     )
     target_link_libraries (ygopro ${CMAKE_THREAD_LIBS_INIT} ${DL_LIBRARIES})
+endif ()
+
+if (APPLE)
+    find_library(COCOA_LIBRARY Cocoa)
+    find_library(IOKIT_LIBRARY IOKit)
+    target_link_libraries(ygopro ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
 endif ()
 
 if (USE_IRRKLANG)

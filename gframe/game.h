@@ -42,6 +42,7 @@ struct Config {
 	int chkWaitChain;
 	int chkIgnore1;
 	int chkIgnore2;
+	int default_rule;
 	int hide_setname;
 	int hide_hint_button;
 	int control_mode;
@@ -59,7 +60,9 @@ struct Config {
 	int window_height;
 	bool resize_popup_menu;
 	int auto_save_replay;
+	int draw_single_chain;
 	int prefer_expansion_script;
+	int ask_mset;
 	bool enable_sound;
 	bool enable_music;
 	double sound_volume;
@@ -112,6 +115,7 @@ struct BotInfo {
 	wchar_t desc[256];
 	bool support_master_rule_3;
 	bool support_new_master_rule;
+	bool support_master_rule_2020;
 };
 
 struct FadingUnit {
@@ -171,6 +175,7 @@ public:
 	void WaitFrameSignal(int frame);
 	void DrawThumb(code_pointer cp, position2di pos, const std::unordered_map<int,int>* lflist, bool drag = false);
 	void DrawDeckBd();
+	bool LoadConfigFromFile(const char* file);
 	void LoadConfig();
 	void SaveConfig();
 	void ShowCardInfo(int code, bool resize = false);
@@ -182,6 +187,8 @@ public:
 	void ErrorLog(const char* msgbuf);
 	void initUtils();
 	void ClearTextures();
+	void CloseGameButtons();
+	void CloseGameWindow();
 	void CloseDuelWindow();
 
 	int LocalPlayer(int player);
@@ -193,6 +200,12 @@ public:
 	bool HasFocus(EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
 		return focus && focus->hasType(type);
+	}
+
+	void TrimText(irr::gui::IGUIElement* editbox) const {
+		irr::core::stringw text(editbox->getText());
+		text.trim();
+		editbox->setText(text.c_str());
 	}
 
 	void OnResize();
@@ -319,6 +332,8 @@ public:
 	irr::gui::IGUICheckBox* chkWaitChain;
 	irr::gui::IGUICheckBox* chkQuickAnimation;
 	irr::gui::IGUICheckBox* chkAutoSaveReplay;
+	irr::gui::IGUICheckBox* chkDrawSingleChain;
+	irr::gui::IGUICheckBox* chkAskMSet;
 	irr::gui::IGUIWindow* tabSystem;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
@@ -404,7 +419,7 @@ public:
 	irr::gui::IGUIStaticText* stBotInfo;
 	irr::gui::IGUIButton* btnStartBot;
 	irr::gui::IGUIButton* btnBotCancel;
-	irr::gui::IGUICheckBox* chkBotOldRule;
+	irr::gui::IGUIComboBox* cbBotRule;
 	irr::gui::IGUICheckBox* chkBotHand;
 	irr::gui::IGUICheckBox* chkBotNoCheckDeck;
 	irr::gui::IGUICheckBox* chkBotNoShuffleDeck;
@@ -611,6 +626,13 @@ public:
 	irr::gui::IGUIButton* btnChainWhenAvail;
 	//cancel or finish
 	irr::gui::IGUIButton* btnCancelOrFinish;
+	//big picture
+	irr::gui::IGUIWindow* wBigCard;
+	irr::gui::IGUIImage* imgBigCard;
+	irr::gui::IGUIButton* btnBigCardOriginalSize;
+	irr::gui::IGUIButton* btnBigCardZoomIn;
+	irr::gui::IGUIButton* btnBigCardZoomOut;
+	irr::gui::IGUIButton* btnBigCardClose;
 #endif //YGOPRO_SERVER_MODE
 };
 
@@ -619,8 +641,8 @@ extern Game* mainGame;
 extern unsigned short aServerPort;
 extern unsigned short replay_mode;
 extern HostInfo game_info;
+extern time_t pre_seed[3];
 #endif
-
 }
 
 #define CARD_IMG_WIDTH		177
@@ -685,7 +707,7 @@ extern HostInfo game_info;
 #define BUTTON_CANCEL_SINGLEPLAY	152
 #define LISTBOX_BOT_LIST			153
 #define BUTTON_BOT_START			154
-#define CHECKBOX_BOT_OLD_RULE		155
+#define COMBOBOX_BOT_RULE			155
 #define EDITBOX_CHAT				199
 
 #define BUTTON_MSG_OK				200
@@ -790,7 +812,7 @@ extern HostInfo game_info;
 #define BUTTON_MARKS_FILTER			322
 #define BUTTON_MARKERS_OK			323
 #define COMBOBOX_SORTTYPE			324
-
+#define EDITBOX_INPUTS				325
 #define WINDOW_DECK_MANAGE			330
 #define BUTTON_NEW_CATEGORY			331
 #define BUTTON_RENAME_CATEGORY		332
@@ -823,8 +845,15 @@ extern HostInfo game_info;
 #define SCROLL_TAB_SYSTEM			371
 #define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_PREFER_EXPANSION	373
-#define CHECKBOX_REGEX				374
-#define COMBOBOX_LOCALE				375
+#define CHECKBOX_DRAW_SINGLE_CHAIN	374
+#define CHECKBOX_REGEX				375
+#define COMBOBOX_LOCALE				376
+#define CHECKBOX_ASK_MSET			377
+
+#define BUTTON_BIG_CARD_CLOSE		380
+#define BUTTON_BIG_CARD_ZOOM_IN		381
+#define BUTTON_BIG_CARD_ZOOM_OUT	382
+#define BUTTON_BIG_CARD_ORIG_SIZE	383
 
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
@@ -839,7 +868,7 @@ extern HostInfo game_info;
 #define TEXTURE_ACTIVATE			6
 
 #ifndef DEFAULT_DUEL_RULE
-#define DEFAULT_DUEL_RULE			4
+#define DEFAULT_DUEL_RULE			5
 #endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10

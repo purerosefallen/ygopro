@@ -126,7 +126,7 @@ void Game::DrawBackGround() {
 	driver->drawVertexPrimitiveList(matManager.vField, 4, matManager.iRectangle, 2);
 	driver->setMaterial(matManager.mBackLine);
 	//select field
-	if(dInfo.curMsg == MSG_SELECT_PLACE || dInfo.curMsg == MSG_SELECT_DISFIELD) {
+	if(dInfo.curMsg == MSG_SELECT_PLACE || dInfo.curMsg == MSG_SELECT_DISFIELD || dInfo.curMsg == MSG_HINT) {
 		float cv[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 		unsigned int filter = 0x1;
 		for (int i = 0; i < 7; ++i, filter <<= 1) {
@@ -415,7 +415,8 @@ void Game::DrawCard(ClientCard* pcard) {
 		matManager.mTexture.setTexture(0, imageManager.tAttack);
 		driver->setMaterial(matManager.mTexture);
 		irr::core::matrix4 atk;
-		atk.setTranslation(pcard->curPos + vector3df(0, -atkdy / 4.0f - 0.35f, 0.05f));
+		atk.setTranslation(pcard->curPos + vector3df(0, (pcard->controler == 0 ? -1 : 1) * (atkdy / 4.0f + 0.35f), 0.05f));
+		atk.setRotationRadians(vector3df(0, 0, pcard->controler == 0 ? 0 : 3.1415926f));
 		driver->setTransform(irr::video::ETS_WORLD, atk);
 		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
 	}
@@ -446,7 +447,7 @@ void Game::DrawShadowText(CGUITTFont * font, const core::stringw & text, const c
 void Game::DrawMisc() {
 	static irr::core::vector3df act_rot(0, 0, 0);
 	int rule = (dInfo.duel_rule >= 4) ? 1 : 0;
-	irr::core::matrix4 im, ic, it;
+	irr::core::matrix4 im, ic, it, ig;
 	act_rot.Z += 0.02f;
 	im.setRotationRadians(act_rot);
 	matManager.mTexture.setTexture(0, imageManager.tAct);
@@ -490,12 +491,24 @@ void Game::DrawMisc() {
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
 	if(dField.conti_act) {
-		im.setTranslation(vector3df((matManager.vFieldContiAct[0].X + matManager.vFieldContiAct[1].X) / 2,
-			(matManager.vFieldContiAct[0].Y + matManager.vFieldContiAct[2].Y) / 2, 0.03f));
+		irr::core::vector3df pos = vector3df((matManager.vFieldContiAct[0].X + matManager.vFieldContiAct[1].X) / 2,
+			(matManager.vFieldContiAct[0].Y + matManager.vFieldContiAct[2].Y) / 2, 0);
+		im.setRotationRadians(irr::core::vector3df(0, 0, 0));
+		for(auto cit = dField.conti_cards.begin(); cit != dField.conti_cards.end(); ++cit) {
+			im.setTranslation(pos);
+			driver->setTransform(irr::video::ETS_WORLD, im);
+			matManager.mCard.setTexture(0, imageManager.GetTexture((*cit)->code));
+			driver->setMaterial(matManager.mCard);
+			driver->drawVertexPrimitiveList(matManager.vCardFront, 4, matManager.iRectangle, 2);
+			pos.Z += 0.03f;
+		}
+		im.setTranslation(pos);
+		im.setRotationRadians(act_rot);
 		driver->setTransform(irr::video::ETS_WORLD, im);
+		driver->setMaterial(matManager.mTexture);
 		driver->drawVertexPrimitiveList(matManager.vActivate, 4, matManager.iRectangle, 2);
 	}
-	if(dField.chains.size() > 1) {
+	if(dField.chains.size() > 1 || mainGame->gameConf.draw_single_chain) {
 		for(size_t i = 0; i < dField.chains.size(); ++i) {
 			if(dField.chains[i].solved)
 				break;
@@ -517,6 +530,18 @@ void Game::DrawMisc() {
 			driver->setTransform(irr::video::ETS_WORLD, it);
 			driver->drawVertexPrimitiveList(matManager.vChainNum, 4, matManager.iRectangle, 2);
 		}
+	}
+	if(dField.cant_check_grave) {
+		matManager.mTexture.setTexture(0, imageManager.tNegated);
+		driver->setMaterial(matManager.mTexture);
+		ig.setTranslation(vector3df((matManager.vFieldGrave[0][rule][0].Pos.X + matManager.vFieldGrave[0][rule][1].Pos.X) / 2,
+			(matManager.vFieldGrave[0][rule][0].Pos.Y + matManager.vFieldGrave[0][rule][2].Pos.Y) / 2, dField.grave[0].size() * 0.01f + 0.02f));
+		driver->setTransform(irr::video::ETS_WORLD, ig);
+		driver->drawVertexPrimitiveList(matManager.vNegate, 4, matManager.iRectangle, 2);
+		ig.setTranslation(vector3df((matManager.vFieldGrave[1][rule][0].Pos.X + matManager.vFieldGrave[1][rule][1].Pos.X) / 2,
+			(matManager.vFieldGrave[1][rule][0].Pos.Y + matManager.vFieldGrave[1][rule][2].Pos.Y) / 2, dField.grave[1].size() * 0.01f + 0.02f));
+		driver->setTransform(irr::video::ETS_WORLD, ig);
+		driver->drawVertexPrimitiveList(matManager.vNegate, 4, matManager.iRectangle, 2);
 	}
 	//finish button
 	if(btnCancelOrFinish->isVisible() && dField.select_ready)
@@ -1068,9 +1093,12 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 			btnCardDisplay[i]->setDrawImage(false);
 	}
 	win->setRelativePosition(irr::core::recti(center.X, center.Y, 0, 0));
+	win->setVisible(true);
 	fadingList.push_back(fu);
 }
 void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
+	if(!win->isVisible() && !set_action)
+		return;
 	FadingUnit fu;
 	fu.fadingSize = win->getRelativePosition();
 	for(auto fit = fadingList.begin(); fit != fadingList.end(); ++fit)
@@ -1095,10 +1123,16 @@ void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
 		for(int i = 0; i < 5; ++i)
 			btnCardSelect[i]->setDrawImage(false);
 		dField.conti_selecting = false;
+		stCardListTip->setVisible(false);
+		for(auto& pcard : dField.selectable_cards)
+			dField.SetShowMark(pcard, false);
 	}
 	if(win == wCardDisplay) {
 		for(int i = 0; i < 5; ++i)
 			btnCardDisplay[i]->setDrawImage(false);
+		stCardListTip->setVisible(false);
+		for(auto& pcard : dField.display_cards)
+			dField.SetShowMark(pcard, false);
 	}
 	fadingList.push_back(fu);
 }
@@ -1280,8 +1314,13 @@ void Game::DrawDeckBd() {
 	DrawShadowText(numFont, deckBuilder.result_string, Resize(875, 137, 935, 157), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, false, true);
 	driver->draw2DRectangle(Resize(805, 160, 1020, 630), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(Resize(804, 159, 1020, 630));
-	for(size_t i = 0; i < 7 && i + scrFilter->getPos() < deckBuilder.results.size(); ++i) {
+	for(size_t i = 0; i < 9 && i + scrFilter->getPos() < deckBuilder.results.size(); ++i) {
 		code_pointer ptr = deckBuilder.results[i + scrFilter->getPos()];
+		if(i >= 7)
+		{
+			imageManager.GetTextureThumb(ptr->second.code);
+			break;
+		}
 		if(deckBuilder.hovered_pos == 4 && deckBuilder.hovered_seq == (int)i)
 			driver->draw2DRectangle(0x80000000, Resize(806, 164 + i * 66, 1019, 230 + i * 66));
 		DrawThumb(ptr, position2di(810, 165 + i * 66), deckBuilder.filterList);

@@ -63,7 +63,8 @@ public:
 	int announce_count;
 	int select_counter_count;
 	int select_counter_type;
-	std::vector<ClientCard*> selectable_cards;
+	int current_mset_param;
+	std::vector<ClientCard *> selectable_cards;
 	std::vector<ClientCard*> selected_cards;
 	std::set<ClientCard*> selectsum_cards;
 	std::vector<ClientCard*> selectsum_all;
@@ -82,6 +83,7 @@ public:
 	bool last_chain;
 	bool deck_reversed;
 	bool conti_selecting;
+	bool cant_check_grave;
 
 	ClientField();
 	void Clear();
@@ -107,16 +109,23 @@ public:
 	void FadeCard(ClientCard* pcard, int alpha, int frame);
 	bool ShowSelectSum(bool panelmode);
 	bool CheckSelectSum();
+	bool CheckSelectTribute();
 	bool check_min(const std::set<ClientCard*>& left, std::set<ClientCard*>::const_iterator index, int min, int max);
 	bool check_sel_sum_s(const std::set<ClientCard*>& left, int index, int acc);
 	void check_sel_sum_t(const std::set<ClientCard*>& left, int acc);
 	bool check_sum(std::set<ClientCard*>::const_iterator index, std::set<ClientCard*>::const_iterator end, int acc, int count);
+	bool check_sel_sum_trib_s(const std::set<ClientCard*>& left, int index, int acc);
+	void check_sel_sum_trib_t(const std::set<ClientCard*>& left, int acc);
+	bool check_sum_trib(std::set<ClientCard*>::const_iterator index, std::set<ClientCard*>::const_iterator end, int acc);
 
 	void UpdateDeclarableList();
 
 	void RefreshCardCountDisplay();
 
 	irr::gui::IGUIElement* panel;
+	bool is_dragging_cardtext;
+	int dragging_cardtext_start_pos;
+	int dragging_cardtext_start_y;
 	std::vector<int> ancard;
 	int hovered_controler;
 	int hovered_location;
@@ -149,5 +158,6 @@ public:
 //special cards
 #define CARD_MARINE_DOLPHIN	78734254
 #define CARD_TWINKLE_MOSS	13857930
+#define CARD_QUESTION		38723936
 
 #endif //CLIENT_FIELD_H

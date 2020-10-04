@@ -64,6 +64,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_JOIN_HOST: {
 				bot_mode = false;
+				mainGame->TrimText(mainGame->ebJoinHost);
+				mainGame->TrimText(mainGame->ebJoinPort);
 				char ip[20];
 				const wchar_t* pstr = mainGame->ebJoinHost->getText();
 				BufferIO::CopyWStr(pstr, ip, 16);
@@ -566,23 +568,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			break;
 		}
-		case irr::gui::EGET_COMBO_BOX_CHANGED: {
-			switch(id) {
-			case COMBOBOX_HP_CATEGORY: {
-				int catesel = mainGame->cbCategorySelect->getSelected();
-				if(catesel == 3) {
-					catesel = 2;
-					mainGame->cbCategorySelect->setSelected(2);
-				}
-				if(catesel >= 0) {
-					mainGame->RefreshDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
-					mainGame->cbDeckSelect->setSelected(0);
-				}
-				break;
-			}
-			}
-			break;
-		}
 		case irr::gui::EGET_CHECKBOX_CHANGED: {
 			switch(id) {
 			case CHECKBOX_HP_READY: {
@@ -606,8 +591,25 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
-			case CHECKBOX_BOT_OLD_RULE: {
+			}
+			break;
+		}
+		case irr::gui::EGET_COMBO_BOX_CHANGED: {
+			switch(id) {
+			case COMBOBOX_BOT_RULE: {
 				mainGame->RefreshBot();
+				break;
+			}
+			case COMBOBOX_HP_CATEGORY: {
+				int catesel = mainGame->cbCategorySelect->getSelected();
+				if(catesel == 3) {
+					catesel = 2;
+					mainGame->cbCategorySelect->setSelected(2);
+				}
+				if(catesel >= 0) {
+					mainGame->RefreshDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
+					mainGame->cbDeckSelect->setSelected(0);
+				}
 				break;
 			}
 			}

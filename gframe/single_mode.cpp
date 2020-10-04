@@ -181,6 +181,10 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 		offset = pbuf;
 		mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
 		switch (mainGame->dInfo.curMsg) {
+		case MSG_RESET_TIME: {
+			pbuf += 3;
+			break;
+		}
 		case MSG_RETRY: {
 			if(!DuelClient::ClientAnalyze(offset, pbuf - offset)) {
 				mainGame->singleSignal.Reset();
@@ -343,8 +347,7 @@ bool SingleMode::SinglePlayAnalyze(char* msg, unsigned int len) {
 			}
 			break;
 		}
-		case MSG_SORT_CARD:
-		case MSG_SORT_CHAIN: {
+		case MSG_SORT_CARD: {
 			player = BufferIO::ReadInt8(pbuf);
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 7;

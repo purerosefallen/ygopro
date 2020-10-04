@@ -5,7 +5,7 @@
 
 # build files
 /bin
-/build
+build
 /obj
 
 # dependencies
