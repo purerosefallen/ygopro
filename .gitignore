@@ -1,6 +1,5 @@
 # data files
 /beta
-/expansions
 /specials
 
 # build files
@@ -94,3 +93,5 @@ core*
 /patch.exe.manifest
 /patch.exe
 /diff.exe
+/lua/Makefile
+/out/build/x64-Debug
