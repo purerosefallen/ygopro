@@ -38,19 +38,15 @@ build:
 after_build:
   - ps: move bin\release\ygopro.exe .
 
-  # redis
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/MicrosoftArchive/redis/releases/download/win-3.2.100/Redis-x64-3.2.100.zip ; exit 0"
-  - 7z x -y -oredis Redis-x64-3.2.100.zip
-
   # nodejs
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v12.14.0/node-v12.14.0-win-x64.zip ; exit 0"
-  - 7z x -y node-v12.14.0-win-x64.zip
-  - mv node-v12.14.0-win-x64 node
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v14.15.0/node-v14.15.0-win-x64.7z ; exit 0"
+  - 7z x -y node-v14.15.0-win-x64.7z
+  - mv node-v14.15.0-win-x64 node
 
   # srvpro
   - git clone https://github.com/purerosefallen/ygopro-server
   - cd ygopro-server
-  - ../node/npm install
+  - ../node/npm ci
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
   - 7z x -y WindBot.7z
   - rm -rf Bot.exe bot.conf
@@ -70,8 +66,8 @@ after_build:
   - cd ../..
 
   # start script
-  - bash -c "echo '@echo off' >> run.bat ; echo 'start redis/redis-server.exe' >> run.bat ; echo 'cd ygopro-server/windbot' >> run.bat ; echo 'start WindBot.exe servermode=true serverport=2399' >> run.bat ; echo 'cd ..' >> run.bat ; echo 'start ../node/node.exe ygopro-server.js' >> run.bat"
-  - 7z a -mx9 -xr!.git* ygopro-server-win.zip node redis ygopro-server run.bat
+  - bash -c "echo '@echo off' >> run.bat ; echo 'cd ygopro-server/windbot' >> run.bat ; echo 'start WindBot.exe servermode=true serverport=2399' >> run.bat ; echo 'cd ..' >> run.bat ; echo 'start ../node/node.exe ygopro-server.js' >> run.bat"
+  - 7z a -mx9 -xr!.git* ygopro-server-win.zip node ygopro-server run.bat
 
 
 test: off
