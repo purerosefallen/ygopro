@@ -233,7 +233,7 @@ void ReplayMode::EndDuel() {
 	if(!is_closing) {
 		if(auto_watch_mode && no_wait_before_exit) {
 			mainGame->device->closeDevice();
-			return false;
+			return;
 		}
 		mainGame->actionSignal.Reset();
 		mainGame->gMutex.lock();
