@@ -882,6 +882,9 @@ bool Game::Initialize() {
 	}
 	hideChat = false;
 	hideChatTimer = 0;
+	screenshotSequence = 0;
+	sprintf(screenshotDirectory, "screenshots/ygopro_%u", device->getTimer()->getRealTime());
+	FileSystem::MakeDir(screenshotDirectory);
 	return true;
 }
 void Game::MainLoop() {
@@ -980,6 +983,7 @@ void Game::MainLoop() {
 			DuelClient::try_needed = false;
 			DuelClient::StartClient(DuelClient::temp_ip, DuelClient::temp_port, false);
 		}
+		takeScreenshotLoop();
 	}
 	DuelClient::StopClient(true);
 	if(dInfo.isSingleMode)
@@ -2199,6 +2203,17 @@ void Game::takeScreenshot() {
 		image->drop();
 	} else
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
+}
+void Game::takeScreenshotLoop() {
+	irr::video::IImage* const image = driver->createScreenShot();
+	const unsigned int currentSequence = ++screenshotSequence;
+	if(image) {
+		irr::c8 filename[64];
+		snprintf(filename, 64, "%s/%u.bmp", screenshotDirectory, currentSequence);
+		driver->writeImageToFile(image, filename);
+		image->drop();
+	} else
+		device->getLogger()->log(L"Failed to take loop screenshot.", irr::ELL_WARNING);
 }
 bool Game::CheckRegEx(const std::wstring& text, const std::wstring& exp, bool exact) {
 	if(!gameConf.search_regex)

@@ -214,6 +214,7 @@ public:
 	void SetWindowsScale(float scale);
 	void FlashWindow();
 	void takeScreenshot();
+	void takeScreenshotLoop();
 	void SetCursor(ECURSOR_ICON icon);
 
 	std::mutex gMutex;
@@ -259,6 +260,8 @@ public:
 	bool always_chain;
 	bool ignore_chain;
 	bool chain_when_avail;
+	unsigned int screenshotSequence;
+	char screenshotDirectory[64];
 
 	bool is_building;
 	bool is_siding;
