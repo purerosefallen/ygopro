@@ -883,9 +883,6 @@ bool Game::Initialize() {
 	}
 	hideChat = false;
 	hideChatTimer = 0;
-	screenshotSequence = 0;
-	sprintf(screenshotDirectory, "screenshots/ygopro_%u", device->getTimer()->getRealTime());
-	FileSystem::MakeDir(screenshotDirectory);
 	return true;
 }
 void Game::MainLoop() {
