@@ -981,7 +981,8 @@ void Game::MainLoop() {
 			DuelClient::try_needed = false;
 			DuelClient::StartClient(DuelClient::temp_ip, DuelClient::temp_port, false);
 		}
-		takeScreenshotLoop();
+		if(raw_video_mode)
+			takeScreenshotLoop();
 	}
 	DuelClient::StopClient(true);
 	if(dInfo.isSingleMode)
