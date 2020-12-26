@@ -11,6 +11,7 @@ int enable_log = 0;
 bool exit_on_return = false;
 bool auto_watch_mode = false;
 bool raw_video_mode = false;
+bool no_wait_before_exit = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
@@ -115,7 +116,12 @@ int main(int argc, char* argv[]) {
 			auto_watch_mode = true;
 		} else if(!wcscmp(wargv[i], L"--raw-video")) { // Raw video mode
 			raw_video_mode = true;
-		} else if(!wcscmp(wargv[i], L"-d")) { // Deck
+		} else if(!wcscmp(wargv[i], L"--auto-watch-no-wait")) { // Auto watch mode, but don't wait 2 sec
+			auto_watch_mode = true;
+			no_wait_before_exit = true;
+		}
+		else if (!wcscmp(wargv[i], L"-d"))
+		{ // Deck
 			++i;
 			if(i + 1 < wargc) { // select deck
 				ygo::mainGame->gameConf.lastcategory[0] = 0;
@@ -130,17 +136,23 @@ int main(int argc, char* argv[]) {
 				ClickButton(ygo::mainGame->btnDeckEdit);
 				break;
 			}
-		} else if(!wcscmp(wargv[i], L"-c")) { // Create host
+		}
+		else if (!wcscmp(wargv[i], L"-c"))
+		{ // Create host
 			exit_on_return = !keep_on_return;
 			ygo::mainGame->HideElement(ygo::mainGame->wMainMenu);
 			ClickButton(ygo::mainGame->btnHostConfirm);
 			break;
-		} else if(!wcscmp(wargv[i], L"-j")) { // Join host
+		}
+		else if (!wcscmp(wargv[i], L"-j"))
+		{ // Join host
 			exit_on_return = !keep_on_return;
 			ygo::mainGame->HideElement(ygo::mainGame->wMainMenu);
 			ClickButton(ygo::mainGame->btnJoinHost);
 			break;
-		} else if(!wcscmp(wargv[i], L"-r")) { // Replay
+		}
+		else if (!wcscmp(wargv[i], L"-r"))
+		{ // Replay
 			exit_on_return = !keep_on_return;
 			++i;
 			if(i < wargc) {
@@ -151,7 +163,9 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadReplay);
 			break;
-		} else if(!wcscmp(wargv[i], L"-s")) { // Single
+		}
+		else if (!wcscmp(wargv[i], L"-s"))
+		{ // Single
 			exit_on_return = !keep_on_return;
 			++i;
 			if(i < wargc) {
@@ -162,7 +176,9 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
-		} else if(wargc == 2 && wcslen(wargv[1]) >= 4) {
+		}
+		else if (wargc == 2 && wcslen(wargv[1]) >= 4)
+		{
 			wchar_t* pstrext = wargv[1] + wcslen(wargv[1]) - 4;
 			if(!mywcsncasecmp(pstrext, L".ydk", 4)) {
 				open_file = true;

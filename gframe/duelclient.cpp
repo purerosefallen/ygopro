@@ -190,7 +190,9 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 				mainGame->env->addMessageBox(L"", dataManager.GetSysString(1400));
 				mainGame->gMutex.unlock();
 				if (auto_watch_mode) {
-					mainGame->actionSignal.Wait(2000);
+					if(!no_wait_before_exit) {
+						mainGame->actionSignal.Wait(2000);
+					}
 					mainGame->device->closeDevice();
 				}
 			} else if(connect_state == 0x7) {
@@ -213,7 +215,9 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					else mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
 					mainGame->gMutex.unlock();
 					if (auto_watch_mode) {
-						mainGame->actionSignal.Wait(2000);
+						if(!no_wait_before_exit) {
+							mainGame->actionSignal.Wait(2000);
+						}
 						mainGame->device->closeDevice();
 					}
 				} else {
@@ -228,7 +232,9 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					mainGame->stTip->setVisible(false);
 					mainGame->gMutex.unlock();
 					if (auto_watch_mode) {
-						mainGame->actionSignal.Wait(2000);
+						if(!no_wait_before_exit) {
+							mainGame->actionSignal.Wait(2000);
+						}
 						mainGame->device->closeDevice();
 					}
 					mainGame->closeDoneSignal.Reset();
@@ -292,7 +298,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				mainGame->env->addMessageBox(L"", dataManager.GetSysString(1405));
 			mainGame->gMutex.unlock();
 			if (auto_watch_mode) {
-				mainGame->actionSignal.Wait(2000);
+				if(!no_wait_before_exit) {
+					mainGame->actionSignal.Wait(2000);
+				}
 				mainGame->device->closeDevice();
 			}
 			event_base_loopbreak(client_base);
@@ -752,7 +760,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->PopupElement(mainGame->wMessage);
 		mainGame->gMutex.unlock();
 		if (auto_watch_mode) {
-			mainGame->actionSignal.Wait(2000);
+			if(!no_wait_before_exit) {
+				mainGame->actionSignal.Wait(2000);
+			}
 			mainGame->device->closeDevice();
 		}
 		else {

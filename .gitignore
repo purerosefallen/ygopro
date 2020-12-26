@@ -94,3 +94,4 @@ core*
 /patch.exe.manifest
 /patch.exe
 /diff.exe
+*.mp4

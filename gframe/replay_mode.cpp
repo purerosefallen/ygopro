@@ -238,7 +238,9 @@ void ReplayMode::EndDuel() {
 		mainGame->PopupElement(mainGame->wMessage);
 		mainGame->gMutex.unlock();
 		if(auto_watch_mode) {
-			mainGame->actionSignal.Wait(2000);
+			if(!no_wait_before_exit) {
+				mainGame->actionSignal.Wait(2000);
+			}
 			mainGame->device->closeDevice();
 		}
 		else {
@@ -315,6 +317,10 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_RETRY: {
+			if(auto_watch_mode && raw_video_mode) {
+				mainGame->device->closeDevice();
+				return false;
+			}
 			if(mainGame->dInfo.isReplaySkiping) {
 				mainGame->dInfo.isReplaySkiping = false;
 				mainGame->dField.RefreshAllCards();
@@ -326,7 +332,9 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			mainGame->gMutex.unlock();
 			mainGame->actionSignal.Reset();
 			if (auto_watch_mode){
-				mainGame->actionSignal.Wait(2000);
+				if(!no_wait_before_exit) {
+					mainGame->actionSignal.Wait(2000);
+				}
 				mainGame->device->closeDevice();
 			}
 			else{

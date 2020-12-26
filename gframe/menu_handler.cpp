@@ -89,7 +89,9 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
 						mainGame->gMutex.unlock();
 						if (auto_watch_mode) {
-							mainGame->actionSignal.Wait(2000);
+							if(!no_wait_before_exit) {
+								mainGame->actionSignal.Wait(2000);
+							}
 							mainGame->device->closeDevice();
 						}
 						break;
