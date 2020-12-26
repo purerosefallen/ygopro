@@ -231,6 +231,10 @@ bool ReplayMode::StartDuel() {
 void ReplayMode::EndDuel() {
 	end_duel(pduel);
 	if(!is_closing) {
+		if(auto_watch_mode && no_wait_before_exit) {
+			mainGame->device->closeDevice();
+			return false;
+		}
 		mainGame->actionSignal.Reset();
 		mainGame->gMutex.lock();
 		mainGame->stMessage->setText(dataManager.GetSysString(1501));
@@ -317,7 +321,7 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_RETRY: {
-			if(auto_watch_mode && raw_video_mode) {
+			if(auto_watch_mode && !no_wait_before_exit) {
 				mainGame->device->closeDevice();
 				return false;
 			}
