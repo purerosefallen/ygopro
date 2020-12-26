@@ -260,7 +260,7 @@ public:
 	bool always_chain;
 	bool ignore_chain;
 	bool chain_when_avail;
-	unsigned int screenshotSequence;
+	int screenshotSequence;
 	char screenshotDirectory[64];
 
 	bool is_building;

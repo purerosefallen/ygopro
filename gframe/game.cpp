@@ -23,6 +23,7 @@ bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	params.LoggingLevel = ELL_NONE;
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
 		params.DriverType = irr::video::EDT_DIRECT3D9;
@@ -2206,11 +2207,26 @@ void Game::takeScreenshot() {
 }
 void Game::takeScreenshotLoop() {
 	irr::video::IImage* const image = driver->createScreenShot();
-	const unsigned int currentSequence = ++screenshotSequence;
+	//const int currentSequence = ++screenshotSequence;
 	if(image) {
-		irr::c8 filename[64];
-		snprintf(filename, 64, "%s/%u.bmp", screenshotDirectory, currentSequence);
-		driver->writeImageToFile(image, filename);
+		
+		//irr::video::ECOLOR_FORMAT colorFormat = image->getColorFormat();
+
+		//u32 pixel_size = image->getBytesPerPixel();
+		//u32 width = image->getDimension().Width;
+		//u32 height = image->getDimension().Height;
+
+		auto data = image->lock();
+		auto size = image->getImageDataSizeInBytes();
+		fwrite(data, size, 1, stderr);
+		fflush(stderr);
+
+		image->unlock();
+
+
+		//irr::c8 filename[64];
+		//snprintf(filename, 64, "%s/%04d.bmp", screenshotDirectory, currentSequence);
+		//driver->writeImageToFile(image, filename);
 		image->drop();
 	} else
 		device->getLogger()->log(L"Failed to take loop screenshot.", irr::ELL_WARNING);
