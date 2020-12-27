@@ -15,6 +15,7 @@ build:
   tags: 
     - docker
   script:
+    - git submodule update --init
     - docker build --pull -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
