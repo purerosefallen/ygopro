@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.1-devel-ubuntu20.04
+FROM nvidia/cudagl:11.1-devel-ubuntu20.04
 
 RUN rm -rf /etc/apt/sources.list.d/* && \
 	apt update && \
