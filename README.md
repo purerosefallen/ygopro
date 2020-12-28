@@ -70,7 +70,7 @@ Xyz materials:
 
 * `/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro`
 
-* `/usr/lib/x86_64-linux-gnu/libnvidia-opticalflow.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro`
+* `/usr/lib/x86_64-linux-gnu/libnvcuvid.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.1:ro`
 
 This package depends on the driver installed. So you have to mount in those library files.
 
