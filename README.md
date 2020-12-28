@@ -63,3 +63,24 @@ Xyz materials:
 * deck: .ydk deck files.
 * replay: .yrp replay files.
 * expansions: *.cdb will be loaded as extra databases.
+
+### About recording docker image
+
+#### Volumes
+
+* `/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro` This package depends on the driver installed. So you have to mount in.
+
+* `/tmp/.X11-unix:/tmp/.X11-unix` for X11 display. You have to install X11 at the host system.
+
+* All other files, including replay path, output path, `system_user.conf` if needed, to `/usr/src/app` .
+
+#### Screen size
+
+The default screen size is as follows.
+
+```
+window_width = 1024
+window_height = 640
+```
+
+If running on headless server, you have to edit the Xorg config for the correct screen size, or mount `system_user.conf` in.
