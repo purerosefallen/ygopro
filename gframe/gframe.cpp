@@ -10,6 +10,7 @@
 int enable_log = 0;
 bool exit_on_return = false;
 bool auto_watch_mode = false;
+bool auto_record_mode = false;
 bool raw_video_mode = false;
 bool no_wait_before_exit = false;
 bool open_file = false;
@@ -119,6 +120,10 @@ int main(int argc, char* argv[]) {
 		} else if(!wcscmp(wargv[i], L"--auto-watch-no-wait")) { // Auto watch mode, but don't wait 2 sec
 			auto_watch_mode = true;
 			no_wait_before_exit = true;
+		} else if(!wcscmp(wargv[i], L"--auto-record")) { // For auto record
+			raw_video_mode = true;
+			auto_watch_mode = true;
+			auto_record_mode = true;
 		}
 		else if (!wcscmp(wargv[i], L"-d"))
 		{ // Deck

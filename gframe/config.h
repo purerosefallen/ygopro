@@ -90,6 +90,7 @@ extern unsigned short PRO_VERSION;
 extern int enable_log;
 extern bool exit_on_return;
 extern bool auto_watch_mode;
+extern bool auto_record_mode;
 extern bool raw_video_mode;
 extern bool no_wait_before_exit;
 extern bool open_file;

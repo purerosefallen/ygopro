@@ -68,7 +68,11 @@ Xyz materials:
 
 #### Volumes
 
-* `/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro` This package depends on the driver installed. So you have to mount in.
+* `/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro`
+
+* `/usr/lib/x86_64-linux-gnu/libnvidia-opticalflow.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro`
+
+This package depends on the driver installed. So you have to mount in those library files.
 
 * `/tmp/.X11-unix:/tmp/.X11-unix` for X11 display. You have to install X11 at the host system.
 

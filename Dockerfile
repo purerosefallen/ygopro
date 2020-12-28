@@ -31,4 +31,4 @@ RUN ln -s /usr/local/cuda/compat/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.
 
 ENV DISPLAY ":0"
 
-ENTRYPOINT ['./docker/record-video.sh']
+ENTRYPOINT './docker/record-video.sh'

@@ -231,7 +231,12 @@ bool ReplayMode::StartDuel() {
 void ReplayMode::EndDuel() {
 	end_duel(pduel);
 	if(!is_closing) {
-		if(auto_watch_mode && no_wait_before_exit) {
+		if(auto_record_mode) {
+			mainGame->gMutex.lock();
+			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, dataManager.GetSysString(1501));
+			mainGame->PopupElement(mainGame->wACMessage, 20);
+			mainGame->gMutex.unlock();
+			mainGame->WaitFrameSignal(2000);
 			mainGame->device->closeDevice();
 			return;
 		}
