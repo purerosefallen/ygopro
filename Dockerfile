@@ -29,4 +29,6 @@ RUN git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux &
 
 RUN ln -s /usr/local/cuda/compat/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
 
-CMD ['./docker/record-video.sh']
+ENV DISPLAY ":0"
+
+ENTRYPOINT ['./docker/record-video.sh']
