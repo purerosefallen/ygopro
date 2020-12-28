@@ -326,7 +326,12 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_RETRY: {
-			if(auto_watch_mode && !no_wait_before_exit) {
+			if(auto_record_mode) {
+				mainGame->gMutex.lock();
+				mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, L"Error occurs.");
+				mainGame->PopupElement(mainGame->wACMessage, 20);
+				mainGame->gMutex.unlock();
+				mainGame->WaitFrameSignal(2000);
 				mainGame->device->closeDevice();
 				return false;
 			}
