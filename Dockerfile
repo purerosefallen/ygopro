@@ -6,7 +6,7 @@ RUN rm -rf /etc/apt/sources.list.d/* && \
 	add-apt-repository -y ppa:savoury1/graphics && \
 	add-apt-repository -y ppa:savoury1/multimedia && \
 	add-apt-repository -y ppa:savoury1/ffmpeg4 && \
-	env DEBIAN_FRONTEND=noninteractive apt -y install wget tar git autoconf automake build-essential ffmpeg libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev p7zip-full && \
+	env DEBIAN_FRONTEND=noninteractive apt -y install wget tar git autoconf automake build-essential ffmpeg libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev p7zip-full libffmpeg-nvenc-dev && \
 	rm -rf /var/tmp/* /tmp/* /var/lib/apt/lists/*
 
 
