@@ -57,6 +57,7 @@ bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	params.LoggingLevel = ELL_NONE;
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
 		params.DriverType = irr::video::EDT_DIRECT3D9;
@@ -1470,30 +1471,6 @@ void Game::LoadConfig() {
 		unsigned int lcid = 0;
 #ifdef _WIN32
 		lcid = ((unsigned int)GetSystemDefaultLangID()) & 0xff;
-#else
-		/* temp broken
-		char* locale_str = getenv("LANG");
-		if(locale_str) {
-			if(strstr(locale_str, "zh"))
-				lcid = 0x04;
-			else
-			if(strstr(locale_str, "en"))
-				lcid = 0x09;
-			else
-			if(strstr(locale_str, "es"))
-				lcid = 0x0a;
-			else
-			if(strstr(locale_str, "ja"))
-				lcid = 0x11;
-			else
-			if(strstr(locale_str, "ko"))
-				lcid = 0x12;
-			else
-			if(strstr(locale_str, "pt"))
-				lcid = 0x16;
-		}
-		*/
-#endif
 		switch(lcid) {
 			case 0x04: {
 				myswprintf(mainGame->gameConf.locale, L"%ls", L"zh-CN");
@@ -1520,6 +1497,30 @@ void Game::LoadConfig() {
 				break;
 			}
 		}
+#else
+		/* temp broken
+		char* locale_str = getenv("LANG");
+		if(locale_str) {
+			if(strstr(locale_str, "zh"))
+				lcid = 0x04;
+			else
+			if(strstr(locale_str, "en"))
+				lcid = 0x09;
+			else
+			if(strstr(locale_str, "es"))
+				lcid = 0x0a;
+			else
+			if(strstr(locale_str, "ja"))
+				lcid = 0x11;
+			else
+			if(strstr(locale_str, "ko"))
+				lcid = 0x12;
+			else
+			if(strstr(locale_str, "pt"))
+				lcid = 0x16;
+		}
+		*/
+#endif
 #ifndef YGOPRO_COMPAT_MYCARD
 		SaveConfig();
 #endif
