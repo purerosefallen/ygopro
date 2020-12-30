@@ -86,7 +86,7 @@ before_deploy:
     7z a -mx9 -xr!.git* KoishiPro-$TRAVIS_OS_NAME-$TRAVIS_TAG.zip ygopro.app;
   fi
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://minio-tokin.mycard.moe:9001/mycard/images/ygopro-images-zh-CN.zip
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://water.mycard.moe:9000/mycard/images/ygopro-images-zh-CN.zip
 - 7z x -y -opics ygopro-images-zh-CN.zip > /dev/null
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
