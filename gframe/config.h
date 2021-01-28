@@ -93,6 +93,7 @@ extern bool auto_watch_mode;
 extern bool auto_record_mode;
 extern bool raw_video_mode;
 extern bool no_wait_before_exit;
+extern bool unlimited_fps;
 extern bool open_file;
 extern wchar_t open_file_name[256];
 extern bool bot_mode;

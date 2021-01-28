@@ -13,6 +13,7 @@ bool auto_watch_mode = false;
 bool auto_record_mode = false;
 bool raw_video_mode = false;
 bool no_wait_before_exit = false;
+bool unlimited_fps = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
@@ -124,6 +125,8 @@ int main(int argc, char* argv[]) {
 			raw_video_mode = true;
 			auto_watch_mode = true;
 			auto_record_mode = true;
+		} else if(!wcscmp(wargv[i], L"--unlimited-fps")) { // unlimited fps
+			unlimited_fps = true;
 		}
 		else if (!wcscmp(wargv[i], L"-d"))
 		{ // Deck
