@@ -1,6 +1,6 @@
 #!/bin/bash
-REPLAY_NAME=$1
-VIDEO_NAME=$2
+# REPLAY_NAME=$1
+# VIDEO_NAME=$2
 WINDOW_WIDTH=$(grep window_width ./system_user.conf | grep -oP '\d+')
 WINDOW_HEIGHT=$(grep window_height ./system_user.conf | grep -oP '\d+')
 FFMPEG_EXEC=ffmpeg
