@@ -329,7 +329,7 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			if(auto_record_mode) {
 				mainGame->gMutex.lock();
 				mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, L"Error occurs.");
-				mainGame->PopupElement(mainGame->wACMessage, 120);
+				mainGame->PopupElement(mainGame->wACMessage, 60);
 				mainGame->gMutex.unlock();
 				mainGame->WaitFrameSignal(120);
 				mainGame->device->closeDevice();
