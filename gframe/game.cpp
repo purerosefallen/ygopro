@@ -58,6 +58,7 @@ bool Game::Initialize() {
 	linePatternGL = 0x0f0f;
 	waitFrame = 0;
 	signalFrame = 0;
+	totalFrame = 0;
 	showcard = 0;
 	is_attacking = false;
 	lpframe = 0;
@@ -962,6 +963,9 @@ void Game::MainLoop() {
 		if(closeSignal.Wait(1))
 			CloseDuelWindow();
 		fps++;
+		if(soundSequenceFile) {
+			++totalFrame;
+		}
 		cur_time = timer->getTime();
 		if(cur_time < fps * 17 - 20)
 			std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -989,6 +993,9 @@ void Game::MainLoop() {
 		SingleMode::StopPlay(true);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	SaveConfig();
+	if(soundSequenceFile) {
+		fclose(soundSequenceFile);
+	}
 //	device->drop();
 }
 void Game::RefreshTimeDisplay() {

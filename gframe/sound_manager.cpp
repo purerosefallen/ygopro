@@ -49,6 +49,140 @@ void SoundManager::RefershBGMDir(std::wstring path, int scene) {
 	});
 }
 void SoundManager::PlaySoundEffect(int sound) {
+	if(mainGame->soundSequenceFile) {
+		char *soundName = NULL;
+		switch(sound) {
+			case SOUND_SUMMON: {
+				soundName = "summon.wav";
+				break;
+			}
+			case SOUND_SPECIAL_SUMMON: {
+				soundName = "specialsummon";
+				break;
+			}
+			case SOUND_ACTIVATE: {
+				soundName = "activate";
+				break;
+			}
+			case SOUND_SET: {
+				soundName = "set";
+				break;
+			}
+			case SOUND_FILP: {
+				soundName = "flip";
+				break;
+			}
+			case SOUND_REVEAL: {
+				soundName = "reveal";
+				break;
+			}
+			case SOUND_EQUIP: {
+				soundName = "equip";
+				break;
+			}
+			case SOUND_DESTROYED: {
+				soundName = "destroyed";
+				break;
+			}
+			case SOUND_BANISHED: {
+				soundName = "banished";
+				break;
+			}
+			case SOUND_TOKEN: {
+				soundName = "token";
+				break;
+			}
+			case SOUND_NEGATE: {
+				soundName = "negate";
+				break;
+			}
+			case SOUND_ATTACK: {
+				soundName = "attack";
+				break;
+			}
+			case SOUND_DIRECT_ATTACK: {
+				soundName = "directattack";
+				break;
+			}
+			case SOUND_DRAW: {
+				soundName = "draw";
+				break;
+			}
+			case SOUND_SHUFFLE: {
+				soundName = "shuffle";
+				break;
+			}
+			case SOUND_DAMAGE: {
+				soundName = "damage";
+				break;
+			}
+			case SOUND_RECOVER: {
+				soundName = "gainlp";
+				break;
+			}
+			case SOUND_COUNTER_ADD: {
+				soundName = "addcounter";
+				break;
+			}
+			case SOUND_COUNTER_REMOVE: {
+				soundName = "removecounter";
+				break;
+			}
+			case SOUND_COIN: {
+				soundName = "coinflip";
+				break;
+			}
+			case SOUND_DICE: {
+				soundName = "diceroll";
+				break;
+			}
+			case SOUND_NEXT_TURN: {
+				soundName = "nextturn";
+				break;
+			}
+			case SOUND_PHASE: {
+				soundName = "phase";
+				break;
+			}
+			case SOUND_MENU: {
+				soundName = "menu";
+				break;
+			}
+			case SOUND_BUTTON: {
+				soundName = "button";
+				break;
+			}
+			case SOUND_INFO: {
+				soundName = "info";
+				break;
+			}
+			case SOUND_QUESTION: {
+				soundName = "question";
+				break;
+			}
+			case SOUND_CARD_PICK: {
+				soundName = "cardpick";
+				break;
+			}
+			case SOUND_CARD_DROP: {
+				soundName = "carddrop";
+				break;
+			}
+			case SOUND_PLAYER_ENTER: {
+				soundName = "playerenter";
+				break;
+			}
+			case SOUND_CHAT: {
+				soundName = "chatmessage";
+				break;
+			}
+			default:
+				break;
+		}
+		if(soundName != NULL) {
+			fprintf(mainGame->soundSequenceFile, "%llu %s\n", mainGame->totalFrame, soundName);
+		}
+	}
 #ifdef YGOPRO_USE_IRRKLANG
 	if(!mainGame->chkEnableSound->isChecked())
 		return;

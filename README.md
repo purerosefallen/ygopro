@@ -66,6 +66,12 @@ Xyz materials:
 
 ### About recording docker image
 
+#### Environment Variables
+
+* `REPLAY_NAME` The path to replay file.
+* `VIDEO_NAME` The output video path.
+* `SOUND_SEQUENCE_FILE` (Optional) The output sound sequence file.
+
 #### Volumes
 
 * `/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.450.80.02:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:ro`

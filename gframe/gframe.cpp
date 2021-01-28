@@ -181,6 +181,22 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
+		} else if(!wcscmp(wargv[i], L"--sound-sequence")) { // For auto record
+			++i;
+			if(i < wargc) {
+				char filename[256];
+				BufferIO::EncodeUTF8(wargv[i], filename);
+#ifdef WIN32
+				ygo::mainGame->soundSequenceFile = _wfopen(wargv[i], "w");
+#else
+				ygo::mainGame->soundSequenceFile = fopen(filename, "w");
+#endif
+				if(!ygo::mainGame->soundSequenceFile) {
+					printf("Failed opening sound sequence file %s.\n", filename);
+				}
+			} else {
+				printf("Missing sound sequence filename.\n");
+			}
 		}
 		else if (wargc == 2 && wcslen(wargv[1]) >= 4)
 		{

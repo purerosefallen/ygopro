@@ -272,6 +272,9 @@ public:
 	wchar_t orig_dir[64];
 	char locale_buf_utf8[256];
 
+	unsigned long long totalFrame;
+	FILE *soundSequenceFile;
+
 	ClientField dField;
 	DeckBuilder deckBuilder;
 	MenuHandler menuHandler;
