@@ -753,9 +753,9 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		if(auto_record_mode) {
 			mainGame->gMutex.lock();
 			mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, dataManager.GetSysString(1500));
-			mainGame->PopupElement(mainGame->wACMessage, 20);
+			mainGame->PopupElement(mainGame->wACMessage, 60);
 			mainGame->gMutex.unlock();
-			mainGame->WaitFrameSignal(120);
+			mainGame->WaitFrameSignal(60);
 			mainGame->device->closeDevice();
 			return;
 		}
