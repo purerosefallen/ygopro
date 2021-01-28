@@ -53,7 +53,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 		char *soundName = NULL;
 		switch(sound) {
 			case SOUND_SUMMON: {
-				soundName = "summon.wav";
+				soundName = "summon";
 				break;
 			}
 			case SOUND_SPECIAL_SUMMON: {
