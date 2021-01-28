@@ -70,7 +70,6 @@ Xyz materials:
 
 * `REPLAY_NAME` The path to replay file.
 * `VIDEO_NAME` The output video path.
-* `SOUND_SEQUENCE_FILE` (Optional) The output sound sequence file.
 
 #### Volumes
 
