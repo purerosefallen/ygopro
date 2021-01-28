@@ -227,7 +227,19 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_LOAD_REPLAY: {
 				if(open_file) {
-					ReplayMode::cur_replay.OpenReplay(open_file_name);
+					wchar_t* pstrext = open_file_name + wcslen(open_file_name) - 4;
+					if (!mywcsncasecmp(pstrext, L".yrp", 4))
+					{
+						ReplayMode::cur_replay.OpenReplay(open_file_name);
+					} else {
+						char replayBase64[0x20000];
+						BufferIO::EncodeUTF8(open_file_name, replayBase64);
+						if (!ReplayMode::cur_replay.OpenReplayBase64(replayBase64, strlen(replayBase64)))
+						{
+							printf("Invalid replay Base64.\n");
+						}
+					}
+					
 					open_file = false;
 				} else {
 					if(mainGame->lstReplayList->getSelected() == -1)

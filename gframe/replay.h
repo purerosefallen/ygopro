@@ -35,6 +35,7 @@ public:
 	void EndRecord();
 	void SaveReplay(const wchar_t* name);
 	bool OpenReplay(const wchar_t* name);
+	bool OpenReplayBase64(const char *code, int len);
 	static bool CheckReplay(const wchar_t* name);
 	static bool DeleteReplay(const wchar_t* name);
 	static bool RenameReplay(const wchar_t* oldname, const wchar_t* newname);

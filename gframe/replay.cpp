@@ -2,6 +2,7 @@
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 #include "lzma/LzmaLib.h"
+#include "base64.h"
 
 namespace ygo {
 
@@ -175,6 +176,30 @@ bool Replay::OpenReplay(const wchar_t* name) {
 	} else {
 		comp_size = fread(replay_data, 1, 0x20000, fp);
 		fclose(fp);
+		replay_size = comp_size;
+	}
+	pdata = replay_data;
+	is_replaying = true;
+	return true;
+}
+bool Replay::OpenReplayBase64(const char *code, int len) {
+	char data[0x20000], *decodedPos = data, *tmpData = data;
+	int decoded_len = Base64::DecodedLength(code, len);
+	if(decoded_len <= sizeof(pheader) || !Base64::Decode(code, len, tmpData, decoded_len))
+		return false;
+	memcpy(&pheader, decodedPos, sizeof(pheader));
+	decodedPos += sizeof(pheader);
+	comp_size = decoded_len - sizeof(pheader);
+	if (pheader.flag & REPLAY_COMPRESSED)
+	{
+		memcpy(comp_data, decodedPos, comp_size);
+		replay_size = pheader.datasize;
+		if(LzmaUncompress(replay_data, &replay_size, comp_data, &comp_size, pheader.props, 5) != SZ_OK)
+			return false;
+	}
+	else
+	{
+		memcpy(replay_data, decodedPos, comp_size);
 		replay_size = comp_size;
 	}
 	pdata = replay_data;

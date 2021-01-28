@@ -15,7 +15,7 @@ bool raw_video_mode = false;
 bool no_wait_before_exit = false;
 bool unlimited_fps = false;
 bool open_file = false;
-wchar_t open_file_name[256] = L"";
+wchar_t open_file_name[0x20000] = L"";
 bool bot_mode = false;
 
 void ClickButton(irr::gui::IGUIElement* btn) {
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 	});
 #else
 	int wargc = argc;
-	auto wargv = std::make_unique<wchar_t[][256]>(wargc);
+	auto wargv = std::make_unique<wchar_t[][0x20000]>(wargc);
 	for(int i = 0; i < argc; ++i) {
 		BufferIO::DecodeUTF8(argv[i], wargv[i]);
 	}

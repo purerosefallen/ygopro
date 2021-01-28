@@ -46,6 +46,7 @@ Xyz materials:
 * `-j`: Join the host specified in above, or if absent, lasthost in system.conf file.
 * `-r`: Enter the replay mode page.
 * `-r replay.yrp`: Load the replay.yrp in replay mode.
+* `-r <replay base64>`: Load the replay given in Base64 in replay mode.
 * `-s`: Enter the single mode page.
 * `-s puzzle.lua`: Load the puzzle.lua in single mode.
 * `-k`: Keep when duel finished. See below.
