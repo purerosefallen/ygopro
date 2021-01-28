@@ -15,7 +15,7 @@ build:
   tags: 
     - docker
   script:
-    - apt update && apt -y install git
+    - apk add --no-cache git
     - git submodule update --init
     - docker build --pull -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
