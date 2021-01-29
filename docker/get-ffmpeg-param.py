@@ -18,7 +18,7 @@ def parseSoundLine(frame, soundName, sequence):
   soundFilename = Template('"./sound/${soundName}.wav"').substitute(soundName=soundName)
   commands.append('-i')
   commands.append(soundFilename)
-  commandFirstPart += Template("[${sequence}]volume=23dB[audioext${sequence}];[audioext${sequence}]adelay=${ms}|${ms}[audiodelay${sequence}];").substitute(sequence=sequence, ms=ms)
+  commandFirstPart += Template("[${sequence}]volume=50dB[audioext${sequence}];[audioext${sequence}]adelay=${ms}|${ms}[audiodelay${sequence}];").substitute(sequence=sequence, ms=ms)
   commandSecondPart += Template("[audiodelay${sequence}]").substitute(sequence=sequence)
 
 sequence = 1
