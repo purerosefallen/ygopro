@@ -21,9 +21,9 @@ RUN git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux &
 	wget -O ygopro-images-zh-CN.zip https://cdn01.moecube.com/images/ygopro-images-zh-CN.zip && \
 	7z x -y -opics ygopro-images-zh-CN.zip && \
 	rm -rf ygopro-images-zh-CN.zip && \
-	rm -rf sound && \
 	wget -O - https://github.com/moecube/ygopro-sounds/archive/master.tar.gz | tar zfx - && \
-	mv ygopro-sounds-master sound && \
+	mv ygopro-sounds-master/sound/* sound && \
+	rm -rf ygopro-sounds-master && \
 	mkdir fonts && \
 	cd fonts && \
 	wget -O - https://cdn01.moecube.com/ygopro-fonts.tar.gz | tar zfx -  && \
