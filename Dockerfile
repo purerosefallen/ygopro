@@ -51,7 +51,7 @@ RUN git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux &
 	cp -rf system.conf system_user.conf && \
 	rm -rf bin obj build premake5 irrlicht_linux irrklang irrKlang.zip
 
-# RUN ln -s /usr/local/cuda/compat/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
+RUN ln -s /usr/local/cuda/compat/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
 
 ENV DISPLAY ":0"
 CMD ["./ygopro"]
