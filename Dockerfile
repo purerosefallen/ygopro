@@ -3,7 +3,7 @@ LABEL Author="Nanahira <nanahira@momobako.com>"
 
 RUN rm -rf /etc/apt/sources.list.d/* && \
 	apt update && \
-	env DEBIAN_FRONTEND=noninteractive apt -y install wget tar git autoconf automake build-essential libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev p7zip-full mono-complete libasound2-dev libasound2 && \
+	env DEBIAN_FRONTEND=noninteractive apt -y install wget tar git autoconf automake build-essential libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev p7zip-full mono-complete && \
 	rm -rf /var/tmp/* /tmp/* /var/lib/apt/lists/*
 
 
