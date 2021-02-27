@@ -1,0 +1,113 @@
+# data files
+/beta
+/expansions
+/specials
+
+# build files
+/bin
+build
+/obj
+
+# dependencies
+/event
+/freetype
+/sqlite3
+/irrklang
+/irrlicht*
+
+# gframe additionals
+/gframe/ygopro.ico
+/gframe/ygopro.rc
+/gframe/ygopro.aps
+/gframe/ygopro.icns
+/gframe/dirent.h
+
+# git repos
+/CustomTools
+/DataEditorX
+/Magic*
+/pics
+/Printer
+/ygopro-*
+/*-Cards
+
+# libs
+/*.dll
+/*.so
+/*.dylib
+
+# windbot related files
+/[Bb]ot
+/[Bb]ot.conf
+/[Bb]ot.exe
+/[Bb]ot.sh
+/[Ww]ind[Bb]ot
+
+# ygopro config file
+/system_user.conf
+
+# ygopro folders
+/deck
+/pack
+/fonts
+/replay
+/single
+/screenshots
+/sound/*.wav
+/sound/custom
+/sound/BGM
+/sound/README.md
+/sound/LICENSE
+/sound/,*
+/update
+/update*
+/locales
+
+# ygopro main program
+/ygopro
+/ygopro_*
+/ygopro.exe
+/ygopro_*.exe
+/ygopro.app
+/ygopro_*.app
+/premake4
+/premake4.exe
+/premake5
+/premake5.exe
+
+# others
+*.log
+.vscode
+core*
+/bak/
+/.vs
+/bug.txt
+/output
+/temp
+[Tt]humbs.cdb
+
+/PrinterData.txt
+
+/*.bat
+/*.sh
+/*.sql
+/patch.exe.manifest
+/patch.exe
+/diff.exe
+
+
+Dockerfile
+.dockerignore
+/ocgcore
+/script
+/skin
+/sound
+/textures
+/premake
+/ikpmp3
+/cards.cdb
+/LICENSE
+/README.md
+/.gitignore
+/strings.conf
+/system.conf

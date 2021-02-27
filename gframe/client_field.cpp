@@ -1585,10 +1585,10 @@ void ClientField::RefreshCardCountDisplay() {
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
 			pcard = *it;
 			if(pcard) {
-				if(pcard->type & TYPE_LINK && pcard->link)
-					mainGame->dInfo.card_count[p] += pcard->link;
-				else
-					mainGame->dInfo.card_count[p]++;
+				//if(pcard->type & TYPE_LINK && pcard->link)
+				//	mainGame->dInfo.card_count[p] += pcard->link;
+				//else
+				mainGame->dInfo.card_count[p]++;
 				if(pcard->position == POS_FACEUP_ATTACK && pcard->attack > 0 && (p == 1 || mainGame->dInfo.curMsg != MSG_SELECT_BATTLECMD || pcard->cmdFlag & COMMAND_ATTACK))
 					mainGame->dInfo.total_attack[p] += pcard->attack;
 			}
