@@ -1,4 +1,4 @@
---高速决斗技能-秘密交换
+--高速决斗技能-融合大师
 Duel.LoadScript("speed_duel_common.lua")
 function c100730055.initial_effect(c)
 	if not c100730055.UsedLP then

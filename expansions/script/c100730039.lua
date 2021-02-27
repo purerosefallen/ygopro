@@ -27,7 +27,7 @@ function c100730039.regop(e,tp,eg,ep,ev,re,r,rp)
 	if rp==tp and not c100730039.chain[re] and re:IsHasType(EFFECT_TYPE_ACTIVATE) and re:IsActiveType(TYPE_TRAP) then
 		c100730039.chain[re]=true
 		Duel.Hint(HINT_CARD,0,100730039)
-		local lp=Duel.GetLP(1-tp)-200
+		local lp=Duel.GetLP(1-tp)-350
 		if lp<0 then lp=0 end
 		Duel.SetLP(1-tp,lp)
 	end

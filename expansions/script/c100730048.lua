@@ -21,6 +21,6 @@ function c100730048.skill(e,tp)
 	local g1=Duel.GetMatchingGroup(c100730048.filter,tp,LOCATION_GRAVE,0,nil)
 	if not (g1 and g1:GetCount()>0) then return end
 	local g2=g1:RandomSelect(tp,1)
-	Duel.SendtoHand(g2,nil,REASON_RULE)
+	Duel.SendtoHand(g3,nil,REASON_RULE)
 	e:Reset()
 end

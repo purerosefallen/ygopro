@@ -134,7 +134,7 @@ function aux.SpeedDuelMoveCardToDeckCommonOperation(e,tp,eg,ep,ev,re,r,rp)
 	local c=Duel.CreateToken(tp,id)
 	Duel.DisableShuffleCheck()
 	Duel.SendtoDeck(c,nil,2,REASON_RULE)
-	if c:IsLocation(LOCATION_DECK) then
+	if c:GetLocation()&LOCATION_DECK then
 		aux.Redraw[tp]=false
 	end
 	aux.CardAddedBySkill:AddCard(c)
