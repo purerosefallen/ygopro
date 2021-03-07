@@ -1,6 +1,7 @@
 --高速决斗技能-无尽陷阱地狱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730038.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(59237154,c)
 	aux.SpeedDuelAtMainPhase(c,c100730038.skill,c100730038.con,aux.Stringid(100730038,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

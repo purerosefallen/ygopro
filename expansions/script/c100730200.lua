@@ -11,8 +11,7 @@ end
 function c100730200.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	if Duel.SelectYesNo(tp,aux.Stringid(100730200,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730200)
-		local c=Duel.CreateToken(tp,48130200)
+		local c=Duel.CreateToken(tp,48130397)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)
 		e:Reset()
 	end

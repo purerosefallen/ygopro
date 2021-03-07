@@ -1,4 +1,4 @@
---高速决斗技能-新生宇宙
+--高速决斗技能-黑暗决斗
 Duel.LoadScript("speed_duel_common.lua")
 function c100730053.initial_effect(c)
 	local e1=Effect.GlobalEffect()
@@ -13,7 +13,7 @@ function c100730053.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=Duel.GetTurnPlayer()
 	Duel.Hint(HINT_CARD,tp,100730053)
 	Duel.Hint(HINT_CARD,1-tp,100730053)
-	local ct=Duel.GetFieldGroupCount(tp,LOCATION_GRAVE,0)*100
+	local ct=Duel.GetFieldGroupCount(tp,LOCATION_GRAVE,0)*200
 	ct=Duel.GetLP(tp)-ct
 	if ct<0 then ct=0 end
 	Duel.SetLP(tp,ct)

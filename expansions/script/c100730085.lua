@@ -1,6 +1,7 @@
 --高速决斗技能-抽卡预感：风
 Duel.LoadScript("speed_duel_common.lua")
 function c100730085.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(26022485,c)
 	if not c100730085.UsedLP then
 		c100730085.UsedLP={}
 		c100730085.UsedLP[0]=0

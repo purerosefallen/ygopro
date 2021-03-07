@@ -1,6 +1,7 @@
 --高速决斗技能-魔术手
 Duel.LoadScript("speed_duel_common.lua")
 function c100730071.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(12183332,c)
 	if not c100730071.UsedLP then
 		c100730071.UsedLP={}
 		c100730071.UsedLP[0]=0

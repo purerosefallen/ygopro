@@ -10,14 +10,14 @@ end
 function c100730051.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730051.filter,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730051.filter,tp,LOCATION_ONFIELD,0,1,nil)
 end
 function c100730051.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730051)
-	local g=Duel.GetMatchingGroup(c100730051.filter,tp,LOCATION_MZONE,0,nil)
+	local g=Duel.GetMatchingGroup(c100730051.filter,tp,LOCATION_ONFIELD,0,nil)
 	if g:GetCount()==0 then return end
-	local ct=Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)*100
+	local ct=Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD,0)*100
 	local tc=g:GetFirst()
 	while tc do
 		local e1=Effect.CreateEffect(tc)

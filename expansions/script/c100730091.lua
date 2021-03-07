@@ -1,6 +1,7 @@
---高速决斗技能-魔力流通
+--高速决斗技能-增援
 Duel.LoadScript("speed_duel_common.lua")
 function c100730091.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(52503575,c)
 	if not c100730091.UsedLP then
 		c100730091.UsedLP={}
 		c100730091.UsedLP[0]=0

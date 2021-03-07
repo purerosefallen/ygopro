@@ -1,6 +1,7 @@
 --高速决斗技能--丧尸招来
 Duel.LoadScript("speed_duel_common.lua")
 function c100730089.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(66835946,c)
 	if not c100730089.UsedLP then
 		c100730089.UsedLP={}
 		c100730089.UsedLP[0]=0

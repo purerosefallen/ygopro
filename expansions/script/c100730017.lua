@@ -4,5 +4,7 @@ function c100730017.initial_effect(c)
 	aux.SpeedDuelMoveCardToDeckCommon(57108202,c)
 	aux.SpeedDuelMoveCardToDeckCommon(57108202,c)
 	aux.SpeedDuelMoveCardToDeckCommon(2403771,c)
+	aux.SpeedDuelMoveCardToDeckCommon(68084557,c)
+	aux.SpeedDuelMoveCardToDeckCommon(25165047,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

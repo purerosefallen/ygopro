@@ -1,6 +1,7 @@
 --高速决斗技能-我的怪兽卡
 Duel.LoadScript("speed_duel_common.lua")
 function c100730036.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(66865880,c)
 	aux.SpeedDuelBeforeDraw(c,c100730036.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

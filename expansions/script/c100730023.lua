@@ -7,7 +7,7 @@ end
 function c100730023.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp+3500)
+	Duel.SetLP(tp,lp+4000)
 	local g=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_HAND,0,nil)
 	g=g:RandomSelect(tp,2)
 	aux.SpeedDuelSendToDeckWithExile(tp,g)

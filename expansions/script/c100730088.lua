@@ -1,6 +1,7 @@
 --高速决斗技能--嘻嘻嘻嘻（虫鸣不止）
 Duel.LoadScript("speed_duel_common.lua")
 function c100730088.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(22991179,c)
 	if not c100730088.UsedLP then
 		c100730088.UsedLP={}
 		c100730088.UsedLP[0]=0

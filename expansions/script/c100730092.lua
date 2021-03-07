@@ -1,6 +1,7 @@
 --高速决斗技能--生命总会找到出路
 Duel.LoadScript("speed_duel_common.lua")
 function c100730092.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(54407825,c)
 	if not c100730092.UsedLP then
 		c100730092.UsedLP={}
 		c100730092.UsedLP[0]=0

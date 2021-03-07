@@ -12,7 +12,6 @@ end
 function c100730045.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return Duel.IsExistingMatchingCard(c100730045.filter,tp,LOCATION_DECK,0,1,nil)
-		and Duel.GetLP(tp)>=3000
 end
 
 function c100730045.reg(c)

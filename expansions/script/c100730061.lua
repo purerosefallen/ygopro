@@ -9,7 +9,7 @@ function c100730061.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetMZoneCount(1-tp)>0
-		and Duel.GetLP(tp)<=500
+		and Duel.GetLP(tp)<=1000
 end
 
 function c100730061.skill(e,tp)

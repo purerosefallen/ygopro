@@ -32,6 +32,5 @@ function c100730069.skill(e,tp)
 	Duel.Exile(c,REASON_RULE)
 	local nc=Duel.CreateToken(tp,code)
 	Duel.MoveToField(nc,tp,tp,LOCATION_MZONE,pos,true)
-	nc:MoveSequence(seq)
-	e:Reset()
+	Duel.MoveSequence(nc,seq)
 end

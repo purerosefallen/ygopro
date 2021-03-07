@@ -30,7 +30,6 @@ function c100730041.skill(e,tp)
 	local newc=Duel.CreateToken(tp,38517737)
 	Duel.MoveToField(newc,tp,tp,LOCATION_MZONE,pos,true)
 	Duel.MoveSequence(newc,seq)
-	e:Reset()
 end
 function c100730041.DisableMonsterZone(e,tp)
 	return 0x1f-aux.SequenceToZone(tc:GetSequence())

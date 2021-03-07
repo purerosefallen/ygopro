@@ -1,6 +1,7 @@
 --高速决斗技能-陷阱分堆
 Duel.LoadScript("speed_duel_common.lua")
 function c100730035.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(17874674,c)
 	aux.SpeedDuelBeforeDraw(c,c100730035.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
