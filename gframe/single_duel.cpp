@@ -1939,7 +1939,7 @@ if(!dp || dp == players[player])
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -1947,7 +1947,7 @@ if(!dp || dp == players[player])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[1 - player])
 #endif
@@ -1987,7 +1987,7 @@ if(!dp || dp == players[player])
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -1995,7 +1995,7 @@ if(!dp || dp == players[player])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[1 - player])
 #endif
@@ -2035,7 +2035,7 @@ if(!dp || dp == players[player])
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int slen = BufferIO::ReadInt32(qbuf);
 		int qflag = *(int*)qbuf;
 		int offset = 8;
@@ -2046,7 +2046,7 @@ if(!dp || dp == players[player])
 			memset(qbuf, 0, slen - 4);
 		qbuf += slen - 4;
 		qlen += slen;
-	}
+	}*/
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[1 - player])
 #endif
@@ -2119,7 +2119,7 @@ if(!dp || dp == players[player])
 	if(!dp)
 		NetServer::ReSendToPlayer(replay_recorder);
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2127,7 +2127,7 @@ if(!dp || dp == players[player])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	if(!dp || dp == players[1 - player])
 		NetServer::SendBufferToPlayer(players[1 - player], STOC_GAME_MSG, query_buffer, len + 3);
 	if(!dp)
@@ -2150,7 +2150,7 @@ void SingleDuel::RefreshRemoved(int player, int flag, int use_cache, DuelPlayer*
 	if(!dp)
 		NetServer::ReSendToPlayer(replay_recorder);
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2158,7 +2158,7 @@ void SingleDuel::RefreshRemoved(int player, int flag, int use_cache, DuelPlayer*
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	if(!dp || dp == players[1 - player])
 		NetServer::SendBufferToPlayer(players[1 - player], STOC_GAME_MSG, query_buffer, len + 3);
 	if(!dp)
@@ -2177,16 +2177,16 @@ void SingleDuel::RefreshSingle(int player, int location, int sequence, int flag)
 	BufferIO::WriteInt8(qbuf, sequence);
 	int len = query_card(pduel, player, location, sequence, flag, (unsigned char*)qbuf, 0);
 	NetServer::SendBufferToPlayer(players[player], STOC_GAME_MSG, query_buffer, len + 4);
-	if(location == LOCATION_REMOVED && (qbuf[15] & POS_FACEDOWN))
-		return;
-	if ((location & 0x90) || ((location & 0x2c) && (qbuf[15] & POS_FACEUP))) {
+	//if(location == LOCATION_REMOVED && (qbuf[15] & POS_FACEDOWN))
+	//	return;
+	//if ((location & 0x90) || ((location & 0x2c) && (qbuf[15] & POS_FACEUP))) {
 		NetServer::ReSendToPlayer(players[1 - player]);
 		for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 			NetServer::ReSendToPlayer(*pit);
 #ifdef YGOPRO_SERVER_MODE
 		NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
-	}
+	//}
 }
 int SingleDuel::MessageHandler(long fduel, int type) {
 	if(!enable_log)

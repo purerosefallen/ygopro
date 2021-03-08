@@ -2045,7 +2045,7 @@ if(!dp || dp == players[pid])
 	NetServer::ReSendToPlayer(players[pid + 1]);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2053,7 +2053,7 @@ if(!dp || dp == players[pid])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	pid = 2 - pid;
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[pid])
@@ -2103,7 +2103,7 @@ if(!dp || dp == players[pid])
 	NetServer::ReSendToPlayer(players[pid + 1]);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2111,7 +2111,7 @@ if(!dp || dp == players[pid])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	pid = 2 - pid;
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[pid])
@@ -2156,7 +2156,7 @@ if(!dp || dp == cur_player[player])
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int slen = BufferIO::ReadInt32(qbuf);
 		int qflag = *(int*)qbuf;
 		int offset = 8;
@@ -2167,7 +2167,7 @@ if(!dp || dp == cur_player[player])
 			memset(qbuf, 0, slen - 4);
 		qbuf += slen - 4;
 		qlen += slen;
-	}
+	}*/
 	for(int i = 0; i < 4; ++i)
 #ifdef YGOPRO_SERVER_MODE
 if(!dp || dp == players[i])
@@ -2242,7 +2242,7 @@ if(!dp || dp == cur_player[player])
 	if(!dp)
 		NetServer::ReSendToPlayer(replay_recorder);
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2250,7 +2250,7 @@ if(!dp || dp == cur_player[player])
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	for(int i = 0; i < 4; ++i)
 		if(!dp || dp == players[i])
 			if(players[i] != cur_player[player])
@@ -2278,7 +2278,7 @@ void TagDuel::RefreshRemoved(int player, int flag, int use_cache, DuelPlayer* dp
 	if(!dp)
 		NetServer::ReSendToPlayer(replay_recorder);
 	int qlen = 0;
-	while(qlen < len) {
+	/*while(qlen < len) {
 		int clen = BufferIO::ReadInt32(qbuf);
 		qlen += clen;
 		if (clen == 4)
@@ -2286,7 +2286,7 @@ void TagDuel::RefreshRemoved(int player, int flag, int use_cache, DuelPlayer* dp
 		if (qbuf[11] & POS_FACEDOWN)
 			memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
-	}
+	}*/
 	pid = 2 - pid;
 	if(!dp || dp == players[pid])
 		NetServer::SendBufferToPlayer(players[pid], STOC_GAME_MSG, query_buffer, len + 3);
@@ -2314,7 +2314,7 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 #ifdef YGOPRO_SERVER_MODE
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
-		if(qbuf[15] & POS_FACEUP) {
+		//if(qbuf[15] & POS_FACEUP) {
 			pid = 2 - pid;
 			NetServer::SendBufferToPlayer(players[pid], STOC_GAME_MSG, query_buffer, len + 4);
 			NetServer::ReSendToPlayer(players[pid + 1]);
@@ -2323,7 +2323,7 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 #ifdef YGOPRO_SERVER_MODE
 				NetServer::ReSendToPlayer(cache_recorder);
 #endif
-		}
+		//}
 	} else {
 		int pid = (player == 0) ? 0 : 2;
 		NetServer::SendBufferToPlayer(players[pid], STOC_GAME_MSG, query_buffer, len + 4);
@@ -2331,9 +2331,9 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 #ifdef YGOPRO_SERVER_MODE
 		NetServer::ReSendToPlayer(replay_recorder);
 #endif
-		if(location == LOCATION_REMOVED && (qbuf[15] & POS_FACEDOWN))
-			return;
-		if (location & 0x90) {
+		//if(location == LOCATION_REMOVED && (qbuf[15] & POS_FACEDOWN))
+		//	return;
+		//if (location & 0x90) {
 			for(int i = 0; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					NetServer::ReSendToPlayer(players[i]);
@@ -2342,7 +2342,7 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 #ifdef YGOPRO_SERVER_MODE
 				NetServer::ReSendToPlayer(cache_recorder);
 #endif
-		}
+		//}
 	}
 }
 int TagDuel::MessageHandler(long fduel, int type) {
