@@ -13,7 +13,7 @@ function c100730066.skill(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetTargetRange(LOCATION_MZONE,0)
 	e1:SetTarget(c100730066.tgfilter)
-	e1:SetValue(200)
+	e1:SetValue(600)
 	Duel.RegisterEffect(e1,tp)
 	e:Reset()
 end

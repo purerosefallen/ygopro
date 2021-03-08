@@ -33,7 +33,7 @@ function c100730028.skill(e,tp)
 	e2:SetValue(c100730028.limval)
 	e2:SetReset(RESET_PHASE+PHASE_END,count)
 	Duel.RegisterEffect(e2,tp)
-
+	e:Reset()
 end
 function c100730028.limcon(e)
 	if count==2 then return Duel.GetTurnCount()==2 end

@@ -12,7 +12,7 @@ end
 
 function c100730029.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	if Duel.GetLP(tp)>=4000 then
+	if Duel.GetLP(tp)>=2000 then
 		c100730029.turn[tp]=Duel.GetTurnCount()
 	else
 		c100730029.turn[tp]=-1

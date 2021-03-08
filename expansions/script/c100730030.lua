@@ -1,6 +1,7 @@
 --高速决斗技能-魔法专家
 Duel.LoadScript("speed_duel_common.lua")
 function c100730030.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(4259068,c)
 	aux.SpeedDuelBeforeDraw(c,c100730030.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

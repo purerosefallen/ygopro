@@ -1,0 +1,30 @@
+--高速决斗技能-我永远在你身边
+Duel.LoadScript("speed_duel_common.lua")
+function c100730080.initial_effect(c)
+	--activate
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_PREDRAW)
+	e1:SetOperation(c100730080.skill)
+	e1:SetLabelObject(c)
+	Duel.RegisterEffect(e1,0)
+	aux.SpeedDuelMoveCardToDeckCommon(43378048,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60110982,c)
+	aux.RegisterSpeedDuelSkillCardCommon()
+end
+
+function c100730080.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	local g=Group.CreateGroup()
+	local c=Duel.CreateToken(tp,31764700)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	c=Duel.CreateToken(tp,4779091)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	c=Duel.CreateToken(tp,78371393)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	Duel.SendtoGrave(g,REASON_RULE)
+	e:Reset()
+end

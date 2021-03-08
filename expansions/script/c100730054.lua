@@ -1,31 +1,20 @@
---高速决斗技能-重新开始
+--高速决斗技能-来自虚无的复仇
 Duel.LoadScript("speed_duel_common.lua")
 function c100730054.initial_effect(c)
+	aux.SpeedDuelMoveCardToDeckCommon(72896720,c)
+	aux.SpeedDuelMoveCardToDeckCommon(38904695,c)
+	aux.SpeedDuelMoveCardToDeckCommon(81020646,c)
 	aux.SpeedDuelBeforeDraw(c,c100730054.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
 function c100730054.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	e:Reset()
-	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	local ct=g:GetCount()
-	if ct==0 then return end
-	if not Duel.SelectYesNo(tp,aux.Stringid(100730054,0)) then return end
-	aux.SpeedDuelSendToDeckWithExile(tp,g)
-	local g2=Duel.GetFieldGroup(tp,LOCATION_DECK,0)
-	g2=g2:RandomSelect(tp,ct)
-	aux.SpeedDuelSendToHandWithExile(tp,g2)
-	
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetCode(EFFECT_SKIP_DP)
-	e1:SetTargetRange(1,0)
-	if Duel.GetTurnPlayer()==tp then
-		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,2)
+	if Duel.IsExistingMatchingCard(Card.IsAttribute,tp,LOCATION_DECK,0,1,nil,0x5f) then
+		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730054,0))
 	else
-		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN)
+		aux.SpeedDuelSendToDeckWithExile(tp,g)
+		local c=Duel.CreateToken(tp,85475641)
+		Duel.SendtoGrave(c,REASON_RULE)
 	end
-	Duel.RegisterEffect(e1,tp)
 end
