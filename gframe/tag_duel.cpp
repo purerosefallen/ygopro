@@ -1512,15 +1512,15 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			NetServer::ReSendToPlayer(replay_recorder);
 #endif
-			for (int i = 0; i < count; ++i) {
+			/*for (int i = 0; i < count; ++i) {
 				if(!(pbufw[3] & 0x80))
 					BufferIO::WriteInt32(pbufw, 0);
 				else
 					pbufw += 4;
-			}
+			}*/
 			for(int i = 0; i < 4; ++i)
 				if(players[i] != cur_player[player])
-					NetServer::SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
+					NetServer::ReSendToPlayer(players[i]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				NetServer::ReSendToPlayer(*oit);
 #ifdef YGOPRO_SERVER_MODE

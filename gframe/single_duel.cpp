@@ -1488,13 +1488,13 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			NetServer::ReSendToPlayer(replay_recorder);
 #endif
-			for (int i = 0; i < count; ++i) {
+			/*for (int i = 0; i < count; ++i) {
 				if(!(pbufw[3] & 0x80))
 					BufferIO::WriteInt32(pbufw, 0);
 				else
 					pbufw += 4;
-			}
-			NetServer::SendBufferToPlayer(players[1 - player], STOC_GAME_MSG, offset, pbuf - offset);
+			}*/
+			NetServer::ReSendToPlayer(players[1 - player]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				NetServer::ReSendToPlayer(*oit);
 #ifdef YGOPRO_SERVER_MODE
