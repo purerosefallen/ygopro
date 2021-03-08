@@ -13,7 +13,7 @@ BLOCK "080404b0"
 BEGIN
 VALUE "FileDescription", "YGOPRO Server Mode ver.Koishi"
 VALUE "InternalName", "YGOPRO Server Mode"
-VALUE "LegalCopyright", "Copyright (C) 2019 Nanahira"
+VALUE "LegalCopyright", "Copyright (C) 2021 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "YGOPRO Server Mode"
 VALUE "FileVersion", "Server"
