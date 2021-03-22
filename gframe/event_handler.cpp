@@ -1978,6 +1978,12 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case COMBOBOX_LOCALE: {
+				myswprintf(mainGame->gameConf.locale, L"%ls",  mainGame->cbLocale->getItem(mainGame->cbLocale->getSelected()));
+				mainGame->SaveConfig();
+				return true;
+				break;
+			}
 			}
 			break;
 		}
@@ -2039,16 +2045,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				rect<s32> pos = mainGame->tabSystem->getRelativePosition();
 				mainGame->tabSystem->setRelativePosition(recti(0, mainGame->scrTabSystem->getPos() * -1, pos.LowerRightCorner.X, pos.LowerRightCorner.Y));
 				return true;
-				break;
-			}
-			}
-			break;
-		}
-		case irr::gui::EGET_COMBO_BOX_CHANGED: {
-			switch(id) {
-			case COMBOBOX_LOCALE: {
-				myswprintf(mainGame->gameConf.locale, L"%ls",  mainGame->cbLocale->getItem(mainGame->cbLocale->getSelected()));
-				mainGame->SaveConfig();
 				break;
 			}
 			}
