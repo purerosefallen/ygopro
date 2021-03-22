@@ -42,6 +42,8 @@ struct Config {
 	int chkWaitChain;
 	int chkIgnore1;
 	int chkIgnore2;
+	int use_lflist;
+	int default_lflist;
 	int default_rule;
 	int hide_setname;
 	int hide_hint_button;
@@ -116,6 +118,7 @@ struct BotInfo {
 	bool support_master_rule_3;
 	bool support_new_master_rule;
 	bool support_master_rule_2020;
+	bool select_deckfile;
 };
 
 struct FadingUnit {
@@ -342,6 +345,8 @@ public:
 	irr::gui::IGUICheckBox* chkMultiKeywords;
 	irr::gui::IGUICheckBox* chkPreferExpansionScript;
 	irr::gui::IGUICheckBox* chkRegex;
+	irr::gui::IGUICheckBox* chkLFlist;
+	irr::gui::IGUIComboBox* cbLFlist;
 	irr::gui::IGUICheckBox* chkEnableSound;
 	irr::gui::IGUICheckBox* chkEnableMusic;
 	irr::gui::IGUIScrollBar* scrSoundVolume;
@@ -374,7 +379,7 @@ public:
 	irr::gui::IGUIButton* btnCreateHost;
 	//create host
 	irr::gui::IGUIWindow* wCreateHost;
-	irr::gui::IGUIComboBox* cbLFlist;
+	irr::gui::IGUIComboBox* cbHostLFlist;
 	irr::gui::IGUIComboBox* cbMatchMode;
 	irr::gui::IGUIComboBox* cbRule;
 	irr::gui::IGUIEditBox* ebTimeLimit;
@@ -419,6 +424,8 @@ public:
 	irr::gui::IGUIStaticText* stBotInfo;
 	irr::gui::IGUIButton* btnStartBot;
 	irr::gui::IGUIButton* btnBotCancel;
+	irr::gui::IGUIComboBox* cbBotDeckCategory;
+	irr::gui::IGUIComboBox* cbBotDeck;
 	irr::gui::IGUIComboBox* cbBotRule;
 	irr::gui::IGUICheckBox* chkBotHand;
 	irr::gui::IGUICheckBox* chkBotNoCheckDeck;
@@ -576,7 +583,6 @@ public:
 	irr::gui::IGUIComboBox* cbDMCategory;
 	irr::gui::IGUIButton* btnDMOK;
 	irr::gui::IGUIButton* btnDMCancel;
-	irr::gui::IGUIComboBox* cbLFList;
 	//filter
 	irr::gui::IGUIStaticText* wFilter;
 	irr::gui::IGUIScrollBar* scrFilter;
@@ -708,6 +714,7 @@ extern time_t pre_seed[3];
 #define LISTBOX_BOT_LIST			153
 #define BUTTON_BOT_START			154
 #define COMBOBOX_BOT_RULE			155
+#define COMBOBOX_BOT_DECKCATEGORY	156
 #define EDITBOX_CHAT				199
 
 #define BUTTON_MSG_OK				200
@@ -846,9 +853,10 @@ extern time_t pre_seed[3];
 #define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_PREFER_EXPANSION	373
 #define CHECKBOX_DRAW_SINGLE_CHAIN	374
-#define CHECKBOX_REGEX				375
-#define COMBOBOX_LOCALE				376
-#define CHECKBOX_ASK_MSET			377
+#define CHECKBOX_LFLIST				375
+#define CHECKBOX_REGEX				376
+#define COMBOBOX_LOCALE				377
+#define CHECKBOX_ASK_MSET			378
 
 #define BUTTON_BIG_CARD_CLOSE		380
 #define BUTTON_BIG_CARD_ZOOM_IN		381

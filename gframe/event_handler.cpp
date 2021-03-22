@@ -1956,6 +1956,33 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case CHECKBOX_LFLIST: {
+				mainGame->gameConf.use_lflist = mainGame->chkLFlist->isChecked() ? 1 : 0;
+				mainGame->cbLFlist->setEnabled(mainGame->gameConf.use_lflist);
+				mainGame->cbLFlist->setSelected(mainGame->gameConf.use_lflist ? mainGame->gameConf.default_lflist : mainGame->cbLFlist->getItemCount() - 1);
+				mainGame->cbHostLFlist->setSelected(mainGame->gameConf.use_lflist ? mainGame->gameConf.default_lflist : mainGame->cbHostLFlist->getItemCount() - 1);
+				mainGame->deckBuilder.filterList = &deckManager._lfList[mainGame->cbLFlist->getSelected()].content;
+				return true;
+				break;
+			}
+			}
+			break;
+		}
+		case irr::gui::EGET_COMBO_BOX_CHANGED: {
+			switch(id) {
+			case COMBOBOX_LFLIST: {
+				mainGame->gameConf.default_lflist = mainGame->cbLFlist->getSelected();
+				mainGame->cbHostLFlist->setSelected(mainGame->gameConf.default_lflist);
+				mainGame->deckBuilder.filterList = &deckManager._lfList[mainGame->gameConf.default_lflist].content;
+				return true;
+				break;
+			}
+			case COMBOBOX_LOCALE: {
+				myswprintf(mainGame->gameConf.locale, L"%ls",  mainGame->cbLocale->getItem(mainGame->cbLocale->getSelected()));
+				mainGame->SaveConfig();
+				return true;
+				break;
+			}
 			}
 			break;
 		}
@@ -2017,16 +2044,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				rect<s32> pos = mainGame->tabSystem->getRelativePosition();
 				mainGame->tabSystem->setRelativePosition(recti(0, mainGame->scrTabSystem->getPos() * -1, pos.LowerRightCorner.X, pos.LowerRightCorner.Y));
 				return true;
-				break;
-			}
-			}
-			break;
-		}
-		case irr::gui::EGET_COMBO_BOX_CHANGED: {
-			switch(id) {
-			case COMBOBOX_LOCALE: {
-				myswprintf(mainGame->gameConf.locale, L"%ls",  mainGame->cbLocale->getItem(mainGame->cbLocale->getSelected()));
-				mainGame->SaveConfig();
 				break;
 			}
 			}
