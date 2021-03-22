@@ -21,6 +21,10 @@ public:
 	void ClearSearch();
 	void SortList();
 
+	void RefreshDeckList();
+	void RefreshReadonly(int catesel);
+	void ChangeCategory(int catesel);
+	void ShowDeckManage();
 	void ShowBigCard(int code, float zoom);
 	void ZoomBigCard(s32 centerx = -1, s32 centery = -1);
 	void CloseBigCard();
