@@ -2,8 +2,6 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730110.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730110.skill)
-	aux.SpeedDuelMoveCardToDeckCommon(12744567,c)
-	aux.SpeedDuelMoveCardToDeckCommon(48739166,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730110.filter(c,g)
@@ -27,7 +25,11 @@ function c100730110.skill(e,tp)
 		return
 	end
 	tp=e:GetLabelObject():GetOwner()
-	local cno101=Duel.CreateToken(tp,57734012)
+	local n101=Duel.CreateToken(tp,57734012)
+	Duel.SendtoDeck(n101,tp,0,REASON_RULE)
+	local no101=Duel.CreateToken(tp,48739166)
+	Duel.SendtoDeck(no101,tp,1,REASON_RULE)
+	local cno101=Duel.CreateToken(tp,12744567)
 	Duel.SendtoDeck(cno101,tp,0,REASON_RULE)
 	e:Reset()
 end

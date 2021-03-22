@@ -1,7 +1,7 @@
 --高速决斗技能-场地补充
 Duel.LoadScript("speed_duel_common.lua")
 function c100730142.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(69112325,c)
+	aux.SpeedDuelMoveCardToFieldCommon(87624166,c)
 	aux.SpeedDuelAtMainPhase(c,c100730142.skill,c100730142.con,aux.Stringid(100730142,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -29,9 +29,7 @@ function c100730142.skill(e,tp)
 	if not (g1 and g1:GetCount()>0 and g2 and g2:GetCount()>0) then return end
 	local g3=g1:RandomSelect(tp,1)
 	g2:Sub(g3)
-	Duel.SendtoHand(g3,nil,REASON_RULE)
+	Duel.SendtoHand(g3,nil,REASON_EFFECT)
 	e:Reset()
-	if g2:GetCount()<1 then return end
-	g3=g2:RandomSelect(tp,1)
-	Duel.SendtoDeck(g3,nil,2,REASON_RULE)
+	Duel.SendtoDeck(g2,nil,2,REASON_EFFECT)
 end

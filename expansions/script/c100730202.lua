@@ -7,6 +7,8 @@ end
 function c100730202.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.GetMZoneCount(tp)>0
+		and Duel.IsPlayerCanSpecialSummon(tp)
 		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_HAND,0,1,nil,TYPE_TUNER)
 end
 function c100730202.skill(e,tp,c)
@@ -17,6 +19,6 @@ function c100730202.skill(e,tp,c)
 		Duel.Hint(HINT_CARD,1-tp,100730202)
 		Duel.SendtoDeck(c,nil,2,REASON_RULE)
 		local d=Duel.CreateToken(tp,21159309)
-		Duel.MoveToField(d,tp,tp,LOCATION_MZONE,POS_FACEUP,true)
+		Duel.SpecialSummon(d,0,tp,tp,true,true,POS_FACEUP)
 	end
 end

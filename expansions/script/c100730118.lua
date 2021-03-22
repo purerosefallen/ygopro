@@ -2,6 +2,7 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730118.initial_effect(c)
 	aux.SpeedDuelMoveCardToFieldCommon(44710391,c)
+	aux.SpeedDuelMoveCardToFieldCommon(68304813,c)
 	if not c100730118.UsedLP then
 		c100730118.UsedLP={}
 		c100730118.UsedLP[0]=0
@@ -9,6 +10,13 @@ function c100730118.initial_effect(c)
 	end
 	aux.SpeedDuelCalculateDecreasedLP()
 	aux.SpeedDuelReplaceDraw(c,c100730118.skill,c100730118.con,aux.Stringid(100730118,1))
+	aux.SpeedDuelMoveCardToDeckCommon(39823987,c)
+	aux.SpeedDuelMoveCardToDeckCommon(66818682,c)
+	aux.SpeedDuelMoveCardToDeckCommon(41181774,c)
+	aux.SpeedDuelMoveCardToDeckCommon(37910722,c)
+	aux.SpeedDuelMoveCardToDeckCommon(25472513,c)
+	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
+	aux.SpeedDuelMoveCardToDeckCommon(90884403,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 

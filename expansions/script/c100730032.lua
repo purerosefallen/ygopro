@@ -28,5 +28,4 @@ function c100730032.skill(e,tp)
 	e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 	e1:SetValue(source:GetLevel())
 	to:RegisterEffect(e1)
-	e:Reset()
 end

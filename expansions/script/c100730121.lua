@@ -18,9 +18,6 @@ function c100730121.skill(e,tp,eg,ep,ev,re,r,rp)
 	local ct=g:GetCount()
 	if ct==0 then return end
 	if not Duel.SelectYesNo(tp,aux.Stringid(100730121,0)) then return end
-	aux.SpeedDuelSendToDeckWithExile(tp,g)
-	Duel.ShuffleDeck(tp)
-	local g2=Duel.GetDecktopGroup(tp,ct)
-	aux.SpeedDuelSendToHandWithExile(tp,g2)
-	
+	Duel.SendtoDeck(g,nil,1,REASON_RULE)
+	Duel.Draw(tp,g:GetCount(),REASON_RULE)
 end

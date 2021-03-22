@@ -11,11 +11,11 @@ function c100730044.con(e,tp)
 end
 function c100730044.skill(e,tp,c)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730044)
 	local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_HAND,0,1,nil,RACE_FAIRY)
 	local g1=g:Select(tp,1,1,nil)
 	if g1 then
 		Duel.ConfirmCards(1-tp,g1)
-		local lp=Duel.GetLP(tp)
-		Duel.SetLP(tp,lp+1000)
+		Duel.Recover(tp,1000,REASON_EFFECT)   
 	end
 end

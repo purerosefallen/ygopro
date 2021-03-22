@@ -7,6 +7,7 @@ function c100730203.initial_effect(c)
 end
 function c100730203.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730203)
 	if Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_HAND+LOCATION_DECK,0,nil,TYPE_MONSTER)<6 then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730203,0))
 		e:Reset()

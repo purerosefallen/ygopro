@@ -13,9 +13,8 @@ end
 function c100730140.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=Duel.GetTurnPlayer()
 	Duel.Hint(HINT_CARD,1-tp,100730140)
-	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp+2000)
-	local lp2=Duel.GetLP(1-tp)
-	Duel.SetLP(1-tp,lp2-2000)
+	Duel.Recover(tp,2000,REASON_EFFECT)
+	local lp=Duel.GetLP(1-tp)
+	Duel.SetLP(1-tp,lp-2000) 
 	e:Reset()
 end

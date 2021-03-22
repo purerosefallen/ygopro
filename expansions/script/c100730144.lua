@@ -28,7 +28,6 @@ function c100730144.skill(e,tp)
 	Duel.Hint(HINT_CARD,1-tp,100730144)
 	local cn=Duel.CreateToken(tp,87902575)
 	Duel.MoveToField(cn,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
-	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp-1500)
+	Duel.PayLPCost(tp,1500)
 	e:Reset()
 end

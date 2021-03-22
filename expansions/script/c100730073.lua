@@ -1,4 +1,4 @@
---高速决斗技能-盗贼
+--高速决斗技能-永火炼狱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730073.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730073.skill,c100730073.con,aux.Stringid(100730073,0))

@@ -19,6 +19,7 @@ function c100730029.skill(e,tp)
 	end
 	if not c100730029.reg[tp] then
 		c100730029.reg[tp]=true
+		Duel.Hint(HINT_CARD,1-tp,100730029)
 		local e1=Effect.GlobalEffect()
 		e1:SetType(EFFECT_TYPE_FIELD)
 		e1:SetCode(EFFECT_CHANGE_DAMAGE)

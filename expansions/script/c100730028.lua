@@ -6,6 +6,7 @@ function c100730028.initial_effect(c)
 end
 function c100730028.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730028)
 	local g=Duel.GetDecktopGroup(tp,1)
 	aux.SpeedDuelSendToHandWithExile(tp,g)
 	local g2=Duel.GetDecktopGroup(1-tp,1)

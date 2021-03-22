@@ -10,6 +10,7 @@ end
 function c100730131.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+	and Duel.GetFieldGroupCount(tp,LOCATION_HAND,0)<=2
 	and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,51960178)
 end
 function c100730131.skill(e,tp)

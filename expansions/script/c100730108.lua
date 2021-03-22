@@ -11,6 +11,5 @@ function c100730108.con(e,tp)
 end
 function c100730108.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp+1000)
+	Duel.Recover(tp,1000,REASON_EFFECT)   
 end

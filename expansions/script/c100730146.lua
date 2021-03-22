@@ -13,10 +13,8 @@ function c100730146.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730146.Isdino,tp,LOCATION_GRAVE,0,1,nil)
+		and Duel.IsPlayerCanSpecialSummon(tp)
 		and Duel.GetMZoneCount(tp)>-1
-end
-function c100730146.SequenceToZone(seq)
-	return 1 << seq
 end
 function c100730146.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
@@ -24,12 +22,8 @@ function c100730146.skill(e,tp)
 	if not g then return end
 	local tc=g:GetFirst()
 	Duel.Remove(tc,POS_FACEUP,REASON_COST)
-	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp-1500)
+	Duel.PayLPCost(tp,1500)
 	local newc=Duel.CreateToken(tp,15894048)
-	Duel.MoveToField(newc,tp,tp,LOCATION_MZONE,POS_FACEUP,true)
+	Duel.SpecialSummon(newc,0,tp,tp,true,true,POS_FACEUP)
 	e:Reset()
-end
-function c100730146.DisableMonsterZone(e,tp)
-	return 0x1f-aux.SequenceToZone(tc:GetSequence())
 end

@@ -6,42 +6,28 @@ function c100730201.initial_effect(c)
 end
 function c100730201.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp and Duel.GetLP(tp)<=2000
+	return Duel.GetTurnPlayer()==tp and Duel.GetLP(tp)<=4000
 end
 function c100730201.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	if Duel.SelectYesNo(tp,aux.Stringid(100730201,0)) then
 		Duel.Hint(HINT_CARD,1-tp,100730201)
-		local g=Group.CreateGroup()
-		local c=Duel.CreateToken(tp,3078576)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,78706415)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,34124316)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,3280747)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,74191942)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		Duel.SendtoHand(g,tp,0,REASON_RULE)
-		local g2=g:RandomSelect(tp,4)
-		Duel.Exile(g2,REASON_RULE)
+		local count=Duel.TossCoin(tp,4)
+		if count==4 then
+			local c=Duel.CreateToken(tp,3280747)
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		elseif count==3 then
+			local c=Duel.CreateToken(tp,78706415)
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		elseif count==2 then
+			local c=Duel.CreateToken(tp,34124316)
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		elseif count==1 then
+			local c=Duel.CreateToken(tp,3078576)
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		elseif count==0 then
+			local c=Duel.CreateToken(tp,18144506)
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		end
 	end
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetCode(EFFECT_SKIP_DP)
-	e1:SetTargetRange(1,0)
-	if Duel.GetTurnPlayer()==tp then
-		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,2)
-	else
-		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN)
-	end
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
 end

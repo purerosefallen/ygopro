@@ -31,7 +31,5 @@ function c100730145.skill(e,tp)
 	g2:Sub(g3)
 	Duel.SendtoHand(g3,nil,REASON_RULE)
 	e:Reset()
-	if g2:GetCount()<1 then return end
-	g3=g2:RandomSelect(tp,1)
-	Duel.SendtoDeck(g3,nil,2,REASON_RULE)
+	Duel.SendtoDeck(g2,nil,2,REASON_RULE)
 end

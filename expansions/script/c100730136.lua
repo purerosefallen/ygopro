@@ -7,10 +7,17 @@ function c100730136.initial_effect(c)
 		c100730136.UsedLP[1]=0
 	end
 	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelReplaceDraw(c,c100730136.skill,c100730136.con,aux.Stringid(100730136,1))
+	aux.SpeedDuelReplaceDraw(c,c100730136.skill,c100730136.con,aux.Stringid(100730136,1))	
+	aux.SpeedDuelBeforeDraw(c,c100730136.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
+function c100730136.skill2(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730136)
+	local tc=Duel.CreateToken(tp,53586134)
+	aux.SpeedDuelSendToHandWithExile(tp,tc)
+	e:Reset()
+end
 function c100730136.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp = e:GetLabelObject():GetOwner()
 	if Duel.SelectYesNo(tp,aux.Stringid(100730136,0)) then
