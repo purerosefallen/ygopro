@@ -1268,11 +1268,19 @@ void Game::RefreshBot() {
 				BufferIO::DecodeUTF8(strbuf, newinfo.name);
 				fgets(linebuf, 256, fp);
 				sscanf(linebuf, "%240[^\n]", strbuf);
+#ifndef _WIN32
+				bool skipRandom = !!strstr(strbuf, "Random=");
+#endif
 				BufferIO::DecodeUTF8(strbuf, newinfo.command);
 				fgets(linebuf, 256, fp);
 				sscanf(linebuf, "%240[^\n]", strbuf);
 				BufferIO::DecodeUTF8(strbuf, newinfo.desc);
 				fgets(linebuf, 256, fp);
+#ifndef _WIN32
+				if(skipRandom) {
+					continue;
+				}
+#endif
 				newinfo.support_master_rule_3 = !!strstr(linebuf, "SUPPORT_MASTER_RULE_3");
 				newinfo.support_new_master_rule = !!strstr(linebuf, "SUPPORT_NEW_MASTER_RULE");
 				newinfo.support_master_rule_2020 = !!strstr(linebuf, "SUPPORT_MASTER_RULE_2020");
