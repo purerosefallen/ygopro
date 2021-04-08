@@ -1,7 +1,6 @@
 --高速决斗技能-检查我的自行车
 Duel.LoadScript("speed_duel_common.lua")
 function c100730190.initial_effect(c)
-function c100730190.initial_effect(c)
 	if not c100730190.UsedLP then
 		c100730190.UsedLP={}
 		c100730190.UsedLP[0]=0

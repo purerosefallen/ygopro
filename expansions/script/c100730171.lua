@@ -7,12 +7,8 @@ function c100730171.initial_effect(c)
 		c100730171.UsedLP[1]=0
 	end
 	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelAtMainPhase(c,c100730171.operation,c100730171.con,aux.Stringid(100730171,0))
-	local e1=Effect.GlobalEffect(c)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetOperation(c100730171.operation)
-	c:RegisterEffect(e1)
-	aux.SpeedDuelBeforeDraw(c,c100730171.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730171.skill1,c100730171.con,aux.Stringid(100730171,1))
+	aux.SpeedDuelBeforeDraw(c,c100730171.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 
@@ -24,22 +20,22 @@ function c100730171.con(e,tp)
 		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_DECK,0,1,nil,0x41)
 		and Duel.GetMZoneCount(tp)>0
 		and aux.DecreasedLP[tp]-c100730171.UsedLP[tp]>=1800
-		and c100730171.UsedLP[tp]<3600
 end
 
-function c100730171.operation(e,tp,eg,ep,ev,re,r,rp)
+function c100730171.skill1(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	c100730171.UsedLP[tp]=c100730171.UsedLP[tp]+1800
-	local g1=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local c=g1:GetFirst()
 	if c then
 		Duel.Hint(HINT_CARD,1-tp,100730171)
 		Duel.SendtoDeck(c,nil,2,REASON_RULE)
-		local g=Duel.SelectMatchingCard(tp,c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil)
+		local d=Duel.CreateToken(tp,25774450)
+		Duel.SendtoHand(d,nil,REASON_RULE)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+		local g=Duel.SelectMatchingCard(tp,c100730171.filter,tp,LOCATION_DECK,0,1,1,nil)
 		if g:GetCount()>0 then
-			local d=Duel.CreateToken(tp,25774450)
-			Duel.SendtoHand(d,nil,REASON_RULE)
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 			local tc=g:GetFirst()
 			local c=e:GetHandler()
 			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
@@ -55,14 +51,6 @@ function c100730171.operation(e,tp,eg,ep,ev,re,r,rp)
 			e1:SetReset(RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN,2)
 			e1:SetCountLimit(1)
 			Duel.RegisterEffect(e1,tp)
-			local e2=Effect.CreateEffect(c)
-			e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
-			e2:SetTargetRange(LOCATION_MZONE,0)
-			e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
-			e2:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
-			e2:SetValue(1)
-			e2:SetReset(RESET_PHASE+PHASE_END+RESET_OPPO_TURN)
-			Duel.RegisterEffect(e2,tc)
 			Duel.ConfirmCards(1-tp,d)
 		end
 	end
@@ -78,8 +66,9 @@ function c100730171.tdop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,100730171)
 	Duel.GetControl(tc,1-tp)
 end
-function c100730171.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730171.skill2(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	local c=e:GetLabelObject()
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetTargetRange(LOCATION_MZONE,0)
@@ -95,6 +84,13 @@ function c100730171.skill(e,tp,eg,ep,ev,re,r,rp)
 	e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	e2:SetValue(c100730171.val)
 	Duel.RegisterEffect(e2,tp)
+	local e3=Effect.CreateEffect(c)
+	e3:SetDescription(aux.Stringid(100730171,0))
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
+	e3:SetTargetRange(LOCATION_HAND+LOCATION_MZONE,0)
+	e3:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x41))
+	Duel.RegisterEffect(e3,tp)
 	e:Reset()
 end
 
@@ -113,5 +109,5 @@ function c100730171.efilter(e,te)
 	return not te:GetOwner():IsSetCard(0x41)
 end
 function c100730171.val(e,c)
-	return c:GetLevel()*1500-c:GetTextAttack()*2-c:GetTextDefense()*3
+	return c:GetLevel()*857-c:GetTextAttack()-c:GetTextDefense()
 end

@@ -29,18 +29,5 @@ function c100730141.skill(e,tp)
 	e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 	e1:SetValue(-source:GetLevel())
 	to:RegisterEffect(e1)
-end
-function c100730141.skill2(e,tp,eg,ep,ev,re,
-	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730141.Dfilter)
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
-end
-
-function c100730141.Dfilter(e,c)
-	return c:IsAttribute(ATTRIBUTE_DARK) and c:IsAttackBelow(1500) and c:IsDefenseBelow(1500)
+	Duel.ShuffleHand(tp)
 end

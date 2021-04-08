@@ -1,6 +1,8 @@
 --高速决斗技能-龙印·翼
 Duel.LoadScript("speed_duel_common.lua")
 function c100730011.initial_effect(c)
+	aux.SpeedDuelMoveCardToDeckCommon(66141736,c)
+	aux.SpeedDuelMoveCardToDeckCommon(76547525,c)
 	aux.SpeedDuelMoveCardToDeckCommon(97021916,c)
 	aux.SpeedDuelMoveCardToDeckCommon(97021916,c)
 	aux.SpeedDuelMoveCardToDeckCommon(70902743,c)
@@ -11,6 +13,7 @@ function c100730011.initial_effect(c)
 	aux.SpeedDuelMoveCardToDeckCommon(62242678,c)
 	aux.SpeedDuelMoveCardToDeckCommon(97489701,c)
 	aux.SpeedDuelMoveCardToDeckCommon(99585850,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
 	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

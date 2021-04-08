@@ -16,7 +16,8 @@ function c100730180.con(e,tp)
 		and Duel.IsExistingMatchingCard(c100730180.otfilter,tp,LOCATION_MZONE,0,1,nil)
 end
 function c100730180.operation(e,tp,eg,ep,ev,re,r,rp)
-	local sg=Duel.GetMatchingGroup(c100730180.otfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	local sg=Duel.GetMatchingGroup(c100730180.otfilter,tp,LOCATION_MZONE,0,nil)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local tc=sg:GetFirst()
 	local atk=tc:GetAttack()
 	if not tc then return end

@@ -5,9 +5,11 @@ function c100730185.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730185.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
+
 function c100730185.skill2(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
+	local c=e:GetHandler()
+	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetTargetRange(LOCATION_MZONE,0)
@@ -23,10 +25,12 @@ end
 function c100730185.cfilter(e,c)
 	return c:IsRace(RACE_MACHINE) or c:IsRace(RACE_WARRIOR)
 end
-function c100730185.kaicon(e,tp)
-	return Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_MZONE+LOCATION_SZONE,0,1,nil,6400512)
+function c100730185.kaicon(e)
+	return Duel.IsExistingMatchingCard(c100730185.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
 end
-
+function c100730185.filter(c)
+	return c:IsFaceup() and c:IsCode(6400512)
+end
 function c100730185.con(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	return Duel.GetTurnPlayer()==tp

@@ -16,6 +16,7 @@ function c100730175.skill1(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730175)
 	local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_HAND,0,nil,26964762)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
 	if g:GetCount()==0 then return end
 	local tc=g:GetFirst()
 	local op=Duel.SelectOption(tp,aux.Stringid(100730175,1),aux.Stringid(100730175,2))

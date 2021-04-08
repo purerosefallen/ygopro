@@ -32,4 +32,5 @@ function c100731000.skilllose(e,tp)
 	Duel.Hint(HINT_CARD,1-tp,100731000)
 	local lp=Duel.GetLP(tp)
 	Duel.Damage(tp,lp,REASON_RULE)
+	Duel.Win(1-tp,WIN_REASON_FINAL_DRAW)
 end

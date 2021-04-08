@@ -1,7 +1,7 @@
 --高速决斗技能-电子化天使的祝福
 Duel.LoadScript("speed_duel_common.lua")
 function c100730094.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(81380218,c)
+	aux.SpeedDuelMoveCardToFieldCommon(91946859,c)
 	aux.SpeedDuelReplaceDraw(c,c100730094.skill,c100730094.con,aux.Stringid(100730094,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -21,6 +21,6 @@ function c100730094.skill(e,tp)
 		if c:IsSetCard(0x2093) then
 			Duel.SendtoDeck(c,tp,0,REASON_RULE)
 		else Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730094,2))
-		end 
+		end
 	end
 end

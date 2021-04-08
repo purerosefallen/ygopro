@@ -8,7 +8,6 @@ end
 function c100730186.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.GetMZoneCount(tp)>0
 		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_ONFIELD,0,1,nil,TYPE_EQUIP)
 		and Duel.IsPlayerCanDraw(tp,1)
 		and Duel.GetLP(tp)<=6000

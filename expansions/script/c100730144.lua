@@ -1,33 +1,40 @@
---高速决斗技能-未来视界
+--高速决斗技能-里电子流派
 Duel.LoadScript("speed_duel_common.lua")
 function c100730144.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730144.skill)
+	if not c100730144.UsedLP then
+		c100730144.UsedLP={}
+		c100730144.UsedLP[0]=0
+		c100730144.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730144.skill,c100730144.con,aux.Stringid(100730144,1))
+	aux.SpeedDuelBeforeDraw(c,c100730144.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730144.filter(c,g)
-	if not c:IsSetCard(0x31) then return false end
-	local tc=g:GetFirst()
-	while tc do
-		if c:GetOriginalCode()==tc:GetOriginalCode() then
-			return false
-		end
-		tc=g:GetNext()
-	end
-	g:AddCard(c)
-	return true
-end
-function c100730144.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730144.filter,tp,LOCATION_DECK+LOCATION_HAND,0,5,nil,g) then
-		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730144,0))
+
+function c100730144.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730144,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730144)
+		c100730144.UsedLP[tp]=c100730144.UsedLP[tp]+1000
+		local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x4093)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
 		e:Reset()
-		return
 	end
+end
+
+function c100730144.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x4093)>0
+		and aux.DecreasedLP[tp]-c100730144.UsedLP[tp] >= 1000
+end
+function c100730144.skill2(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730144)
-	local cn=Duel.CreateToken(tp,87902575)
-	Duel.MoveToField(cn,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
-	Duel.PayLPCost(tp,1500)
+	local tc=Duel.CreateToken(tp,73026394)
+	aux.SpeedDuelSendToHandWithExile(tp,tc)
 	e:Reset()
 end

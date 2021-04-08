@@ -1,4 +1,4 @@
---高速决斗技能-堕落之王的仆从
+--高速决斗技能-不死王的从者
 Duel.LoadScript("speed_duel_common.lua")
 function c100730194.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730194.skill,c100730194.con,aux.Stringid(100730194,0))

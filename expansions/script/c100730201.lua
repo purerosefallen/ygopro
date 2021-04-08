@@ -1,33 +1,45 @@
---高速决斗技能-创造者
+--高速决斗技能-救世守卫
 Duel.LoadScript("speed_duel_common.lua")
 function c100730201.initial_effect(c)
-	aux.SpeedDuelReplaceDraw(c,c100730201.skill,c100730201.con,aux.Stringid(100730201,1))
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_PREDRAW)
+	e1:SetOperation(c100730201.skill2)
+	e1:SetLabelObject(c)
+	Duel.RegisterEffect(e1,0)
 	aux.RegisterSpeedDuelSkillCardCommon()
+	aux.SpeedDuelBeforeDraw(c,c100730201.skill)
 end
-function c100730201.con(e,tp)
+function c100730201.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp and Duel.GetLP(tp)<=4000
+	local c=e:GetHandler()
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_CHAIN_SOLVING)
+	e1:SetCondition(c100730201.damcon)
+	e1:SetOperation(c100730201.disop)
+	Duel.RegisterEffect(e1,tp)
+	e:Reset()
 end
-function c100730201.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730201,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730201)
-		local count=Duel.TossCoin(tp,4)
-		if count==4 then
-			local c=Duel.CreateToken(tp,3280747)
-			Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		elseif count==3 then
-			local c=Duel.CreateToken(tp,78706415)
-			Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		elseif count==2 then
-			local c=Duel.CreateToken(tp,34124316)
-			Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		elseif count==1 then
-			local c=Duel.CreateToken(tp,3078576)
-			Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		elseif count==0 then
-			local c=Duel.CreateToken(tp,18144506)
-			Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		end
+function c100730201.damcon(e,tp,eg,ep,ev,re,r,rp)
+	local tc=re:GetHandler()
+	return tc:IsControler(tp) and tc:IsCode(7841112) or tc:IsCode(67030233)
+end
+function c100730201.disop(e,tp,eg,ep,ev,re,r,rp)
+	local tc=re:GetHandler()
+	if Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON) then
+		Duel.NegateEffect(ev)
 	end
+end
+function c100730201.skill2(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	local g=Group.CreateGroup()
+	local c=Duel.CreateToken(tp,68543408)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	c=Duel.CreateToken(tp,80244114)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	Duel.SendtoGrave(g,REASON_RULE)
+	e:Reset()
 end
