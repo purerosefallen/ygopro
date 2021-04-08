@@ -13,7 +13,7 @@ function c100730193.initial_effect(c)
 end
 function c100730193.skill2(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730136)
+	Duel.Hint(HINT_CARD,1-tp,100730193)
 	local tc=Duel.CreateToken(tp,50412166)
 	aux.SpeedDuelSendToHandWithExile(tp,tc)
 	e:Reset()

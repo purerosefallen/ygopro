@@ -20,6 +20,7 @@ function c100730188.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	c100730188.UsedLP[tp]=c100730188.UsedLP[tp]+1000
 	Duel.Hint(HINT_CARD,1-tp,100730188)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g1=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
 	if not g1 then return end
 	Duel.SendtoDeck(g1,nil,2,REASON_RULE)

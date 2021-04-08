@@ -1,6 +1,12 @@
 --高速决斗技能-救世之光
 Duel.LoadScript("speed_duel_common.lua")
 function c100730202.initial_effect(c)
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_PREDRAW)
+	e1:SetOperation(c100730202.skill2)
+	e1:SetLabelObject(c)
+	Duel.RegisterEffect(e1,0)
 	aux.SpeedDuelAtMainPhase(c,c100730202.skill,c100730202.con,aux.Stringid(100730202,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -21,4 +27,16 @@ function c100730202.skill(e,tp,c)
 		local d=Duel.CreateToken(tp,21159309)
 		Duel.SpecialSummon(d,0,tp,tp,true,true,POS_FACEUP)
 	end
+end
+function c100730202.skill2(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	local g=Group.CreateGroup()
+	local c=Duel.CreateToken(tp,68543408)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	c=Duel.CreateToken(tp,80244114)
+	g:AddCard(c)
+	aux.CardAddedBySkill:AddCard(c)
+	Duel.SendtoGrave(g,REASON_RULE)
+	e:Reset()
 end

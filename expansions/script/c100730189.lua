@@ -36,7 +36,7 @@ function c100730189.skill(e,tp,eg,ep,ev,re,r,rp)
 		if ft<g3:GetCount() or not g3 then return end
 		local sc=g3:GetFirst()
 		while sc do
-		   Duel.SpecialSummon(sc,0,tp,tp,true,true,POS_FACEUP_DEFENSE)
+		   Duel.SpecialSummon(sc,0,tp,tp,true,true,POS_FACEUP)
 		   sc=g3:GetNext()
 		end
 		local e1=Effect.GlobalEffect()
@@ -47,7 +47,6 @@ function c100730189.skill(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetTargetRange(1,0)
 		Duel.RegisterEffect(e1,tp,true)
 		e1:SetOwnerPlayer(tp)
-	e:Reset()
 	end
 end
 function c100730189.filter(c,tp)
