@@ -13,7 +13,9 @@ end
 function c100730127.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local lp=Duel.GetLP(tp)
-	if lp>3001 then return end
+	if lp>=3001 then return end
 	if not Duel.SelectYesNo(tp,aux.Stringid(100730127,0)) then return end
-		Duel.SetLP(tp,3001)   
+	Duel.Hint(HINT_CARD,1-tp,100730127)
+	local rp=3001-lp
+	Duel.Recover(tp,rp,REASON_RULE)
 end

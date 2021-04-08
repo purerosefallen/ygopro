@@ -20,6 +20,7 @@ end
 
 function c100730045.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730045)
 	local g=Duel.GetDecktopGroup(tp,1)
 	if not g or g:GetCount()==0 then return end
 	g:ForEach(c100730045.reg)

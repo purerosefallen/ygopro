@@ -16,7 +16,7 @@ function c100730181.con(e,tp)
 		and Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE+LOCATION_SZONE,0,1,nil)
 end
 function c100730181.kaicon(e,tp)
-	return Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE+LOCATION_SZONE,0,1,nil)
+	return Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE+LOCATION_SZONE,LOCATION_MZONE+LOCATION_SZONE,1,nil)
 end
 
 
@@ -54,7 +54,7 @@ function c100730181.skill2(e,tp,eg,ep,ev,re,r,rp)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_UPDATE_LEVEL)
-	e2:SetTargetRange(LOCATION_HAND+LOCATION_MZONE+LOCATION_DECK+LOCATION_GRAVE,LOCATION_HAND+LOCATION_MZONE)
+	e2:SetTargetRange(LOCATION_HAND+LOCATION_MZONE+LOCATION_DECK+LOCATION_GRAVE,0)
 	e2:SetTarget(aux.TargetBoolFunction(Card.IsAttribute,ATTRIBUTE_WATER))
 	e2:SetValue(-1)
 	Duel.RegisterEffect(e2,tp)

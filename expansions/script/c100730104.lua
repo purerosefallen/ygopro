@@ -37,6 +37,5 @@ function c100730104.skill(e,tp)
 		e2:SetTargetRange(1,0)
 		e2:SetReset(RESET_PHASE+PHASE_END)
 		Duel.RegisterEffect(e2,1-tp)
-	e:Reset()
 	end
 end

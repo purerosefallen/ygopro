@@ -9,28 +9,21 @@ function c100730128.skill(e,tp,eg,ep,ev,re,r,rp)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCategory(CATEGORY_RECOVER)
-	e1:SetCode(EVENT_DRAW)
+	e1:SetCode(EVENT_TURN_END)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e1:SetTargetRange(1,0)
 	e1:SetCountLimit(1)
-	e1:SetTarget(c100730128.rectg)
+	e1:SetReset(RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN,6)
 	e1:SetOperation(c100730128.recop)
 	e1:SetValue(c100730128.abdcon)
 	Duel.RegisterEffect(e1,tp)
+	e:Reset()
 end
-function c100730128.rectg(e,tp,eg,ep,ev,re,r,rp,chk)
-	tp=Duel.GetTurnPlayer()
-	if chk==0 then return true end
-	Duel.SetTargetPlayer(tp)
-	Duel.SetTargetParam(200)
-	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,200)
-end
-
 function c100730128.recop(e,tp,eg,ep,ev,re,r,rp)
 	if ep~=tp then return end
+	local count= Duel.GetTurnCount()
 	Duel.Hint(HINT_CARD,1-tp,100730128)
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	Duel.Recover(p,d,REASON_RULE)
+	Duel.Recover(tp,count*200,REASON_RULE)
 end
 
 function c100730128.abdcon(e)

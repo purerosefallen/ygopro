@@ -22,7 +22,6 @@ function c100730100.con(e,tp)
 	if ht>=6 then return end
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730100.Isgod,tp,LOCATION_MZONE,0,1,nil)
-		and Duel.GetMZoneCount(tp)>-1
 		and Duel.IsPlayerCanDraw(tp,6-ht)
 end
 
@@ -48,7 +47,7 @@ function c100730100.skill(e,tp,eg,ep,ev,re,r,rp)
 	e:Reset()
 end
 function c100730100.tgfilter(e,c)
-	return c:IsOriginalCodeRule(10000020)
+	return c:IsOriginalCodeRule(10000020) and c:IsFaceup()
 end
 function c100730100.imfilter(e,re)
 	return re:IsActiveType(TYPE_TRAP)

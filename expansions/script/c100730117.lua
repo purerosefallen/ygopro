@@ -9,6 +9,7 @@ function c100730117.initial_effect(c)
 	aux.SpeedDuelMoveCardToDeckCommon(25472513,c)
 	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
 	aux.SpeedDuelMoveCardToDeckCommon(90884403,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730117.con(e,tp)
@@ -43,6 +44,7 @@ function c100730117.skill(e,tp,eg,ep,ev,re,r,rp)
 		local d3=Duel.CreateToken(tp,70109009)
 		Duel.MoveToField(d3,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
 	end
+	Duel.ShuffleHand(tp)
 	e:Reset()
 end
 function c100730117.nttg(e,c)

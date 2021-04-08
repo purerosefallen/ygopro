@@ -1,9 +1,12 @@
---高速决斗技能-来自虚无的复仇
+--高速决斗技能-来自墓碑的复仇
 Duel.LoadScript("speed_duel_common.lua")
 function c100730054.initial_effect(c)
+	aux.SpeedDuelMoveCardToDeckCommon(81020646,c)
 	aux.SpeedDuelMoveCardToDeckCommon(72896720,c)
 	aux.SpeedDuelMoveCardToDeckCommon(38904695,c)
-	aux.SpeedDuelMoveCardToDeckCommon(81020646,c)
+	aux.SpeedDuelMoveCardToDeckCommon(50321796,c)
+	aux.SpeedDuelMoveCardToDeckCommon(52687916,c)
+	aux.SpeedDuelMoveCardToDeckCommon(70980824,c)
 	aux.SpeedDuelBeforeDraw(c,c100730054.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

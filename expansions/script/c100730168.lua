@@ -9,7 +9,7 @@ function c100730168.con(e,tp)
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetMZoneCount(tp)>0
 		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,TYPE_MONSTER)
+		and Duel.IsExistingMatchingCard(c100730168.filter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil)
 end
 function c100730168.skill(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,1-tp,100730168)
@@ -36,7 +36,9 @@ function c100730168.skill(e,tp,eg,ep,ev,re,r,rp)
 		e:Reset()
 	end
 end
-
+function c100730168.filter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsAttackBelow(4000)
+end
 function c100730168.limval(e,re,rp)
 	return true
 end

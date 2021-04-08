@@ -36,7 +36,7 @@ function c100730154.skill(e,tp)
 		if g:GetFirst():IsLocation(LOCATION_HAND) then
 			if Duel.IsPlayerCanSummon(tp) and Duel.IsPlayerCanAdditionalSummon(tp) and Duel.GetFlagEffect(tp,78665705)==0 then
 				local e1=Effect.CreateEffect(e:GetHandler())
-				e1:SetDescription(aux.Stringid(c100730154,0))
+				e1:SetDescription(aux.Stringid(100730154,0))
 				e1:SetType(EFFECT_TYPE_FIELD)
 				e1:SetTargetRange(LOCATION_HAND,0)
 				e1:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
@@ -46,7 +46,7 @@ function c100730154.skill(e,tp)
 				local e2=e1:Clone()
 				e2:SetCode(EFFECT_EXTRA_SET_COUNT)
 				Duel.RegisterEffect(e2,tp)
-				Duel.RegisterFlagEffect(tp,100730154,RESET_PHASE+PHASE_END,0,1)
+				Duel.RegisterFlagEffect(tp,78665705,RESET_PHASE+PHASE_END,0,1)
 			end
 		end
 	end

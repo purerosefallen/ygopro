@@ -8,6 +8,7 @@ function c100730112.initial_effect(c)
 	aux.SpeedDuelMoveCardToDeckCommon(37910722,c)
 	aux.SpeedDuelMoveCardToDeckCommon(25472513,c)
 	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
 	aux.SpeedDuelMoveCardToDeckCommon(90884403,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -20,7 +21,6 @@ function c100730112.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730112.Isgod,tp,LOCATION_MZONE,0,1,nil)
-		and Duel.GetMZoneCount(tp)>-1
 		and Duel.GetTurnCount()>=5
 end
 function c100730112.skill(e,tp)

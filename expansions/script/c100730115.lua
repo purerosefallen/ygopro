@@ -9,6 +9,7 @@ function c100730115.initial_effect(c)
 	aux.SpeedDuelMoveCardToDeckCommon(25472513,c)
 	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
 	aux.SpeedDuelMoveCardToDeckCommon(90884403,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730115.Isyubel(c)
@@ -30,6 +31,7 @@ function c100730115.skill(e,tp)
 	if tc:IsCode(66818682) then code=39823987 end
 	if tc:IsCode(39823987) then code=66818682 end
 	Duel.SendtoGrave(tc,REASON_RULE)
+	Duel.Hint(HINT_CARD,1-tp,100730115)
 	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_EXTRA+LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,code)
 	if g1:GetCount()>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)

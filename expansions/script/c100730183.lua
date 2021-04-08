@@ -1,4 +1,4 @@
---高速决斗技能-作弊洗牌术
+--高速决斗技能-霰弹式洗牌
 Duel.LoadScript("speed_duel_common.lua")
 function c100730183.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730183.skill,c100730183.con,aux.Stringid(100730183,0))
@@ -7,17 +7,17 @@ end
 
 function c100730183.con(e,tp,eg,ep,ev,re,r,rp)
 	tp = e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+	return Duel.CheckLPCost(tp,300)
 end
 
 
 function c100730183.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp = e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730183,0)) then	
+	if Duel.SelectYesNo(tp,aux.Stringid(100730183,0)) then  
 		Duel.PayLPCost(tp,300)
 		Duel.Hint(HINT_CARD,1-tp,100730183)
 		local op=Duel.SelectOption(tp,aux.Stringid(100730183,1),aux.Stringid(100730183,2))
-		if op==0 then		  
+		if op==0 then		 
 			Duel.ShuffleDeck(1-tp)
 			local g=Duel.GetMatchingGroup(Card.IsLevelBelow,1-tp,LOCATION_DECK,0,nil,3)
 			if not g or g:GetCount()==0 then return end

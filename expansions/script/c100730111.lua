@@ -6,21 +6,20 @@ function c100730111.initial_effect(c)
 end
 
 function c100730111.Is8800(c)
-	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:IsAttack(c:GetDefense())
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:GetTextAttack()==c:GetTextDefense()
 end
 
 function c100730111.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730111.Is8800,tp,LOCATION_MZONE,0,1,nil)
-		and Duel.GetMZoneCount(tp)>-1
 end
 function c100730111.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730111)
 	local g=Duel.GetMatchingGroup(c100730111.Is8800,tp,LOCATION_MZONE,0,nil)
 	if g:GetCount()==0 then return end
-	local ct=Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)*300
+	local ct=Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD,LOCATION_ONFIELD)*300
 	local tc=g:GetFirst()
 	while tc do
 		local e1=Effect.CreateEffect(tc)
