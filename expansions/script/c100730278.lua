@@ -1,51 +1,42 @@
---高速决斗技能-耐魔法装甲
+--高速决斗技能-绝望的拂晓
 Duel.LoadScript("speed_duel_common.lua")
 function c100730278.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730278.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730278.skill,c100730278.con,aux.Stringid(100730106,0))
+	aux.SpeedDuelReplaceDraw(c,c100730278.skill1,c100730278.con1,aux.Stringid(100730185,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730278.filter(c)
-	return c:IsRace(RACE_MACHINE) and c:IsType(TYPE_NORMAL)
-end
-function c100730278.nttg(e,c)
-	return c:IsRace(RACE_MACHINE) and c:IsType(TYPE_NORMAL)
-end
-function c100730278.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730278.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetLabelObject()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730278.efilter)
-	e1:SetCode(EFFECT_IMMUNE_EFFECT)
-	e1:SetCondition(c100730278.con)
-	e1:SetValue(c100730278.imfilter)
-	Duel.RegisterEffect(e1,tp)
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(100730278,0))
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
-	e2:SetTargetRange(LOCATION_HAND+LOCATION_MZONE,0)
-	e2:SetTarget(c100730278.nttg)
-	Duel.RegisterEffect(e2,tp)
-	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(100730278,1))
-	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetTargetRange(LOCATION_HAND,0)
-	e3:SetCode(EFFECT_SUMMON_PROC)
-	e3:SetTarget(c100730278.nttg)
-	Duel.RegisterEffect(e3,tp)
-	e:Reset()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsPlayerCanSpecialSummon(tp)
+		and Duel.GetMZoneCount(tp)>0
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_HAND,0,1,nil,21251800)
 end
-function c100730278.con(e)
-	local tp=e:GetHandlerPlayer()
-	local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_GRAVE,0,nil,TYPE_MONSTER)
-	if g:GetClassCount(Card.GetOriginalRace)>1 then return false end
-	return Duel.IsExistingMatchingCard(Card.IsRace,tp,LOCATION_GRAVE,0,1,nil,RACE_MACHINE) or g:GetCount()==0
+function c100730278.skill(e,tp,c)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730278)
+	local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_HAND,0,1,1,nil,21251800)
+	local tc=g:GetFirst()
+	Duel.ConfirmCards(1-tp,tc)
+	local sg=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	if sg:GetCount()>0 then
+		Duel.ChangePosition(sg,POS_FACEUP_DEFENSE,0,POS_FACEUP_ATTACK,0)
+	end
+	Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
 end
-function c100730278.efilter(e,c)
-	return c:IsRace(RACE_MACHINE) and c:IsFaceup()
+function c100730278.con1(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsCode,tp,LOCATION_DECK,0,nil,21251800)>0
+		and Duel.GetTurnCount()>=5
 end
-function c100730278.imfilter(e,re)
-	return re:IsActiveType(TYPE_SPELL)
+function c100730278.skill1(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730278,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730278)
+		local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_DECK,0,nil,21251800)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+	end
 end

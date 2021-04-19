@@ -19,28 +19,23 @@ end
 function c100730215.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730215.filter,tp,LOCATION_DECK+LOCATION_HAND,0,4,nil,g) then
-		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730215,0))
-		e:Reset()
-	end
-	tp=e:GetLabelObject():GetOwner()
+	if not Duel.IsExistingMatchingCard(c100730215.filter,tp,LOCATION_DECK+LOCATION_HAND,0,4,nil,g) then Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730215,0)) e:Reset() return end
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_HAND,0,1,2,nil,22493811)
+	if g1:GetCount()==0 then e:Reset() return end
 	Duel.Hint(HINT_CARD,1-tp,100730215)
-	local count=Duel.GetFieldGroupCount(tp,0,LOCATION_DECK)-Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)
-	local ct=count+2
-	if count<=0 then
-		ct=2 
-	end
+	Duel.SSet(tp,g1)
+	local ct=Duel.GetFieldGroupCount(tp,0,LOCATION_DECK)-Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)
 	while ct>0 do
 		local c=Duel.CreateToken(tp,27911549)
 		Duel.DisableShuffleCheck()
 		Duel.SendtoDeck(c,1-tp,0,REASON_RULE)
-		Card.ReverseInDeck(c)
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 		e1:SetCode(EVENT_DRAW)
 		e1:SetOperation(c100730215.spop)
 		e1:SetReset(RESET_EVENT+0x1de0000)
 		c:RegisterEffect(e1)
+		Card.ReverseInDeck(c)
 		ct=ct-1
 	end
 	Duel.ShuffleDeck(1-tp)

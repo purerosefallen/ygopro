@@ -5,42 +5,37 @@ function c100730181.initial_effect(c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 	aux.SpeedDuelBeforeDraw(c,c100730181.skill2)
 end
-
 function c100730181.Iskai(c)
 	return c:IsCode(76634149) and c:IsFaceup()
 end
-
 function c100730181.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE+LOCATION_SZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE,0,1,nil)and Duel.IsExistingMatchingCard(c100730181.filter,tp,LOCATION_FZONE+LOCATION_GRAVE+LOCATION_DECK+LOCATION_HAND,0,1,nil)
 end
 function c100730181.kaicon(e,tp)
-	return Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE+LOCATION_SZONE,LOCATION_MZONE+LOCATION_SZONE,1,nil)
+	return Duel.IsExistingMatchingCard(c100730181.Iskai,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
 end
-
-
 function c100730181.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730181)
-	local d=Duel.CreateToken(tp,22702055)
-	local g1=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_FZONE,0,nil,TYPE_FIELD)
-	if g1:GetCount()~=0 then
+	local g1=Duel.GetMatchingGroup(c100730181.filter,tp,LOCATION_FZONE,0,nil)
+	if g1:GetCount()~=0 and Duel.IsPlayerCanDraw(tp,2) then
 		Duel.Draw(tp,2,REASON_RULE)
-		local g2=Duel.GetMatchingGroup(Card.IsAttackBelow,tp,LOCATION_HAND,0,nil,500)
-		if g2:GetCount()==0 or Duel.GetMZoneCount(tp)==0 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-			local sg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
-			Duel.SendtoDeck(sg,nil,1,REASON_EFFECT)
-		elseif g2:GetCount()~=0 and Duel.GetMZoneCount(tp)>0 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-			local tc=g2:Select(tp,1,1,nil)
-			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
-		end
-	else Duel.MoveToField(d,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+		local sg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+		Duel.SendtoDeck(sg,nil,1,REASON_EFFECT)
+	end
+	if g1:GetCount()==0 then
+		local tc=Duel.SelectMatchingCard(tp,c100730181.filter,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,tp):GetFirst()
+		Duel.MoveToField(tc,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+		local te=tc:GetActivateEffect()
+		Duel.RaiseEvent(tc,4179255,te,0,tp,tp,Duel.GetCurrentChain())
 	end
 end
-
+function c100730181.filter(c)
+	return c:IsCode(22702055)
+end
 function c100730181.skill2(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local c=e:GetHandler()
@@ -54,7 +49,7 @@ function c100730181.skill2(e,tp,eg,ep,ev,re,r,rp)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_UPDATE_LEVEL)
-	e2:SetTargetRange(LOCATION_HAND+LOCATION_MZONE+LOCATION_DECK+LOCATION_GRAVE,0)
+	e2:SetTargetRange(LOCATION_HAND+LOCATION_DECK+LOCATION_MZONE,0)
 	e2:SetTarget(aux.TargetBoolFunction(Card.IsAttribute,ATTRIBUTE_WATER))
 	e2:SetValue(-1)
 	Duel.RegisterEffect(e2,tp)

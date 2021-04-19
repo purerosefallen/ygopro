@@ -7,33 +7,45 @@ function c100730216.initial_effect(c)
 end
 
 function c100730216.Iskai(c)
-	return c:IsCode(3643300) and c:IsFaceup()
+	return c:IsCode(3643300)
 end
 
 function c100730216.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730216.Iskai,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730216.Iskai,tp,LOCATION_MZONE+LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730216.filter,tp,LOCATION_FZONE+LOCATION_GRAVE+LOCATION_DECK,0,1,nil)
 end
 
 function c100730216.wfilter(c)
 	return c:IsAttribute(ATTRIBUTE_WATER) and c:IsLevelBelow(4)
 end
+function c100730216.filter(c)
+	return c:IsCode(22702055)
+end
 function c100730216.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730216)
-	local d=Duel.CreateToken(tp,22702055)
-	local g1=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_FZONE,0,nil,TYPE_FIELD)
+	local g1=Duel.GetMatchingGroup(c100730216.filter,tp,LOCATION_FZONE,0,nil)
 	if g1:GetCount()~=0 then
 		local g2=Duel.GetMatchingGroup(c100730216.wfilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,nil)
 		if g2:GetCount()==0 or Duel.GetMZoneCount(tp)==0 then return end
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local tc=g2:Select(tp,1,1,nil)
 		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
-	else Duel.MoveToField(d,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+	end
+	if g1:GetCount()==0 then
+		local tc=Duel.SelectMatchingCard(tp,c100730216.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,tp):GetFirst()
+		Duel.MoveToField(tc,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+		local te=tc:GetActivateEffect()
+		Duel.RaiseEvent(tc,4179255,te,0,tp,tp,Duel.GetCurrentChain())
+		local g3=Duel.GetMatchingGroup(Card.IsType,tp,0,LOCATION_FZONE,nil,TYPE_FIELD)
+		if g3:GetCount()==0 and Duel.IsExistingMatchingCard(c100730216.filter,tp,LOCATION_GRAVE+LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(100730216,0)) then
+			local sc=Duel.SelectMatchingCard(tp,c100730216.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,tp):GetFirst()
+			Duel.MoveToField(sc,tp,1-tp,LOCATION_FZONE,POS_FACEUP,true)
+		end
 	end
 end
-
 function c100730216.skill2(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local c=e:GetHandler()

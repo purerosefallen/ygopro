@@ -7,6 +7,9 @@ end
 
 function c100730151.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730151)
+	local c=Duel.CreateToken(tp,71442223)
+	Duel.SSet(tp,c)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_BATTLE_DESTROY_REDIRECT)

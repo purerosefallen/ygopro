@@ -19,19 +19,19 @@ function c100730277.skillflash(e,tp)
 	local count=e:GetLabel()
 	count=count+1
 	e:SetLabel(count)
-	if count==1 then
+	if count==3 then
 		local c=Duel.CreateToken(tp,7902349)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)
-	elseif count==3 then
+	elseif count==5 then
 		local c=Duel.CreateToken(tp,70903634)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)
-	elseif count==5 then
+	elseif count==7 then
 		local c=Duel.CreateToken(tp,44519536)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)
-	elseif count==7 then
+	elseif count==9 then
 		local c=Duel.CreateToken(tp,8124921)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)
-	elseif count==15 then
+	elseif count==11 then
 		Duel.Hint(HINT_CARD,1-tp,100730277)
 		local c=Duel.CreateToken(tp,33396948)
 		Duel.SendtoDeck(c,tp,0,REASON_RULE)

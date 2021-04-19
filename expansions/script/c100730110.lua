@@ -25,6 +25,7 @@ function c100730110.skill(e,tp)
 		return
 	end
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730110)
 	local n101=Duel.CreateToken(tp,57734012)
 	Duel.SendtoDeck(n101,tp,0,REASON_RULE)
 	local no101=Duel.CreateToken(tp,48739166)

@@ -1,6 +1,7 @@
 --高速决斗技能-暗之诱惑
 Duel.LoadScript("speed_duel_common.lua")
 function c100730099.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(61623148,c)
 	if not c100730099.UsedLP then
 		c100730099.UsedLP={}
 		c100730099.UsedLP[0]=0

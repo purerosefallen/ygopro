@@ -8,6 +8,7 @@ function c100730248.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsPlayerCanSpecialSummon(tp)
+		and Duel.GetMZoneCount(tp)>0
 		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_HAND,0,1,nil,64788463)
 end
 function c100730248.skill(e,tp,c)

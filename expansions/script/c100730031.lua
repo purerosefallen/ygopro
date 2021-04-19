@@ -11,7 +11,6 @@ end
 
 function c100730031.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local num=math.floor((6000-Duel.GetLP(tp))/1000)
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetLP(tp)<=6000
 		and Duel.GetMZoneCount(tp)>0
@@ -19,7 +18,7 @@ end
 function c100730031.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730031)
-	local num=math.floor((6000-Duel.GetLP(tp))/1000)
+	local num=math.floor((8000-Duel.GetLP(tp))/2000)
 	local max=3-Duel.GetMatchingGroupCount(c100730031.filter,tp,LOCATION_MZONE,0,nil)
 	if num>max then num=max end
 	while num>0 do

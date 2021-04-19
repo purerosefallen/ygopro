@@ -12,6 +12,7 @@ function c100730189.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730189.Isfairy,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsPlayerCanSpecialSummon(tp)
 		and Duel.GetLP(tp)<=6000
 end
  
