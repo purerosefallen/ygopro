@@ -1,0 +1,37 @@
+--高速决斗技能-魔法组合技
+Duel.LoadScript("speed_duel_common.lua")
+function c100730296.initial_effect(c)
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelBeforeDraw(c,c100730296.skill)
+	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730296.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	local c=e:GetLabelObject()
+	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(100730296,2))
+	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
+	e1:SetCondition(c100730296.thcon)
+	e1:SetOperation(c100730296.thop)
+	Duel.RegisterEffect(e1,tp)
+	local e2=e1:Clone()
+	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
+	Duel.RegisterEffect(e2,tp)
+	e:Reset()
+end
+function c100730296.thcon(e,tp,eg,ep,ev,re,r,rp)
+	local tc=eg:GetFirst()
+	return tc:GetSummonPlayer()==tp and tc:IsFaceup() and tc:IsCode(51254277) or tc:IsCode(13429800)
+end
+function c100730296.thop(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,7653207)
+	Duel.Hint(HINT_CARD,1-tp,100730296)
+	Duel.SendtoHand(g2,nil,REASON_EFFECT)
+	Duel.ConfirmCards(1-tp,g2)
+	if g2:GetCount()<=1 then return end
+	e:Reset()
+end

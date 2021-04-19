@@ -13,7 +13,7 @@ function c100730128.skill(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e1:SetTargetRange(1,0)
 	e1:SetCountLimit(1)
-	e1:SetReset(RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN,6)
+	e1:SetReset(RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN,5)
 	e1:SetOperation(c100730128.recop)
 	e1:SetValue(c100730128.abdcon)
 	Duel.RegisterEffect(e1,tp)
@@ -24,6 +24,9 @@ function c100730128.recop(e,tp,eg,ep,ev,re,r,rp)
 	local count= Duel.GetTurnCount()
 	Duel.Hint(HINT_CARD,1-tp,100730128)
 	Duel.Recover(tp,count*200,REASON_RULE)
+	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,9032529)
+	if g2:GetCount()==0 then return end
+	Duel.SendtoHand(g2,tp,REASON_RULE)
 end
 
 function c100730128.abdcon(e)

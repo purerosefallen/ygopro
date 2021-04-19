@@ -30,6 +30,5 @@ function c100730142.skill(e,tp)
 	local g3=g1:RandomSelect(tp,1)
 	g2:Sub(g3)
 	Duel.SendtoHand(g3,nil,REASON_EFFECT)
-	e:Reset()
 	Duel.SendtoDeck(g2,nil,2,REASON_EFFECT)
 end

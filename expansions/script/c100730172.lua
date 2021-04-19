@@ -6,6 +6,8 @@ function c100730172.initial_effect(c)
 end
 function c100730172.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	local c=Duel.CreateToken(tp,60643553)
+	Duel.SendtoHand(c,tp,REASON_RULE)
 	local e1=Effect.GlobalEffect()
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetOperation(c100730172.lpop)

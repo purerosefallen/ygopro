@@ -7,6 +7,8 @@ end
 
 function c100730066.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	local tc=Duel.CreateToken(tp,423705)
+	aux.SpeedDuelSendToHandWithExile(tp,tc)
 	--atk up
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)

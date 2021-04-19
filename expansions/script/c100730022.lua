@@ -12,5 +12,7 @@ function c100730022.skill(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_HAND,0,nil)
 	g=g:RandomSelect(tp,1)
 	aux.SpeedDuelSendToDeckWithExile(tp,g)
+	local c=Duel.CreateToken(tp,20871001)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
 	e:Reset()
 end

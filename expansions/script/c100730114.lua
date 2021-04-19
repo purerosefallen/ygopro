@@ -22,6 +22,7 @@ function c100730114.con(e,tp)
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730114.Issun,tp,LOCATION_MZONE,0,1,nil)
 		and Duel.GetMZoneCount(tp)>0
+		and Duel.IsPlayerCanSpecialSummon(tp)
 end
 function c100730114.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()

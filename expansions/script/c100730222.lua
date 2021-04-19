@@ -12,5 +12,5 @@ function c100730222.skill(e,tp)
 	e1:SetCode(EVENT_DRAW)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	Duel.RegisterEffect(e1,tp)
-	Duel.Recover(tp,350,REASON_EFFECT)
+	Duel.Recover(tp,500,REASON_EFFECT)
 end

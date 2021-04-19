@@ -24,8 +24,10 @@ function c100730239.skill(e,tp,c)
 		e1:SetValue(3)
 		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 		tc:RegisterEffect(e1)
-		local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,94068856)
-		if g2:GetCount()==0 then return end
-		Duel.SendtoHand(g2,tp,REASON_RULE)
+		local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_GRAVE+LOCATION_DECK,0,0,3,nil,94068856)
+		Duel.SendtoHand(g2,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,g2)
+		if g2:GetCount()<=1 then return end
+		e:Reset()
 	end
 end

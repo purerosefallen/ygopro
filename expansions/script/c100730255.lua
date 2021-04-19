@@ -17,8 +17,8 @@ function c100730255.skill(e,tp,c)
 	if d>=count then return end
 	local c=Duel.CreateToken(tp,97642679)
 	Duel.MoveToField(c,tp,tp,LOCATION_MZONE,POS_FACEUP,true)
+	e:Reset()
 	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,4614116)
 	if g1:GetCount()==0 then return end
 	Duel.SendtoHand(g1,tp,REASON_RULE)
-	e:Reset()
 end

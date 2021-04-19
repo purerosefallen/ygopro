@@ -18,4 +18,7 @@ function c100730127.skill(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,1-tp,100730127)
 	local rp=3001-lp
 	Duel.Recover(tp,rp,REASON_RULE)
+	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,11868825)
+	if g2:GetCount()==0 then return end
+	Duel.SendtoHand(g2,tp,REASON_RULE)
 end

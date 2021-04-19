@@ -16,6 +16,10 @@ function c100730044.skill(e,tp,c)
 	local g1=g:Select(tp,1,1,nil)
 	if g1 then
 		Duel.ConfirmCards(1-tp,g1)
-		Duel.Recover(tp,1000,REASON_EFFECT)   
+		Duel.Recover(tp,1000,REASON_EFFECT)
+		local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,2130625)
+		if g2:GetCount()==0 then return end
+		Duel.SendtoHand(g2,tp,REASON_RULE)
+		Duel.ConfirmCards(1-tp,g2)
 	end
 end
