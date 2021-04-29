@@ -1,8 +1,8 @@
 --高速决斗技能-魔法组合技
 Duel.LoadScript("speed_duel_common.lua")
 function c100730296.initial_effect(c)
-	aux.SpeedDuelCalculateDecreasedLP()
 	aux.SpeedDuelBeforeDraw(c,c100730296.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730296.skill1,c100730296.con,aux.Stringid(100730171,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730296.skill(e,tp,eg,ep,ev,re,r,rp)
@@ -24,14 +24,30 @@ function c100730296.skill(e,tp,eg,ep,ev,re,r,rp)
 end
 function c100730296.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local tc=eg:GetFirst()
-	return tc:GetSummonPlayer()==tp and tc:IsFaceup() and tc:IsCode(51254277) or tc:IsCode(13429800)
+	return tc:GetSummonPlayer()==tp and tc:IsFaceup() and tc:IsCode(13429800,51254277)
 end
 function c100730296.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,7653207)
-	Duel.Hint(HINT_CARD,1-tp,100730296)
+	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,7653207)
 	Duel.SendtoHand(g2,nil,REASON_EFFECT)
 	Duel.ConfirmCards(1-tp,g2)
-	if g2:GetCount()<=1 then return end
-	e:Reset()
+end
+function c100730296.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK,0,1,nil,50532786)
+		and Duel.IsExistingMatchingCard(c100730296.tlimit,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.GetActivityCount(tp,ACTIVITY_NORMALSUMMON)==0
+end
+function c100730296.tlimit(c)
+	return c:IsAttribute(ATTRIBUTE_WATER) 
+		and not (c:IsHasEffect(EFFECT_UNRELEASABLE_SUM))
+end
+function c100730296.skill1(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730296)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK,0,1,1,nil,50532786)
+	local c=g1:GetFirst()
+	Duel.Summon(tp,c,false,nil)
 end

@@ -18,11 +18,14 @@ function c100730278.skill(e,tp,c)
 	local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_HAND,0,1,1,nil,21251800)
 	local tc=g:GetFirst()
 	Duel.ConfirmCards(1-tp,tc)
-	local sg=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	local sg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
 	if sg:GetCount()>0 then
 		Duel.ChangePosition(sg,POS_FACEUP_DEFENSE,0,POS_FACEUP_ATTACK,0)
 	end
 	Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,28106077)
+	if g1:GetCount()==0 then return end
+	Duel.SendtoHand(g1,tp,REASON_RULE)
 end
 function c100730278.con1(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()

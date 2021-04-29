@@ -32,6 +32,9 @@ function c100730214.skill(e,tp,eg,ep,ev,re,r,rp,chk)
 	e2:SetValue(c100730214.damval)
 	e2:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e2,tp)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,13235258)
+	if g1:GetCount()==0 then return end
+	Duel.SendtoHand(g1,tp,REASON_RULE)
 end
 
 function c100730214.damval(e,re,val,r,rp,rc)

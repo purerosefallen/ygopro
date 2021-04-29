@@ -54,11 +54,11 @@ function c100730103.skill(e,tp,c)
 			fop(ce,e,tp,tc,mat2)
 		end
 		tc:CompleteProcedure()
+		local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,46009906)
+		if g1:GetCount()==0 then return end
+		Duel.SendtoHand(g1,tp,REASON_RULE)
 		e:Reset()
 	end
-	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,46009906)
-	if g1:GetCount()==0 then return end
-	Duel.SendtoHand(g1,tp,REASON_RULE)
 end
 
 function c100730103.filter1(c,e)

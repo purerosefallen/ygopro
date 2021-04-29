@@ -11,7 +11,7 @@ function c100730259.skill(e,tp)
 	if g1:GetCount()==0 then return end
 	Duel.Hint(HINT_CARD,1-tp,100730259)
 	Duel.SSet(tp,g1)
-	local ct=Duel.GetFieldGroupCount(tp,0,LOCATION_DECK)-Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)
+	local ct=Duel.GetFieldGroupCount(tp,0,LOCATION_DECK)-Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)  
 	if ct>0 then
 		Duel.DiscardDeck(1-tp,ct,REASON_RULE)
 		local g=Group.CreateGroup()

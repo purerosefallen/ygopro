@@ -52,7 +52,7 @@ end
 function c100730240.skill2(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730240)
-	local c=Duel.CreateToken(tp,68663748)
-	Duel.SendtoHand(c,tp,REASON_RULE)
+	local c=Duel.CreateToken(tp,49826746)
+	Duel.SendtoGrave(c,REASON_RULE)
 	e:Reset()
 end

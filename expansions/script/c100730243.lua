@@ -2,6 +2,7 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730243.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730243.skill,c100730243.con,aux.Stringid(100730243,0))
+	aux.SpeedDuelBeforeDraw(c,c100730243.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730243.con(e,tp)
@@ -29,4 +30,11 @@ function c100730243.skill(e,tp,c)
 		if g2:GetCount()==0 then return end
 		Duel.SendtoHand(g2,tp,REASON_RULE)
 	end
+end
+function c100730243.skill2(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730240)
+	local c=Duel.CreateToken(tp,49826746)
+	Duel.SendtoGrave(c,REASON_RULE)
+	e:Reset()
 end

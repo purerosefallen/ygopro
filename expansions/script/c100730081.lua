@@ -16,6 +16,7 @@ function c100730081.skill(e,tp,eg,ep,ev,re,r,rp)
 	local g=sg:Select(tp,1,9,nil)
 	Duel.SendtoDeck(g,1-tp,0,REASON_RULE)
 	local ct=g:GetCount()
-	local g1=Duel.GetDecktopGroup(tp,ct) 
+	local g1=Duel.GetDecktopGroup(tp,ct)
+	Duel.DisableShuffleCheck()
 	Duel.Destroy(g1,REASON_EFFECT)
 end
