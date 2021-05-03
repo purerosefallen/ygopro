@@ -43,6 +43,7 @@ public:
 	std::vector<ClientCard*> conti_cards;
 	std::vector<std::pair<int,int>> activatable_descs;
 	std::vector<int> select_options;
+	std::vector<int> select_options_index;
 	std::vector<ChainInfo> chains;
 	int extra_p_count[2];
 
@@ -138,6 +139,7 @@ public:
 	ClientCard* clicked_card;
 	ClientCard* command_card;
 	ClientCard* highlighting_card;
+	ClientCard* menu_card;
 	int list_command;
 
 	virtual bool OnEvent(const irr::SEvent& event);
