@@ -1,29 +1,28 @@
---高速决斗技能-风暴访问
+--高速决斗技能-法老的陵墓
 Duel.LoadScript("speed_duel_common.lua")
 function c100730077.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730077.skill,c100730077.con,aux.Stringid(100730077,0))
+	aux.SpeedDuelBeforeDraw(c,c100730077.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-function c100730077.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.GetLP(tp)<=1000
 end
 function c100730077.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local cards=
-		{1861629,1861630,2220237,4478086,4709881,4914353,5043010,5043011,5043012,5329790,5524387,5821478,6622715,11674673,11738489,
-		12450071,13452889,13536606,14812471,15844566,21887175,22593417,22862454,23971061,24487411,24842059,24882256,30691817,30822527,
-		31313405,32617464,32995276,33897356,34472920,38502358,39752820,40669071,41248270,41463181,41463182,41999284,43735670,45002991,
-		45462149,46947713,47910940,48068378,49847524,51476410,52615248,52698008,53413628,57282724,59859086,60279710,60292055,60303245,
-		61245672,63503850,65741786,66226132,66403530,67231737,67712104,68295149,68934651,72336818,72529749,74163487,76232522,77058170,
-		77637979,79016563,79130389,80088625,85243784,86066372,87871125,88000953,88093706,89238128,94207108,96380700,97383507,97677329,
-		98978921,99111753}
-	local g=CreateGroup()
-	for i,code in cards do
-		g:AddCard(Duel.CreateToken(tp,code))
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_HAND,0,1,1,nil,31076103)
+	if g1:GetCount()>0 then
+		Duel.Hint(HINT_CARD,1-tp,100730077)
+		local tc=g1:GetFirst()
+		Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+		local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK,0,1,1,nil,47355498)
+		Duel.SSet(tp,g2)
+		local d=Duel.CreateToken(tp,4081094)
+		Duel.SendtoDeck(d,tp,0,REASON_RULE)
+		local g=Group.CreateGroup()
+		local c=Duel.CreateToken(tp,89959682)
+		g:AddCard(c)
+		aux.CardAddedBySkill:AddCard(c)
+		c=Duel.CreateToken(tp,52550973)
+		g:AddCard(c)
+		aux.CardAddedBySkill:AddCard(c)
+		Duel.SendtoGrave(g,REASON_RULE)
 	end
-	local g2=g:RandomSelect(tp,1)
-	Duel.SendtoDeck(g2,nil,0,REASON_RULE)
 	e:Reset()
 end
