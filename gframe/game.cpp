@@ -57,6 +57,7 @@ bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	params.LoggingLevel = ELL_NONE;
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
 		params.DriverType = irr::video::EDT_DIRECT3D9;
@@ -127,14 +128,70 @@ bool Game::Initialize() {
 	dataManager.LoadStrings("./expansions/strings.conf");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
+	if(!numFont) {
+		const wchar_t* numFontPaths[] = {
+			L"C:/Windows/Fonts/arialbd.ttf",
+			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
+			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
+			L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
+			L"/System/Library/Fonts/SFNS.ttf",
+			L"./fonts/numFont.ttf",
+			L"./fonts/numFont.ttc",
+			L"./fonts/numFont.otf"
+		};
+		for(const wchar_t* path : numFontPaths) {
+			myswprintf(gameConf.numfont, path);
+			numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
+			if(numFont)
+				break;
+		}
+	}
+	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
+	if(!textFont) {
+		const wchar_t* textFontPaths[] = {
+			L"C:/Windows/Fonts/msyh.ttc",
+			L"C:/Windows/Fonts/msyh.ttf",
+			L"C:/Windows/Fonts/simsun.ttc",
+			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
+			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
+			L"/System/Library/Fonts/PingFang.ttc",
+			L"./fonts/textFont.ttf",
+			L"./fonts/textFont.ttc",
+			L"./fonts/textFont.otf"
+		};
+		for(const wchar_t* path : textFontPaths) {
+			myswprintf(gameConf.textfont, path);
+			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
+			if(textFont)
+				break;
+		}
+	}
+	if(!numFont || !textFont) {
+		wchar_t fpath[1024];
+		fpath[0] = 0;
+		FileSystem::TraversalDir(L"./fonts", [&fpath](const wchar_t* name, bool isdir) {
+			if(!isdir && wcsrchr(name, '.') && (!mywcsncasecmp(wcsrchr(name, '.'), L".ttf", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".ttc", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".otf", 4))) {
+				myswprintf(fpath, L"./fonts/%ls", name);
+			}
+		});
+		if(fpath[0] == 0) {
+			ErrorLog("Failed to load font(s)!");
+			return false;
+		}
+		if(!numFont) {
+			myswprintf(gameConf.numfont, fpath);
+			numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
+		}
+		if(!textFont) {
+			myswprintf(gameConf.textfont, fpath);
+			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
+		}
+	}
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48);
 	guiFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
-	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
-	if(!numFont || !textFont) {
-		ErrorLog("Failed to load font(s)!");
-		return false;
-	}
 	smgr = device->getSceneManager();
 	device->setWindowCaption(L"KoishiPro");
 	device->setResizable(true);
@@ -150,7 +207,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Koikokoro", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Trackmaker", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -186,9 +243,10 @@ bool Game::Initialize() {
 	wCreateHost->getCloseButton()->setVisible(false);
 	wCreateHost->setVisible(false);
 	env->addStaticText(dataManager.GetSysString(1226), rect<s32>(20, 30, 220, 50), false, false, wCreateHost);
-	cbLFlist = env->addComboBox(rect<s32>(140, 25, 300, 50), wCreateHost);
+	cbHostLFlist = env->addComboBox(rect<s32>(140, 25, 300, 50), wCreateHost);
 	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbLFlist->addItem(deckManager._lfList[i].listName.c_str(), deckManager._lfList[i].hash);
+		cbHostLFlist->addItem(deckManager._lfList[i].listName.c_str(), deckManager._lfList[i].hash);
+	cbHostLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbHostLFlist->getItemCount() - 1);
 	env->addStaticText(dataManager.GetSysString(1225), rect<s32>(20, 60, 220, 80), false, false, wCreateHost);
 	cbRule = env->addComboBox(rect<s32>(140, 55, 300, 80), wCreateHost);
 	cbRule->addItem(dataManager.GetSysString(1240));
@@ -254,8 +312,8 @@ bool Game::Initialize() {
 		chkHostPrepReady[i]->setEnabled(false);
 	}
 	btnHostPrepOB = env->addButton(rect<s32>(10, 180, 110, 205), wHostPrepare, BUTTON_HP_OBSERVER, dataManager.GetSysString(1252));
-	myswprintf(dataManager.strBuffer, L"%ls%d", dataManager.GetSysString(1253), 0);
-	stHostPrepOB = env->addStaticText(dataManager.strBuffer, rect<s32>(10, 285, 270, 305), false, false, wHostPrepare);
+	myswprintf(strbuf, L"%ls%d", dataManager.GetSysString(1253), 0);
+	stHostPrepOB = env->addStaticText(strbuf, rect<s32>(10, 285, 270, 305), false, false, wHostPrepare);
 	stHostPrepRule = env->addStaticText(L"", rect<s32>(280, 30, 460, 230), false, true, wHostPrepare);
 	env->addStaticText(dataManager.GetSysString(1254), rect<s32>(10, 210, 110, 230), false, false, wHostPrepare);
 	cbCategorySelect = env->addComboBox(rect<s32>(10, 230, 138, 255), wHostPrepare, COMBOBOX_HP_CATEGORY);
@@ -388,11 +446,20 @@ bool Game::Initialize() {
 	chkPreferExpansionScript = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
 	chkPreferExpansionScript->setChecked(gameConf.prefer_expansion_script != 0);
 	posY += 30;
-	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 120, posY + 28), false, false, tabSystem);
+	env->addStaticText(dataManager.GetSysString(1282), rect<s32>(posX + 23, posY + 3, posX + 110, posY + 28), false, false, tabSystem);
 	btnWinResizeS = env->addButton(rect<s32>(posX + 115, posY, posX + 145, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
 	btnWinResizeM = env->addButton(rect<s32>(posX + 150, posY, posX + 180, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
 	btnWinResizeL = env->addButton(rect<s32>(posX + 185, posY, posX + 215, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
 	btnWinResizeXL = env->addButton(rect<s32>(posX + 220, posY, posX + 250, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
+	posY += 30;
+	chkLFlist = env->addCheckBox(false, rect<s32>(posX, posY, posX + 110, posY + 25), tabSystem, CHECKBOX_LFLIST, dataManager.GetSysString(1288));
+	chkLFlist->setChecked(gameConf.use_lflist);
+	cbLFlist = env->addComboBox(rect<s32>(posX + 115, posY, posX + 250, posY + 25), tabSystem, COMBOBOX_LFLIST);
+	cbLFlist->setMaxSelectionRows(6);
+	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
+		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
+	cbLFlist->setEnabled(gameConf.use_lflist);
+	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
@@ -418,7 +485,7 @@ bool Game::Initialize() {
 	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1269));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	posY += 30;
-	env->addStaticText(dataManager.GetSysString(1288), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
+	env->addStaticText(dataManager.GetSysString(1289), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
 	cbLocale = env->addComboBox(rect<s32>(posX + 150, posY + 4, posX + 250, posY + 21), tabSystem, COMBOBOX_LOCALE);
 	RefreshLocales();
 	elmTabSystemLast = cbLocale;
@@ -592,25 +659,20 @@ bool Game::Initialize() {
 	lstDecks = env->addListBox(rect<s32>(150, 30, 340, 320), wDeckManage, LISTBOX_DECKS, true);
 	posY = 30;
 	btnNewCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_NEW_CATEGORY, dataManager.GetSysString(1461));
-	posY += 30;
+	posY += 35;
 	btnRenameCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_RENAME_CATEGORY, dataManager.GetSysString(1462));
-	posY += 30;
+	posY += 35;
 	btnDeleteCategory = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_DELETE_CATEGORY, dataManager.GetSysString(1463));
-	posY += 30;
+	posY += 35;
 	btnNewDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_NEW_DECK, dataManager.GetSysString(1464));
-	posY += 30;
+	posY += 35;
 	btnRenameDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_RENAME_DECK, dataManager.GetSysString(1465));
-	posY += 30;
+	posY += 35;
 	btnDMDeleteDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_DELETE_DECK_DM, dataManager.GetSysString(1466));
-	posY += 30;
+	posY += 35;
 	btnMoveDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_MOVE_DECK, dataManager.GetSysString(1467));
-	posY += 30;
+	posY += 35;
 	btnCopyDeck = env->addButton(rect<s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_COPY_DECK, dataManager.GetSysString(1468));
-	posY += 55;
-	cbLFList = env->addComboBox(rect<s32>(350, posY, 480, posY + 25), wDeckManage, COMBOBOX_LFLIST);
-	cbLFList->setMaxSelectionRows(10);
-	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbLFList->addItem(deckManager._lfList[i].listName.c_str());
 	//deck manage query
 	wDMQuery = env->addWindow(rect<s32>(400, 200, 710, 320), false, dataManager.GetSysString(1460));
 	wDMQuery->getCloseButton()->setVisible(false);
@@ -728,7 +790,7 @@ bool Game::Initialize() {
 		btnStartFilter->setRelativePosition(rect<s32>(260, 80 + 125 / 6, 390, 100 + 125 / 6));
 		btnClearFilter = env->addButton(rect<s32>(205, 80 + 125 / 6, 255, 100 + 125 / 6), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
 	}
-	wCategories = env->addWindow(rect<s32>(600, 60, 1000, 305), false, dataManager.strBuffer);
+	wCategories = env->addWindow(rect<s32>(600, 60, 1000, 305), false, L"");
 	wCategories->getCloseButton()->setVisible(false);
 	wCategories->setDrawTitlebar(false);
 	wCategories->setDraggable(false);
@@ -746,7 +808,7 @@ bool Game::Initialize() {
 	wCategories->setRelativePosition(rect<s32>(1000 - wcatewidth, 60, 1000, 305));
 	btnCategoryOK->setRelativePosition(recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
 	btnMarksFilter = env->addButton(rect<s32>(60, 80 + 125 / 6, 190, 100 + 125 / 6), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
-	wLinkMarks = env->addWindow(rect<s32>(700, 30, 820, 150), false, dataManager.strBuffer);
+	wLinkMarks = env->addWindow(rect<s32>(700, 30, 820, 150), false, L"");
 	wLinkMarks->getCloseButton()->setVisible(false);
 	wLinkMarks->setDrawTitlebar(false);
 	wLinkMarks->setDraggable(false);
@@ -791,6 +853,12 @@ bool Game::Initialize() {
 		btnBotCancel = env->addButton(rect<s32>(459, 331, 569, 356), tabBot, BUTTON_CANCEL_SINGLEPLAY, dataManager.GetSysString(1210));
 		env->addStaticText(dataManager.GetSysString(1382), rect<s32>(360, 10, 550, 30), false, true, tabBot);
 		stBotInfo = env->addStaticText(L"", rect<s32>(360, 40, 560, 160), false, true, tabBot);
+		cbBotDeckCategory = env->addComboBox(rect<s32>(360, 95, 560, 120), tabBot, COMBOBOX_BOT_DECKCATEGORY);
+		cbBotDeckCategory->setMaxSelectionRows(6);
+		cbBotDeckCategory->setVisible(false);
+		cbBotDeck = env->addComboBox(rect<s32>(360, 130, 560, 155), tabBot);
+		cbBotDeck->setMaxSelectionRows(6);
+		cbBotDeck->setVisible(false);
 		cbBotRule = env->addComboBox(rect<s32>(360, 165, 560, 190), tabBot, COMBOBOX_BOT_RULE);
 		cbBotRule->addItem(dataManager.GetSysString(1262));
 		cbBotRule->addItem(dataManager.GetSysString(1263));
@@ -887,7 +955,6 @@ bool Game::Initialize() {
 	stCardListTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stCardListTip->setVisible(false);
 	device->setEventReceiver(&menuHandler);
-	LoadConfig();
 	if(!soundManager.Init()) {
 		chkEnableSound->setChecked(false);
 		chkEnableSound->setEnabled(false);
@@ -1051,25 +1118,29 @@ void Game::BuildProjectionMatrix(irr::core::matrix4& mProjection, f32 left, f32 
 	mProjection[14] = znear * zfar / (znear - zfar);
 }
 void Game::InitStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text) {
-	SetStaticText(pControl, cWidth, font, text);
-	if(font->getDimension(dataManager.strBuffer).Height <= cHeight) {
+	std::wstring format_text;
+	format_text = SetStaticText(pControl, cWidth, font, text);
+	if(font->getDimension(format_text.c_str()).Height <= cHeight) {
 		scrCardText->setVisible(false);
 		if(env->hasFocus(scrCardText))
 			env->removeFocus(scrCardText);
 		return;
 	}
-	SetStaticText(pControl, cWidth-25, font, text);
+	format_text = SetStaticText(pControl, cWidth-25, font, text);
 	u32 fontheight = font->getDimension(L"A").Height + font->getKerningHeight();
-	u32 step = (font->getDimension(dataManager.strBuffer).Height - cHeight) / fontheight + 1;
+	u32 step = (font->getDimension(format_text.c_str()).Height - cHeight) / fontheight + 1;
 	scrCardText->setVisible(true);
 	scrCardText->setMin(0);
 	scrCardText->setMax(step);
 	scrCardText->setPos(0);
 }
-void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, u32 pos) {
+std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, u32 pos) {
 	int pbuffer = 0;
 	u32 _width = 0, _height = 0;
 	wchar_t prev = 0;
+	wchar_t strBuffer[4096];
+	std::wstring ret;
+
 	for(size_t i = 0; text[i] != 0 && i < wcslen(text); ++i) {
 		wchar_t c = text[i];
 		u32 w = font->getCharDimension(c).Width + font->getKerningWidth(c, prev);
@@ -1077,7 +1148,7 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 		if(text[i] == L'\r') {
 			continue;
 		} else if(text[i] == L'\n') {
-			dataManager.strBuffer[pbuffer++] = L'\n';
+			strBuffer[pbuffer++] = L'\n';
 			_width = 0;
 			_height++;
 			prev = 0;
@@ -1085,7 +1156,7 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 				pbuffer = 0;
 			continue;
 		} else if(_width > 0 && _width + w > cWidth) {
-			dataManager.strBuffer[pbuffer++] = L'\n';
+			strBuffer[pbuffer++] = L'\n';
 			_width = 0;
 			_height++;
 			prev = 0;
@@ -1093,10 +1164,12 @@ void Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, irr::gu
 				pbuffer = 0;
 		}
 		_width += w;
-		dataManager.strBuffer[pbuffer++] = c;
+		strBuffer[pbuffer++] = c;
 	}
-	dataManager.strBuffer[pbuffer] = 0;
-	pControl->setText(dataManager.strBuffer);
+	strBuffer[pbuffer] = 0;
+	pControl->setText(strBuffer);
+	ret.assign(strBuffer);
+	return ret;
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansions() {
@@ -1241,14 +1314,23 @@ void Game::RefreshBot() {
 				BufferIO::DecodeUTF8(strbuf, newinfo.name);
 				fgets(linebuf, 256, fp);
 				sscanf(linebuf, "%240[^\n]", strbuf);
+#ifndef _WIN32
+				bool skipRandom = !!strstr(strbuf, "Random=");
+#endif
 				BufferIO::DecodeUTF8(strbuf, newinfo.command);
 				fgets(linebuf, 256, fp);
 				sscanf(linebuf, "%240[^\n]", strbuf);
 				BufferIO::DecodeUTF8(strbuf, newinfo.desc);
 				fgets(linebuf, 256, fp);
+#ifndef _WIN32
+				if(skipRandom) {
+					continue;
+				}
+#endif
 				newinfo.support_master_rule_3 = !!strstr(linebuf, "SUPPORT_MASTER_RULE_3");
 				newinfo.support_new_master_rule = !!strstr(linebuf, "SUPPORT_NEW_MASTER_RULE");
 				newinfo.support_master_rule_2020 = !!strstr(linebuf, "SUPPORT_MASTER_RULE_2020");
+				newinfo.select_deckfile = !!strstr(linebuf, "SELECT_DECKFILE");
 				int rule = cbBotRule->getSelected() + 3;
 				if((rule == 3 && newinfo.support_master_rule_3)
 					|| (rule == 4 && newinfo.support_new_master_rule)
@@ -1261,11 +1343,17 @@ void Game::RefreshBot() {
 	}
 	lstBotList->clear();
 	stBotInfo->setText(L"");
+	cbBotDeckCategory->setVisible(false);
+	cbBotDeck->setVisible(false);
 	for(unsigned int i = 0; i < botInfo.size(); ++i) {
 		lstBotList->addItem(botInfo[i].name);
 	}
-	if(botInfo.size() == 0)
+	if(botInfo.size() == 0) {
 		SetStaticText(stBotInfo, 200, guiFont, dataManager.GetSysString(1385));
+	}
+	else {
+		RefreshCategoryDeck(cbBotDeckCategory, cbBotDeck);
+	}
 }
 bool Game::LoadConfigFromFile(const char* file) {
 	FILE* fp = fopen(file, "r");
@@ -1290,7 +1378,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 			enable_log = atoi(valbuf);
 		} else if(!strcmp(strbuf, "textfont")) {
 			BufferIO::DecodeUTF8(valbuf, wstr);
-			int textfontsize;
+			int textfontsize = gameConf.textfontsize;
 			sscanf(linebuf, "%s = %s %d", strbuf, valbuf, &textfontsize);
 			gameConf.textfontsize = textfontsize;
 			BufferIO::CopyWStr(wstr, gameConf.textfont, 256);
@@ -1322,6 +1410,10 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.chkIgnore1 = atoi(valbuf);
 		} else if(!strcmp(strbuf, "mute_spectators")) {
 			gameConf.chkIgnore2 = atoi(valbuf);
+		} else if(!strcmp(strbuf, "use_lflist")) {
+			gameConf.use_lflist = atoi(valbuf);
+		} else if(!strcmp(strbuf, "default_lflist")) {
+			gameConf.default_lflist = atoi(valbuf);
 		} else if(!strcmp(strbuf, "default_rule")) {
 			gameConf.default_rule = atoi(valbuf);
 			if(gameConf.default_rule <= 0)
@@ -1391,9 +1483,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 			} else if (!strcmp(strbuf, "gamename")) {
 				BufferIO::DecodeUTF8(valbuf, wstr);
 				BufferIO::CopyWStr(wstr, gameConf.gamename, 20);
-			} else if (!strcmp(strbuf, "bot_deck_path")) {
-				BufferIO::DecodeUTF8(valbuf, wstr);
-				BufferIO::CopyWStr(wstr, gameConf.bot_deck_path, 64);
 			} else if (!strcmp(strbuf, "lastcategory")) {
 				BufferIO::DecodeUTF8(valbuf, wstr);
 				BufferIO::CopyWStr(wstr, gameConf.lastcategory, 64);
@@ -1403,6 +1492,9 @@ bool Game::LoadConfigFromFile(const char* file) {
 			} else if (!strcmp(strbuf, "locale")) {
 				BufferIO::DecodeUTF8(valbuf, wstr);
 				BufferIO::CopyWStr(wstr, gameConf.locale, 64);
+			} else if(!strcmp(strbuf, "bot_deck_path")) {
+				BufferIO::DecodeUTF8(valbuf, wstr);
+				BufferIO::CopyWStr(wstr, gameConf.bot_deck_path, 64);
 			}
 		}
 	}
@@ -1413,7 +1505,7 @@ void Game::LoadConfig() {
 	gameConf.use_image_scale = 1;
 	gameConf.antialias = 0;
 	gameConf.serverport = 7911;
-	gameConf.textfontsize = 12;
+	gameConf.textfontsize = 14;
 	gameConf.nickname[0] = 0;
 	gameConf.gamename[0] = 0;
 	gameConf.bot_deck_path[0] = 0;
@@ -1432,6 +1524,8 @@ void Game::LoadConfig() {
 	gameConf.chkWaitChain = 0;
 	gameConf.chkIgnore1 = 0;
 	gameConf.chkIgnore2 = 0;
+	gameConf.use_lflist = 1;
+	gameConf.default_lflist = 0;
 	gameConf.default_rule = DEFAULT_DUEL_RULE;
 	gameConf.hide_setname = 0;
 	gameConf.hide_hint_button = 0;
@@ -1470,30 +1564,6 @@ void Game::LoadConfig() {
 		unsigned int lcid = 0;
 #ifdef _WIN32
 		lcid = ((unsigned int)GetSystemDefaultLangID()) & 0xff;
-#else
-		/* temp broken
-		char* locale_str = getenv("LANG");
-		if(locale_str) {
-			if(strstr(locale_str, "zh"))
-				lcid = 0x04;
-			else
-			if(strstr(locale_str, "en"))
-				lcid = 0x09;
-			else
-			if(strstr(locale_str, "es"))
-				lcid = 0x0a;
-			else
-			if(strstr(locale_str, "ja"))
-				lcid = 0x11;
-			else
-			if(strstr(locale_str, "ko"))
-				lcid = 0x12;
-			else
-			if(strstr(locale_str, "pt"))
-				lcid = 0x16;
-		}
-		*/
-#endif
 		switch(lcid) {
 			case 0x04: {
 				myswprintf(mainGame->gameConf.locale, L"%ls", L"zh-CN");
@@ -1520,6 +1590,30 @@ void Game::LoadConfig() {
 				break;
 			}
 		}
+#else
+		/* temp broken
+		char* locale_str = getenv("LANG");
+		if(locale_str) {
+			if(strstr(locale_str, "zh"))
+				lcid = 0x04;
+			else
+			if(strstr(locale_str, "en"))
+				lcid = 0x09;
+			else
+			if(strstr(locale_str, "es"))
+				lcid = 0x0a;
+			else
+			if(strstr(locale_str, "ja"))
+				lcid = 0x11;
+			else
+			if(strstr(locale_str, "ko"))
+				lcid = 0x12;
+			else
+			if(strstr(locale_str, "pt"))
+				lcid = 0x16;
+		}
+		*/
+#endif
 #ifndef YGOPRO_COMPAT_MYCARD
 		SaveConfig();
 #endif
@@ -1564,6 +1658,8 @@ void Game::SaveConfig() {
 	fprintf(fp, "waitchain = %d\n", (chkWaitChain->isChecked() ? 1 : 0));
 	fprintf(fp, "mute_opponent = %d\n", (chkIgnore1->isChecked() ? 1 : 0));
 	fprintf(fp, "mute_spectators = %d\n", (chkIgnore2->isChecked() ? 1 : 0));
+	fprintf(fp, "use_lflist = %d\n", gameConf.use_lflist);
+	fprintf(fp, "default_lflist = %d\n", gameConf.default_lflist);
 	fprintf(fp, "default_rule = %d\n", gameConf.default_rule == DEFAULT_DUEL_RULE ? 0 : gameConf.default_rule);
 	fprintf(fp, "hide_setname = %d\n", gameConf.hide_setname);
 	fprintf(fp, "hide_hint_button = %d\n", gameConf.hide_hint_button);

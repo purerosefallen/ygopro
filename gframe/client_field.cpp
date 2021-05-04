@@ -18,6 +18,7 @@ ClientField::ClientField() {
 	hovered_card = 0;
 	clicked_card = 0;
 	highlighting_card = 0;
+	menu_card = 0;
 	hovered_controler = 0;
 	hovered_location = 0;
 	hovered_sequence = 0;
@@ -89,6 +90,7 @@ void ClientField::Clear() {
 	hovered_card = 0;
 	clicked_card = 0;
 	highlighting_card = 0;
+	menu_card = 0;
 	hovered_controler = 0;
 	hovered_location = 0;
 	hovered_sequence = 0;
@@ -459,7 +461,8 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 						mainGame->stCardPos[i]->setOverrideColor(0xff0000ff);
 					if(selectable_cards[i]->overlayTarget->controler)
 						mainGame->stCardPos[i]->setBackgroundColor(0xffd0d0d0);
-					else mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
+					else
+						mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
 				} else if(selectable_cards[i]->location == LOCATION_DECK || selectable_cards[i]->location == LOCATION_EXTRA || selectable_cards[i]->location == LOCATION_REMOVED) {
 					if(selectable_cards[i]->position & POS_FACEDOWN)
 						mainGame->stCardPos[i]->setOverrideColor(0xff0000ff);
@@ -479,7 +482,8 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 				wchar_t formatBuffer[2048];
 				myswprintf(formatBuffer, L"%d", sort_list[i]);
 				mainGame->stCardPos[i]->setText(formatBuffer);
-			} else mainGame->stCardPos[i]->setText(L"");
+			} else
+				mainGame->stCardPos[i]->setText(L"");
 			mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
 		}
 		mainGame->stCardPos[i]->setVisible(true);
@@ -1585,10 +1589,10 @@ void ClientField::RefreshCardCountDisplay() {
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
 			pcard = *it;
 			if(pcard) {
-				if(pcard->type & TYPE_LINK && pcard->link)
-					mainGame->dInfo.card_count[p] += pcard->link;
-				else
-					mainGame->dInfo.card_count[p]++;
+				//if(pcard->type & TYPE_LINK && pcard->link)
+				//	mainGame->dInfo.card_count[p] += pcard->link;
+				//else
+				mainGame->dInfo.card_count[p]++;
 				if(pcard->position == POS_FACEUP_ATTACK && pcard->attack > 0 && (p == 1 || mainGame->dInfo.curMsg != MSG_SELECT_BATTLECMD || pcard->cmdFlag & COMMAND_ATTACK))
 					mainGame->dInfo.total_attack[p] += pcard->attack;
 			}
