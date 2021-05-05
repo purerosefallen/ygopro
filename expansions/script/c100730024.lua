@@ -1,4 +1,4 @@
---高速决斗技能-生命增加Ω
+--高速决斗技能-生命增加δ
 Duel.LoadScript("speed_duel_common.lua")
 function c100730024.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730024.skill)
@@ -6,10 +6,17 @@ function c100730024.initial_effect(c)
 end
 function c100730024.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730024)
 	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp+2500)
+	Duel.SetLP(tp,lp+7500)
 	local g=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_HAND,0,nil)
 	g=g:RandomSelect(tp,3)
 	aux.SpeedDuelSendToDeckWithExile(tp,g)
+	local c=Duel.CreateToken(tp,98535702)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
+	local c=Duel.CreateToken(tp,98535702)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
+	local c=Duel.CreateToken(tp,98535702)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
 	e:Reset()
 end

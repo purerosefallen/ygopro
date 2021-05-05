@@ -1,6 +1,7 @@
 --高速决斗技能-魔术手
 Duel.LoadScript("speed_duel_common.lua")
 function c100730071.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(67048711,c)
 	if not c100730071.UsedLP then
 		c100730071.UsedLP={}
 		c100730071.UsedLP[0]=0
@@ -14,9 +15,7 @@ end
 function c100730071.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
 		and aux.DecreasedLP[tp]-c100730071.UsedLP[tp]>=1500
-		and c100730071.UsedLP[tp]<3000
 end
 function c100730071.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()

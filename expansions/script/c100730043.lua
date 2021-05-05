@@ -1,6 +1,7 @@
 --高速决斗技能-心灵扫描
 Duel.LoadScript("speed_duel_common.lua")
 function c100730043.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(34694160,c)
 	aux.SpeedDuelAtMainPhaseNoCountLimit(c,c100730043.skill,c100730043.con,aux.Stringid(100730043,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

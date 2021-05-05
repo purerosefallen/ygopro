@@ -1,7 +1,8 @@
---高速决斗技能-抽卡预感：魔法·陷阱
+--高速决斗技能-当然是正位置！
 Duel.LoadScript("speed_duel_common.lua")
 function c100730062.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730062.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(96012004,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 

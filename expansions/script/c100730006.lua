@@ -2,5 +2,6 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730006.initial_effect(c)
 	aux.SpeedDuelMoveCardToFieldCommon(59197169,c)
+	aux.SpeedDuelMoveCardToFieldCommon(88851326,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

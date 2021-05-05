@@ -15,6 +15,7 @@ end
 
 function c100730060.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730060)
 	local token=Duel.CreateToken(1-tp,14470846)
 	Duel.MoveToField(token,tp,1-tp,LOCATION_MZONE,POS_FACEUP_DEFENSE,true)
 	e:Reset()

@@ -1,6 +1,7 @@
 --高速决斗技能-无尽陷阱地狱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730038.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(59237154,c)
 	aux.SpeedDuelAtMainPhase(c,c100730038.skill,c100730038.con,aux.Stringid(100730038,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -29,8 +30,5 @@ function c100730038.skill(e,tp)
 	local g3=g1:RandomSelect(tp,1)
 	g2:Sub(g3)
 	Duel.SendtoHand(g3,nil,REASON_RULE)
-	e:Reset()
-	if g2:GetCount()<1 then return end
-	g3=g2:RandomSelect(tp,1)
-	Duel.SendtoDeck(g3,nil,2,REASON_RULE)
+	Duel.SendtoDeck(g2,nil,2,REASON_RULE)
 end
