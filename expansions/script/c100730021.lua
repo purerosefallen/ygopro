@@ -6,7 +6,8 @@ function c100730021.initial_effect(c)
 end
 function c100730021.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730023)
 	local lp=Duel.GetLP(tp)
-	Duel.SetLP(tp,lp+1000)
+	Duel.SetLP(tp,lp+1500)
 	e:Reset()
 end

@@ -12,6 +12,7 @@ function c100730050.initial_effect(c)
 			local result={}
 			while c100730050.used[tp]>0 and count>0 do
 				table.insert(result,1)
+				Duel.Hint(HINT_CARD,1-tp,100730050)
 				Duel.Hint(HINT_OPSELECTED,tp,aux.Stringid(100730050,4))
 				Duel.Hint(HINT_OPSELECTED,1-tp,aux.Stringid(100730050,4))
 				count=count-1

@@ -20,7 +20,9 @@ function c100730065.skill(e,tp)
 	Duel.Hint(HINT_CARD,1-tp,100730065)
 	local g=Duel.SelectMatchingCard(tp,c100730065.filter,tp,LOCATION_MZONE,0,1,1,nil,tp)
 	if #g>0 then
-		Duel.SendtoHand(g,nil,REASON_RULE)
+		Duel.SendtoHand(g,nil,REASON_EFFECT)
+		local c=Duel.CreateToken(tp,93108433)
+		Duel.SendtoHand(c,nil,REASON_RULE)
 	end
 	e:Reset()
 end

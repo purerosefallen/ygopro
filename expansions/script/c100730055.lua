@@ -1,4 +1,4 @@
---高速决斗技能-秘密交换
+--高速决斗技能-融合大师
 Duel.LoadScript("speed_duel_common.lua")
 function c100730055.initial_effect(c)
 	if not c100730055.UsedLP then
@@ -8,6 +8,7 @@ function c100730055.initial_effect(c)
 	end
 	aux.SpeedDuelCalculateDecreasedLP()
 	aux.SpeedDuelAtMainPhase(c,c100730055.skill,c100730055.con,aux.Stringid(100730055,0))
+	aux.SpeedDuelMoveCardToFieldCommon(30548775,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730055.con(e,tp)

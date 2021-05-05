@@ -2,10 +2,12 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730028.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730028.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(56433456,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730028.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730028)
 	local g=Duel.GetDecktopGroup(tp,1)
 	aux.SpeedDuelSendToHandWithExile(tp,g)
 	local g2=Duel.GetDecktopGroup(1-tp,1)
@@ -33,7 +35,7 @@ function c100730028.skill(e,tp)
 	e2:SetValue(c100730028.limval)
 	e2:SetReset(RESET_PHASE+PHASE_END,count)
 	Duel.RegisterEffect(e2,tp)
-
+	e:Reset()
 end
 function c100730028.limcon(e)
 	if count==2 then return Duel.GetTurnCount()==2 end

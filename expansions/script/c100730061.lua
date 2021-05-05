@@ -9,7 +9,7 @@ function c100730061.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.GetMZoneCount(1-tp)>0
-		and Duel.GetLP(tp)<=500
+		and Duel.GetLP(tp)<=1000
 end
 
 function c100730061.skill(e,tp)
@@ -18,6 +18,7 @@ function c100730061.skill(e,tp)
 	local z=Duel.GetMZoneCount(1-tp)
 	if m>z then m=z end
 	while m>0 do
+		Duel.Hint(HINT_CARD,1-tp,100730061)
 		local token=Duel.CreateToken(tp,14470846)
 		Duel.MoveToField(token,tp,1-tp,LOCATION_MZONE,POS_FACEUP_DEFENSE,true)
 		m=m-1

@@ -32,5 +32,8 @@ function c100730018.skill(e,tp,eg,ep,ev,re,r,rp)
 	Duel.SendtoDeck(g,nil,-1,REASON_RULE)
 	local g2=g:RandomSelect(tp,3)
 	Duel.Exile(g2,REASON_RULE)
+	Duel.Hint(HINT_CARD,1-tp,100730018)
+	local d=Duel.CreateToken(tp,11429811)
+	Duel.SSet(tp,d)
 	e:Reset()
 end

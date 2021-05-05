@@ -1,6 +1,7 @@
 --高速决斗技能-噩梦呈现
 Duel.LoadScript("speed_duel_common.lua")
 function c100730048.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(78637313,c)
 	aux.SpeedDuelAtMainPhase(c,c100730048.skill,c100730048.con,aux.Stringid(100730048,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

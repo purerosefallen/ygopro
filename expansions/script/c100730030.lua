@@ -1,6 +1,7 @@
 --高速决斗技能-魔法专家
 Duel.LoadScript("speed_duel_common.lua")
 function c100730030.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(4259068,c)
 	aux.SpeedDuelBeforeDraw(c,c100730030.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
@@ -19,11 +20,12 @@ end
 function c100730030.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730030.filter,tp,LOCATION_DECK+LOCATION_HAND,0,5,nil,g) then
+	if not Duel.IsExistingMatchingCard(c100730030.filter,tp,LOCATION_DECK,0,5,nil,g) then
 		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730030,0))
 		e:Reset()
 		return
 	end
+	Duel.Hint(HINT_CARD,1-tp,100730030)
 	g=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_HAND,0,nil)
 	local count=aux.SpeedDuelSendToDeckWithExile(tp,g)
 	local gA=Group.CreateGroup()

@@ -1,6 +1,7 @@
 --高速决斗技能-假陷阱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730037.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(66526672,c)
 	if not c100730037.UsedLP then
 		c100730037.UsedLP={}
 		c100730037.UsedLP[0]=0

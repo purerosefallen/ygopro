@@ -12,13 +12,14 @@ end
 
 function c100730029.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	if Duel.GetLP(tp)>=4000 then
+	if Duel.GetLP(tp)>=2000 then
 		c100730029.turn[tp]=Duel.GetTurnCount()
 	else
 		c100730029.turn[tp]=-1
 	end
 	if not c100730029.reg[tp] then
 		c100730029.reg[tp]=true
+		Duel.Hint(HINT_CARD,1-tp,100730029)
 		local e1=Effect.GlobalEffect()
 		e1:SetType(EFFECT_TYPE_FIELD)
 		e1:SetCode(EFFECT_CHANGE_DAMAGE)
