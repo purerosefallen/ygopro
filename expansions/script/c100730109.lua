@@ -15,8 +15,8 @@ function c100730109.skill(e,tp,c)
 	local c=g:Select(tp,2,4,nil)
 	if c then
 		Duel.Hint(HINT_CARD,1-tp,100730109)
-		Duel.HintSelection(g)
-		Duel.SendtoDeck(c,nil,2,REASON_EFFECT)
+		Duel.HintSelection(c)
+		Duel.SendtoDeck(c,nil,0,REASON_EFFECT)
 		Duel.Recover(tp,2000,REASON_EFFECT)   
 	e:Reset()
 	end

@@ -7,7 +7,8 @@ end
 function c100730192.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730192)
-	Duel.Recover(1-tp,2000,REASON_EFFECT)  
+	Duel.Recover(1-tp,2000,REASON_EFFECT)
+	Duel.Recover(tp,2000,REASON_EFFECT)
 	local count=1
 	if Duel.GetTurnPlayer()~=tp then
 		count=2
