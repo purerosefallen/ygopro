@@ -93,17 +93,17 @@ end
     include "gframe"
     if os.ishost("windows") then
         include "lua"
-		include "event"
-		include "freetype"
-		include "irrlicht"
-		include "sqlite3"
-	end
-	if os.ishost("linux") then
-		include "irrlicht_linux"
+        include "event"
+        include "freetype"
+        include "irrlicht"
+        include "sqlite3"
+    end
+    if os.ishost("linux") then
+        include "irrlicht_linux"
     end
     if os.ishost("macosx") or BUILD_LUA then
-		include "lua"
-	end
-	if USE_IRRKLANG then
-		include "ikpmp3"
-	end
+        include "lua"
+    end
+    if USE_IRRKLANG then
+        include "ikpmp3"
+    end
