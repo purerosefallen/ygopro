@@ -53,7 +53,12 @@ project "ygopro"
         links { "event_pthreads", "GL", "dl", "pthread" }
     configuration "linux"
         includedirs { "../irrlicht_linux/include" }
-        links { "lua5.3-c++", "X11", "Xxf86vm" }
+        links { "X11", "Xxf86vm" }
+        if BUILD_LUA then
+            links { "lua" }
+        else
+            links { "lua5.3-c++" }
+        end
         if USE_IRRKLANG then
             links { "IrrKlang" }
             linkoptions{ "-Wl,-rpath=./" }

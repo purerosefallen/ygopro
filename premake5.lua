@@ -8,6 +8,9 @@ solution "ygo"
             IRRKLANG_PRO = true
         end
     end
+    if os.ishost("linux") and os.getenv("YGOPRO_BUILD_LUA") then
+        BUILD_LUA=true
+    end
 
     configurations { "Release", "Debug" }
 if os.getenv("YGOPRO_LUA_SAFE") then
@@ -98,7 +101,7 @@ end
 	if os.ishost("linux") then
 		include "irrlicht_linux"
     end
-    if os.ishost("macosx") then
+    if os.ishost("macosx") or BUILD_LUA then
 		include "lua"
 	end
 	if USE_IRRKLANG then
