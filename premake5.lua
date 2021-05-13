@@ -2,6 +2,9 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
+    if os.ishost("linux") and os.getenv("YGOPRO_BUILD_LUA") then
+        BUILD_LUA=true
+    end
 
     configurations { "Release", "Debug" }
 if os.getenv("YGOPRO_NO_LUA_SAFE") then
@@ -86,6 +89,6 @@ end
     include "sqlite3"
     end
 
-    if os.getenv("YGOPRO_BUILD_LUA") then
+    if os.ishost("macosx") or BUILD_LUA then
         include "lua"
     end

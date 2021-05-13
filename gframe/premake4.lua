@@ -36,7 +36,7 @@ project "ygopro"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
         links { "event_pthreads", "dl", "pthread" }
-        if os.getenv("YGOPRO_BUILD_LUA") then
+        if BUILD_LUA then
             links { "lua" }
         else
             links { "lua5.3-c++" }
