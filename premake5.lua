@@ -85,3 +85,7 @@ end
     include "event"
     include "sqlite3"
     end
+
+    if os.getenv("YGOPRO_BUILD_LUA") then
+        include "lua"
+    end
