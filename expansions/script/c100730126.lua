@@ -21,5 +21,10 @@ function c100730126.skill(e,tp,c)
 	local d=Duel.CreateToken(tp,24094653)
 	Duel.SendtoHand(d,nil,REASON_RULE)
 	Duel.ConfirmCards(1-tp,d)
+	if g:GetCount()==3 then
+		local c=Duel.CreateToken(tp,53347303)
+		Duel.SendtoHand(c,nil,REASON_RULE)
+		Duel.ConfirmCards(1-tp,c)
+	end
 	e:Reset()
 end
