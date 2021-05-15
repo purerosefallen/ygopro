@@ -12,6 +12,7 @@ function c100730189.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(c100730189.Isfairy,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730189.filter,tp,LOCATION_EXTRA,0,1,nil)
 		and Duel.IsPlayerCanSpecialSummon(tp)
 		and Duel.GetLP(tp)<=6000
 end
@@ -19,7 +20,7 @@ end
 function c100730189.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730189)
-	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_MZONE,0,1,1,nil,45939611)
+	local g1=Duel.SelectMatchingCard(tp,c100730189.Isfairy,tp,LOCATION_MZONE,0,1,1,nil)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
 	local tc1=g1:GetFirst()
 	local g2=Duel.SelectMatchingCard(tp,c100730189.filter,tp,LOCATION_EXTRA,0,1,1,nil)
@@ -50,6 +51,6 @@ function c100730189.skill(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetOwnerPlayer(tp)
 	end
 end
-function c100730189.filter(c,tp)
-	return c:IsCode(51960178) or c:IsCode(23454876)
+function c100730189.filter(c)
+	return c:IsCode(51960178,23454876)
 end
