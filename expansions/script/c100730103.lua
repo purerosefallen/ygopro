@@ -22,7 +22,7 @@ function c100730103.skill(e,tp,c)
 	local d1=Duel.CreateToken(tp,5818798)
 	local d2=Duel.CreateToken(tp,77207191)
 	Duel.SpecialSummon(d1,0,tp,tp,true,true,POS_FACEUP)
-	Duel.SpecialSummon(d2,0,tp,tp,true,true,POS_FACEUP)
+	Duel.SpecialSummon(d2,0,tp,tp,true,true,POS_FACEDOWN_DEFENSE)
 	Duel.SendtoDeck(d,tp,0,REASON_RULE)
 	local chkf=tp
 	local mg1=Duel.GetFusionMaterial(tp):Filter(c100730103.filter1,nil,e)
@@ -54,7 +54,7 @@ function c100730103.skill(e,tp,c)
 			fop(ce,e,tp,tc,mat2)
 		end
 		tc:CompleteProcedure()
-		local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,46009906)
+		local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,46009906,76539047)
 		if g1:GetCount()>=1 then
 			Duel.SendtoHand(g1,tp,REASON_RULE)
 		end

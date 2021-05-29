@@ -32,7 +32,7 @@ function c100730273.skill(e,tp,eg,ep,ev,re,r,rp)
 		g:GetFirst():RegisterEffect(e1)
 		Duel.ShuffleHand(tp)
 	end
-	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,3,nil,126218)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,12760674)
 	if g1:GetCount()==0 then return end
 	Duel.SendtoHand(g1,tp,REASON_RULE)
 end

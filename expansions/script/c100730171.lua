@@ -16,34 +16,32 @@ function c100730171.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return Duel.GetTurnPlayer()==tp
 		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
-		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.IsExistingMatchingCard(c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil)
 		and Duel.GetMZoneCount(tp)>0
-		and aux.DecreasedLP[tp]-c100730171.UsedLP[tp]>=1800
 end
 
 function c100730171.skill1(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	if Duel.SelectYesNo(tp,aux.Stringid(100730171,1)) then
-	c100730171.UsedLP[tp]=c100730171.UsedLP[tp]+1800
-		local g1=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+		local g=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-		local c=g1:GetFirst()
 		Duel.Hint(HINT_CARD,1-tp,100730171)
-		Duel.SendtoDeck(c,nil,1,REASON_RULE)
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local g=Duel.SelectMatchingCard(tp,c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-		Duel.SpecialSummon(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP)
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local g3=Duel.SelectMatchingCard(tp,Card.IsType,tp,LOCATION_DECK,0,0,1,nil,TYPE_QUICKPLAY)
-		if g3:GetCount()==0 then return end
-		Duel.SendtoHand(g3,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,g3)
-		if Duel.GetMZoneCount(1-tp)>0 and Duel.SelectYesNo(tp,aux.Stringid(100730171,0)) then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-			local g2=Duel.SelectMatchingCard(tp,c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-			if g2:GetCount()==0 then return end
-			Duel.SpecialSummon(g2:GetFirst(),0,tp,1-tp,false,false,POS_FACEUP_DEFENSE)
+		Duel.SendtoDeck(g:GetFirst(),nil,1,REASON_RULE)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
+		local sg=Duel.SelectMatchingCard(tp,c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil)
+		Duel.Summon(tp,sg:GetFirst(),false,nil)
+		if aux.DecreasedLP[tp]-c100730171.UsedLP[tp]>=1800 then
+			c100730171.UsedLP[tp]=c100730171.UsedLP[tp]+1800
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+			local g1=Duel.SelectMatchingCard(tp,Card.IsType,tp,LOCATION_DECK,0,0,1,nil,TYPE_QUICKPLAY)
+			Duel.SendtoHand(g1,nil,REASON_EFFECT)
+			Duel.ConfirmCards(1-tp,g1)
+			local g2=Duel.GetMatchingGroup(c100730171.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,nil)
+			if Duel.GetMZoneCount(1-tp)>0 and g2:GetCount()>0 and Duel.SelectYesNo(tp,aux.Stringid(100730171,0)) then
+				Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+				local c=g2:Select(tp,1,1,nil)
+				Duel.SpecialSummon(c,0,tp,1-tp,false,false,POS_FACEUP_DEFENSE)
+			end
 		end
 	end
 end
@@ -82,7 +80,7 @@ end
 function c100730171.filter(c)
 	return c:IsSetCard(0x41) and c:IsLevelBelow(4)
 end
-function c100730171.efilter(e,te)	
+function c100730171.efilter(e,te)   
 	return not te:GetOwner():IsType(TYPE_SPELL) and not te:GetOwner():IsSetCard(0x41) and te:IsActivated()
 end
 function c100730171.val(e,c)

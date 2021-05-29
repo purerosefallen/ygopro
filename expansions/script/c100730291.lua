@@ -8,6 +8,7 @@ function c100730291.initial_effect(c)
 	end
 	aux.SpeedDuelCalculateDecreasedLP()
 	aux.SpeedDuelAtMainPhase(c,c100730291.skill,c100730291.con,aux.Stringid(100730291,1))
+	aux.SpeedDuelAtMainPhase(c,c100730291.skill1,c100730291.con1,aux.Stringid(100730291,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730291.con(e,tp)
@@ -30,5 +31,20 @@ function c100730291.skill(e,tp)
 		local sg=g:FilterSelect(1-tp,Card.IsCode,1,1,nil,ac)
 		if sg:GetCount()<1 then return end
 		Duel.MoveSequence(sg:GetFirst(),0)
+	end
+end
+function c100730291.con1(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+end
+function c100730291.skill1(e,tp,c)
+	tp=e:GetLabelObject():GetOwner()
+	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+	local c=g:GetFirst()
+	if c then
+		Duel.Hint(HINT_CARD,1-tp,100730291)
+		Duel.SendtoDeck(c,1-tp,nil,0,REASON_RULE)
+		Duel.ShuffleDeck(1-tp)
 	end
 end
