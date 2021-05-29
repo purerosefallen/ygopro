@@ -26,6 +26,9 @@ function c100730252.skill(e,tp,eg,ep,ev,re,r,rp)
 		e2:SetCode(EFFECT_UPDATE_DEFENSE)
 		tc:RegisterEffect(e2)
 	end
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,25880422,63102017)
+	if g1:GetCount()==0 then return end
+	Duel.SendtoHand(g1,tp,REASON_RULE)
 end
 function c100730252.filter(c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsAttackAbove(0)

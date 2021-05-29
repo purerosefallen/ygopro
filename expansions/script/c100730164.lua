@@ -6,6 +6,8 @@ function c100730164.initial_effect(c)
 end
 function c100730164.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
+	local c=Duel.CreateToken(tp,82085619)
+	Duel.SendtoHand(c,tp,REASON_RULE)
 	local e1=Effect.GlobalEffect()
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_REVERSE_DAMAGE)

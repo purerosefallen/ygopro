@@ -6,7 +6,7 @@ function c100730041.initial_effect(c)
 end
 
 function c100730041.IsBlueEyes(c)
-	return c:IsOriginalCodeRule(89631139) and c:IsFaceup()
+	return c:IsType(TYPE_MONSTER) and aux.IsCodeListed(c,89631139) and c:IsFaceup() and not c:IsOriginalCodeRule(38517737)
 end
 
 function c100730041.con(e,tp)

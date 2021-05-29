@@ -23,6 +23,9 @@ function c100730274.skill(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(500)
 		tc:RegisterEffect(e1)
 	end
+	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,78211862)
+	if g1:GetCount()==0 then return end
+	Duel.SendtoHand(g1,tp,REASON_RULE)
 end
 function c100730274.filter(c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER)
