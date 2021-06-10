@@ -18,6 +18,7 @@ ClientField::ClientField() {
 	hovered_card = 0;
 	clicked_card = 0;
 	highlighting_card = 0;
+	menu_card = 0;
 	hovered_controler = 0;
 	hovered_location = 0;
 	hovered_sequence = 0;
@@ -89,6 +90,7 @@ void ClientField::Clear() {
 	hovered_card = 0;
 	clicked_card = 0;
 	highlighting_card = 0;
+	menu_card = 0;
 	hovered_controler = 0;
 	hovered_location = 0;
 	hovered_sequence = 0;
@@ -378,6 +380,18 @@ void ClientField::ClearCommandFlag() {
 }
 void ClientField::ClearSelect() {
 	for(auto cit = selectable_cards.begin(); cit != selectable_cards.end(); ++cit) {
+		(*cit)->is_selectable = false;
+		(*cit)->is_selected = false;
+	}
+	for(auto cit = selected_cards.begin(); cit != selected_cards.end(); ++cit) {
+		(*cit)->is_selectable = false;
+		(*cit)->is_selected = false;
+	}
+	for(auto cit = selectsum_all.begin(); cit != selectsum_all.end(); ++cit) {
+		(*cit)->is_selectable = false;
+		(*cit)->is_selected = false;
+	}
+	for(auto cit = selectsum_cards.begin(); cit != selectsum_cards.end(); ++cit) {
 		(*cit)->is_selectable = false;
 		(*cit)->is_selected = false;
 	}

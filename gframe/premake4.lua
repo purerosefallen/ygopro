@@ -35,4 +35,9 @@ project "ygopro"
     configuration "not vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
-        links { "lua5.3-c++", "event_pthreads", "dl", "pthread" }
+        links { "event_pthreads", "dl", "pthread" }
+        if BUILD_LUA then
+            links { "lua" }
+        else
+            links { "lua5.3-c++" }
+        end
