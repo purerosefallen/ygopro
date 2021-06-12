@@ -34,7 +34,7 @@ before_install:
   cp premake/lua/premake4.lua lua/;
   fi
 
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cp libIrrlicht.a /usr/local/lib/ ; sudo cp -r include /usr/local/include/irrlicht ; cd .. ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir irrlicht ; cd irrlicht ; curl --retry 5 --location https://github.com/moecube/irrlicht/releases/download/test/irrlicht-mycard-mac.tar.gz | tar zfx - ; cd .. ; fi
 
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     curl --location --retry 5 https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz | tar zfx -;
