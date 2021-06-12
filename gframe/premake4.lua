@@ -42,6 +42,8 @@ project "ygopro"
             libdirs { "../irrklang/lib/Win32-visualStudio" }
         configuration { "windows", "vs2017" }
             libdirs { "../irrklang/lib/Win32-vs2017" }
+        configuration { "windows", "vs2019" }
+            libdirs { "../irrklang/lib/Win32-vs2017" }
     end
     configuration {"windows", "not vs*"}
         includedirs { "/mingw/include/irrlicht", "/mingw/include/freetype2" }
