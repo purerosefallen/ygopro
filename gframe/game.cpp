@@ -134,6 +134,7 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
 			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
 			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
+			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
 			L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
 			L"/System/Library/Fonts/SFNS.ttf",
 			L"./fonts/numFont.ttf",
@@ -156,6 +157,7 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
 			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
 			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
+			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
 			L"/System/Library/Fonts/PingFang.ttc",
 			L"./fonts/textFont.ttf",
 			L"./fonts/textFont.ttc",
@@ -207,7 +209,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Trackmaker", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Desire", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1615,7 +1617,7 @@ void Game::LoadConfig() {
 		*/
 #endif
 #ifndef YGOPRO_COMPAT_MYCARD
-		SaveConfig();
+		//SaveConfig();
 #endif
 	}
 }

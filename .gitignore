@@ -13,6 +13,7 @@ build
 /sqlite3
 /irrklang
 /irrlicht*
+/lua
 
 # gframe additionals
 /gframe/ygopro.ico
