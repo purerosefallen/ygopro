@@ -1577,7 +1577,7 @@ void Game::LoadConfig() {
 		*/
 #endif
 #ifndef YGOPRO_COMPAT_MYCARD
-		SaveConfig();
+		//SaveConfig();
 #endif
 	}
 }
