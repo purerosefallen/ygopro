@@ -261,6 +261,7 @@ assets_windows:
     - wget https://cdn01.moecube.com/windbot/WindBot.7z
     - 7z x -y WindBot.7z
     - aws s3 --endpoint=https://minio.mycard.moe:9000 sync s3://mycard/koishipro/contents/update-koishipro/ ./update-koishipro
+    - rm -rf update-koishipro/.git || true
   artifacts:
     paths:
       - bot.conf
