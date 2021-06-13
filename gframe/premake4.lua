@@ -69,6 +69,7 @@ project "ygopro"
             libdirs { "../irrklang/bin/linux-gcc-64" }
         end
     configuration "macosx"
+        links { "lua" }
         includedirs { "../irrlicht/include" }
         libdirs { "../irrlicht" }
         if USE_IRRKLANG then
