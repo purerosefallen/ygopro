@@ -3,7 +3,7 @@ set -x
 set -o errexit
 # TARGET_LOCALE
 
-apt update && apt -y install tar git
+apt update && apt -y install p7zip-full git
 git submodule update --init
 mkdir dist replay
 
