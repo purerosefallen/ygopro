@@ -52,7 +52,9 @@ project "ygopro"
     configuration "not windows"
         includedirs { "/usr/include/freetype2" }
         excludes { "COSOperator.*" }
-        links { "event_pthreads", "GL", "dl", "pthread" }
+        links { "event_pthreads" , "dl", "pthread" }
+    configuration { "not windows", "not macosx" }
+        links "GL"
     configuration "linux"
         includedirs { "../irrlicht_linux/include" }
         links { "X11", "Xxf86vm" }

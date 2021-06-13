@@ -1,0 +1,478 @@
+stages:
+  - prepare
+  - build
+  - sign
+  - pack
+  - deploy
+
+variables:
+  GIT_DEPTH: "1"
+  USE_IRRKLANG: "1"
+
+mat_lua:
+  stage: prepare
+  tags: 
+    - linux
+  script:
+    - apt update; apt -y install wget tar
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
+    - mv lua-5.3.5/src lua
+    - cp premake/lua/premake4.lua lua/;
+  artifacts:
+    paths:
+      - lua
+
+mat_irrklang:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install git
+    - mkdir -p ~/.ssh; chmod 700 ~/.ssh; echo "$NANAHIRA_SSH_KEY" | base64 --decode > ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan git.mycard.moe >> ~/.ssh/known_hosts
+    - git clone --depth=1 git@git.mycard.moe:nanahira/irrklang
+    - mv -f irrklang/plugins/ikpmp3 .
+  artifacts:
+    paths:
+      - irrklang
+      - ikpmp3
+
+mat_linux:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install git wget tar
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
+  artifacts:
+    paths:
+      - premake5
+      - irrlicht_linux
+
+mat_macos:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install wget tar
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
+    - mkdir irrlicht
+    - cd irrlicht
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
+    - cd ..
+  artifacts:
+    paths:
+      - libirrklang-patched.dylib
+      - premake5
+      - irrlicht
+
+mat_windows:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install wget tar patch p7zip-full
+    # premake5.exe
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-windows.zip
+    - 7z x -y premake-5.0.0-alpha14-windows.zip
+    # event
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+    - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
+    # freetype
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
+    - mv freetype-2.10.1 freetype
+    # sqlite3
+    - wget https://cdn01.moecube.com/ygopro-build-materials/sqlite-amalgamation-3310100.zip
+    - 7z x -y sqlite-amalgamation-3310100.zip
+    - mv sqlite-amalgamation-3310100 sqlite3
+    # irrlicht
+    - wget https://cdn01.moecube.com/ygopro-build-materials/irrlicht-1.8.4.zip
+    - 7z x -y irrlicht-1.8.4.zip
+    - mv premake/irrlicht .
+    - mv irrlicht-1.8.4/source/Irrlicht irrlicht/src
+    - mv irrlicht-1.8.4/include irrlicht/include
+  artifacts:
+    paths:
+      - premake5.exe
+      - event
+      - freetype
+      - sqlite3
+      - irrlicht
+
+exec_windows:
+  stage: build
+  tags:
+    - vs
+  dependencies:
+    - mat_lua
+    - mat_irrklang
+    - mat_windows
+  variables:
+    irrklang_pro: '1'
+  cache:
+    paths:
+      - bin/
+      - obj/
+  script:
+    - git submodule update --init
+    - bash -c 'cp -rf premake/* .'
+    - cmd /C "patch -p0 < irrlicht\irrlicht.patch"
+    - '.\premake5.exe vs2019'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\ygo.sln /m /p:Configuration=Release'
+    - copy bin\release\ygopro.exe .
+  artifacts:
+    paths:
+      - ygopro.exe
+
+exec_linux:
+  stage: build
+  tags:
+    - linux
+  dependencies:
+    - mat_irrklang
+    - mat_linux
+  cache:
+    paths:
+      - bin/
+      - obj/
+  script:
+    - apt update; apt -y install git build-essential libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev
+    - git submodule update --init
+    - ./premake5 gmake
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mv bin/release/ygopro .
+    - strip ygopro
+    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so .
+  artifacts:
+    paths:
+      - ygopro
+      - libIrrKlang.so
+
+exec_macos:
+  stage: build
+  tags:
+    - macos
+  dependencies:
+    - mat_irrklang
+    - mat_macos
+    - mat_lua
+  cache:
+    paths:
+      - bin/
+      - obj/
+  script:
+    - git submodule update --init
+    - brew install freetype libevent sqlite dylibbundler
+    - sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/
+    #- sudo cp -rf irrklang/include /usr/local/include/irrklang
+    - ./premake5 gmake --cc=clang
+    - cd build
+    - make config=release -j4
+    - cd ..
+    - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
+    - mv bin/release/ygopro.app ygopro.app/Contents/MacOS/ygopro;
+    # do some special things for irrklang
+    - mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
+    - install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
+    - dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
+    - strip ygopro.app/Contents/MacOS/ygopro;
+    - mkdir ygopro.app/Contents/Resources;
+    - mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
+    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
+
+  artifacts:
+    paths:
+      - ygopro.app
+
+#exec_macos_sign:
+#  stage: sign
+#  tags:
+#    - macos
+#  dependencies:
+#    - exec_macos
+#  script: ./.ci/sign-macos.sh
+#  artifacts:
+#    paths:
+#      - ygopro.app
+#  only:
+#    - tags
+#    - master
+
+assets:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install tar wget git
+    # starter pack
+    - wget -O - https://code.mycard.moe/mycard/ygopro-starter-pack/-/archive/master/ygopro-starter-pack-master.tar.gz | tar zfx -
+    - mv ygopro-starter-pack-master/* .
+    # sound
+    - wget -O - https://code.mycard.moe/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
+    - mv ygopro-sounds-master/sound/* sound
+    # fonts
+    - mkdir fonts
+    - cd fonts
+    - wget -O - https://cdn01.moecube.com/ygopro-fonts.tar.gz | tar zfx -
+    - cd ..
+    # locales
+    - git clone --depth=1 https://code.mycard.moe/mycard/ygopro-database
+    - mv ygopro-database/locales .
+  artifacts:
+    paths:
+      - deck
+      - single
+      - sound
+      - fonts
+      - locales
+  only:
+    - tags
+    - master
+
+assets_nonwindows:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install tar wget
+    - wget -O - https://cdn01.moecube.com/windbot/windbot.tar.gz | tar zfx -
+  artifacts:
+    paths:
+      - bot.conf
+      - windbot
+      - bot
+  only:
+    - tags
+    - master
+
+assets_windows:
+  stage: prepare
+  tags:
+    - linux
+  image: python
+  script:
+    - apt update; apt -y install wget p7zip-full
+    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
+    - wget https://cdn01.moecube.com/windbot/WindBot.7z
+    - 7z x -y WindBot.7z
+    - aws s3 sync s3://mycard/koishipro/contents/update-koishipro/ .
+  artifacts:
+    paths:
+      - bot.conf
+      - WindBot
+      - Bot.exe
+      - update-koishipro
+  only:
+    - tags
+    - master
+
+assets_zh-CN:
+  stage: build
+  tags:
+    - linux
+  script: ./.ci/assets-locale.sh
+  variables:
+    TARGET_LOCALE: zh-CN
+  artifacts:
+    paths:
+      - pics
+      - cards.cdb
+      - strings.conf
+      - bot.conf
+  only:
+    - tags
+    - master
+
+assets_en-US:
+  stage: build
+  tags:
+    - linux
+  script: ./.ci/assets-locale.sh
+  variables:
+    TARGET_LOCALE: en-US
+  artifacts:
+    paths:
+      - pics
+      - cards.cdb
+      - strings.conf
+      - bot.conf
+  only:
+    - tags
+    - master
+
+pack_windows_zh-CN:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_windows
+    - exec_windows
+    - assets_zh-CN
+  script: ./.ci/pack-windows.sh
+  variables:
+    TARGET_LOCALE: zh-CN
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_windows_zh-CN:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_windows
+    - exec_windows
+    - assets_zh-CN
+  script: ./.ci/pack-windows.sh
+  variables:
+    TARGET_LOCALE: zh-CN
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_windows_en-US:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_windows
+    - exec_windows
+    - assets_en-US
+  script: ./.ci/pack-windows.sh
+  variables:
+    TARGET_LOCALE: en-US
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_linux_zh-CN:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linux
+    - assets_zh-CN
+  script: ./.ci/pack-linux.sh
+  variables:
+    TARGET_LOCALE: zh-CN
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_linux_en-US:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linux
+    - assets_en-US
+  script: ./.ci/pack-linux.sh
+  variables:
+    TARGET_LOCALE: en-US
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_macos_zh-CN:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_macos
+    - assets_zh-CN
+  script: ./.ci/pack-macos.sh
+  variables:
+    TARGET_LOCALE: zh-CN
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+pack_macos_en-US:
+  stage: pack
+  tags:
+    - linux
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_macos
+    - assets_en-US
+  script: ./.ci/pack-macos.sh
+  variables:
+    TARGET_LOCALE: en-US
+  artifacts:
+    paths:
+      - dist
+  only:
+    - tags
+    - master
+
+upload_contents:
+  stage: deploy
+  dependencies:
+    - pack_windows_zh-CN
+  tags: 
+    - linux
+  image: python
+  script:
+    - apt update; apt -y install mono-complete p7zip-full
+    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
+    - 7z x -y -ocontents dist/KoishiPro-$CI_COMMIT_REF_NAME-win32-zh-CN.7z
+    - cd contents/update-koishipro
+    - chmod +x *.sh
+    - mono update.exe -ci
+    - sed -i "/git/d" filelist.txt
+    - cd ../..
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete contents/ s3://mycard/koishipro/contents/
+  only:
+    - master
+
+upload_to_minio:
+  stage: deploy
+  dependencies:
+    - pack_windows_zh-CN
+    - pack_linux_zh-CN
+    - pack_macos_zh-CN
+    - pack_windows_en-US
+    - pack_linux_en-US
+    - pack_macos_en-US
+  tags: 
+    - linux
+  image: python
+  script:
+    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync dist/ s3://mycard/koishipro/archive
+  only:
+    - tags
+    - master
