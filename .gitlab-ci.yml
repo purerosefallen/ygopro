@@ -31,7 +31,7 @@ mat_irrklang:
     - mkdir -p ~/.ssh; chmod 700 ~/.ssh; echo "$NANAHIRA_SSH_KEY" | base64 --decode > ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan git.mycard.moe >> ~/.ssh/known_hosts
     - git clone --depth=1 git@git.mycard.moe:nanahira/irrklang
-    - mv -f irrklang/plugins/ikpmp3 .
+    #- mv -f irrklang/plugins/ikpmp3 .
   artifacts:
     paths:
       - irrklang
