@@ -33,9 +33,9 @@ end
         libdirs { "/usr/local/lib" }
 
     configuration "macosx"
-        defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53" }
-        includedirs { "/usr/local/include", "/usr/local/include/*" }
-        libdirs { "/usr/local/lib", "/usr/X11/lib" }
+        defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
+        includedirs { "/usr/local/include/event2", "/usr/local/include/freetype2", "/usr/local/opt/sqlite3/include" }
+        libdirs { "/usr/local/lib", "/usr/local/opt/sqlite3/lib" }
         buildoptions { "-stdlib=libc++" }
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
@@ -54,9 +54,7 @@ end
     configuration { "Release", "vs*" }
         optimize "Speed"
         flags { "LinkTimeOptimization" }
-if not os.ishost("macosx") then
         staticruntime "On"
-end
         disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800" }
 
     configuration { "Release", "not vs*" }
