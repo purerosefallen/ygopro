@@ -1,53 +1,33 @@
---高速决斗技能-磁吸引力
+--高速决斗技能-鲨鱼领域
 Duel.LoadScript("speed_duel_common.lua")
 function c100730226.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730226.skill,c100730226.con,aux.Stringid(100730226,0))
-	aux.SpeedDuelBeforeDraw(c,c100730226.skill2)
+	aux.SpeedDuelAtMainPhase(c,c100730226.skill,c100730226.con)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730226.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
+	local tp=e:GetHandlerPlayer()
+	local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_EXTRA,0,nil,TYPE_MONSTER)
+	if g:GetClassCount(Card.GetOriginalAttribute)>1 or g:GetCount()==0 then return false end
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_HAND,0,2,nil,0x2066)
-		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,75347539)
+		and Duel.IsExistingMatchingCard(c100730226.filter,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(Card.IsAttribute,tp,LOCATION_EXTRA,0,1,nil,ATTRIBUTE_WATER)
 end
 function c100730226.skill(e,tp,c)
 	tp=e:GetLabelObject():GetOwner()
-	local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_HAND,0,nil,0x2066)
-	local g2=g:Select(tp,2,2,nil)
 	Duel.Hint(HINT_CARD,1-tp,100730226)
-	if g2 then
-		Duel.ConfirmCards(1-tp,g2)
-		local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,75347539)
-		local tc=g:GetFirst()
-		Duel.SendtoHand(tc,nil,REASON_RULE)
-	end
-end
-function c100730226.skill2(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetCountLimit(1)
-	e1:SetCondition(c100730226.condition)
-	e1:SetOperation(c100730226.op)
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
-end
-function c100730226.condition(e,tp,eg,ep,ev,re,r,rp)
-	return ep==tp and eg:GetFirst():IsSummonType(SUMMON_TYPE_NORMAL)
-end
-function c100730226.op(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,1-tp,100730226)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c100730226.filter,tp,LOCATION_DECK,0,1,1,nil)
-	if g:GetCount()>0 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,g)
+	local g=Duel.GetMatchingGroup(c100730226.filter,tp,LOCATION_MZONE,0,1,nil)
+	local tc=g:GetFirst()
+	while tc do
+		local e1=Effect.CreateEffect(tc)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetCode(EFFECT_CHANGE_LEVEL)
+		e1:SetValue(4)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
+		tc=g:GetNext()
 	end
 end
 function c100730226.filter(c)
-	return c:IsSetCard(0x2066) and c:IsAbleToHand() and c:IsLevelBelow(4)
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WATER)
 end

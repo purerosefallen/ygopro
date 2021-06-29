@@ -118,7 +118,7 @@ function c210000020.rettg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c210000020.filter2(c,e,tp)
-	return c:IsCanBeSpecialSummoned(e,0,tp,true,false) and c:IsCode(210000020,52900000,210000030)
+	return c:IsCanBeSpecialSummoned(e,0,tp,true,false) and c:IsCode(210000040,52900000,25415052,210000030)
 end
 function c210000020.retop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()

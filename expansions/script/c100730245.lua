@@ -1,35 +1,60 @@
---高速决斗技能-未来视界
+--高速决斗技能-你很弱哎！
 Duel.LoadScript("speed_duel_common.lua")
 function c100730245.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730245.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730245.skill,c100730245.con,aux.Stringid(100730245,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730245.filter(c,g)
-	if not c:IsSetCard(0x31) then return false end
-	local tc=g:GetFirst()
-	while tc do
-		if c:GetOriginalCode()==tc:GetOriginalCode() then
-			return false
-		end
-		tc=g:GetNext()
-	end
-	g:AddCard(c)
-	return true
+function c100730245.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730245.filter,tp,LOCATION_MZONE,0,1,nil) 
+		and Duel.IsExistingMatchingCard(c100730245.filter,tp,0,LOCATION_MZONE,1,nil) 
 end
-function c100730245.skill(e,tp)
+function c100730245.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	local g=Group.CreateGroup()
-	if not Duel.IsExistingMatchingCard(c100730245.filter,tp,LOCATION_DECK+LOCATION_HAND,0,5,nil,g) then
-		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730245,0))
-		e:Reset()
-		return
-	end
-	tp=e:GetLabelObject():GetOwner()
-	Duel.PayLPCost(1-tp,1500)
 	Duel.Hint(HINT_CARD,1-tp,100730245)
-	local cn=Duel.CreateToken(tp,87902575)
-	Duel.MoveToField(cn,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
-	local c=Duel.CreateToken(tp,56256517)
-	Duel.SendtoHand(c,tp,REASON_RULE)
-	e:Reset()
+	local c=e:GetHandler()
+	local g=Duel.SelectMatchingCard(tp,c100730245.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	local sc=g:GetFirst()
+	if sc then
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetCode(EFFECT_DISABLE)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		sc:RegisterEffect(e2)
+		local e3=Effect.CreateEffect(c)
+		e3:SetType(EFFECT_TYPE_SINGLE)
+		e3:SetCode(EFFECT_DISABLE_EFFECT)
+		e3:SetValue(RESET_TURN_SET)
+		e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		sc:RegisterEffect(e3)
+		local e4=e3:Clone()
+		e4:SetCode(EFFECT_CANNOT_ATTACK)
+		sc:RegisterEffect(e4)
+	end
+	local g1=Duel.SelectMatchingCard(tp,c100730245.filter,tp,0,LOCATION_MZONE,1,1,nil)
+	local tc=g1:GetFirst()
+	if tc then
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetCode(EFFECT_DISABLE)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e2)
+		local e3=Effect.CreateEffect(c)
+		e3:SetType(EFFECT_TYPE_SINGLE)
+		e3:SetCode(EFFECT_DISABLE_EFFECT)
+		e3:SetValue(RESET_TURN_SET)
+		e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e3)
+		local e4=Effect.CreateEffect(c)
+		e4:SetType(EFFECT_TYPE_FIELD)
+		e4:SetCode(EFFECT_CANNOT_SELECT_BATTLE_TARGET)
+		e4:SetRange(LOCATION_SZONE)
+		e4:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
+		e4:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e4)
+	end
+end
+function c100730245.filter(c)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsType(TYPE_EFFECT) and c:IsCanBeEffectTarget() and not c:IsDisabled()
 end

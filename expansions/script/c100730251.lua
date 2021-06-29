@@ -1,36 +1,31 @@
---高速决斗技能-爱即是伤
+--高速决斗技能-真红之王
 Duel.LoadScript("speed_duel_common.lua")
 function c100730251.initial_effect(c)
+	aux.SpeedDuelAtMainPhase(c,c100730251.skill,c100730251.con,aux.Stringid(100730251,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
-	aux.SpeedDuelBeforeDraw(c,c100730251.skill)
 end
-function c100730251.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730251.filter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:IsSetCard(0x1045)
+end
+function c100730251.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetHandler()
-	local e3=Effect.CreateEffect(c)
-	e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e3:SetTargetRange(1,0)
-	e3:SetCategory(CATEGORY_DAMAGE)
-	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e3:SetCode(EVENT_BATTLED)
-	e3:SetValue(c100730251.abdcon)
-	e3:SetCondition(c100730251.damcon)
-	e3:SetOperation(c100730251.damop)
-	Duel.RegisterEffect(e3,tp)
-	e:Reset()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730251.filter,tp,LOCATION_MZONE,0,1,nil)
 end
-function c100730251.damcon(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetAttacker()
-	local bc=tc:GetBattleTarget()
-	return tc:IsControler(tp) and tc:IsRelateToBattle() and bc:IsLocation(LOCATION_MZONE) and bc:IsType(TYPE_MONSTER) and tc:IsCode(78371393) or tc:IsCode(4779091) or tc:IsCode(31764700)
-end
-function c100730251.damop(e,tp,eg,ep,ev,re,r,rp) 
-	local tc=Duel.GetAttacker()
-	local bc=tc:GetBattleTarget()
-	local dam=bc:GetAttack()
-	if dam<0 then dam=0 end
-	Duel.Damage(1-tp,dam,REASON_RULE)
-end
-function c100730251.abdcon(e)
-	return Duel.GetTurnPlayer()==e:GetHandlerPlayer()
+function c100730251.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730251)
+	local g=Duel.GetMatchingGroup(c100730251.filter,tp,LOCATION_MZONE,0,nil)
+	if g:GetCount()==0 then return end
+	local tc=g:GetFirst()
+	while tc do
+		local e1=Effect.CreateEffect(tc)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_UPDATE_ATTACK)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,2)
+		e1:SetValue(tc:GetLevel()*100)
+		tc:RegisterEffect(e1)
+		tc=g:GetNext()
+	end
 end

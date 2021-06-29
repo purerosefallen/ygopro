@@ -1,22 +1,28 @@
---高速决斗技能-生命支付0
+--高速决斗技能-秘密调查
 Duel.LoadScript("speed_duel_common.lua")
 function c100730236.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730236.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(60391791,c)
+	aux.SpeedDuelAtMainPhase(c,c100730236.skill,c100730236.con,aux.Stringid(100730236,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730236.skill(e,tp,eg,ep,ev,re,r,rp)
+
+function c100730236.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetHandler()
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_LPCOST_CHANGE)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetCondition(c100730236.con)
-	e2:SetTargetRange(1,0)
-	e2:SetValue(0)
-	Duel.RegisterEffect(e2,tp)
+	return Duel.IsExistingMatchingCard(c100730236.filter,tp,0,LOCATION_MZONE,1,nil)
 end
-function c100730236.con(e)
-	local tp=e:GetHandlerPlayer()
-	return Duel.GetLP(tp)<=2500
+
+function c100730236.filter(c)
+	return c:GetFlagEffect(100730236)==0 and c:GetFlagEffectLabel(100730236)~=c:GetFieldID() and c:IsFacedown()
+end
+
+function c100730236.reg(c)
+	c:RegisterFlagEffect(100730236,RESET_EVENT+RESETS_STANDARD+EVENT_FLIP,0,1,c:GetFieldID())
+end
+
+function c100730236.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	local g=Duel.GetMatchingGroup(c100730236.filter,tp,0,LOCATION_MZONE,nil)
+	if not g or g:GetCount()==0 then return end
+	g:ForEach(c100730236.reg)
+	Duel.ConfirmCards(tp,g)
 end
