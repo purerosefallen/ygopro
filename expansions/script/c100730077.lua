@@ -1,28 +1,31 @@
---高速决斗技能-法老的陵墓
+--高速决斗技能-契约的门扉
 Duel.LoadScript("speed_duel_common.lua")
 function c100730077.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730077.skill)
+	if not c100730077.UsedLP then
+		c100730077.UsedLP={}
+		c100730077.UsedLP[0]=0
+		c100730077.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelAtMainPhase(c,c100730077.skill,c100730077.con,aux.Stringid(100730077,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+
+function c100730077.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+		and aux.DecreasedLP[tp]-c100730077.UsedLP[tp]>=2000
+		and c100730077.UsedLP[tp]<4000
 end
 function c100730077.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local g1=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_HAND,0,1,1,nil,31076103)
-	if g1:GetCount()>0 then
-		Duel.Hint(HINT_CARD,1-tp,100730077)
-		local tc=g1:GetFirst()
-		Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
-		local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK,0,1,1,nil,47355498)
-		Duel.SSet(tp,g2)
-		local d=Duel.CreateToken(tp,4081094)
-		Duel.SendtoDeck(d,tp,1,REASON_RULE)
-		local g=Group.CreateGroup()
-		local c=Duel.CreateToken(tp,89959682)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,52550973)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		Duel.SendtoGrave(g,REASON_RULE)
-	end
-	e:Reset()
+	c100730077.UsedLP[tp]=c100730077.UsedLP[tp]+2000
+	Duel.Hint(HINT_CARD,1-tp,100730077)
+	local c=Duel.CreateToken(tp,18809562)
+	Duel.SendtoHand(c,nil,REASON_RULE)
+	Duel.ConfirmCards(1-tp,c)
+	local d=Duel.CreateToken(tp,83764718)
+	Duel.SendtoHand(d,1-tp,REASON_RULE)
+	Duel.ConfirmCards(tp,d)
 end

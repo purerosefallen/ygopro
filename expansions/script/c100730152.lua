@@ -1,25 +1,39 @@
---高速决斗技能-科技属助推器
+--高速决斗技能-方界次元召唤
 Duel.LoadScript("speed_duel_common.lua")
 function c100730152.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730152.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730152.skill,c100730152.con,aux.Stringid(100730152,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730152.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730152.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730152.tgfilter)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.GetMZoneCount(tp)>-1
+		and Duel.IsPlayerCanSpecialSummon(tp)
+		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_HAND,0,1,nil,0xe3)
+		and Duel.IsExistingMatchingCard(c100730152.filter,tp,LOCATION_MZONE,0,1,nil)
+end
+function c100730152.filter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:IsSetCard(0xe3)
+end
+function c100730152.skill(e,tp,c)
+	tp=e:GetLabelObject():GetOwner()
+	local g=Duel.SelectMatchingCard(tp,c100730152.filter,tp, LOCATION_MZONE,0,1,1,nil)
+	local tc=g:GetFirst()
+	local g1=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp, LOCATION_HAND,0,1,1,nil,0xe3)
+	local c=g1:GetFirst()
+	Duel.Hint(HINT_CARD,1-tp,100730152)
+	Duel.SendtoGrave(tc,nil,REASON_RULE)
+	Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetCode(EFFECT_SET_BASE_ATTACK)
+	e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_DISABLE)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 	e1:SetValue(c100730152.val)
-	Duel.RegisterEffect(e1,tp)
+	c:RegisterEffect(e1)
+	if c:GetLevel()<=4 then return end
 	e:Reset()
 end
-function c100730152.tgfilter(e,c)
-	return c:IsSetCard(0x27)
-end
-
 function c100730152.val(e,c)
-	return c:GetLevel()*150
+	return c:GetLevel()*500
 end

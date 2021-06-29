@@ -1,23 +1,20 @@
---高速决斗技能-王者之威
+--高速决斗技能-龙印·头
 Duel.LoadScript("speed_duel_common.lua")
 function c100730288.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(61032879,c)
-	aux.SpeedDuelAtMainPhase(c,c100730288.skill,c100730288.con,aux.Stringid(100730288,0))
+	aux.SpeedDuelMoveCardToDeckCommon(68431965,c)
+	aux.SpeedDuelMoveCardToDeckCommon(63977008,c)
+	aux.SpeedDuelMoveCardToDeckCommon(63977008,c)
+	aux.SpeedDuelMoveCardToDeckCommon(44508094,c)
+	aux.SpeedDuelMoveCardToDeckCommon(24696097,c)
+	aux.SpeedDuelMoveCardToDeckCommon(35952884,c)
+	aux.SpeedDuelMoveCardToDeckCommon(83994433,c)
+	aux.SpeedDuelMoveCardToDeckCommon(89474727,c)
+	aux.SpeedDuelMoveCardToDeckCommon(26268488,c)
+	aux.SpeedDuelMoveCardToDeckCommon(21123811,c)
+	aux.SpeedDuelMoveCardToDeckCommon(7841112,c)
+	aux.SpeedDuelMoveCardToDeckCommon(63180841,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
+	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
+	aux.SpeedDuelMoveCardToFieldCommon(1003840,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-function c100730288.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730288.filter,tp,LOCATION_MZONE,0,1,nil)
-end
-function c100730288.filter(c)
-	return c:IsFaceup() and c:IsCode(70902743)
-end
-function c100730288.skill(e,tp,c)
-	tp=e:GetLabelObject():GetOwner()
-	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,87614611,50215517,24566654)
-	if g2:GetCount()==0 then return end
-	local qc=g2:GetFirst()
-	if not qc then return end
-	Duel.SendtoHand(qc,tp,REASON_RULE)
 end

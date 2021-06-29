@@ -1,73 +1,27 @@
---高速决斗技能-飞蛾扑火
+--高速决斗技能-噩梦呈现
 Duel.LoadScript("speed_duel_common.lua")
 function c100730184.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730184.operation,c100730184.con,aux.Stringid(100730184,0))
-	aux.SpeedDuelBeforeDraw(c,c100730184.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(78637313,c)
+	aux.SpeedDuelAtMainPhase(c,c100730184.skill,c100730184.con,aux.Stringid(100730184,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+
+function c100730184.filter(c)
+	return c:IsType(TYPE_SPELL) and c:IsAbleToHand()
 end
 
 function c100730184.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_GRAVE,0,3,nil,TYPE_SPELL)
+		and Duel.IsExistingMatchingCard(c100730184.filter,tp,LOCATION_GRAVE,0,1,nil)
 end
 
-function c100730184.operation(e,tp,eg,ep,ev,re,r,rp)
+function c100730184.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_DECK+LOCATION_HAND,0,1,nil,58192742)
-	local g1=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
-	local c=g1:Select(tp,1,1,nil)
-	Duel.Hint(HINT_CARD,1-tp,100730184)
-	Duel.SendtoDeck(c,nil,1,REASON_RULE)
-	local op=Duel.SelectOption(tp,aux.Stringid(100730184,1),aux.Stringid(100730184,2))
-	if op==0 and g:GetCount()>0 and Duel.GetMZoneCount(tp)>0 and Duel.IsPlayerCanSpecialSummon(tp) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_HAND,0,1,1,nil,58192742)
-		local tc=g:GetFirst()
-		if tc and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP) then
-			local e1=Effect.CreateEffect(tc)
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_IGNORE_IMMUNE)
-			e1:SetCode(EFFECT_IGNORE_BATTLE_TARGET)
-			e1:SetRange(LOCATION_MZONE)
-			e1:SetValue(aux.imval1)
-			e1:SetOwnerPlayer(tp)
-			tc:RegisterEffect(e1,true)
-			Duel.SpecialSummonComplete()
-			local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,40240595)
-			if g2:GetCount()==0 then return end
-			local qc=g2:GetFirst()
-			if not qc then return end
-			Duel.SendtoHand(qc,tp,REASON_RULE)
-		end
-	elseif op==1 then
-		local g=Group.CreateGroup()
-		local c=Duel.CreateToken(tp,48579379)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,14141448)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		c=Duel.CreateToken(tp,87756343)
-		g:AddCard(c)
-		aux.CardAddedBySkill:AddCard(c)
-		Duel.SendtoHand(g,tp,REASON_RULE)
-		local g1=g:RandomSelect(tp,2)
-		Duel.Exile(g1,REASON_RULE)
-	end
-end
-
-function c100730184.skill(e,tp,eg,ep,ev,re,r,rp)
-	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730184.mothfilter)
-	e1:SetCode(EFFECT_IMMUNE_EFFECT)
-	e1:SetValue(1)
-	Duel.RegisterEffect(e1,tp)
+	local g1=Duel.GetMatchingGroup(c100730184.filter,tp,LOCATION_GRAVE,0,nil)
+	if not (g1 and g1:GetCount()>0) then return end
+	local g2=g1:RandomSelect(tp,1)
+	Duel.SendtoHand(g2,nil,REASON_RULE)
 	e:Reset()
-end
-function c100730184.mothfilter(e,c)
-	return c:IsCode(58192742) or c:IsCode(87756343) or c:IsCode(14141448) or c:IsCode(48579379)
 end

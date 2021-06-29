@@ -4,9 +4,6 @@ function c100730299.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730299.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730299.filter(c)
-	return c:IsRace(RACE_MACHINE) and c:IsType(TYPE_NORMAL)
-end
 function c100730299.nttg(e,c)
 	return c:IsRace(RACE_MACHINE) and c:IsType(TYPE_NORMAL)
 end

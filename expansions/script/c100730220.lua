@@ -1,40 +1,29 @@
---高速决斗技能-致命五连击
+--高速决斗技能-大公归来
 Duel.LoadScript("speed_duel_common.lua")
 function c100730220.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730220.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730220.skill,c100730220.con,aux.Stringid(100730220,0))
+	aux.SpeedDuelMoveCardToDeckCommon(66506689,c)
+	aux.SpeedDuelMoveCardToDeckCommon(18063928,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730220.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+	and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,66506689)
+	and Duel.IsExistingMatchingCard(c100730220.filter,tp,0,LOCATION_MZONE,1,nil)
 end
 function c100730220.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,0)
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCode(EVENT_BATTLED)
-	e1:SetProperty(EFFECT_FLAG_DELAY)
-	e1:SetCondition(c100730220.btcon)
-	e1:SetOperation(c100730220.op)
-	e1:SetCountLimit(1)
-	e1:SetValue(c100730220.abdcon)
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
+	Duel.Hint(HINT_CARD,1-tp,100730220)
+	local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_GRAVE,0,1,1,nil,66506689)
+	Duel.SendtoDeck(g,nil,0,REASON_RULE)
+	local c=Duel.CreateToken(tp,18063928)
+	Duel.SendtoHand(c,nil,REASON_RULE)
+	if Duel.GetMZoneCount(tp)>0 then
+		local c=Duel.CreateToken(tp,42969214)
+		Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP_ATTACK)
+	end
 end
-
-function c100730220.btcon(e,tp,eg,ep,ev,re,r,rp)
-	local a=Duel.GetAttacker()
-	local d=Duel.GetAttackTarget()
-	if a:IsControler(1-tp) then a,d=d,a end
-	if a then
-		a:RegisterFlagEffect(100730220,RESET_EVENT+0x3fe0000+RESET_PHASE+PHASE_END,0,1)
-		return a:GetFlagEffect(100730220)==5
-	else return false end
-end
-
-function c100730220.op(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,0,100730220)
-	Duel.Win(tp,WIN_REASON_LAST_TURN)
-end
-function c100730220.abdcon(e)
-	return Duel.GetTurnPlayer()==e:GetHandlerPlayer()
+function c100730220.filter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsPosition(POS_DEFENSE)
 end

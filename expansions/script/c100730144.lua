@@ -1,40 +1,25 @@
---高速决斗技能-里电子流派
+--高速决斗技能-永火炼狱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730144.initial_effect(c)
-	if not c100730144.UsedLP then
-		c100730144.UsedLP={}
-		c100730144.UsedLP[0]=0
-		c100730144.UsedLP[1]=0
-	end
-	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelReplaceDraw(c,c100730144.skill,c100730144.con,aux.Stringid(100730144,1))
-	aux.SpeedDuelBeforeDraw(c,c100730144.skill2)
+	aux.SpeedDuelAtMainPhase(c,c100730144.skill,c100730144.con,aux.Stringid(100730144,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730144.skill(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730144,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730144)
-		c100730144.UsedLP[tp]=c100730144.UsedLP[tp]+1000
-		local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x4093)
-		if not g or g:GetCount()==0 then return end
-		g=g:RandomSelect(tp,1)
-		Duel.MoveSequence(g:GetFirst(),0)
-		e:Reset()
-	end
+function c100730144.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	local ct=Duel.GetFieldGroupCount(tp,LOCATION_HAND,0)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.GetTurnCount(tp)==2
+		and ct>2
+		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_DECK,0,ct-2,nil,0xb)
 end
-
-function c100730144.con(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.GetMatchingGroupCount(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x4093)>0
-		and aux.DecreasedLP[tp]-c100730144.UsedLP[tp] >= 1000
-end
-function c100730144.skill2(e,tp)
+function c100730144.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730144)
-	local tc=Duel.CreateToken(tp,73026394)
-	aux.SpeedDuelSendToHandWithExile(tp,tc)
+	local ct=Duel.GetFieldGroupCount(tp,LOCATION_HAND,0)-2
+	if ct<=0 then return end
+	local g=Duel.SelectMatchingCard(tp,aux.TRUE,tp,LOCATION_HAND,0,ct,ct,nil)
+	Duel.SendtoGrave(g,REASON_RULE+REASON_DISCARD)
+	local g2=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp,LOCATION_DECK,0,ct,ct,nil,0xb)
+	Duel.SendtoGrave(g2,REASON_RULE)
 	e:Reset()
 end

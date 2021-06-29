@@ -1,23 +1,23 @@
---高速决斗技能-吃点决斗饭团！
+--高速决斗技能-上膛
 Duel.LoadScript("speed_duel_common.lua")
 function c100730109.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730109.skill,c100730109.con,aux.Stringid(100730109,0))
+	aux.SpeedDuelAtMainPhase(c,c100730109.skill,c100730109.con,aux.Stringid(100730109,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
+
 function c100730109.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsRace,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,2,nil,RACE_FAIRY)
+	return Duel.GetTurnPlayer()==tp
+	and aux.SpeedDuelAtMainPhaseCondition(e,tp)
+	and Duel.GetTurnCount()>=5
 end
-function c100730109.skill(e,tp,c)
+
+function c100730109.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	local g=Duel.GetMatchingGroup(Card.IsRace,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,nil,RACE_FAIRY)
-	local c=g:Select(tp,2,4,nil)
-	if c then
-		Duel.Hint(HINT_CARD,1-tp,100730109)
-		Duel.HintSelection(c)
-		Duel.SendtoDeck(c,nil,0,REASON_EFFECT)
-		Duel.Recover(tp,2000,REASON_EFFECT)   
-	e:Reset()
-	end
+	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
+	local ct=g:GetCount()
+	if ct==0 then return end
+	if not Duel.SelectYesNo(tp,aux.Stringid(100730109,0)) then return end
+	Duel.SendtoDeck(g,nil,1,REASON_RULE)
+	Duel.Draw(tp,g:GetCount(),REASON_RULE)
 end

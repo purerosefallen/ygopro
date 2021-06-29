@@ -239,7 +239,6 @@ function aux.CannotActivateValue(e,te,tp)
 	if mon>0 and aux.IsTableContainValue(aux.SP3,code) then return true end
 	if enemymon>0 and aux.IsTableContainValue(aux.SP3Ex,code) then return true end
 	if mon>0 and code==53315891 and te:GetHandler():IsLocation(LOCATION_GRAVE) then return true end
-	if mon>0 and code==44097050 and te:GetType()~=EFFECT_TYPE_IGNITION then return true end
 	if mon>1 and aux.IsTableContainValue(aux.SP2,code) then return true end
 	if enemymon>1 and aux.IsTableContainValue(aux.SP2Ex,code) then return true end
 	if mon>1 and code==22227683 and te:GetCode()==EVENT_BATTLE_DESTROYING then return true end

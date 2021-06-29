@@ -1,74 +1,74 @@
---高速决斗技能-凡人融合
+--高速决斗技能-来自深海的恐怖
 Duel.LoadScript("speed_duel_common.lua")
 function c100730269.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730269.skill,c100730269.con,aux.Stringid(100730269,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
+	aux.SpeedDuelBeforeDraw(c,c100730269.skill2)
+end
+function c100730269.Iskai(c)
+	return c:IsCode(76634149,17115745) and c:IsFaceup()
 end
 function c100730269.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local mg1=Duel.GetFusionMaterial(tp)
-	local res=Duel.IsExistingMatchingCard(c100730269.filter2,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg1,nil,tp)
-	if not res then
-		local ce=Duel.GetChainMaterial(tp)
-		if ce~=nil then
-			local fgroup=ce:GetTarget()
-			local mg2=fgroup(ce,e,tp)
-			local mf=ce:GetValue()
-			res=Duel.IsExistingMatchingCard(c100730269.filter2,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg2,mf,tp)
-		end
-		return res
-	end
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.GetMZoneCount(tp)>1
+		and Duel.IsExistingMatchingCard(c100730269.Iskai,tp,LOCATION_MZONE,0,1,nil)and Duel.IsExistingMatchingCard(c100730269.filter,tp,LOCATION_FZONE+LOCATION_GRAVE+LOCATION_DECK+LOCATION_HAND,0,1,nil)
 end
-function c100730269.skill(e,tp,c)
+function c100730269.kaicon(e,tp)
+	return Duel.IsExistingMatchingCard(c100730269.Iskai,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
+end
+function c100730269.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	Duel.Hint(HINT_CARD,1-tp,100730269)
-	local chkf=tp
-	local mg1=Duel.GetFusionMaterial(tp):Filter(c100730269.filter1,nil,e)
-	local sg1=Duel.GetMatchingGroup(c100730269.filter2,tp,LOCATION_EXTRA,0,nil,e,tp,mg1,nil,chkf)
-	local mg2=nil
-	local sg2=nil
-	local ce=Duel.GetChainMaterial(tp)
-	if ce~=nil then
-		local fgroup=ce:GetTarget()
-		mg2=fgroup(ce,e,tp)
-		local mf=ce:GetValue()
-		sg2=Duel.GetMatchingGroup(c100730269.filter2,tp,LOCATION_EXTRA,0,nil,e,tp,mg2,mf,chkf)
+	local g1=Duel.GetMatchingGroup(c100730269.filter,tp,LOCATION_FZONE,0,nil)
+	if g1:GetCount()~=0 and Duel.IsPlayerCanDraw(tp,2) then
+		Duel.Draw(tp,2,REASON_RULE)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+		local sg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+		Duel.SendtoDeck(sg,nil,1,REASON_EFFECT)
 	end
-	if sg1:GetCount()>0 or (sg2~=nil and sg2:GetCount()>0) then
-		local sg=sg1:Clone()
-		if sg2 then sg:Merge(sg2) end
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local tg=sg:Select(tp,1,1,nil)
-		local tc=tg:GetFirst()
-		if sg1:IsContains(tc) and (sg2==nil or not sg2:IsContains(tc) or not Duel.SelectYesNo(tp,ce:GetDescription())) then
-			local mat1=Duel.SelectFusionMaterial(tp,tc,mg1,nil,chkf)
-			tc:SetMaterial(mat1)
-			Duel.SendtoGrave(mat1,REASON_EFFECT+REASON_MATERIAL+REASON_FUSION)
-			Duel.BreakEffect()
-			Duel.SpecialSummon(tc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)
-		else
-			local mat2=Duel.SelectFusionMaterial(tp,tc,mg2,nil,chkf)
-			local fop=ce:GetOperation()
-			fop(ce,e,tp,tc,mat2)
-		end
-		tc:CompleteProcedure()
-		if tc:GetAttack()<=2000 then
-			local g1=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,0x46)
-			Duel.SendtoHand(g1,tp,REASON_RULE)
-		end
-		if tc:GetDefense()<=2000 then
-			local g2=Duel.SelectMatchingCard(tp,Card.IsType,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,TYPE_NORMAL)
-			Duel.SendtoHand(g2,tp,REASON_RULE)
-		end
+	if g1:GetCount()==0 then
+		local tc=Duel.SelectMatchingCard(tp,c100730269.filter,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,tp):GetFirst()
+		Duel.MoveToField(tc,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+		local te=tc:GetActivateEffect()
+		Duel.RaiseEvent(tc,4179255,te,0,tp,tp,Duel.GetCurrentChain())
 	end
 end
-function c100730269.filter1(c,e)
-	return not c:IsImmuneToEffect(e)
+function c100730269.filter(c)
+	return c:IsCode(22702055)
 end
-function c100730269.filter2(c,e,tp,m,f,chkf)
-	return c:IsType(TYPE_FUSION) and (not f or f(c)) and not c:IsType(TYPE_EFFECT)
-		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial(m,nil,chkf)
+function c100730269.skill2(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	local c=e:GetHandler()
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
+	e1:SetTargetRange(LOCATION_MZONE,0)
+	e1:SetCode(EFFECT_IMMUNE_EFFECT)
+	e1:SetValue(c100730269.efilter)
+	e1:SetCondition(c100730269.kaicon)
+	Duel.RegisterEffect(e1,tp)
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_UPDATE_LEVEL)
+	e2:SetTargetRange(LOCATION_HAND+LOCATION_DECK+LOCATION_MZONE,0)
+	e2:SetTarget(aux.TargetBoolFunction(Card.IsAttribute,ATTRIBUTE_WATER))
+	e2:SetValue(-1)
+	Duel.RegisterEffect(e2,tp)
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_SET_BASE_ATTACK)
+	e3:SetTargetRange(LOCATION_MZONE,0)
+	e3:SetTarget(c100730269.waterfilter)
+	e3:SetValue(c100730269.val)
+	Duel.RegisterEffect(e3,tp)
+	e:Reset()
+end
+function c100730269.efilter(e,te)
+	local c=te:GetHandler()
+	return c:GetType()==TYPE_TRAP 
+end
+function c100730269.val(e,c)
+	return c:GetOriginalLevel()*500
+end
+function c100730269.waterfilter(e,c)
+	return c:IsAttribute(ATTRIBUTE_WATER) and c:IsLevelBelow(4)
 end

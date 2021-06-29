@@ -1,38 +1,42 @@
---高速决斗技能-痛苦进化
+--高速决斗技能-抽卡预感：地缚神
 Duel.LoadScript("speed_duel_common.lua")
 function c100730113.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730113.skill,c100730113.con,aux.Stringid(100730105,0))
+	aux.SpeedDuelMoveCardToFieldCommon(44710391,c)
+	aux.SpeedDuelMoveCardToFieldCommon(68304813,c)
+	if not c100730113.UsedLP then
+		c100730113.UsedLP={}
+		c100730113.UsedLP[0]=0
+		c100730113.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730113.skill,c100730113.con,aux.Stringid(100730113,1))
+	aux.SpeedDuelMoveCardToDeckCommon(39823987,c)
+	aux.SpeedDuelMoveCardToDeckCommon(66818682,c)
+	aux.SpeedDuelMoveCardToDeckCommon(41131774,c)
+	aux.SpeedDuelMoveCardToDeckCommon(37910722,c)
+	aux.SpeedDuelMoveCardToDeckCommon(25472513,c)
+	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
+	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
+	aux.SpeedDuelMoveCardToDeckCommon(90884403,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 
-function c100730113.Isyubel(c)
-	return (c:IsOriginalCodeRule(78371393) and c:IsFaceup())
-		or (c:IsOriginalCodeRule(4779091) and c:IsFaceup())
+function c100730113.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730113,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730113)
+		c100730113.UsedLP[tp]=c100730113.UsedLP[tp]+1000
+		local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x21)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+		e:Reset()
+	end
 end
 
-function c100730113.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730113.Isyubel,tp,LOCATION_MZONE,0,1,nil)
-		and Duel.GetMZoneCount(tp)>-1
-end
-function c100730113.SequenceToZone(seq)
-	return 1 << seq
-end
-function c100730113.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	local g=Duel.SelectMatchingCard(tp,c100730113.Isyubel,tp,LOCATION_MZONE,0,1,1,nil)
-	if not g then return end
-	local tc=g:GetFirst()
-	local pos=tc:GetPosition()
-	local seq=tc:GetSequence()
-	if tc:IsOriginalCodeRule(78371393) then code=4779091 end
-	if tc:IsOriginalCodeRule(4779091) then code=31764700 end
-	Duel.SendtoGrave(tc,REASON_RULE)
-	local nc=Duel.CreateToken(tp,code)
-	Duel.MoveToField(nc,tp,tp,LOCATION_MZONE,pos,true)
-	Duel.MoveSequence(nc,seq)
-end
-function c100730113.DisableMonsterZone(e,tp)
-	return 0x1f-aux.SequenceToZone(tc:GetSequence())
+function c100730113.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x21)>0
+		and aux.DecreasedLP[tp]-c100730113.UsedLP[tp] >= 1000
 end

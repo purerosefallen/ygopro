@@ -1,44 +1,33 @@
---高速决斗技能-黑暗苏生
+--高速决斗技能-抽卡预感：风
 Duel.LoadScript("speed_duel_common.lua")
 function c100730168.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730168.skill,c100730168.con,aux.Stringid(100730168,0))
+	aux.SpeedDuelMoveCardToFieldCommon(26022485,c)
+	if not c100730168.UsedLP then
+		c100730168.UsedLP={}
+		c100730168.UsedLP[0]=0
+		c100730168.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730168.skill,c100730168.con,aux.Stringid(100730168,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730168.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.GetMZoneCount(tp)>0
-		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.IsExistingMatchingCard(c100730168.filter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil)
-end
+
 function c100730168.skill(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,1-tp,100730168)
-	Duel.PayLPCost(tp,math.floor(Duel.GetLP(tp)/2))
-	local e1=Effect.GlobalEffect()   
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,0)
-	e1:SetValue(c100730168.limval)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e1,tp)
-	local e2=Effect.GlobalEffect()
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetTargetRange(1,0)
-	e2:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e2,1-tp)
-	local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_GRAVE,LOCATION_GRAVE,nil,TYPE_MONSTER)
-	local tc=g:Select(tp,1,1,nil)
-	if tc then
-		Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730168,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730168)
+		c100730168.UsedLP[tp]=c100730168.UsedLP[tp]+1500
+		local g=Duel.GetMatchingGroup(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WIND)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
 		e:Reset()
 	end
 end
-function c100730168.filter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsAttackBelow(4000)
-end
-function c100730168.limval(e,re,rp)
-	return true
+
+function c100730168.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WIND)>0
+		and aux.DecreasedLP[tp]-c100730168.UsedLP[tp] >= 1500
 end

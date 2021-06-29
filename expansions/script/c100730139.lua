@@ -25,7 +25,6 @@ function c100730139.con(e,tp)
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
 		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,84013237)
 		and aux.DecreasedLP[tp]-c100730139.UsedLP[tp]>=2000
-		and c100730139.UsedLP[tp]<2500
 end
 function c100730139.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()

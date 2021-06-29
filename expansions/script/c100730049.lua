@@ -1,32 +1,27 @@
---高速决斗技能-等级复制
+--高速决斗技能-其名为完全败北之鞭
 Duel.LoadScript("speed_duel_common.lua")
 function c100730049.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730049.skill,c100730049.con,aux.Stringid(100730049,0))
+	aux.SpeedDuelReplaceDraw(c,c100730049.skill,c100730049.con,aux.Stringid(100730049,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-function c100730049.filter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsLevelAbove(1)
 end
 function c100730049.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730049.filter,tp,LOCATION_HAND,0,1,nil)
-		and Duel.IsExistingMatchingCard(c100730049.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
+	return Duel.GetTurnPlayer()==tp 
+	and Duel.GetTurnCount()>=6
+end
+function c100730049.Is8800(c)
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:GetDefense()>=3500
 end
 function c100730049.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730049)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(100730049,1))
-	local source=Duel.SelectMatchingCard(tp,c100730049.filter,tp,LOCATION_HAND,0,1,1,nil):GetFirst()
-	Duel.ConfirmCards(1-tp,source)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(100730049,2))
-	local to=Duel.SelectMatchingCard(tp,c100730049.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil):GetFirst()
-	local e1=Effect.CreateEffect(to)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_CHANGE_LEVEL)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-	e1:SetValue(source:GetLevel())
-	to:RegisterEffect(e1)
-	Duel.ShuffleHand(tp)
+	if Duel.SelectYesNo(tp,aux.Stringid(100730049,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730049)
+		local c=Duel.CreateToken(tp,55410871)
+		Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		local g=Duel.GetMatchingGroup(c100730049.Is8800,1-tp,LOCATION_MZONE,0,nil)
+		if g:GetCount()==0 then return end
+			local c=Duel.CreateToken(tp,21082832)
+			Duel.SendtoHand(c,nil,REASON_RULE)
+			e:Reset()
+		end
 end

@@ -1,33 +1,32 @@
---高速决斗技能-等级下降
+--高速决斗技能-梦幻的手卡
 Duel.LoadScript("speed_duel_common.lua")
 function c100730141.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730141.skill,c100730141.con,aux.Stringid(100730141,0))
-	aux.SpeedDuelBeforeDraw(c,c100730141.skill2)
+	aux.SpeedDuelAtMainPhase(c,c100730141.operation,c100730141.con,aux.Stringid(100730141,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-function c100730141.filter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsLevelAbove(1)
 end
 function c100730141.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730141.filter,tp,LOCATION_HAND,0,1,nil)
-		and Duel.IsExistingMatchingCard(c100730141.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+		and Duel.GetMZoneCount(tp)>0
+		and Duel.GetLP(tp)+2000<=Duel.GetLP(1-tp)
+		and Duel.IsPlayerCanSpecialSummon(tp)
 end
-function c100730141.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730049)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(100730141,1))
-	local source=Duel.SelectMatchingCard(tp,c100730141.filter,tp,LOCATION_HAND,0,1,1,nil):GetFirst()
-	Duel.ConfirmCards(1-tp,source)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(100730141,2))
-	local to=Duel.SelectMatchingCard(tp,c100730141.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil):GetFirst()
-	local e1=Effect.CreateEffect(to)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_LEVEL)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-	e1:SetValue(-source:GetLevel())
-	to:RegisterEffect(e1)
-	Duel.ShuffleHand(tp)
+function c100730141.operation(e,tp,eg,ep,ev,re,r,rp)
+	local g=Duel.GetMatchingGroup(Card.IsAbleToGrave,tp,LOCATION_HAND,0,nil)
+	local g1=g:Select(tp,1,3,nil)
+	if not g1 then return end
+	Duel.SendtoDeck(g1,tp,0,REASON_RULE)
+	Duel.Hint(HINT_CARD,1-tp,100730141)
+	local ct=g1:GetCount()
+	if ct==1 then
+		local c=Duel.CreateToken(tp,18724123)
+		Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)
+	elseif ct==2 then
+		local c=Duel.CreateToken(tp,56209279)
+		Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)
+	elseif ct==3 then
+		local c=Duel.CreateToken(tp,66957584)
+		Duel.SendtoHand(c,nil,REASON_RULE)
+	end
 end

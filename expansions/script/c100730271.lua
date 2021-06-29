@@ -1,30 +1,33 @@
---高速决斗技能-僵尸之主
+--高速决斗技能-抽卡预感：水
 Duel.LoadScript("speed_duel_common.lua")
 function c100730271.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730271.skill,c100730271.con,aux.Stringid(100730271,0))
+	aux.SpeedDuelMoveCardToFieldCommon(95132338,c)
+	if not c100730271.UsedLP then
+		c100730271.UsedLP={}
+		c100730271.UsedLP[0]=0
+		c100730271.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730271.skill,c100730271.con,aux.Stringid(100730271,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730271.filter(c)
-	return c:IsRace(RACE_ZOMBIE) and c:IsLevelBelow(4)
-end
-function c100730271.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.GetMZoneCount(tp)>0
-		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_HAND,0,1,nil,TYPE_MONSTER)
-		and Duel.IsExistingMatchingCard(c100730271.filter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil)
-end
+
 function c100730271.skill(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,1-tp,100730271)
-	local g1=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_HAND,0,nil,TYPE_MONSTER)
-	local c=g1:Select(tp,1,1,nil)
-	if not c then return end
-	Duel.SendtoGrave(c,nil,REASON_RULE)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,c100730271.filter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil)
-	local tc=g:GetFirst()
-	if not tc then return end
-	Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
-	e:Reset()
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730271,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730271)
+		c100730271.UsedLP[tp]=c100730271.UsedLP[tp]+1500
+		local g=Duel.GetMatchingGroup(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WATER)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+		e:Reset()
+	end
+end
+
+function c100730271.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WATER)>0
+		and aux.DecreasedLP[tp]-c100730271.UsedLP[tp] >= 1500
 end

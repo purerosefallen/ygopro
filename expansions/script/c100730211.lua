@@ -1,15 +1,32 @@
---高速决斗技能-№系规则
+--高速决斗技能-当然是正位置！
 Duel.LoadScript("speed_duel_common.lua")
 function c100730211.initial_effect(c)
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
-	e2:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
-	e2:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x48))
-	e2:SetValue(c100730211.indval)
-	Duel.RegisterEffect(e2,c)
+	aux.SpeedDuelBeforeDraw(c,c100730211.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(96012004,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730211.indval(e,c)
-	return not c:IsSetCard(0x48)
+
+function c100730211.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_TOSS_COIN_NEGATE)
+	e1:SetCondition(c100730211.coincon2)
+	e1:SetOperation(c100730211.coinop2)
+	e1:SetLabelObject(e:GetLabelObject())
+	Duel.RegisterEffect(e1,tp)
+	e:Reset()
+end
+function c100730211.coincon2(e,tp,eg,ep,ev,re,r,rp)
+	return re:GetHandler():GetControler()==e:GetLabelObject():GetOwner()
+		and re:GetHandler():IsSetCard(0x05)
+end
+function c100730211.coinop2(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_CARD,0,100730211)
+	local res={Duel.GetCoinResult()}
+	local ct=ev
+	for i=1,ct do
+		res[i]=1
+	end
+	Duel.SetCoinResult(table.unpack(res))
 end

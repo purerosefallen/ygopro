@@ -1,37 +1,33 @@
---高速决斗技能-空手组合技无限
+--高速决斗技能--抽卡预感：低星
 Duel.LoadScript("speed_duel_common.lua")
 function c100730129.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(67616300,c)
-	aux.SpeedDuelBeforeDraw(c,c100730129.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(37231841,c)
+	if not c100730129.UsedLP then
+		c100730129.UsedLP={}
+		c100730129.UsedLP[0]=0
+		c100730129.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730129.skill,c100730129.con,aux.Stringid(100730129,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
+
 function c100730129.skill(e,tp,eg,ep,ev,re,r,rp)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730129)
-	local c=Duel.CreateToken(tp,81020646)
-	Duel.SendtoDeck(c,nil,0,REASON_RULE)
-	local d1=Duel.CreateToken(tp,45313724)
-	Duel.SendtoDeck(d1,nil,0,REASON_RULE)
-	local d2=Duel.CreateToken(tp,18712704)
-	Duel.SendtoDeck(d2,nil,0,REASON_RULE)
-	local d3=Duel.CreateToken(tp,40555959)
-	Duel.SendtoDeck(d3,nil,0,REASON_RULE)
-	local d4=Duel.CreateToken(tp,14550855)
-	Duel.SendtoDeck(d4,nil,0,REASON_RULE)
-	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	aux.SpeedDuelSendToDeckWithExile(tp,g)
-	local sg=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_DECK,0,nil,45313724,66957584,40555959,14550855,18712704)
-	local g1=sg:SelectSubGroup(tp,aux.dncheck,false,3,3)
-	Duel.SSet(tp,g1)
-	local d=Duel.CreateToken(tp,13582837)
-	Duel.Summon(tp,d,false,nil)
-	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_EXTRA,0,1,1,nil,72896720)
-	if g2:GetCount()>0 then
-		Duel.SpecialSummon(g2,0,tp,tp,true,false,POS_FACEUP_ATTACK,0x60) 
-		local sc=Duel.CreateToken(tp,5560911)
-		Duel.SpecialSummon(sc,0,tp,tp,true,true,POS_FACEUP_DEFENSE)
-		local xc=Duel.CreateToken(tp,18590133)
-		Duel.SpecialSummon(xc,0,tp,tp,true,true,POS_FACEDOWN_DEFENSE)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730129,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730129)
+		c100730129.UsedLP[tp]=c100730129.UsedLP[tp]+1000
+		local g=Duel.GetMatchingGroup(Card.IsLevelBelow,tp,LOCATION_DECK,0,nil,4)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+		e:Reset()
 	end
-	e:Reset()
+end
+
+function c100730129.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsLevelBelow,tp,LOCATION_DECK,0,nil,4)>0
+		and aux.DecreasedLP[tp]-c100730129.UsedLP[tp] >= 1000
 end

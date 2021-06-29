@@ -1,27 +1,33 @@
---高速决斗技能-噩梦呈现
+--高速决斗技能--抽卡预感：高星
 Duel.LoadScript("speed_duel_common.lua")
 function c100730048.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(78637313,c)
-	aux.SpeedDuelAtMainPhase(c,c100730048.skill,c100730048.con,aux.Stringid(100730048,0))
+	aux.SpeedDuelMoveCardToFieldCommon(76297408,c)
+	if not c100730048.UsedLP then
+		c100730048.UsedLP={}
+		c100730048.UsedLP[0]=0
+		c100730048.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730048.skill,c100730048.con,aux.Stringid(100730048,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 
-function c100730048.filter(c)
-	return c:IsType(TYPE_SPELL) and c:IsAbleToHand()
+function c100730048.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730048,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730048)
+		c100730048.UsedLP[tp]=c100730048.UsedLP[tp]+1000
+		local g=Duel.GetMatchingGroup(Card.IsLevelAbove,tp,LOCATION_DECK,0,nil,5)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+		e:Reset()
+	end
 end
 
-function c100730048.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_GRAVE,0,3,nil,TYPE_SPELL)
-		and Duel.IsExistingMatchingCard(c100730048.filter,tp,LOCATION_GRAVE,0,1,nil)
-end
-
-function c100730048.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	local g1=Duel.GetMatchingGroup(c100730048.filter,tp,LOCATION_GRAVE,0,nil)
-	if not (g1 and g1:GetCount()>0) then return end
-	local g2=g1:RandomSelect(tp,1)
-	Duel.SendtoHand(g2,nil,REASON_RULE)
-	e:Reset()
+function c100730048.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsLevelAbove,tp,LOCATION_DECK,0,nil,5)>0
+		and aux.DecreasedLP[tp]-c100730048.UsedLP[tp] >= 1000
 end

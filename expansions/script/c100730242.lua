@@ -1,23 +1,35 @@
---高速决斗技能-命运占卜师
+--高速决斗技能-未来视界
 Duel.LoadScript("speed_duel_common.lua")
 function c100730242.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730242.skill,c100730242.con,aux.Stringid(100730242,0))
+	aux.SpeedDuelBeforeDraw(c,c100730242.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730242.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_HAND,0,1,nil,0x12e)
-		and Duel.IsPlayerCanDraw(tp,1)
-end
-function c100730242.skill(e,tp,c)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730242)
-	local g=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp,LOCATION_HAND,0,1,1,nil,0x12e)
-	local c=g:GetFirst()
-	if c then
-		Duel.Draw(tp,1,REASON_RULE)
-		Duel.ShuffleHand(tp)
-		Duel.SendtoDeck(c,tp,0,REASON_RULE)
+function c100730242.filter(c,g)
+	if not c:IsSetCard(0x31) then return false end
+	local tc=g:GetFirst()
+	while tc do
+		if c:GetOriginalCode()==tc:GetOriginalCode() then
+			return false
+		end
+		tc=g:GetNext()
 	end
+	g:AddCard(c)
+	return true
+end
+function c100730242.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	local g=Group.CreateGroup()
+	if not Duel.IsExistingMatchingCard(c100730242.filter,tp,LOCATION_DECK+LOCATION_HAND,0,5,nil,g) then
+		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730242,0))
+		e:Reset()
+		return
+	end
+	tp=e:GetLabelObject():GetOwner()
+	Duel.PayLPCost(1-tp,1500)
+	Duel.Hint(HINT_CARD,1-tp,100730242)
+	local cn=Duel.CreateToken(tp,87902575)
+	Duel.MoveToField(cn,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
+	local c=Duel.CreateToken(tp,56256517)
+	Duel.SendtoHand(c,tp,REASON_RULE)
+	e:Reset()
 end

@@ -21,9 +21,7 @@ function c100730214.skill(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.SelectMatchingCard(tp,c100730214.filter,tp,LOCATION_DECK+LOCATION_HAND,0,1,1,nil)
 	if g:GetCount()==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local tc=g:GetFirst()
-	if not tc then return end
-	Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
+	Duel.SpecialSummon(g:GetFirst(),0,tp,tp,true,true,POS_FACEUP)
 	local e2=Effect.GlobalEffect()   
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_CHANGE_DAMAGE)

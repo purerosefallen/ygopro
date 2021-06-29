@@ -1,31 +1,26 @@
---高速决斗技能-虚无的波动
+--高速决斗技能-少女的行动
 Duel.LoadScript("speed_duel_common.lua")
 function c100730253.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(63665606,c)
-	aux.SpeedDuelMoveCardToFieldCommon(80921533,c)
-	aux.SpeedDuelBeforeDraw(c,c100730253.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730253.skill,c100730253.con,aux.Stringid(100730253,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
+function c100730253.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsPlayerCanSpecialSummon(tp)
+		and Duel.IsExistingMatchingCard(c100730253.filter,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730253.filter,tp,LOCATION_DECK,0,1,nil) 
+end
 function c100730253.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	--atk up
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetCondition(c100730253.atcon)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730253.tgfilter)
-	e1:SetValue(400)
-	Duel.RegisterEffect(e1,tp)
-	local e2=e1:Clone()
-	e2:SetCode(EFFECT_UPDATE_DEFENSE)
-	Duel.RegisterEffect(e2,tp)
-	e:Reset()
+	Duel.Hint(HINT_CARD,1-tp,100730253)
+	local g=Duel.SelectMatchingCard(tp,c100730253.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.SendtoHand(g,tp,REASON_EFFECT)
+	Duel.ConfirmCards(1-tp,g)
+	local g2=Duel.SelectMatchingCard(tp,c100730253.filter,tp,LOCATION_DECK,0,1,1,nil)
+	local tc=g2:GetFirst()
+	Duel.SpecialSummon(tc,0,tp,tp,true,true,POS_FACEUP)
 end
-function c100730253.atcon(e)
-	return Duel.GetFieldGroupCount(e:GetHandlerPlayer(),LOCATION_HAND,0)==0
-end
-function c100730253.tgfilter(e,c)
-	return c:IsSetCard(0xb)
+function c100730253.filter(c)
+	return c:IsType(TYPE_MONSTER) and c:IsRace(RACE_FAIRY) and c:IsDefense(600)
 end
