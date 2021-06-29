@@ -1,7 +1,20 @@
---高速决斗技能-攀登高峰
+--高速决斗技能-生命增加γ
 Duel.LoadScript("speed_duel_common.lua")
 function c100730004.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(50913601,c)
-	aux.SpeedDuelMoveCardToFieldCommon(54178050,c)
+	aux.SpeedDuelBeforeDraw(c,c100730004.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730004.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730004)
+	local lp=Duel.GetLP(tp)
+	Duel.SetLP(tp,lp+5000)
+	local g=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_HAND,0,nil)
+	local c=g:Select(tp,2,2,nil)
+	Duel.SendtoDeck(c,nil,1,REASON_RULE)
+	local c=Duel.CreateToken(tp,38199696)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
+	local c=Duel.CreateToken(tp,38199696)
+	aux.SpeedDuelSendToHandWithExile(tp,c)
+	e:Reset()
 end

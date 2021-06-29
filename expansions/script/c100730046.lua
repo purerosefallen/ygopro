@@ -1,23 +1,31 @@
---高速决斗技能-神圣护卫
+--高速决斗技能-进化后的最强龙族
 Duel.LoadScript("speed_duel_common.lua")
 function c100730046.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730046.skill)
+	aux.SpeedDuelMoveCardToDeckCommon(23995346,c)
+	aux.SpeedDuelMoveCardToDeckCommon(56532353,c)
+	aux.SpeedDuelMoveCardToDeckCommon(2129638,c)
+	aux.SpeedDuelMoveCardToDeckCommon(62873545,c)
+	aux.SpeedDuelMoveCardToDeckCommon(43228023,c)
+	aux.SpeedDuelAtMainPhase(c,c100730046.skill,c100730046.con,aux.Stringid(100730106,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730046.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730046.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=Duel.CreateToken(tp,88789641)
-	Duel.SendtoHand(c,tp,REASON_RULE)
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_REVERSE_DAMAGE)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,0)
-	e1:SetValue(c100730046.abdcon)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e1,tp)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_HAND,0,2,nil,89631139)
 end
-
-function c100730046.abdcon(e)
-	return Duel.GetTurnPlayer()==e:GetHandlerPlayer()
+function c100730046.skill(e,tp,c)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730046)
+	local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_HAND,0,nil,89631139)
+	Duel.ConfirmCards(1-tp,g)
+	local d=Duel.CreateToken(tp,24094653)
+	Duel.SendtoHand(d,nil,REASON_RULE)
+	Duel.ConfirmCards(1-tp,d)
+	if g:GetCount()==3 then
+		local c=Duel.CreateToken(tp,53347303)
+		Duel.SendtoHand(c,nil,REASON_RULE)
+		Duel.ConfirmCards(1-tp,c)
+	end
+	e:Reset()
 end

@@ -1,36 +1,28 @@
---高速决斗技能-奇迹抽卡
+--高速决斗技能-同盟联合
 Duel.LoadScript("speed_duel_common.lua")
 function c100730047.initial_effect(c)
-	aux.SpeedDuelReplaceDraw(c,c100730047.skill,c100730047.con,aux.Stringid(100730047,1))
-	aux.SpeedDuelBeforeDraw(c,c100730047.skill2)
+	aux.SpeedDuelBeforeDraw(c,c100730047.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730047.skill2(e,tp)
+function c100730047.nttg(e,c)
+	return c:IsType(TYPE_UNION) or c:IsType(TYPE_NORMAL)
+end
+function c100730047.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730136)
-	local tc=Duel.CreateToken(tp,97362768)
-	aux.SpeedDuelSendToHandWithExile(tp,tc)
+	local c=e:GetLabelObject()
+	local e2=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(100730047,0))
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
+	e2:SetTargetRange(LOCATION_HAND+LOCATION_MZONE,0)
+	e2:SetTarget(aux.TargetBoolFunction(Card.IsType,TYPE_NORMAL))
+	Duel.RegisterEffect(e2,tp)
+	local e3=Effect.CreateEffect(c)
+	e3:SetDescription(aux.Stringid(100730047,1))
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetTargetRange(LOCATION_HAND,0)
+	e3:SetCode(EFFECT_SUMMON_PROC)
+	e3:SetTarget(c100730047.nttg)
+	Duel.RegisterEffect(e3,tp)
 	e:Reset()
-end
-
-function c100730047.filter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x3008)
-end
-
-function c100730047.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.IsExistingMatchingCard(c100730047.filter,tp,LOCATION_GRAVE,0,1,nil)
-		and Duel.GetTurnCount()>=3
-end
-
-function c100730047.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-	if Duel.SelectYesNo(tp,aux.Stringid(100730047,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730047)
-		local c=Duel.CreateToken(tp,55144522)
-		Duel.SendtoDeck(c,tp,0,REASON_RULE)
-		e:Reset()
-	end
 end

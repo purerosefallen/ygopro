@@ -1,20 +1,33 @@
---高速决斗技能-龙印·翼
+--高速决斗技能-魔力流通
 Duel.LoadScript("speed_duel_common.lua")
 function c100730011.initial_effect(c)
-	aux.SpeedDuelMoveCardToDeckCommon(66141736,c)
-	aux.SpeedDuelMoveCardToDeckCommon(76547525,c)
-	aux.SpeedDuelMoveCardToDeckCommon(97021916,c)
-	aux.SpeedDuelMoveCardToDeckCommon(97021916,c)
-	aux.SpeedDuelMoveCardToDeckCommon(70902743,c)
-	aux.SpeedDuelMoveCardToDeckCommon(80666118,c)
-	aux.SpeedDuelMoveCardToDeckCommon(16172067,c)
-	aux.SpeedDuelMoveCardToDeckCommon(39765958,c)
-	aux.SpeedDuelMoveCardToDeckCommon(36857073,c)
-	aux.SpeedDuelMoveCardToDeckCommon(62242678,c)
-	aux.SpeedDuelMoveCardToDeckCommon(97489701,c)
-	aux.SpeedDuelMoveCardToDeckCommon(99585850,c)
-	aux.SpeedDuelMoveCardToDeckCommon(60025883,c)
-	aux.SpeedDuelMoveCardToDeckCommon(1686814,c)
-	aux.SpeedDuelMoveCardToFieldCommon(59593925,c)
+	aux.SpeedDuelMoveCardToFieldCommon(51481927,c)
+	if not c100730011.UsedLP then
+		c100730011.UsedLP={}
+		c100730011.UsedLP[0]=0
+		c100730011.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730011.skill,c100730011.con,aux.Stringid(100730011,1))
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+
+function c100730011.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730011,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730011)
+		c100730011.UsedLP[tp]=c100730011.UsedLP[tp]+1500
+		local g=Duel.GetMatchingGroup(Card.IsRace,tp,LOCATION_DECK,0,nil,RACE_SPELLCASTER)
+		if not g or g:GetCount()==0 then return end
+		g=g:RandomSelect(tp,1)
+		Duel.MoveSequence(g:GetFirst(),0)
+		e:Reset()
+	end
+end
+
+function c100730011.con(e,tp,eg,ep,ev,re,r,rp)
+	tp = e:GetLabelObject():GetOwner()
+	return Duel.GetTurnPlayer()==tp
+		and Duel.GetMatchingGroupCount(Card.IsRace,tp,LOCATION_DECK,0,nil,RACE_SPELLCASTER)>0
+		and aux.DecreasedLP[tp]-c100730011.UsedLP[tp] >= 1500
 end

@@ -1,35 +1,51 @@
---高速决斗技能-香水战术
+--高速决斗技能-唤龙者
 Duel.LoadScript("speed_duel_common.lua")
 function c100730045.initial_effect(c)
-	aux.SpeedDuelAtMainPhaseNoCountLimit(c,c100730045.skill,c100730045.con,aux.Stringid(100730045,0))
+	aux.SpeedDuelAtMainPhase(c,c100730045.skill,c100730045.con,aux.Stringid(100730045,0))
+	aux.SpeedDuelBeforeDraw(c,c100730045.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730045.filter(c)
-	return c:GetFlagEffect(100730045)==0 and c:GetFlagEffectLabel(100730045)~=c:GetFieldID() and c:IsFacedown()
-end
-
 function c100730045.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return Duel.IsExistingMatchingCard(c100730045.filter,tp,LOCATION_DECK,0,1,nil)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_HAND,0,1,nil,43973174)
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,17985575)
 end
-
-function c100730045.reg(c)
-	c:RegisterFlagEffect(100730045,RESET_EVENT+RESETS_STANDARD+EVENT_FLIP,0,1,c:GetFieldID())
-end
-
-function c100730045.skill(e,tp)
+function c100730045.skill(e,tp,c)
 	tp=e:GetLabelObject():GetOwner()
+	local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_HAND,0,nil,43973174)
+	local g2=g:Select(tp,1,1,nil)
 	Duel.Hint(HINT_CARD,1-tp,100730045)
-	local g=Duel.GetDecktopGroup(tp,1)
-	if not g or g:GetCount()==0 then return end
-	g:ForEach(c100730045.reg)
-	Duel.ConfirmCards(tp,g)
+	if g2 then
+		Duel.ConfirmCards(1-tp,g2)
+		local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,17985575)
+		local tc=g:GetFirst()
+		Duel.SendtoHand(tc,nil,REASON_RULE)
+	end
 end
-function c100730045.adjustop(e,tp)
-	local g=Duel.GetDecktopGroup(tp,1)
-	if not g or g:GetCount()==0 then return end
-	local fc=g:GetFirst()
-	if fc:IsPosition(POS_FACEUP_DEFENSE) then return end
-	fc:ReverseInDeck()
+function c100730045.skill2(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e1:SetCountLimit(1)
+	e1:SetCondition(c100730045.condition)
+	e1:SetOperation(c100730045.op)
+	Duel.RegisterEffect(e1,tp)
+	e:Reset()
+end
+function c100730045.condition(e,tp,eg,ep,ev,re,r,rp)
+	return ep==tp and eg:GetFirst():IsSummonType(SUMMON_TYPE_NORMAL)
+end
+function c100730045.op(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_CARD,1-tp,100730045)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,43973174)
+	if g:GetCount()>0 then
+		Duel.SendtoHand(g,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,g)
+		Duel.ShuffleHand(tp)
+	end
 end
