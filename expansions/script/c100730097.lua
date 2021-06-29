@@ -1,45 +1,41 @@
---高速决斗技能-丧悼之假面
+--高速决斗技能-守护者呼唤
 Duel.LoadScript("speed_duel_common.lua")
 function c100730097.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730097.skill,c100730097.con,aux.Stringid(100730097,0))
+	if not c100730097.UsedLP then
+		c100730097.UsedLP={}
+		c100730097.UsedLP[0]=0
+		c100730097.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelReplaceDraw(c,c100730097.skill,c100730097.con,aux.Stringid(100730097,1))
+	aux.SpeedDuelBeforeDraw(c,c100730097.skill2)
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730097.skill2(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730097)
+	local tc=Duel.CreateToken(tp,50412166)
+	aux.SpeedDuelSendToHandWithExile(tp,tc)
+	e:Reset()
 end
 function c100730097.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsPlayerCanSpecialSummon(tp)
-		and Duel.GetMZoneCount(tp)>0
-		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_MZONE+LOCATION_GRAVE,0,2,nil,13676474,86569121)
-		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,1,nil,48948935)
+	return Duel.GetTurnPlayer()==tp 
+		and aux.DecreasedLP[tp]-c100730097.UsedLP[tp] >= 1800
 end
-function c100730097.skill(e,tp,c)
+function c100730097.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730097)
-	local g1=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_MZONE+LOCATION_GRAVE,0,2,nil,13676474,86569121)
-	local c=g1:Select(tp,2,2,nil)
-	if c then
-		Duel.ConfirmCards(1-tp,c)
-		Duel.SendtoDeck(c,nil,2,REASON_RULE)
-		local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(c100730097.filter),tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil)
-		if g:GetCount()>0 then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local tc=g:GetFirst()
-		if tc and Duel.SpecialSummonStep(tc,0,tp,tp,true,true,POS_FACEUP) then
-			local e1=Effect.GlobalEffect()
-			e1:SetType(EFFECT_TYPE_FIELD)
-			e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
-			e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-			e1:SetReset(RESET_PHASE+PHASE_END)
-			e1:SetTargetRange(1,0)
-			Duel.RegisterEffect(e1,tp,true)
-			e1:SetOwnerPlayer(tp)
-			tc:RegisterEffect(e1,true)
-			end
-			Duel.SpecialSummonComplete()
+	if Duel.SelectYesNo(tp,aux.Stringid(100730097,0)) then
+		Duel.Hint(HINT_CARD,1-tp,100730097)
+		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730097,1))
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CODE)
+		getmetatable(e:GetHandler()).announce_filter={TYPE_MONSTER+TYPE_SPELL+TYPE_TRAP,OPCODE_ISTYPE,TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK,OPCODE_ISTYPE,OPCODE_NOT,OPCODE_AND}
+		local ac=Duel.AnnounceCard(tp,table.unpack(getmetatable(e:GetHandler()).announce_filter))
+		local c=Duel.CreateToken(tp,ac)
+		if c:IsSetCard(0x52) then
+			Duel.SendtoDeck(c,tp,0,REASON_RULE)
+			Duel.Draw(tp,1,REASON_RULE)
+		else Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730097,2))
 		end
 	end
-end
-
-function c100730097.filter(c)
-	return c:IsCode(48948935)
 end

@@ -1,6 +1,7 @@
 --高速决斗技能-XYZ猎人
 Duel.LoadScript("speed_duel_common.lua")
 function c100730124.initial_effect(c)
+	aux.SpeedDuelMoveCardToDeckCommon(1127737,c)
 	aux.SpeedDuelAtMainPhase(c,c100730124.skill,c100730124.con,aux.Stringid(100730124,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end

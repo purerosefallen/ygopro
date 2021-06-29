@@ -1,29 +1,35 @@
---高速决斗技能-神秘礼物
+--高速决斗技能-香水战术
 Duel.LoadScript("speed_duel_common.lua")
 function c100730167.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730167.skill,c100730167.con,aux.Stringid(100730167,0))
+	aux.SpeedDuelAtMainPhaseNoCountLimit(c,c100730167.skill,c100730167.con,aux.Stringid(100730167,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-function c100730167.con(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730167.filter,tp,LOCATION_SZONE,0,1,nil)
-		and Duel.GetLocationCount(1-tp,LOCATION_SZONE)>0
-end
-function c100730167.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730167)
-	local tc=Duel.SelectMatchingCard(tp,c100730167.filter,tp,LOCATION_SZONE,0,1,1,nil):GetFirst()
-	if tc:IsLocation(LOCATION_FZONE) then
-		Duel.MoveToField(tc,tp,1-tp,LOCATION_FZONE,tc:GetPosition(),true)
-	else
-		Duel.MoveToField(tc,tp,1-tp,LOCATION_SZONE,tc:GetPosition(),true)
-	end
-	local d=Duel.CreateToken(1-tp,56119752)
-	Duel.SendtoHand(d,tp,REASON_RULE)
-	e:Reset()
 end
 
 function c100730167.filter(c)
-	return c:IsFacedown()
+	return c:GetFlagEffect(100730167)==0 and c:GetFlagEffectLabel(100730167)~=c:GetFieldID() and c:IsFacedown()
+end
+
+function c100730167.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return Duel.IsExistingMatchingCard(c100730167.filter,tp,LOCATION_DECK,0,1,nil)
+end
+
+function c100730167.reg(c)
+	c:RegisterFlagEffect(100730167,RESET_EVENT+RESETS_STANDARD+EVENT_FLIP,0,1,c:GetFieldID())
+end
+
+function c100730167.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730167)
+	local g=Duel.GetDecktopGroup(tp,1)
+	if not g or g:GetCount()==0 then return end
+	g:ForEach(c100730167.reg)
+	Duel.ConfirmCards(tp,g)
+end
+function c100730167.adjustop(e,tp)
+	local g=Duel.GetDecktopGroup(tp,1)
+	if not g or g:GetCount()==0 then return end
+	local fc=g:GetFirst()
+	if fc:IsPosition(POS_FACEUP_DEFENSE) then return end
+	fc:ReverseInDeck()
 end

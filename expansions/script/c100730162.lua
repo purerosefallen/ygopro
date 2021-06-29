@@ -1,25 +1,22 @@
---高速决斗技能-全新的力量！
+--高速决斗技能-超能力猛攻
 Duel.LoadScript("speed_duel_common.lua")
 function c100730162.initial_effect(c)
-	aux.SpeedDuelMoveCardToDeckCommon(17955766,c)
-	aux.SpeedDuelMoveCardToDeckCommon(17955766,c)
-	aux.SpeedDuelMoveCardToDeckCommon(13857930,c)
-	aux.SpeedDuelMoveCardToDeckCommon(78734254,c)
-	aux.SpeedDuelMoveCardToDeckCommon(5128859,c)
-	aux.SpeedDuelMoveCardToDeckCommon(11502550,c)
-	aux.SpeedDuelMoveCardToDeckCommon(17032740,c)
-	aux.SpeedDuelMoveCardToDeckCommon(28677304,c)
-	aux.SpeedDuelMoveCardToDeckCommon(31111109,c)
-	aux.SpeedDuelMoveCardToDeckCommon(40080312,c)
-	aux.SpeedDuelMoveCardToDeckCommon(48996569,c)
-	aux.SpeedDuelMoveCardToDeckCommon(49352945,c)
-	aux.SpeedDuelMoveCardToDeckCommon(55171412,c)
-	aux.SpeedDuelMoveCardToDeckCommon(64655485,c)
-	aux.SpeedDuelMoveCardToDeckCommon(72926163,c)
-	aux.SpeedDuelMoveCardToDeckCommon(78512663,c)
-	aux.SpeedDuelMoveCardToDeckCommon(81566151,c)
-	aux.SpeedDuelMoveCardToDeckCommon(85507811,c)
-	aux.SpeedDuelMoveCardToDeckCommon(90050480,c)
-	aux.SpeedDuelMoveCardToFieldCommon(42015635,c)
+	aux.SpeedDuelBeforeDraw(c,c100730162.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730162.skill(e,tp)
+   tp = e:GetLabelObject():GetOwner()
+	local g=Group.CreateGroup()
+	local d=Duel.CreateToken(tp,68077936)
+	Duel.SendtoGrave(d,REASON_RULE)
+	local count=1
+	if Duel.TossCoin(tp,1)==1 then
+		count=2
+	end
+	while count>0 do
+		local c=Duel.CreateToken(tp,39987731)
+		Duel.SendtoDeck(c,tp,0,REASON_RULE)
+		count=count-1
+	end
+	e:Reset()
 end

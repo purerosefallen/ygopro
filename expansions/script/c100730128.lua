@@ -1,34 +1,30 @@
---高速决斗技能-生命充能
+--高速决斗技能-超级强壮！
 Duel.LoadScript("speed_duel_common.lua")
 function c100730128.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730128.skill)
+	aux.SpeedDuelAtMainPhase(c,c100730128.skill,c100730128.con,aux.Stringid(100730128,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730128.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730128.filter,tp,LOCATION_MZONE,0,1,nil) 
+		and Duel.GetTurnCount()>=5
 end
 function c100730128.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCategory(CATEGORY_RECOVER)
-	e1:SetCode(EVENT_TURN_END)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,0)
-	e1:SetCountLimit(1)
-	e1:SetReset(RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN,5)
-	e1:SetOperation(c100730128.recop)
-	e1:SetValue(c100730128.abdcon)
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
-end
-function c100730128.recop(e,tp,eg,ep,ev,re,r,rp)
-	if ep~=tp then return end
-	local count= Duel.GetTurnCount()
 	Duel.Hint(HINT_CARD,1-tp,100730128)
-	Duel.Recover(tp,count*200,REASON_RULE)
-	local g2=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,0,1,nil,9032529)
-	if g2:GetCount()==0 then return end
-	Duel.SendtoHand(g2,tp,REASON_RULE)
+	local g=Duel.SelectMatchingCard(tp,c100730128.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	local tc=g:GetFirst()
+	if tc then
+		local e1=Effect.CreateEffect(tc)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_SET_BASE_ATTACK)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		e1:SetValue(3001)
+		tc:RegisterEffect(e1)
+	end
 end
-
-function c100730128.abdcon(e)
-	return Duel.GetTurnPlayer()==e:GetHandlerPlayer()
+function c100730128.filter(c)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER)
 end

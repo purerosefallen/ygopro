@@ -1,33 +1,80 @@
---高速决斗技能-抽卡预感：水
+--高速决斗技能-祭品的力量
 Duel.LoadScript("speed_duel_common.lua")
 function c100730084.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(95132338,c)
-	if not c100730084.UsedLP then
-		c100730084.UsedLP={}
-		c100730084.UsedLP[0]=0
-		c100730084.UsedLP[1]=0
-	end
-	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelReplaceDraw(c,c100730084.skill,c100730084.con,aux.Stringid(100730084,1))
+	aux.SpeedDuelBeforeDraw(c,c100730084.skill)
+	local e3=Effect.GlobalEffect()
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EVENT_PREDRAW)
+	e3:SetOperation(c100730084.operation)
+	e3:SetLabel(10000090)
+	e3:SetLabelObject(c)
+	Duel.RegisterEffect(e3,0)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 
-function c100730084.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730084.operation(e,tp,eg,ep,ev,re,r,rp)
+	local id=e:GetLabel()
 	tp = e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730084,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730084)
-		c100730084.UsedLP[tp]=c100730084.UsedLP[tp]+1500
-		local g=Duel.GetMatchingGroup(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WATER)
-		if not g or g:GetCount()==0 then return end
-		g=g:RandomSelect(tp,1)
-		Duel.MoveSequence(g:GetFirst(),0)
-		e:Reset()
-	end
+	local c=Duel.CreateToken(tp,id)
+	Duel.SendtoGrave(c,REASON_RULE)
+	e:Reset()
 end
 
-function c100730084.con(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WATER)>0
-		and aux.DecreasedLP[tp]-c100730084.UsedLP[tp] >= 1500
+function c100730084.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	local c=e:GetHandler()
+	--tribute check
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_MATERIAL_CHECK)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_RANGE)
+	e1:SetValue(c100730084.valcheck)
+	Duel.RegisterEffect(e1,tp)
+	--give atk effect only when summon
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_SUMMON_COST)
+	e2:SetTargetRange(LOCATION_HAND,0)
+	e2:SetTarget(c100730084.tgchk)
+	e2:SetOperation(c100730084.facechk)
+	e2:SetLabelObject(e1)
+	Duel.RegisterEffect(e2,tp)
+	Duel.RegisterFlagEffect(tp,100424104,RESET_PHASE+PHASE_END,0,1)
+	e:Reset()
+end
+
+function c100730084.valcheck(e,c)
+	if e:GetLabel()==1 then
+		e:SetLabel(0)
+		local g=c:GetMaterial()
+		local tc=g:GetFirst()
+		local atk=0
+		local def=0
+		while tc do
+			atk=atk+math.max(tc:GetTextAttack(),0)
+			def=def+math.max(tc:GetTextDefense(),0)
+			tc=g:GetNext()
+		end
+		--atk continuous effect
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_SET_BASE_ATTACK)
+		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetRange(LOCATION_MZONE)
+		e1:SetValue(atk)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TOFIELD)
+		c:RegisterEffect(e1)
+		--def continuous effect
+		local e2=e1:Clone()
+		e2:SetCode(EFFECT_SET_BASE_DEFENSE)
+		e2:SetValue(def)
+		c:RegisterEffect(e2)
+	end
+end
+function c100730084.tgchk(e,c)
+	return c:IsCode(10000010)
+end
+function c100730084.facechk(e,tp,eg,ep,ev,re,r,rp)
+	e:GetLabelObject():SetLabel(1)
+
 end

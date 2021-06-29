@@ -1,22 +1,25 @@
---高速决斗技能-攻击助推器：lv2
+--高速决斗技能-一手起动器
 Duel.LoadScript("speed_duel_common.lua")
 function c100730143.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730143.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
 function c100730143.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	--atk up
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetTarget(c100730143.tgfilter)
-	e1:SetValue(700)
-	Duel.RegisterEffect(e1,tp)
 	e:Reset()
-end
-function c100730143.tgfilter(e,c)
-	return c:IsLevelBelow(2)
+	if Duel.IsExistingMatchingCard(Card.IsAttribute,tp,LOCATION_DECK,0,1,nil,0x5f) then
+		Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730143,0))
+	else
+		local g=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_HAND,0,nil)
+		local ct=g:GetCount()
+		local c=g:Select(tp,ct-1,ct-1,nil)
+		Duel.SendtoDeck(c,nil,2,REASON_RULE)
+		local e1=Effect.GlobalEffect()
+		e1:SetType(EFFECT_TYPE_FIELD)
+		e1:SetCode(EFFECT_DRAW_COUNT)
+		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+		e1:SetTargetRange(1,0)
+		e1:SetValue(2)
+		Duel.RegisterEffect(e1,tp)
+	end
 end

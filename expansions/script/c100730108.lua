@@ -1,16 +1,37 @@
---高速决斗技能-决斗饭团
+--高速决斗技能-攻击力：8800P
 Duel.LoadScript("speed_duel_common.lua")
 function c100730108.initial_effect(c)
 	aux.SpeedDuelAtMainPhase(c,c100730108.skill,c100730108.con,aux.Stringid(100730108,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
+
+function c100730108.Is8800(c)
+	return c:IsLevel(4) and c:IsFaceup() and c:GetAttack()==c:GetDefense()
+end
+
 function c100730108.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetLP(tp)<Duel.GetLP(1-tp)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730108.Is8800,tp,LOCATION_MZONE,0,1,nil)
 end
-function c100730108.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730108.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	if not Duel.SelectYesNo(tp,aux.Stringid(100730108,0)) then return end
 	Duel.Hint(HINT_CARD,1-tp,100730108)
-	Duel.Recover(tp,1000,REASON_EFFECT)   
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
+	local g=Duel.SelectMatchingCard(tp,c100730108.Is8800,tp,LOCATION_MZONE,0,1,1,nil)
+	local tc=g:GetFirst()
+	local e1=Effect.CreateEffect(tc)
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetCode(EFFECT_SET_BASE_ATTACK)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e1:SetValue(8800)
+	e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+	tc:RegisterEffect(e1)
+	local e2=e1:Clone()
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e2:SetTargetRange(1,0)
+	e2:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e2,1-tp)
 end

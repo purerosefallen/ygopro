@@ -1,29 +1,25 @@
---高速决斗技能-场地更变
+--高速决斗技能-不朽的印记
 Duel.LoadScript("speed_duel_common.lua")
 function c100730186.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730186.skill,c100730186.con,aux.Stringid(100730186,0))
-	aux.SpeedDuelMoveCardToFieldCommon(25518020,c)
+	aux.SpeedDuelBeforeDraw(c,c100730186.skill)
+	aux.SpeedDuelMoveCardToFieldCommon(80921533,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730186.con(e,tp)
+
+function c100730186.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_ONFIELD,0,1,nil,TYPE_EQUIP)
-		and Duel.IsPlayerCanDraw(tp,1)
-		and Duel.GetLP(tp)<=6000
-end
-function c100730186.skill(e,tp,eg,ep,ev,re,r,rp,chk)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730186)
-	local g=Duel.GetMatchingGroup(Card.IsAbleToGrave,tp,LOCATION_ONFIELD,0,nil)
-	if chk==0 then return g:CheckSubGroup(c100730186.fselect,2,2) end
-	local rg=g:SelectSubGroup(tp,c100730186.fselect,false,1,2)
-	Duel.SendtoGrave(rg,REASON_EFFECT)
-	local ct=rg:GetCount()
-	Duel.Draw(tp,ct,REASON_RULE)
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+	e1:SetTargetRange(LOCATION_MZONE,0)
+	e1:SetTarget(c100730186.tgfilter)
+	e1:SetValue(c100730186.efilter)
+	Duel.RegisterEffect(e1,tp)
 	e:Reset()
 end
-
-function c100730186.fselect(g)
-	return g:IsExists(Card.IsType,1,nil,TYPE_EQUIP)
+function c100730186.tgfilter(e,c)
+	return c:IsSetCard(0x21)
+end
+function c100730186.efilter(e,re,rp,c)
+	return re:GetOwner()==c
 end

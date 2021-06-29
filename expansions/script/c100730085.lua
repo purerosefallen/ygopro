@@ -1,33 +1,54 @@
---高速决斗技能-抽卡预感：风
+--高速决斗技能-神官的咏唱
 Duel.LoadScript("speed_duel_common.lua")
 function c100730085.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(26022485,c)
-	if not c100730085.UsedLP then
-		c100730085.UsedLP={}
-		c100730085.UsedLP[0]=0
-		c100730085.UsedLP[1]=0
-	end
-	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelReplaceDraw(c,c100730085.skill,c100730085.con,aux.Stringid(100730085,1))
+	aux.SpeedDuelAtMainPhase(c,c100730085.skill,c100730085.con,aux.Stringid(100730085,0))
+	local e3=Effect.GlobalEffect()
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EVENT_PREDRAW)
+	e3:SetOperation(c100730085.operation)
+	e3:SetLabel(78665705)
+	e3:SetLabelObject(c)
+	Duel.RegisterEffect(e3,0)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730085.skill(e,tp,eg,ep,ev,re,r,rp)
+function c100730085.operation(e,tp,eg,ep,ev,re,r,rp)
+	local id=e:GetLabel()
 	tp = e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730085,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730085)
-		c100730085.UsedLP[tp]=c100730085.UsedLP[tp]+1500
-		local g=Duel.GetMatchingGroup(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WIND)
-		if not g or g:GetCount()==0 then return end
-		g=g:RandomSelect(tp,1)
-		Duel.MoveSequence(g:GetFirst(),0)
-		e:Reset()
-	end
+	local c=Duel.CreateToken(tp,id)
+	Duel.SendtoGrave(c,REASON_RULE)
+	e:Reset()
 end
-
-function c100730085.con(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_DECK,0,nil,ATTRIBUTE_WIND)>0
-		and aux.DecreasedLP[tp]-c100730085.UsedLP[tp] >= 1500
+function c100730085.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,10000010)
+end
+function c100730085.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730085)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,29,nil)
+	if not g1 then return end
+	Duel.SendtoGrave(g1,nil,REASON_EFFECT)
+	local g=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,10000010)
+	if g:GetCount()>0 then
+		Duel.SendtoHand(g,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,g)
+		if g:GetFirst():IsLocation(LOCATION_HAND) then
+			if Duel.IsPlayerCanSummon(tp) and Duel.IsPlayerCanAdditionalSummon(tp) and Duel.GetFlagEffect(tp,78665705)==0 then
+				local e1=Effect.CreateEffect(e:GetHandler())
+				e1:SetDescription(aux.Stringid(100730085,0))
+				e1:SetType(EFFECT_TYPE_FIELD)
+				e1:SetTargetRange(LOCATION_HAND,0)
+				e1:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
+				e1:SetValue(0x1)
+				e1:SetReset(RESET_PHASE+PHASE_END)
+				Duel.RegisterEffect(e1,tp)
+				local e2=e1:Clone()
+				e2:SetCode(EFFECT_EXTRA_SET_COUNT)
+				Duel.RegisterEffect(e2,tp)
+				Duel.RegisterFlagEffect(tp,78665705,RESET_PHASE+PHASE_END,0,1)
+			end
+		end
+	end
 end

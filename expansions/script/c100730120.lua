@@ -1,27 +1,30 @@
---高速决斗技能-火山之力
+--高速决斗技能-心灵扫描
 Duel.LoadScript("speed_duel_common.lua")
 function c100730120.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730120.skill,c100730120.con,aux.Stringid(100730105,0))
+	aux.SpeedDuelMoveCardToFieldCommon(34694160,c)
+	aux.SpeedDuelAtMainPhaseNoCountLimit(c,c100730120.skill,c100730120.con,aux.Stringid(100730120,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
-end
-
-function c100730120.Isvol(c)
-	return (c:IsOriginalCodeRule(21420702) and c:IsFaceup())
 end
 
 function c100730120.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(c100730120.Isvol,tp,LOCATION_SZONE,0,1,nil)
-		and Duel.GetMZoneCount(tp)>0
-		and Duel.IsPlayerCanSpecialSummon(tp)
+	return Duel.GetTurnCount()>=3 and Duel.GetCurrentChain()==0
+		and Duel.IsExistingMatchingCard(c100730120.filter,tp,0,LOCATION_ONFIELD,1,nil)
+		and Duel.GetLP(tp)>=3000
 end
+
+function c100730120.filter(c)
+	return c:GetFlagEffect(100730120)==0 and c:GetFlagEffectLabel(100730120)~=c:GetFieldID() and c:IsFacedown()
+end
+
+function c100730120.reg(c)
+	c:RegisterFlagEffect(100730120,RESET_EVENT+RESETS_STANDARD+EVENT_FLIP,0,1,c:GetFieldID())
+end
+
 function c100730120.skill(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local g=Duel.SelectMatchingCard(tp,c100730120.Isyvol,tp,LOCATION_SZONE,0,1,1,nil)
-	if not g then return end
-	local tc=g:GetFirst()
-	Duel.SendtoGrave(tc,REASON_RULE)
-	local nc=Duel.CreateToken(tp,32543380)
-	Duel.SpecialSummon(nc,0,tp,tp,true,true,POS_FACEUP)
+	local g=Duel.GetMatchingGroup(c100730120.filter,tp,0,LOCATION_ONFIELD,nil)
+	if not g or g:GetCount()==0 then return end
+	g:ForEach(c100730120.reg)
+	Duel.ConfirmCards(tp,g)
 end

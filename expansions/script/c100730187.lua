@@ -1,29 +1,31 @@
---高速决斗技能-场地更变
+--高速决斗技能-虚无的波动
 Duel.LoadScript("speed_duel_common.lua")
 function c100730187.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730187.skill,c100730187.con,aux.Stringid(100730187,0))
-	aux.SpeedDuelMoveCardToFieldCommon(69112325,c)
+	aux.SpeedDuelMoveCardToFieldCommon(63665606,c)
+	aux.SpeedDuelMoveCardToFieldCommon(80921533,c)
+	aux.SpeedDuelBeforeDraw(c,c100730187.skill)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-function c100730187.con(e,tp)
+
+function c100730187.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
-	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_ONFIELD,0,1,nil,TYPE_FIELD)
-		and Duel.IsPlayerCanDraw(tp,1)
-		and Duel.GetLP(tp)<=6000
-end
-function c100730187.skill(e,tp,eg,ep,ev,re,r,rp,chk)
-	tp=e:GetLabelObject():GetOwner()
-	Duel.Hint(HINT_CARD,1-tp,100730187)
-	local g=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_ONFIELD,0,nil)
-	if chk==0 then return g:CheckSubGroup(c100730187.fselect,2,2) end
-	local rg=g:SelectSubGroup(tp,c100730187.fselect,false,1,2)
-	Duel.SendtoDeck(rg,nil,tp,2,REASON_EFFECT)
-	local ct=rg:GetCount()
-	Duel.Draw(tp,ct,REASON_RULE)
+	--atk up
+	local e1=Effect.GlobalEffect()
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_UPDATE_ATTACK)
+	e1:SetCondition(c100730187.atcon)
+	e1:SetTargetRange(LOCATION_MZONE,0)
+	e1:SetTarget(c100730187.tgfilter)
+	e1:SetValue(400)
+	Duel.RegisterEffect(e1,tp)
+	local e2=e1:Clone()
+	e2:SetCode(EFFECT_UPDATE_DEFENSE)
+	Duel.RegisterEffect(e2,tp)
 	e:Reset()
 end
-
-function c100730187.fselect(g)
-	return g:IsExists(Card.IsType,1,nil,TYPE_FIELD)
+function c100730187.atcon(e)
+	return Duel.GetFieldGroupCount(e:GetHandlerPlayer(),LOCATION_HAND,0)==0
+end
+function c100730187.tgfilter(e,c)
+	return c:IsSetCard(0xb)
 end

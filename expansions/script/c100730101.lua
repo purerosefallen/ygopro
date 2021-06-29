@@ -1,80 +1,47 @@
---高速决斗技能-祭品的力量
+--高速决斗技能-爱即是伤
 Duel.LoadScript("speed_duel_common.lua")
 function c100730101.initial_effect(c)
-	aux.SpeedDuelBeforeDraw(c,c100730101.skill)
-	local e3=Effect.GlobalEffect()
-	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e3:SetCode(EVENT_PREDRAW)
-	e3:SetOperation(c100730101.operation)
-	e3:SetLabel(10000090)
-	e3:SetLabelObject(c)
-	Duel.RegisterEffect(e3,0)
 	aux.RegisterSpeedDuelSkillCardCommon()
+	aux.SpeedDuelBeforeDraw(c,c100730101.skill)
 end
-
-function c100730101.operation(e,tp,eg,ep,ev,re,r,rp)
-	local id=e:GetLabel()
-	tp = e:GetLabelObject():GetOwner()
-	local c=Duel.CreateToken(tp,id)
-	Duel.SendtoGrave(c,REASON_RULE)
-	e:Reset()
-end
-
 function c100730101.skill(e,tp,eg,ep,ev,re,r,rp)
 	tp=e:GetLabelObject():GetOwner()
 	local c=e:GetHandler()
-	--tribute check
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_MATERIAL_CHECK)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_RANGE)
-	e1:SetValue(c100730101.valcheck)
-	Duel.RegisterEffect(e1,tp)
-	--give atk effect only when summon
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_SUMMON_COST)
-	e2:SetTargetRange(LOCATION_HAND,0)
-	e2:SetTarget(c100730101.tgchk)
-	e2:SetOperation(c100730101.facechk)
-	e2:SetLabelObject(e1)
-	Duel.RegisterEffect(e2,tp)
-	Duel.RegisterFlagEffect(tp,100424104,RESET_PHASE+PHASE_END,0,1)
+	local e3=Effect.CreateEffect(c)
+	e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e3:SetTargetRange(1,0)
+	e3:SetCategory(CATEGORY_DAMAGE)
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EVENT_BATTLED)
+	e3:SetValue(c100730101.abdcon)
+	e3:SetCondition(c100730101.damcon)
+	e3:SetOperation(c100730101.damop)
+	Duel.RegisterEffect(e3,tp)
+	Duel.Hint(HINT_CARD,1-tp,100730101)
+	local c=Duel.CreateToken(tp,19763315)
+	Duel.SendtoDeck(c,nil,0,REASON_RULE)
+	local d1=Duel.CreateToken(tp,31245780)
+	Duel.SendtoDeck(d1,nil,0,REASON_RULE)
+	local d2=Duel.CreateToken(tp,28378427)
+	Duel.SendtoDeck(d2,nil,0,REASON_RULE)
+	local sg=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_DECK,0,nil,19763315,31245780,28378427)
+	local g=sg:SelectSubGroup(tp,aux.dncheck,false,2,2)
+	Duel.SSet(tp,g)
 	e:Reset()
 end
-
-function c100730101.valcheck(e,c)
-	if e:GetLabel()==1 then
-		e:SetLabel(0)
-		local g=c:GetMaterial()
-		local tc=g:GetFirst()
-		local atk=0
-		local def=0
-		while tc do
-			atk=atk+math.max(tc:GetTextAttack(),0)
-			def=def+math.max(tc:GetTextDefense(),0)
-			tc=g:GetNext()
-		end
-		--atk continuous effect
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_SET_BASE_ATTACK)
-		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_CANNOT_DISABLE)
-		e1:SetRange(LOCATION_MZONE)
-		e1:SetValue(atk)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TOFIELD)
-		c:RegisterEffect(e1)
-		--def continuous effect
-		local e2=e1:Clone()
-		e2:SetCode(EFFECT_SET_BASE_DEFENSE)
-		e2:SetValue(def)
-		c:RegisterEffect(e2)
+function c100730101.damcon(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetAttacker()
+	return tc:IsControler(tp) and tc:IsRelateToBattle() and tc:IsCode(78371393,4779091,31764700)
+end
+function c100730101.damop(e,tp,eg,ep,ev,re,r,rp) 
+	local tc=Duel.GetAttacker()
+	local bc=tc:GetBattleTarget()
+	if bc:IsLocation(LOCATION_MZONE) and bc:IsType(TYPE_MONSTER) then
+		local dam=bc:GetAttack()
+		if dam<0 then dam=0 end
+		Duel.Damage(1-tp,dam,REASON_RULE)
 	end
 end
-function c100730101.tgchk(e,c)
-	return c:IsCode(10000010)
-end
-function c100730101.facechk(e,tp,eg,ep,ev,re,r,rp)
-	e:GetLabelObject():SetLabel(1)
-
+function c100730101.abdcon(e)
+	return Duel.GetTurnPlayer()==e:GetHandlerPlayer()
 end

@@ -1,33 +1,56 @@
---高速决斗技能--抽卡预感：高星
+--高速决斗技能-妖精加油
 Duel.LoadScript("speed_duel_common.lua")
 function c100730133.initial_effect(c)
-	aux.SpeedDuelMoveCardToFieldCommon(76297408,c)
-	if not c100730133.UsedLP then
-		c100730133.UsedLP={}
-		c100730133.UsedLP[0]=0
-		c100730133.UsedLP[1]=0
-	end
-	aux.SpeedDuelCalculateDecreasedLP()
-	aux.SpeedDuelReplaceDraw(c,c100730133.skill,c100730133.con,aux.Stringid(100730133,1))
+	aux.SpeedDuelAtMainPhase(c,c100730133.skill,c100730133.con,aux.Stringid(100730133,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730133.skill(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730133,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730133)
-		c100730133.UsedLP[tp]=c100730133.UsedLP[tp]+1000
-		local g=Duel.GetMatchingGroup(Card.IsLevelAbove,tp,LOCATION_DECK,0,nil,5)
-		if not g or g:GetCount()==0 then return end
-		g=g:RandomSelect(tp,1)
-		Duel.MoveSequence(g:GetFirst(),0)
-		e:Reset()
-	end
+function c100730133.Isfairy(c)
+	return c:IsCode(45939611) and c:IsFaceup()
 end
 
-function c100730133.con(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.GetMatchingGroupCount(Card.IsLevelAbove,tp,LOCATION_DECK,0,nil,5)>0
-		and aux.DecreasedLP[tp]-c100730133.UsedLP[tp] >= 1000
+function c100730133.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730133.Isfairy,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(c100730133.filter,tp,LOCATION_EXTRA,0,1,nil)
+		and Duel.IsPlayerCanSpecialSummon(tp)
+		and Duel.GetLP(tp)<=6000
+end
+ 
+function c100730133.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730133)
+	local g1=Duel.SelectMatchingCard(tp,c100730133.Isfairy,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
+	local tc1=g1:GetFirst()
+	local g2=Duel.SelectMatchingCard(tp,c100730133.filter,tp,LOCATION_EXTRA,0,1,1,nil)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local tc2=g2:GetFirst()
+	if tc2 then
+		Duel.BreakEffect()
+		tc2:SetMaterial(g1)
+		Duel.Overlay(tc2,g1)
+		Duel.SpecialSummon(tc2,SUMMON_TYPE_XYZ,tp,tp,false,false,POS_FACEUP)
+		tc2:CompleteProcedure()
+		local g3=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,0,3,nil,12398280)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+		local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+		if ft<g3:GetCount() or not g3 then return end
+		local sc=g3:GetFirst()
+		while sc do
+		   Duel.SpecialSummon(sc,0,tp,tp,true,true,POS_FACEUP)
+		   sc=g3:GetNext()
+		end
+		local e1=Effect.GlobalEffect()
+		e1:SetType(EFFECT_TYPE_FIELD)
+		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
+		e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+		e1:SetReset(RESET_PHASE+PHASE_END)
+		e1:SetTargetRange(1,0)
+		Duel.RegisterEffect(e1,tp,true)
+		e1:SetOwnerPlayer(tp)
+	end
+end
+function c100730133.filter(c)
+	return c:IsCode(51960178,23454876)
 end

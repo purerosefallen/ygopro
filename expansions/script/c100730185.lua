@@ -1,49 +1,28 @@
---高速决斗技能-卡组统领：突击兵
+--高速决斗技能-魔术大师
 Duel.LoadScript("speed_duel_common.lua")
 function c100730185.initial_effect(c)
-	aux.SpeedDuelReplaceDraw(c,c100730185.skill,c100730185.con,aux.Stringid(100730185,0))
-	aux.SpeedDuelBeforeDraw(c,c100730185.skill2)
+	if not c100730185.UsedLP then
+		c100730185.UsedLP={}
+		c100730185.UsedLP[0]=0
+		c100730185.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelAtMainPhase(c,c100730185.skill,c100730185.con,aux.Stringid(100730185,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
-
-function c100730185.skill2(e,tp,eg,ep,ev,re,r,rp)
+function c100730185.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetCondition(c100730185.kaicon)
-	e1:SetTarget(c100730185.cfilter)
-	e1:SetValue(800)
-	Duel.RegisterEffect(e1,tp)
-	local e2=Effect.Clone(e1)
-	e2:SetCode(EFFECT_UPDATE_DEFENSE)
-	Duel.RegisterEffect(e2,tp)
-	e:Reset()
-end
-function c100730185.cfilter(e,c)
-	return c:IsRace(RACE_MACHINE) or c:IsRace(RACE_WARRIOR)
-end
-function c100730185.kaicon(e)
-	return Duel.IsExistingMatchingCard(c100730185.filter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and aux.DecreasedLP[tp]-c100730185.UsedLP[tp]>=2000
+		and Duel.IsExistingMatchingCard(c100730185.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil)
 end
 function c100730185.filter(c)
-	return c:IsFaceup() and c:IsCode(6400512)
+	return c:IsCode(63391643,2314238,111280) and c:IsAbleToHand()
 end
-function c100730185.con(e,tp,eg,ep,ev,re,r,rp)
+function c100730185.skill(e,tp,c)
 	tp=e:GetLabelObject():GetOwner()
-	return Duel.GetTurnPlayer()==tp
-		and Duel.GetMatchingGroupCount(Card.IsCode,tp,LOCATION_DECK,0,nil,6400512)>0
-		and Duel.GetTurnCount()>=2
-end
-function c100730185.skill(e,tp)
-	tp=e:GetLabelObject():GetOwner()
-	if Duel.SelectYesNo(tp,aux.Stringid(100730185,0)) then
-		Duel.Hint(HINT_CARD,1-tp,100730185)
-		local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_DECK,0,nil,6400512)
-		if not g or g:GetCount()==0 then return end
-		g=g:RandomSelect(tp,1)
-		Duel.MoveSequence(g:GetFirst(),0)
-	end
+	local g=Duel.SelectMatchingCard(tp,c100730185.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+	Duel.SendtoHand(g:GetFirst(),tp,REASON_EFFECT)
+	local c=Duel.CreateToken(tp,67227834)
+	Duel.SendtoHand(c,nil,REASON_RULE)
 end

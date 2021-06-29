@@ -1,45 +1,7 @@
---高速决斗技能-救世守卫
+--高速决斗技能-中世纪机械
 Duel.LoadScript("speed_duel_common.lua")
 function c100730201.initial_effect(c)
-	local e1=Effect.GlobalEffect()
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCode(EVENT_PREDRAW)
-	e1:SetOperation(c100730201.skill2)
-	e1:SetLabelObject(c)
-	Duel.RegisterEffect(e1,0)
+	aux.SpeedDuelMoveCardToFieldCommon(37694547,c)
+	aux.SpeedDuelMoveCardToFieldCommon(92001300,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
-	aux.SpeedDuelBeforeDraw(c,c100730201.skill)
-end
-function c100730201.skill(e,tp,eg,ep,ev,re,r,rp)
-	tp=e:GetLabelObject():GetOwner()
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCode(EVENT_CHAIN_SOLVING)
-	e1:SetCondition(c100730201.damcon)
-	e1:SetOperation(c100730201.disop)
-	Duel.RegisterEffect(e1,tp)
-	e:Reset()
-end
-function c100730201.damcon(e,tp,eg,ep,ev,re,r,rp)
-	local tc=re:GetHandler()
-	return tc:IsControler(tp) and tc:IsCode(7841112) or tc:IsCode(67030233)
-end
-function c100730201.disop(e,tp,eg,ep,ev,re,r,rp)
-	local tc=re:GetHandler()
-	if Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON) then
-		Duel.NegateEffect(ev)
-	end
-end
-function c100730201.skill2(e,tp,eg,ep,ev,re,r,rp)
-	tp = e:GetLabelObject():GetOwner()
-	local g=Group.CreateGroup()
-	local c=Duel.CreateToken(tp,68543408)
-	g:AddCard(c)
-	aux.CardAddedBySkill:AddCard(c)
-	c=Duel.CreateToken(tp,37799519)
-	g:AddCard(c)
-	aux.CardAddedBySkill:AddCard(c)
-	Duel.SendtoGrave(g,REASON_RULE)
-	e:Reset()
 end

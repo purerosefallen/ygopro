@@ -1,34 +1,33 @@
---高速决斗技能-挖金矿
+--高速决斗技能-放马过来
 Duel.LoadScript("speed_duel_common.lua")
 function c100730177.initial_effect(c)
-	aux.SpeedDuelAtMainPhase(c,c100730177.operation,c100730177.con,aux.Stringid(100730177,0))
-	local e1=Effect.GlobalEffect(c)
-	e1:SetCategory(CATEGORY_DRAW)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetOperation(c100730177.operation)
-	c:RegisterEffect(e1)
+	if not c100730177.UsedLP then
+		c100730177.UsedLP={}
+		c100730177.UsedLP[0]=0
+		c100730177.UsedLP[1]=0
+	end
+	aux.SpeedDuelCalculateDecreasedLP()
+	aux.SpeedDuelAtMainPhase(c,c100730177.skill,c100730177.con,aux.Stringid(100730177,0))
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730177.con(e,tp)
 	tp=e:GetLabelObject():GetOwner()
 	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
-		and Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,LOCATION_HAND,0,3,nil)
-		and Duel.IsPlayerCanDraw(tp,1)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil)
+		and aux.DecreasedLP[tp]-c100730177.UsedLP[tp]>=1000
 end
-function c100730177.operation(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	if g:GetCount()>=3 then
-		Duel.Hint(HINT_CARD,1-tp,100730177)
-		local sg=g:Select(tp,3,3,nil)
-		Duel.SendtoGrave(sg,REASON_EFFECT+REASON_DISCARD)
-		if Duel.TossCoin(tp,1)==1 then
-			local gold1=Duel.CreateToken(tp,55144522)
-			Duel.SendtoDeck(gold1,tp,0,REASON_RULE)
-			Duel.Draw(tp,1,REASON_RULE)
-			Duel.Hint(HINT_MESSAGE,tp,aux.Stringid(100730177,0))
-		else Duel.Draw(tp,1,REASON_RULE)
-		end
-	end
-	e:Reset()  
+function c100730177.skill(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	c100730177.UsedLP[tp]=c100730177.UsedLP[tp]+1000
+	Duel.Hint(HINT_CARD,1-tp,100730177)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+	local g1=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+	if not g1 then return end
+	Duel.SendtoDeck(g1,nil,2,REASON_RULE)
+	local g=Duel.GetMatchingGroup(c100730177.Dfilter,tp,LOCATION_DECK,0,nil)
+	local c=g:Select(tp,1,1,nil)
+	Duel.SendtoHand(c,nil,REASON_RULE)
+end
+function c100730177.Dfilter(c)
+	return c:IsAttribute(ATTRIBUTE_DARK) and c:IsLevel(8) and c:IsRace(RACE_WARRIOR)
 end
