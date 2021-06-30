@@ -470,9 +470,7 @@ upload_to_minio:
     - pack_macos_en-US
   tags: 
     - linux
-  image: python
   script:
-    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
     - aws s3 --endpoint=https://minio.mycard.moe:9000 sync dist/ s3://mycard/koishipro/archive
   only:
     - tags
