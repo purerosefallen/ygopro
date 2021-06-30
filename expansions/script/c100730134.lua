@@ -2,7 +2,6 @@
 Duel.LoadScript("speed_duel_common.lua")
 function c100730134.initial_effect(c)
 	aux.SpeedDuelBeforeDraw(c,c100730134.skill)
-	aux.SpeedDuelMoveCardToFieldCommon(32999573,c)
 	aux.RegisterSpeedDuelSkillCardCommon()
 end
 function c100730134.skill(e,tp)
@@ -23,7 +22,7 @@ function c100730134.skill(e,tp)
 	e:Reset()
 end
 function c100730134.filter(c)
-	return c:IsRace(RACE_FAIRY) and c:IsFaceup() and c:IsStatus(STATUS_SUMMON_TURN)
+	return c:IsRace(RACE_FAIRY) and c:IsStatus(STATUS_SUMMON_TURN)
 end
 
 function c100730134.op(e,tp,eg,ep,ev,re,r,rp)
@@ -47,7 +46,7 @@ function c100730134.op(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Overlay(tc,g1)
 		Duel.SpecialSummon(tc,SUMMON_TYPE_XYZ,tp,tp,false,false,POS_FACEUP)
 		tc:CompleteProcedure()
-		local g3=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,0,1,nil,17201174)
+		local g3=Duel.SelectMatchingCard(tp,Card.IsCode,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_HAND,0,0,1,nil,18378582)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		if Duel.GetMZoneCount(tp)<1 or g3:GetCount()==0 then return end
 		local sc=g3:GetFirst()
