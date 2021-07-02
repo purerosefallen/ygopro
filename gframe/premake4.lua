@@ -59,7 +59,10 @@ project "ygopro"
     configuration "not windows"
         includedirs { "/usr/include/freetype2" }
         excludes { "COSOperator.*" }
-        links { "event_pthreads" , "dl", "pthread" }
+        links { "dl", "pthread" }
+        if not LINUX_ALL_STATIC then
+            links { "event_pthreads" }
+        end
     configuration { "not windows", "not macosx" }
         links "GL"
     configuration "linux"
