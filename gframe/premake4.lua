@@ -7,9 +7,9 @@ project "ygopro"
     files { "**.cpp", "**.cc", "**.c", "**.h" }
     excludes { "lzma/**", "spmemvfs/**" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht" }
+    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "event" }
     if not LINUX_ALL_STATIC then
-        links { "freetype", "sqlite3", "event" }
+        links { "freetype", "sqlite3" }
     end
     if USE_IRRKLANG then
         defines { "YGOPRO_USE_IRRKLANG" }
@@ -71,7 +71,13 @@ project "ygopro"
         end
         links { "X11", "Xxf86vm" }
         if LINUX_ALL_STATIC then
-            linkoptions { LIB_ROOT.."libfreetype.a", LIB_ROOT.."libsqlite3.a", LIB_ROOT.."libevent.a", LIB_ROOT.."libevent_pthreads.a" }
+            linkoptions { LIB_ROOT.."libfreetype.a", LIB_ROOT.."libsqlite3.a" }
+            local libeventRootPrefix=LIB_ROOT
+            if LIBEVENT_ROOT then
+                includedirs { LIBEVENT_ROOT.."/include" }
+                libeventRootPrefix=LIBEVENT_ROOT.."/lib/"
+            end
+            linkoptions { libeventRootPrefix.."libevent.a", libeventRootPrefix.."libevent_pthreads.a" }
         end
         if USE_IRRKLANG then
             links { "IrrKlang" }
