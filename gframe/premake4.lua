@@ -7,9 +7,9 @@ project "ygopro"
     files { "**.cpp", "**.cc", "**.c", "**.h" }
     excludes { "lzma/**", "spmemvfs/**" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "event" }
+    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht" }
     if not LINUX_ALL_STATIC then
-        links { "freetype", "sqlite3" }
+        links { "freetype", "sqlite3", "event" }
     end
     if USE_IRRKLANG then
         defines { "YGOPRO_USE_IRRKLANG" }
