@@ -16,6 +16,7 @@ solution "ygo"
             BUILD_LUA=true
             LINUX_ALL_STATIC=true
             LIB_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIB_PATH") or "/usr/lib/x86_64-linux-gnu/"
+            LIBEVENT_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH")
         end
     end
 
