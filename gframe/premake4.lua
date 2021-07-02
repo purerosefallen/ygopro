@@ -46,7 +46,7 @@ project "ygopro"
             links { "lua5.3-c++" }
         end
         if LINUX_ALL_STATIC then
-            linkoptions { LIB_ROOT.."libsqlite3.a" }
+            linkoptions { LIB_ROOT.."libsqlite3.a", "-static-libstdc++", "-static-libgcc" }
             local libeventRootPrefix=LIB_ROOT
             if LIBEVENT_ROOT then
                 includedirs { LIBEVENT_ROOT.."/include" }
