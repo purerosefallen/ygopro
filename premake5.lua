@@ -2,8 +2,19 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    if os.ishost("linux") and os.getenv("YGOPRO_BUILD_LUA") then
+    if os.ishost("macosx") then
         BUILD_LUA=true
+    end
+    if os.ishost("linux") then
+        if os.getenv("YGOPRO_BUILD_LUA") then
+            BUILD_LUA=true
+        end
+        if os.getenv("YGOPRO_LINUX_ALL_STATIC") then
+            BUILD_LUA=true
+            LINUX_ALL_STATIC=true
+            LIB_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIB_PATH") or "/usr/lib/x86_64-linux-gnu/"
+            LIBEVENT_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH")
+        end
     end
 
     configurations { "Release", "Debug" }
@@ -87,6 +98,6 @@ end
     include "sqlite3"
     end
 
-    if os.ishost("macosx") or BUILD_LUA then
+    if BUILD_LUA then
         include "lua"
     end

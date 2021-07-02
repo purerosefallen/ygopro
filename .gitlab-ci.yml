@@ -30,10 +30,18 @@ mat_linux:
     - apt update; apt -y install git wget tar
     #- git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+    - cd libevent-2.0.22-stable
+    - ./configure --prefix=$PWD/libevent-stable --disable-openssl
+    - make -j$(nproc)
+    - make install
+    - cd ..
+    - mv libevent-2.0.22-stable/libevent-stable .
   artifacts:
     paths:
       - premake5
       #- irrlicht_linux
+      - libevent-stable
 
 mat_windows:
   stage: prepare
@@ -85,7 +93,12 @@ exec_linux:
   stage: build
   tags:
     - linux
+  variables:
+    YGOPRO_BUILD_LUA: '1'
+    YGOPRO_LINUX_ALL_STATIC: '1'
+    YGOPRO_LINUX_ALL_STATIC_LIB_PATH: '/usr/lib/x86_64-linux-gnu/'
   dependencies:
+    - mat_lua
     #- mat_irrklang
     - mat_linux
   cache:
@@ -93,9 +106,9 @@ exec_linux:
       - bin/
       - obj/
   script:
-    - apt update; apt -y install git build-essential libevent-dev libsqlite3-dev liblua5.3-dev
+    - apt update; apt -y install git build-essential libsqlite3-dev
     - git submodule update --init
-    - ./premake5 gmake
+    - env YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
