@@ -130,7 +130,12 @@ exec_linux:
   stage: build
   tags:
     - linux
+  variables:
+    YGOPRO_BUILD_LUA: '1'
+    YGOPRO_LINUX_ALL_STATIC: '1'
+    YGOPRO_LINUX_ALL_STATIC_LIB_PATH: '/usr/lib/x86_64-linux-gnu/'
   dependencies:
+    - mat_lua
     - mat_irrklang
     - mat_linux
   cache:
@@ -138,7 +143,7 @@ exec_linux:
       - bin/
       - obj/
   script:
-    - apt update; apt -y install git build-essential libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev liblua5.3-dev libxxf86vm-dev
+    - apt update; apt -y install git build-essential libfreetype6-dev libevent-dev libsqlite3-dev libgl1-mesa-dev libglu-dev libxxf86vm-dev
     - git submodule update --init
     - ./premake5 gmake
     - cd build

@@ -7,7 +7,10 @@ project "ygopro"
     files { "**.cpp", "**.cc", "**.c", "**.h" }
     excludes { "lzma/**", "spmemvfs/**" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "freetype", "sqlite3", "event" }
+    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht" }
+    if not LINUX_ALL_STATIC then
+        links { "freetype", "sqlite3", "event" }
+    end
     if USE_IRRKLANG then
         defines { "YGOPRO_USE_IRRKLANG" }
         links { "ikpmp3" }
@@ -25,6 +28,10 @@ project "ygopro"
     local mr=os.getenv("YGOPRO_DEFAULT_DUEL_RULE")
     if mr and tonumber(mr) then defines { "DEFAULT_DUEL_RULE="..tonumber(mr) } end
 
+    configuration "not linux"
+        if LINUX_ALL_STATIC then
+            links { "freetype", "sqlite3", "event" }
+        end
     configuration "windows"
         files "ygopro.rc"
         excludes "CGUIButton.cpp"
@@ -57,11 +64,14 @@ project "ygopro"
         links "GL"
     configuration "linux"
         includedirs { "../irrlicht_linux/include" }
-        links { "X11", "Xxf86vm" }
         if BUILD_LUA then
             links { "lua" }
         else
             links { "lua5.3-c++" }
+        end
+        links { "X11", "Xxf86vm" }
+        if LINUX_ALL_STATIC then
+            linkoptions { LIB_ROOT.."libfreetype.a", LIB_ROOT.."libsqlite3.a", LIB_ROOT.."libevent.a", LIB_ROOT.."libevent_pthreads.a" }
         end
         if USE_IRRKLANG then
             links { "IrrKlang" }
