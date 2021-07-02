@@ -74,7 +74,7 @@ project "ygopro"
         end
         links { "X11", "Xxf86vm" }
         if LINUX_ALL_STATIC then
-            linkoptions { LIB_ROOT.."libfreetype.a", LIB_ROOT.."libsqlite3.a" }
+            linkoptions { LIB_ROOT.."libfreetype.a", LIB_ROOT.."libsqlite3.a", "-static-libstdc++", "-static-libgcc" }
             local libeventRootPrefix=LIB_ROOT
             if LIBEVENT_ROOT then
                 includedirs { LIBEVENT_ROOT.."/include" }
