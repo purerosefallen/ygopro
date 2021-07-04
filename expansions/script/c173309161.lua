@@ -12,7 +12,7 @@ function c173309161.initial_effect(c)
 	c:RegisterEffect(e1)
 	--lvdown
 	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(173309161,0))
+	e4:SetDescription(aux.Stringid(97518132,0))
 	e4:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e4:SetType(EFFECT_TYPE_IGNITION)
 	e4:SetRange(LOCATION_HAND)
@@ -59,7 +59,7 @@ function c173309161.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsDiscardable() end
 	Duel.SendtoGrave(e:GetHandler(),REASON_DISCARD)
 end
-function c173309161.filter(c)
+function c173309161.filter(c,e,tp)
 	return c:IsLevelAbove(5) and c:IsRace(RACE_FAIRY) and c:IsDefenseBelow(1500) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function c173309161.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
