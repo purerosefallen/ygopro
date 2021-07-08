@@ -24,6 +24,7 @@ mat_common:
   artifacts:
     paths:
       - lua
+      - sqlite3
 
 mat_linux:
   stage: prepare
@@ -105,9 +106,9 @@ exec_linux:
       - bin/
       - obj/
   script:
-    - apt update; apt -y install git build-essential libsqlite3-dev
+    - apt update; apt -y install git build-essential libevent-dev
     - git submodule update --init
-    - env YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
+    - ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
