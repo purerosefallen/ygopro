@@ -9,15 +9,18 @@ variables:
   GIT_DEPTH: "1"
   USE_IRRKLANG: "1"
 
-mat_lua:
+mat_common:
   stage: prepare
   tags: 
     - linux
   script:
-    - apt update; apt -y install wget tar
+    # lua
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
     - mv lua-5.3.5/src lua
-    - cp premake/lua/premake4.lua lua/;
+    # sqlite3
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3360000 sqlite3
+    - cp -rf premake/* .;
   artifacts:
     paths:
       - lua
@@ -91,10 +94,6 @@ mat_windows:
     # freetype
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
     - mv freetype-2.10.1 freetype
-    # sqlite3
-    - wget https://cdn01.moecube.com/ygopro-build-materials/sqlite-amalgamation-3310100.zip
-    - 7z x -y sqlite-amalgamation-3310100.zip
-    - mv sqlite-amalgamation-3310100 sqlite3
     # irrlicht
     - wget https://cdn01.moecube.com/ygopro-build-materials/irrlicht-1.8.4.zip
     - 7z x -y irrlicht-1.8.4.zip
@@ -114,7 +113,7 @@ exec_windows:
   tags:
     - vs
   dependencies:
-    - mat_lua
+    - mat_common
     - mat_irrklang
     - mat_windows
   variables:
@@ -143,7 +142,7 @@ exec_linux:
     #YGOPRO_LINUX_ALL_STATIC: '1'
     #YGOPRO_LINUX_ALL_STATIC_LIB_PATH: '/usr/lib/x86_64-linux-gnu/'
   dependencies:
-    - mat_lua
+    - mat_common
     - mat_irrklang
     - mat_linux
   cache:
@@ -172,7 +171,7 @@ exec_macos:
   dependencies:
     - mat_irrklang
     - mat_macos
-    - mat_lua
+    - mat_common
   cache:
     paths:
       - bin/

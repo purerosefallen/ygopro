@@ -8,11 +8,14 @@ solution "ygo"
             IRRKLANG_PRO = true
         end
     end
-    if os.ishost("linux") then
-        if os.getenv("YGOPRO_BUILD_LUA") then
+    if not os.ishost("windows") then
+        if os.getenv("YGOPRO_BUILD_LUA") or os.ishost("macosx") then
             BUILD_LUA=true
         end
-        if os.getenv("YGOPRO_LINUX_ALL_STATIC") then
+        if os.getenv("YGOPRO_BUILD_SQLITE") then
+            BUILD_SQLITE=true
+        end
+        if os.ishost("linux") and os.getenv("YGOPRO_LINUX_ALL_STATIC") then
             BUILD_LUA=true
             LINUX_ALL_STATIC=true
             LIB_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIB_PATH") or "/usr/lib/x86_64-linux-gnu/"
@@ -103,12 +106,16 @@ end
         include "freetype"
         include "irrlicht"
         include "sqlite3"
+    else
+        if BUILD_LUA then
+            include "lua"
+        end
+        if BUILD_SQLITE then
+            include "sqlite3/premake4.lua"
+        end
     end
     if os.ishost("linux") then
         include "irrlicht_linux"
-    end
-    if os.ishost("macosx") or BUILD_LUA then
-        include "lua"
     end
     if USE_IRRKLANG then
         include "ikpmp3"
