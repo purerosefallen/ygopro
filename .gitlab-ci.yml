@@ -50,7 +50,7 @@ mat_linux:
     paths:
       - premake5
       #- irrlicht_linux
-      #- libevent-stable
+      - libevent-stable
 
 mat_windows:
   stage: prepare
