@@ -15,9 +15,9 @@ solution "ygo"
         if os.getenv("YGOPRO_BUILD_SQLITE") then
             BUILD_SQLITE=true
         end
-        --[[if os.getenv("YGOPRO_BUILD_FREETYPE") then
+        if os.getenv("YGOPRO_BUILD_FREETYPE") then
             BUILD_FREETYPE=true
-        end]]
+        end
         if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
             BUILD_ALL=true
         end
@@ -30,7 +30,9 @@ solution "ygo"
         if BUILD_ALL then
             BUILD_LUA=true
             BUILD_SQLITE=true
-            --BUILD_FREETYPE=true
+            if not os.ishost("macosx") then
+                BUILD_FREETYPE=true
+            end
         end
     end
 
@@ -125,7 +127,7 @@ end
             include "sqlite3/premake4.lua"
         end
         if BUILD_FREETYPE then
-            --include "freetype"
+            include "freetype"
         end
     end
     if os.ishost("linux") then

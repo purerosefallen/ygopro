@@ -20,6 +20,10 @@ mat_common:
     # sqlite3
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
     - mv sqlite-autoconf-3360000 sqlite3
+    # freetype
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
+    - mv freetype-2.10.1 freetype
+    # premake
     - cp -rf premake/* .;
   artifacts:
     paths:
@@ -92,9 +96,6 @@ mat_windows:
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
-    # freetype
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
-    - mv freetype-2.10.1 freetype
     # irrlicht
     - wget https://cdn01.moecube.com/ygopro-build-materials/irrlicht-1.8.4.zip
     - 7z x -y irrlicht-1.8.4.zip
