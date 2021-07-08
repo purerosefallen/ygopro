@@ -7,9 +7,9 @@ project "ygopro"
     files { "**.cpp", "**.cc", "**.c", "**.h" }
     excludes { "lzma/**", "spmemvfs/**" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "sqlite3" }
+    links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "sqlite3", "freetype" }
     if not LINUX_ALL_STATIC then
-        links { "freetype", "event" }
+        links { "event" }
     end
     if USE_IRRKLANG then
         defines { "YGOPRO_USE_IRRKLANG" }
@@ -30,7 +30,7 @@ project "ygopro"
 
     configuration "not linux"
         if LINUX_ALL_STATIC then
-            links { "freetype", "event" }
+            links { "event" }
         end
     configuration "windows"
         files "ygopro.rc"
@@ -67,12 +67,12 @@ project "ygopro"
             includedirs { "../sqlite3" }
         end
         if BUILD_FREETYPE then
-            --includedirs {"../freetype/include" }
+            includedirs {"../freetype/include" }
         end
     configuration { "not windows", "not macosx" }
         links "GL"
     configuration "linux"
-        linkoptions { "-static-libstdc++", "-static-libgcc" }
+        linkoptions { "-static-libstdc++", "-static-libgcc", "-Wl,-rpath=./lib/" }
         includedirs { "../irrlicht_linux/include" }
         if BUILD_LUA then
             links { "lua" }
@@ -81,7 +81,6 @@ project "ygopro"
         end
         links { "X11", "Xxf86vm" }
         if LINUX_ALL_STATIC then
-            linkoptions { LIB_ROOT.."libfreetype.a" }
             local libeventRootPrefix=LIB_ROOT
             if LIBEVENT_ROOT then
                 includedirs { LIBEVENT_ROOT.."/include" }
@@ -89,7 +88,6 @@ project "ygopro"
             end
             linkoptions { libeventRootPrefix.."libevent.a", libeventRootPrefix.."libevent_pthreads.a" }
         end
-        linkoptions{ "-Wl,-rpath=./lib/" }
         if USE_IRRKLANG then
             links { "IrrKlang" }
             libdirs { "../irrklang/bin/linux-gcc-64" }
