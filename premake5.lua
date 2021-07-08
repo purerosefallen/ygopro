@@ -5,15 +5,29 @@ solution "ygo"
     if os.ishost("macosx") then
         BUILD_LUA=true
     end
-    if os.ishost("linux") then
+    if not os.ishost("windows") then
         if os.getenv("YGOPRO_BUILD_LUA") then
             BUILD_LUA=true
         end
-        if os.getenv("YGOPRO_LINUX_ALL_STATIC") then
-            BUILD_LUA=true
+        if os.getenv("YGOPRO_BUILD_SQLITE") then
+            BUILD_SQLITE=true
+        end
+        --[[if os.getenv("YGOPRO_BUILD_FREETYPE") then
+            BUILD_FREETYPE=true
+        end]]
+        if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
+            BUILD_ALL=true
+        end
+        if os.ishost("linux") and os.getenv("YGOPRO_LINUX_ALL_STATIC") then
+            BUILD_ALL=true
             LINUX_ALL_STATIC=true
             LIB_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIB_PATH") or "/usr/lib/x86_64-linux-gnu/"
             LIBEVENT_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH")
+        end
+        if BUILD_ALL then
+            BUILD_LUA=true
+            BUILD_SQLITE=true
+            --BUILD_FREETYPE=true
         end
     end
 
@@ -45,8 +59,8 @@ end
 
     configuration "macosx"
         defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
-        includedirs { "/usr/local/include/event2", "/usr/local/include/freetype2", "/usr/local/opt/sqlite3/include" }
-        libdirs { "/usr/local/lib", "/usr/local/opt/sqlite3/lib" }
+        includedirs { "/usr/local/include/event2", "/usr/local/include/freetype2" }
+        libdirs { "/usr/local/lib" }
         buildoptions { "-stdlib=libc++" }
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
@@ -93,11 +107,14 @@ end
     include "ocgcore"
     include "gframe"
     if os.ishost("windows") then
-    include "lua"
-    include "event"
-    include "sqlite3"
-    end
-
-    if BUILD_LUA then
         include "lua"
+        include "event"
+        include "sqlite3"
+    else
+        if BUILD_LUA then
+            include "lua"
+        end
+        if BUILD_SQLITE then
+            include "sqlite3/premake4.lua"
+        end
     end
