@@ -20,10 +20,15 @@ mat_common:
     # sqlite3
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
     - mv sqlite-autoconf-3360000 sqlite3
+    # freetype
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
+    - mv freetype-2.10.4 freetype
+    # premake
     - cp -rf premake/* .;
   artifacts:
     paths:
       - lua
+      - freetype
       - sqlite3
 
 mat_irrklang:
@@ -92,9 +97,6 @@ mat_windows:
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
-    # freetype
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
-    - mv freetype-2.10.1 freetype
     # irrlicht
     - wget https://cdn01.moecube.com/ygopro-build-materials/irrlicht-1.8.4.zip
     - 7z x -y irrlicht-1.8.4.zip
@@ -105,8 +107,6 @@ mat_windows:
     paths:
       - premake5.exe
       - event
-      - freetype
-      - sqlite3
       - irrlicht
 
 exec_windows:
@@ -153,17 +153,18 @@ exec_linux:
   script:
     - apt update; apt -y install git build-essential libfreetype6-dev libgl1-mesa-dev libglu-dev libxxf86vm-dev
     - git submodule update --init
-    - env YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
+    - mkdir lib
+    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
+    - ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
     - mv bin/release/ygopro .
     - strip ygopro
-    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so .
   artifacts:
     paths:
       - ygopro
-      - libIrrKlang.so
+      - lib
 
 exec_macos:
   stage: build
@@ -179,7 +180,7 @@ exec_macos:
       - obj/
   script:
     - git submodule update --init
-    - brew install freetype libevent dylibbundler
+    - brew install libevent dylibbundler
     - sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/
     #- sudo cp -rf irrklang/include /usr/local/include/irrklang
     - ./premake5 gmake --cc=clang

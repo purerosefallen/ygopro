@@ -15,9 +15,9 @@ solution "ygo"
         if os.getenv("YGOPRO_BUILD_SQLITE") then
             BUILD_SQLITE=true
         end
-        --[[if os.getenv("YGOPRO_BUILD_FREETYPE") then
+        if os.getenv("YGOPRO_BUILD_FREETYPE") then
             BUILD_FREETYPE=true
-        end]]
+        end
         if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
             BUILD_ALL=true
         end
@@ -30,7 +30,7 @@ solution "ygo"
         if BUILD_ALL then
             BUILD_LUA=true
             BUILD_SQLITE=true
-            --BUILD_FREETYPE=true
+            BUILD_FREETYPE=true
         end
     end
 
@@ -66,7 +66,7 @@ end
 
     configuration "macosx"
         defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
-        includedirs { "/usr/local/include/event2", "/usr/local/include/freetype2" }
+        includedirs { "/usr/local/include/event2", }
         libdirs { "/usr/local/lib" }
         buildoptions { "-stdlib=libc++" }
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
@@ -125,7 +125,7 @@ end
             include "sqlite3/premake4.lua"
         end
         if BUILD_FREETYPE then
-            --include "freetype"
+            include "freetype"
         end
     end
     if os.ishost("linux") then
