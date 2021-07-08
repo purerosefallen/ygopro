@@ -18,8 +18,8 @@ mat_common:
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
     - mv lua-5.3.5/src lua
     # sqlite3
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3360000 sqlite3
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3220000.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3220000 sqlite3
     # freetype
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
     - mv freetype-2.10.4 freetype
