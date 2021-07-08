@@ -89,9 +89,9 @@ project "ygopro"
             end
             linkoptions { libeventRootPrefix.."libevent.a", libeventRootPrefix.."libevent_pthreads.a" }
         end
+        linkoptions{ "-Wl,-rpath=./lib/" }
         if USE_IRRKLANG then
             links { "IrrKlang" }
-            linkoptions{ "-Wl,-rpath=./" }
             libdirs { "../irrklang/bin/linux-gcc-64" }
         end
     configuration "macosx"

@@ -153,17 +153,18 @@ exec_linux:
   script:
     - apt update; apt -y install git build-essential libfreetype6-dev libgl1-mesa-dev libglu-dev libxxf86vm-dev
     - git submodule update --init
-    - env YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
+    - mkdir lib
+    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
+    - ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
     - mv bin/release/ygopro .
     - strip ygopro
-    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so .
   artifacts:
     paths:
       - ygopro
-      - libIrrKlang.so
+      - lib
 
 exec_macos:
   stage: build
