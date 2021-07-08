@@ -31,7 +31,7 @@ project "ygopro"
     configuration "windows"
         files "ygopro.rc"
         includedirs { "../event/include", "../sqlite3" }
-        links { "ws2_32", "lua" }
+        links { "ws2_32", "event", "lua" }
     configuration "not vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
