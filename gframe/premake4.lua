@@ -66,6 +66,9 @@ project "ygopro"
         if BUILD_SQLITE then
             includedirs { "../sqlite3" }
         end
+        if BUILD_FREETYPE then
+            --includedirs {"../freetype/include" }
+        end
     configuration { "not windows", "not macosx" }
         links "GL"
     configuration "linux"
