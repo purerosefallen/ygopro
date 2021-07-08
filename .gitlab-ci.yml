@@ -138,7 +138,7 @@ exec_linux:
   tags:
     - linux
   variables:
-    YGOPRO_BUILD_LUA: '1'
+    YGOPRO_BUILD_ALL: '1'
     #YGOPRO_LINUX_ALL_STATIC: '1'
     #YGOPRO_LINUX_ALL_STATIC_LIB_PATH: '/usr/lib/x86_64-linux-gnu/'
   dependencies:
