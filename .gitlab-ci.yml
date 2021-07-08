@@ -21,13 +21,14 @@ mat_common:
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
     - mv sqlite-autoconf-3360000 sqlite3
     # freetype
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.1.tar.gz | tar zfx -
-    - mv freetype-2.10.1 freetype
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
+    - mv freetype-2.10.4 freetype
     # premake
     - cp -rf premake/* .;
   artifacts:
     paths:
       - lua
+      - freetype
       - sqlite3
 
 mat_irrklang:
@@ -106,8 +107,6 @@ mat_windows:
     paths:
       - premake5.exe
       - event
-      - freetype
-      - sqlite3
       - irrlicht
 
 exec_windows:
@@ -181,7 +180,7 @@ exec_macos:
       - obj/
   script:
     - git submodule update --init
-    - brew install freetype libevent dylibbundler
+    - brew install libevent dylibbundler
     - sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/
     #- sudo cp -rf irrklang/include /usr/local/include/irrklang
     - ./premake5 gmake --cc=clang
