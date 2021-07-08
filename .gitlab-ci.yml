@@ -151,7 +151,7 @@ exec_linux:
       - bin/
       - obj/
   script:
-    - apt update; apt -y install git build-essential libgl1-mesa-dev libglu-dev libxxf86vm-dev
+    - apt update; apt -y install git build-essential libevent-dev libgl1-mesa-dev libglu-dev libxxf86vm-dev
     - git submodule update --init
     - mkdir lib
     - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
