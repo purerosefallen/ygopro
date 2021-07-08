@@ -146,7 +146,6 @@ exec_linux:
     - mat_common
     - mat_irrklang
     - mat_linux
-  image: ubuntu:bionic
   cache:
     paths:
       - bin/
