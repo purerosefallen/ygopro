@@ -57,7 +57,6 @@ project "ygopro"
     configuration "not vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
-        includedirs { "/usr/include/freetype2" }
         excludes { "COSOperator.*" }
         links { "dl", "pthread" }
         if not LINUX_ALL_STATIC then
