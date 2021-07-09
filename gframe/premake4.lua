@@ -67,6 +67,8 @@ project "ygopro"
         end
         if BUILD_FREETYPE then
             includedirs {"../freetype/include" }
+        else
+            includedirs { "/usr/include/freetype2" }
         end
     configuration { "not windows", "not macosx" }
         links "GL"
