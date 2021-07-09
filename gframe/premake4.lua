@@ -26,13 +26,12 @@ project "ygopro"
             "single_duel.cpp", "single_duel.h",
             "tag_duel.cpp", "tag_duel.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma" }
+    links { "ocgcore", "clzma", "sqlite3" }
 
     configuration "windows"
-        links { "sqlite3", "event" }
         files "ygopro.rc"
         includedirs { "../event/include", "../sqlite3" }
-        links { "ws2_32", "lua" }
+        links { "ws2_32", "event", "lua" }
     configuration "not vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     configuration "not windows"
@@ -40,13 +39,15 @@ project "ygopro"
         if not LINUX_ALL_STATIC then
             links { "event_pthreads" }
         end
+        if BUILD_SQLITE then
+            includedirs { "../sqlite3" }
+        end
         if BUILD_LUA then
             links { "lua" }
         else
             links { "lua5.3-c++" }
         end
         if LINUX_ALL_STATIC then
-            linkoptions { LIB_ROOT.."libsqlite3.a", "-static-libstdc++", "-static-libgcc" }
             local libeventRootPrefix=LIB_ROOT
             if LIBEVENT_ROOT then
                 includedirs { LIBEVENT_ROOT.."/include" }
@@ -54,5 +55,7 @@ project "ygopro"
             end
             linkoptions { libeventRootPrefix.."libevent.a", libeventRootPrefix.."libevent_pthreads.a" }
         else
-            links { "sqlite3", "event" }
+            links { "event" }
         end
+    configuration "linux"
+        linkoptions { "-static-libstdc++", "-static-libgcc", "-Wl,-rpath=./lib/" }

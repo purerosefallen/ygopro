@@ -9,18 +9,27 @@ variables:
   GIT_DEPTH: "1"
   #USE_IRRKLANG: "1"
 
-mat_lua:
+mat_common:
   stage: prepare
   tags: 
     - linux
   script:
-    - apt update; apt -y install wget tar
+    # lua
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
     - mv lua-5.3.5/src lua
-    - cp premake/lua/premake4.lua lua/;
+    # sqlite3
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3360000 sqlite3
+    # freetype
+    #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
+    #- mv freetype-2.10.4 freetype
+    # premake
+    - cp -rf premake/* .;
   artifacts:
     paths:
       - lua
+      #- freetype
+      - sqlite3
 
 mat_linux:
   stage: prepare
@@ -55,22 +64,17 @@ mat_windows:
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
-    # sqlite3
-    - wget https://cdn01.moecube.com/ygopro-build-materials/sqlite-amalgamation-3310100.zip
-    - 7z x -y sqlite-amalgamation-3310100.zip
-    - mv sqlite-amalgamation-3310100 sqlite3
   artifacts:
     paths:
       - premake5.exe
       - event
-      - sqlite3
 
 exec_windows:
   stage: build
   tags:
     - vs
   dependencies:
-    - mat_lua
+    - mat_common
     - mat_windows
   #variables:
   #  irrklang_pro: '1'
@@ -94,11 +98,11 @@ exec_linux:
   tags:
     - linux
   variables:
-    YGOPRO_BUILD_LUA: '1'
+    YGOPRO_BUILD_ALL: '1'
     YGOPRO_LINUX_ALL_STATIC: '1'
     YGOPRO_LINUX_ALL_STATIC_LIB_PATH: '/usr/lib/x86_64-linux-gnu/'
   dependencies:
-    - mat_lua
+    - mat_common
     #- mat_irrklang
     - mat_linux
   cache:
@@ -106,9 +110,9 @@ exec_linux:
       - bin/
       - obj/
   script:
-    - apt update; apt -y install git build-essential libsqlite3-dev
+    - apt update; apt -y install git build-essential libevent-dev
     - git submodule update --init
-    - env YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
+    - YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH=$PWD/libevent-stable ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
