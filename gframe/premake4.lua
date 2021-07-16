@@ -86,6 +86,7 @@ project "ygopro"
         libdirs { "../irrlicht" }
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos11" }
+            linkoptions { "-arch arm64" }
         end
         if USE_IRRKLANG then
             links { "irrklang" }
