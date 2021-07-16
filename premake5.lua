@@ -2,12 +2,6 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    if (os.ishost("windows") or os.getenv("USE_IRRKLANG")) and not os.getenv("NO_IRRKLANG") then
-        USE_IRRKLANG = true
-        if os.getenv("irrklang_pro") then
-            IRRKLANG_PRO = true
-        end
-    end
     if not os.ishost("windows") then
         if os.getenv("YGOPRO_BUILD_LUA") then
             BUILD_LUA=true
@@ -21,16 +15,24 @@ solution "ygo"
         if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
             BUILD_ALL=true
         end
-        if os.ishost("linux") and os.getenv("YGOPRO_LINUX_ALL_STATIC") then
-            BUILD_ALL=true
-            LINUX_ALL_STATIC=true
-            LIB_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIB_PATH") or "/usr/lib/x86_64-linux-gnu/"
-            LIBEVENT_ROOT=os.getenv("YGOPRO_LINUX_ALL_STATIC_LIBEVENT_PATH")
+        if os.getenv("YGOPRO_LIBEVENT_STATIC_PATH") then
+            LIBEVENT_ROOT=os.getenv("YGOPRO_LIBEVENT_STATIC_PATH")
         end
         if BUILD_ALL then
             BUILD_LUA=true
             BUILD_SQLITE=true
             BUILD_FREETYPE=true
+        end
+        if os.ishost("macosx") then
+            if os.getenv("YGOPRO_TARGET_ARM") then
+                MAC_ARM=true
+            end
+        end
+    end
+    if (os.ishost("windows") or os.getenv("USE_IRRKLANG")) and not os.getenv("NO_IRRKLANG") then
+        USE_IRRKLANG = true
+        if os.getenv("irrklang_pro") then
+            IRRKLANG_PRO = true
         end
     end
 
@@ -66,9 +68,14 @@ end
 
     configuration "macosx"
         defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
-        includedirs { "/usr/local/include/event2", }
+        if not LIBEVENT_ROOT then
+            includedirs { "/usr/local/include/event2" }
+        end
         libdirs { "/usr/local/lib" }
         buildoptions { "-stdlib=libc++" }
+        if MAC_ARM then
+            buildoptions { "--target=arm64-apple-macos11" }
+        end
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
     configuration "linux"
@@ -92,7 +99,9 @@ end
     configuration { "Release", "not vs*" }
         symbols "On"
         defines "NDEBUG"
-        buildoptions "-march=native"
+        if not MAC_ARM then
+            buildoptions "-march=native"
+        end
 
     configuration { "Debug", "vs*" }
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
