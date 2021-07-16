@@ -100,14 +100,12 @@ mat_macos:
   script:
     - apt update; apt -y install wget tar
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-macosx.tar.gz | tar zfx -
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
     - cd ..
   artifacts:
     paths:
-      - libirrklang-patched.dylib
       - premake5
       - irrlicht
 
