@@ -518,7 +518,6 @@ upload_contents:
     - pack_windows_zh-CN
   tags: 
     - linux
-  image: python
   script:
     - apt update; apt -y install mono-complete p7zip-full
     - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
