@@ -1,13 +1,12 @@
 stages:
   - prepare
   - build
-  - sign
+  - combine
   - pack
   - deploy
 
 variables:
   GIT_DEPTH: "1"
-  USE_IRRKLANG: "1"
 
 mat_common:
   stage: prepare
@@ -61,7 +60,7 @@ mat_linux:
       - irrlicht_linux
       - libevent-stable
 
-mat_macos_libevent:
+mat_macos_platform_x86:
   stage: prepare
   tags:
     - macos
@@ -71,6 +70,28 @@ mat_macos_libevent:
   artifacts:
     paths:
       - libevent-stable
+
+mat_macos_platform_m1:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-m1mac.tar.gz | tar zfx -
+  artifacts:
+    paths:
+      - libevent-stable
+
+
+mat_macos_irrklang_patched:
+  stage: build
+  tags:
+    - linux
+  dependencies: []
+  script:
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
+  artifacts:
+    paths:
+      - libirrklang-patched.dylib
 
 mat_macos:
   stage: prepare
@@ -124,6 +145,7 @@ exec_windows:
     - mat_windows
   variables:
     irrklang_pro: '1'
+    USE_IRRKLANG: "1"
   cache:
     paths:
       - bin/
@@ -145,6 +167,7 @@ exec_linux:
     - linux
   variables:
     YGOPRO_BUILD_ALL: '1'
+    USE_IRRKLANG: "1"
   dependencies:
     - mat_common
     - mat_irrklang
@@ -169,7 +192,7 @@ exec_linux:
       - ygopro
       - lib
 
-exec_macos:
+exec_macos_platform_x86:
   stage: build
   tags:
     - macos
@@ -177,26 +200,56 @@ exec_macos:
     - mat_irrklang
     - mat_macos
     - mat_common
-    - mat_macos_libevent
+    - mat_macos_platform_x86
+  variables:
+    USE_IRRKLANG: "1"
+    TARGET_PATFORM: x86
   cache:
     paths:
       - bin/
       - obj/
   script:
-    - git submodule update --init
-    - brew install dylibbundler
-    - sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/
-    #- sudo cp -rf irrklang/include /usr/local/include/irrklang
-    - env YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable ./premake5 gmake --cc=clang
-    - cd build
-    - make config=release -j4
-    - cd ..
+    - ./.ci/exec-macos-platform.sh
+    - install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ./ygopro-platforms/ygopro-platform-$TARGET_PATFORM
+  artifacts:
+    paths:
+      - ygopro-platforms
+      
+exec_macos_platform_m1:
+  stage: build
+  tags:
+    - macos
+  dependencies:
+    - mat_macos
+    - mat_common
+    - mat_macos_platform_m1
+  variables:
+    TARGET_PATFORM: m1
+    YGOPRO_TARGET_ARM: '1'
+  cache:
+    paths:
+      - bin/
+      - obj/
+  script: ./.ci/exec-macos-platform.sh
+  artifacts:
+    paths:
+      - ygopro-platforms
+
+exec_macos:
+  stage: combine
+  tags:
+    - macos
+  dependencies:
+    - exec_macos_platform_x86
+    - exec_macos_platform_m1
+    - mat_macos_irrklang_patched
+  script:
     - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
     - mv bin/release/ygopro.app ygopro.app/Contents/MacOS/ygopro;
     # do some special things for irrklang
     - mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
-    - install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
-    - dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
+    #- install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
+    #- dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
     - strip ygopro.app/Contents/MacOS/ygopro;
     - mkdir ygopro.app/Contents/Resources;
     - mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
