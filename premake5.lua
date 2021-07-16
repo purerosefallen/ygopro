@@ -70,8 +70,8 @@ end
         defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
         if not LIBEVENT_ROOT then
             includedirs { "/usr/local/include/event2" }
+            libdirs { "/usr/local/lib" }
         end
-        libdirs { "/usr/local/lib" }
         buildoptions { "-stdlib=libc++" }
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos11" }

@@ -184,7 +184,7 @@ exec_macos:
       - obj/
   script:
     - git submodule update --init
-    - brew install libevent dylibbundler
+    - brew install dylibbundler
     - sudo cp -rf irrklang/bin/macosx-gcc/libirrklang.dylib /usr/local/lib/
     #- sudo cp -rf irrklang/include /usr/local/include/irrklang
     - env YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable ./premake5 gmake --cc=clang
