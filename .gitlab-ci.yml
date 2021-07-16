@@ -39,13 +39,7 @@ mat_linux:
     - apt update; apt -y install git wget tar
     #- git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - cd libevent-2.0.22-stable
-    - ./configure --prefix=$PWD/libevent-stable --disable-openssl --enable-static=yes --enable-shared=no
-    - make -j$(nproc)
-    - make install
-    - cd ..
-    - mv libevent-2.0.22-stable/libevent-stable .
+    - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
       - premake5
