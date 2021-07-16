@@ -1,13 +1,12 @@
 stages:
   - prepare
   - build
-  - sign
+  - combine
   - pack
   - deploy
 
 variables:
   GIT_DEPTH: "1"
-  #USE_IRRKLANG: "1"
 
 mat_common:
   stage: prepare
@@ -93,6 +92,7 @@ exec_linux:
     - linux
   variables:
     YGOPRO_BUILD_ALL: '1'
+    USE_IRRKLANG: "1"
   dependencies:
     - mat_common
     #- mat_irrklang
