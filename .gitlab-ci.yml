@@ -72,6 +72,7 @@ exec_windows:
   #variables:
   #  irrklang_pro: '1'
   cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - bin/
       - obj/
@@ -98,6 +99,7 @@ exec_linux:
     #- mat_irrklang
     - mat_linux
   cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - bin/
       - obj/
