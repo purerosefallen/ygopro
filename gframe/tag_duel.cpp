@@ -67,10 +67,12 @@ void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			is_recorder = true;
 			cache_recorder = dp;
 		}
+#ifndef YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 		if(!wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
 			is_recorder = true;
 			replay_recorder = dp;
 		}
+#endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
 		if(wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
@@ -335,9 +337,7 @@ void TagDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 			if(deck_error[dp->type]) {
 				deckerror = (DECKERROR_UNKNOWNCARD << 28) + deck_error[dp->type];
 			} else {
-				bool allow_ocg = host_info.rule == 0 || host_info.rule == 2;
-				bool allow_tcg = host_info.rule == 1 || host_info.rule == 2;
-				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, allow_ocg, allow_tcg);
+				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, host_info.rule);
 			}
 		}
 		if(deckerror) {

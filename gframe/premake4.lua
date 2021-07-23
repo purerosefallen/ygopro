@@ -54,4 +54,5 @@ project "ygopro"
     configuration "macosx"
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos11" }
+            linkoptions { "-arch arm64" }
         end
