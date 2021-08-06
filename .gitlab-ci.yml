@@ -294,7 +294,7 @@ assets:
     - wget -O - https://cdn01.moecube.com/ygopro-fonts.tar.gz | tar zfx -
     - cd ..
     # locales
-    - git clone --depth=1 https://code.mycard.moe/mycard/ygopro-database
+    - git clone --depth=1 https://code.mycard.moe/nanahira/ygopro-database
     - mv ygopro-database/locales .
   artifacts:
     paths:
