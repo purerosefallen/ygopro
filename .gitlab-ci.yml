@@ -406,7 +406,7 @@ assets_en-US:
   script: ./.ci/pack-macos.sh
 
 ._pack_assets_windows_zh-CN:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_windows
@@ -414,7 +414,7 @@ assets_en-US:
     - assets_zh-CN
 
 ._pack_assets_windows_en-US:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_windows
@@ -422,7 +422,7 @@ assets_en-US:
     - assets_en-US
 
 ._pack_assets_linux_zh-CN:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_nonwindows
@@ -430,7 +430,7 @@ assets_en-US:
     - assets_zh-CN
 
 ._pack_assets_linux_en-US:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_nonwindows
@@ -438,7 +438,7 @@ assets_en-US:
     - assets_en-US
 
 ._pack_assets_macos_zh-CN:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_nonwindows
@@ -446,7 +446,7 @@ assets_en-US:
     - assets_zh-CN
 
 ._pack_assets_macos_en-US:
-  extends: _pack
+  extends: ._pack
   dependencies:
     - assets
     - assets_nonwindows
@@ -454,12 +454,12 @@ assets_en-US:
     - assets_en-US
 
 ._pack_format_gz:
-  extends: _pack
+  extends: ._pack
   variables:
     ARCHIVE_SUFFIX: gz
 
 ._pack_format_zst:
-  extends: _pack
+  extends: ._pack
   variables:
     ARCHIVE_SUFFIX: zst
 
