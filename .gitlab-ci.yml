@@ -133,8 +133,16 @@ mat_windows:
       - event
       - irrlicht
 
-exec_windows:
+._exec_build:
   stage: build
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - bin/
+      - obj/
+
+exec_windows:
+  extends: ._exec_build
   tags:
     - vs
   dependencies:
@@ -144,11 +152,6 @@ exec_windows:
   variables:
     irrklang_pro: '1'
     USE_IRRKLANG: "1"
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
   script:
     - git submodule update --init
     - bash -c 'cp -rf premake/* .'
@@ -161,7 +164,7 @@ exec_windows:
       - ygopro.exe
 
 exec_linux:
-  stage: build
+  extends: ._exec_build
   tags:
     - linux
   variables:
@@ -171,11 +174,6 @@ exec_linux:
     - mat_common
     - mat_irrklang
     - mat_linux
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
   script:
     - apt update; apt -y install git build-essential libgl1-mesa-dev libglu-dev libxxf86vm-dev
     - git submodule update --init
@@ -193,14 +191,9 @@ exec_linux:
       - lib
 
 ._exec_macos_platform:
-  stage: build
+  extends: ._exec_build
   tags:
     - macos
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
   script:
     - ./.ci/exec-macos-platform.sh
   artifacts:
