@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro.exe cards.cdb locales fonts sound strings.conf system.conf)
+ARCHIVE_FILES=(ygopro.exe cards.cdb locales fonts sound textures strings.conf system.conf)
 
 TARGET_PLATFORM=win32
 
