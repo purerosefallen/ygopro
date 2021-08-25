@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro lib cards.cdb locales fonts strings.conf system.conf)
+ARCHIVE_FILES=(ygopro lib cards.cdb locales fonts sound strings.conf system.conf)
 
 TARGET_PLATFORM=linux
 
