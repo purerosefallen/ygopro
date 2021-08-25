@@ -649,10 +649,10 @@ upload_to_minio:
     #- pack_macos_en-US_zst
     - pack_windows_dlc_zh-CN
     - pack_linux_dlc_zh-CN
-    - pack_macosx_dlc_zh-CN
+    - pack_macos_dlc_zh-CN
     - pack_windows_dlc_en-US
     - pack_linux_dlc_en-US
-    - pack_macosx_dlc_en-US
+    - pack_macos_dlc_en-US
   tags: 
     - linux
   script:
@@ -666,10 +666,10 @@ upload_mycard:
   dependencies:
     - pack_windows_dlc_zh-CN
     - pack_linux_dlc_zh-CN
-    - pack_macosx_dlc_zh-CN
+    - pack_macos_dlc_zh-CN
     - pack_windows_dlc_en-US
     - pack_linux_dlc_en-US
-    - pack_macosx_dlc_en-US
+    - pack_macos_dlc_en-US
   tags: 
     - linux
   variables:
