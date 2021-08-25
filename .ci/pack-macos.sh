@@ -6,7 +6,7 @@ ARCHIVE_FILES=(ygopro.app LICENSE README.md lflist.conf strings.conf system.conf
 
 # TARGET_LOCALE
 # ARCHIVE_SUFFIX
-TARGET_PLATFORM=osx
+TARGET_PLATFORM=darwin
 
 apt update && apt -y install tar git zstd
 git submodule update --init
