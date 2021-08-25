@@ -370,6 +370,22 @@ assets_en-US:
     - tags
     - master
 
+
+._pack_format_gz:
+  extends: ._pack
+  variables:
+    ARCHIVE_SUFFIX: gz
+
+._pack_format_zst:
+  extends: ._pack
+  variables:
+    ARCHIVE_SUFFIX: zst
+
+._pack_dlc:
+  extends: ._pack_format_zst
+  only:
+    - tags
+
 ._pack_script_windows_non7z:
   extends: ._pack
   script: ./.ci/pack-windows.sh
@@ -386,12 +402,40 @@ assets_en-US:
   extends: ._pack
   script: ./.ci/pack-macos.sh
 
+._pack_script_windows_dlc:
+  extends: ._pack_dlc
+  script: ./.ci/pack-windows-dlc.sh
+
+._pack_script_linux_dlc:
+  extends: ._pack_dlc
+  script: ./.ci/pack-linux-dlc.sh
+
+._pack_script_macos_dlc:
+  extends: ._pack_dlc
+  script: ./.ci/pack-macos-dlc.sh
+
 ._pack_assets_windows_zh-CN:
   extends: ._pack
   dependencies:
     - assets
     - assets_windows
     - exec_windows
+    - assets_zh-CN
+
+._pack_assets_linux_zh-CN:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linux
+    - assets_zh-CN
+
+._pack_assets_macos_zh-CN:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_macos
     - assets_zh-CN
 
 ._pack_assets_windows_en-US:
@@ -402,14 +446,6 @@ assets_en-US:
     - exec_windows
     - assets_en-US
 
-._pack_assets_linux_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_linux
-    - assets_zh-CN
-
 ._pack_assets_linux_en-US:
   extends: ._pack
   dependencies:
@@ -417,14 +453,6 @@ assets_en-US:
     - assets_nonwindows
     - exec_linux
     - assets_en-US
-
-._pack_assets_macos_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_macos
-    - assets_zh-CN
 
 ._pack_assets_macos_en-US:
   extends: ._pack
@@ -434,15 +462,59 @@ assets_en-US:
     - exec_macos
     - assets_en-US
 
-._pack_format_gz:
+._pack_assets_windows_dlc:
   extends: ._pack
-  variables:
-    ARCHIVE_SUFFIX: gz
+  dependencies:
+    - assets
+    - exec_windows
 
-._pack_format_zst:
+._pack_assets_linux_dlc:
   extends: ._pack
-  variables:
-    ARCHIVE_SUFFIX: zst
+  dependencies:
+    - assets
+    - exec_linux
+
+._pack_assets_macos_dlc:
+  extends: ._pack
+  dependencies:
+    - assets
+    - exec_macos
+
+pack_windows_dlc_zh-CN:
+  extends:
+    - ._pack_assets_windows_dlc
+    - ._pack_script_windows_dlc
+    - ._locale_zh-CN
+
+pack_linux_dlc_zh-CN:
+  extends:
+    - ._pack_assets_linux_dlc
+    - ._pack_script_linux_dlc
+    - ._locale_zh-CN
+
+pack_macos_dlc_zh-CN:
+  extends:
+    - ._pack_assets_macos_dlc
+    - ._pack_script_macos_dlc
+    - ._locale_zh-CN
+
+pack_windows_dlc_en-US:
+  extends:
+    - ._pack_assets_windows_dlc
+    - ._pack_script_windows_dlc
+    - ._locale_en-US
+
+pack_linux_dlc_en-US:
+  extends:
+    - ._pack_assets_linux_dlc
+    - ._pack_script_linux_dlc
+    - ._locale_en-US
+
+pack_macos_dlc_en-US:
+  extends:
+    - ._pack_assets_macos_dlc
+    - ._pack_script_macos_dlc
+    - ._locale_en-US
 
 pack_windows_zh-CN_7z:
   extends:
@@ -450,19 +522,19 @@ pack_windows_zh-CN_7z:
     - ._pack_script_windows_7z
     - ._locale_zh-CN
 
-pack_windows_zh-CN_gz:
-  extends:
-    - ._pack_assets_windows_zh-CN
-    - ._pack_script_windows_non7z
-    - ._pack_format_gz
-    - ._locale_zh-CN
+#pack_windows_zh-CN_gz:
+#  extends:
+#    - ._pack_assets_windows_zh-CN
+#    - ._pack_script_windows_non7z
+#    - ._pack_format_gz
+#    - ._locale_zh-CN
 
-pack_windows_zh-CN_zst:
-  extends:
-    - ._pack_assets_windows_zh-CN
-    - ._pack_script_windows_non7z
-    - ._pack_format_zst
-    - ._locale_zh-CN
+#pack_windows_zh-CN_zst:
+#  extends:
+#    - ._pack_assets_windows_zh-CN
+#    - ._pack_script_windows_non7z
+#    - ._pack_format_zst
+#    - ._locale_zh-CN
 
 pack_linux_zh-CN_gz:
   extends:
@@ -471,12 +543,12 @@ pack_linux_zh-CN_gz:
     - ._pack_format_gz
     - ._locale_zh-CN
 
-pack_linux_zh-CN_zst:
-  extends:
-    - ._pack_assets_linux_zh-CN
-    - ._pack_script_linux
-    - ._pack_format_zst
-    - ._locale_zh-CN
+#pack_linux_zh-CN_zst:
+#  extends:
+#    - ._pack_assets_linux_zh-CN
+#    - ._pack_script_linux
+#    - ._pack_format_zst
+#    - ._locale_zh-CN
 
 
 pack_macos_zh-CN_gz:
@@ -486,12 +558,12 @@ pack_macos_zh-CN_gz:
     - ._pack_format_gz
     - ._locale_zh-CN
 
-pack_macos_zh-CN_zst:
-  extends:
-    - ._pack_assets_macos_zh-CN
-    - ._pack_script_macos
-    - ._pack_format_zst
-    - ._locale_zh-CN
+#pack_macos_zh-CN_zst:
+#  extends:
+#    - ._pack_assets_macos_zh-CN
+#    - ._pack_script_macos
+#    - ._pack_format_zst
+#    - ._locale_zh-CN
 
 pack_windows_en-US_7z:
   extends:
@@ -499,19 +571,19 @@ pack_windows_en-US_7z:
     - ._pack_script_windows_7z
     - ._locale_en-US
 
-pack_windows_en-US_gz:
-  extends:
-    - ._pack_assets_windows_en-US
-    - ._pack_script_windows_non7z
-    - ._pack_format_gz
-    - ._locale_en-US
+#pack_windows_en-US_gz:
+#  extends:
+#    - ._pack_assets_windows_en-US
+#    - ._pack_script_windows_non7z
+#    - ._pack_format_gz
+#    - ._locale_en-US
 
-pack_windows_en-US_zst:
-  extends:
-    - ._pack_assets_windows_en-US
-    - ._pack_script_windows_non7z
-    - ._pack_format_zst
-    - ._locale_en-US
+#pack_windows_en-US_zst:
+#  extends:
+#    - ._pack_assets_windows_en-US
+#    - ._pack_script_windows_non7z
+#    - ._pack_format_zst
+#    - ._locale_en-US
 
 pack_linux_en-US_gz:
   extends:
@@ -520,12 +592,12 @@ pack_linux_en-US_gz:
     - ._pack_format_gz
     - ._locale_en-US
 
-pack_linux_en-US_zst:
-  extends:
-    - ._pack_assets_linux_en-US
-    - ._pack_script_linux
-    - ._pack_format_zst
-    - ._locale_en-US
+#pack_linux_en-US_zst:
+#  extends:
+#    - ._pack_assets_linux_en-US
+#    - ._pack_script_linux
+#    - ._pack_format_zst
+#    - ._locale_en-US
 
 pack_macos_en-US_gz:
   extends:
@@ -534,12 +606,12 @@ pack_macos_en-US_gz:
     - ._pack_format_gz
     - ._locale_en-US
 
-pack_macos_en-US_zst:
-  extends:
-    - ._pack_assets_macos_en-US
-    - ._pack_script_macos
-    - ._pack_format_zst
-    - ._locale_en-US
+#pack_macos_en-US_zst:
+#  extends:
+#    - ._pack_assets_macos_en-US
+#    - ._pack_script_macos
+#    - ._pack_format_zst
+#    - ._locale_en-US
 
 upload_contents:
   stage: deploy
@@ -562,19 +634,25 @@ upload_to_minio:
   stage: deploy
   dependencies:
     - pack_windows_zh-CN_7z
-    - pack_windows_zh-CN_gz
-    - pack_windows_zh-CN_zst
+    #- pack_windows_zh-CN_gz
+    #- pack_windows_zh-CN_zst
     - pack_linux_zh-CN_gz
-    - pack_linux_zh-CN_zst
+    #- pack_linux_zh-CN_zst
     - pack_macos_zh-CN_gz
-    - pack_macos_zh-CN_zst
+    #- pack_macos_zh-CN_zst
     - pack_windows_en-US_7z
-    - pack_windows_en-US_gz
-    - pack_windows_en-US_zst
+    #- pack_windows_en-US_gz
+    #- pack_windows_en-US_zst
     - pack_linux_en-US_gz
-    - pack_linux_en-US_zst
+    #- pack_linux_en-US_zst
     - pack_macos_en-US_gz
-    - pack_macos_en-US_zst
+    #- pack_macos_en-US_zst
+    - pack_windows_dlc_zh-CN
+    - pack_linux_dlc_zh-CN
+    - pack_macosx_dlc_zh-CN
+    - pack_windows_dlc_en-US
+    - pack_linux_dlc_en-US
+    - pack_macosx_dlc_en-US
   tags: 
     - linux
   script:
@@ -586,12 +664,12 @@ upload_to_minio:
 upload_mycard:
   stage: deploy
   dependencies:
-    - pack_windows_zh-CN_zst
-    - pack_linux_zh-CN_zst
-    - pack_macos_zh-CN_zst
-    - pack_windows_en-US_zst
-    - pack_linux_en-US_zst
-    - pack_macos_en-US_zst
+    - pack_windows_dlc_zh-CN
+    - pack_linux_dlc_zh-CN
+    - pack_macosx_dlc_zh-CN
+    - pack_windows_dlc_en-US
+    - pack_linux_dlc_en-US
+    - pack_macosx_dlc_en-US
   tags: 
     - linux
   variables:
