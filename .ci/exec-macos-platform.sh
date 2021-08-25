@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PATFORM
+TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_ARCH
 export YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable
 
 git submodule update --init
