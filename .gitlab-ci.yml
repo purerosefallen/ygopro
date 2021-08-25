@@ -587,6 +587,7 @@ upload_mycard:
   stage: deploy
   dependencies:
     - pack_windows_zh-CN_zst
+    - pack_linux_zh-CN_zst
     - pack_macos_zh-CN_zst
     - pack_windows_en-US_zst
     - pack_linux_en-US_zst
