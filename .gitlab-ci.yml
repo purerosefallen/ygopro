@@ -280,6 +280,8 @@ assets:
     # locales
     - git clone --depth=1 https://code.mycard.moe/nanahira/ygopro-database
     - mv ygopro-database/locales .
+    # system_user.conf
+    - cp system.conf system_user.conf
   artifacts:
     paths:
       - deck
@@ -287,6 +289,7 @@ assets:
       - sound
       - fonts
       - locales
+      - system_user.conf
   only:
     - tags
     - master

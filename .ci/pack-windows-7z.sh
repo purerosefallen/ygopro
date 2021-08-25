@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound bot.conf Bot.exe WindBot locales fonts)
+ARCHIVE_FILES=(ygopro.exe LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound bot.conf Bot.exe WindBot locales fonts system_user.conf)
 
 if [[ "$TARGET_LOCALE" == "zh-CN" ]]; then
 	ARCHIVE_FILES=("${ARCHIVE_FILES[@]}" update-koishipro)
