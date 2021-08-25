@@ -15,10 +15,8 @@ appName="koishipro"
 handleErrorMessage() {
   rawJsonInput="$1"
   successInfo=$(echo "$rawJsonInput" | jq '.success')
-  statusCode=$(echo "$rawJsonInput" | jq '.statusCode')
   
   if [[ "$successInfo" != "true" ]]; then
-    failMessage=$(echo "$rawJsonInput" | jq '.success')
     echo "$rawJsonInput"
     exit 1
   fi
