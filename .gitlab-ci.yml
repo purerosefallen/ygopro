@@ -345,13 +345,19 @@ assets_windows:
     - tags
     - master
 
-assets_zh-CN:
+._locale_zh-CN:
+  variables:
+    TARGET_LOCALE: zh-CN
+
+._locale_en-US:
+  variables:
+    TARGET_LOCALE: en-US
+
+._assets_locale:
   stage: build
   tags:
     - linux
   script: ./.ci/assets-locale.sh
-  variables:
-    TARGET_LOCALE: zh-CN
   artifacts:
     paths:
       - pics
@@ -361,36 +367,21 @@ assets_zh-CN:
   only:
     - tags
     - master
+
+assets_zh-CN:
+  extends: 
+    - ._assets_locale
+    - ._locale_zh-CN
 
 assets_en-US:
-  stage: build
-  tags:
-    - linux
-  script: ./.ci/assets-locale.sh
-  variables:
-    TARGET_LOCALE: en-US
-  artifacts:
-    paths:
-      - pics
-      - cards.cdb
-      - strings.conf
-      - bot.conf
-  only:
-    - tags
-    - master
+  extends: 
+    - ._assets_locale
+    - ._locale_en-US
 
-pack_windows_zh-CN:
+._pack:
   stage: pack
   tags:
     - linux
-  dependencies:
-    - assets
-    - assets_windows
-    - exec_windows
-    - assets_zh-CN
-  script: ./.ci/pack-windows.sh
-  variables:
-    TARGET_LOCALE: zh-CN
   artifacts:
     paths:
       - dist
@@ -398,129 +389,184 @@ pack_windows_zh-CN:
     - tags
     - master
 
-pack_windows_zh-CN:
-  stage: pack
-  tags:
-    - linux
+._pack_script_windows_non7z:
+  extends: ._pack
+  script: ./.ci/pack-windows.sh
+
+._pack_script_windows_7z:
+  extends: ._pack
+  script: ./.ci/pack-windows-7z.sh
+
+._pack_script_linux:
+  extends: ._pack
+  script: ./.ci/pack-linux.sh
+
+._pack_script_macos:
+  extends: ._pack
+  script: ./.ci/pack-macos.sh
+
+._pack_assets_windows_zh-CN:
+  extends: _pack
   dependencies:
     - assets
     - assets_windows
     - exec_windows
     - assets_zh-CN
-  script: ./.ci/pack-windows.sh
-  variables:
-    TARGET_LOCALE: zh-CN
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
 
-pack_windows_en-US:
-  stage: pack
-  tags:
-    - linux
+._pack_assets_windows_en-US:
+  extends: _pack
   dependencies:
     - assets
     - assets_windows
     - exec_windows
     - assets_en-US
-  script: ./.ci/pack-windows.sh
-  variables:
-    TARGET_LOCALE: en-US
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
 
-pack_linux_zh-CN:
-  stage: pack
-  tags:
-    - linux
+._pack_assets_linux_zh-CN:
+  extends: _pack
   dependencies:
     - assets
     - assets_nonwindows
     - exec_linux
     - assets_zh-CN
-  script: ./.ci/pack-linux.sh
-  variables:
-    TARGET_LOCALE: zh-CN
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
 
-pack_linux_en-US:
-  stage: pack
-  tags:
-    - linux
+._pack_assets_linux_en-US:
+  extends: _pack
   dependencies:
     - assets
     - assets_nonwindows
     - exec_linux
     - assets_en-US
-  script: ./.ci/pack-linux.sh
-  variables:
-    TARGET_LOCALE: en-US
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
 
-pack_macos_zh-CN:
-  stage: pack
-  tags:
-    - linux
+._pack_assets_macos_zh-CN:
+  extends: _pack
   dependencies:
     - assets
     - assets_nonwindows
     - exec_macos
     - assets_zh-CN
-  script: ./.ci/pack-macos.sh
-  variables:
-    TARGET_LOCALE: zh-CN
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
 
-pack_macos_en-US:
-  stage: pack
-  tags:
-    - linux
+._pack_assets_macos_en-US:
+  extends: _pack
   dependencies:
     - assets
     - assets_nonwindows
     - exec_macos
     - assets_en-US
-  script: ./.ci/pack-macos.sh
+
+._pack_format_gz:
+  extends: _pack
   variables:
-    TARGET_LOCALE: en-US
-  artifacts:
-    paths:
-      - dist
-  only:
-    - tags
-    - master
+    ARCHIVE_SUFFIX: gz
+
+._pack_format_zst:
+  extends: _pack
+  variables:
+    ARCHIVE_SUFFIX: zst
+
+pack_windows_zh-CN_7z:
+  extends:
+    - ._pack_assets_windows_zh-CN
+    - ._pack_script_windows_7z
+    - ._locale_zh-CN
+
+pack_windows_zh-CN_gz:
+  extends:
+    - ._pack_assets_windows_zh-CN
+    - ._pack_script_windows_non7z
+    - ._pack_format_gz
+    - ._locale_zh-CN
+
+pack_windows_zh-CN_zst:
+  extends:
+    - ._pack_assets_windows_zh-CN
+    - ._pack_script_windows_non7z
+    - ._pack_format_zst
+    - ._locale_zh-CN
+
+pack_linux_zh-CN_gz:
+  extends:
+    - ._pack_assets_linux_zh-CN
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_zh-CN
+
+pack_linux_zh-CN_zst:
+  extends:
+    - ._pack_assets_linux_zh-CN
+    - ._pack_script_linux
+    - ._pack_format_zst
+    - ._locale_zh-CN
+
+
+pack_macos_zh-CN_gz:
+  extends:
+    - ._pack_assets_macos_zh-CN
+    - ._pack_script_macos
+    - ._pack_format_gz
+    - ._locale_zh-CN
+
+pack_macos_zh-CN_zst:
+  extends:
+    - ._pack_assets_macos_zh-CN
+    - ._pack_script_macos
+    - ._pack_format_zst
+    - ._locale_zh-CN
+
+pack_windows_en-US_7z:
+  extends:
+    - ._pack_assets_windows_en-US
+    - ._pack_script_windows_7z
+    - ._locale_en-US
+
+pack_windows_en-US_gz:
+  extends:
+    - ._pack_assets_windows_en-US
+    - ._pack_script_windows_non7z
+    - ._pack_format_gz
+    - ._locale_en-US
+
+pack_windows_en-US_zst:
+  extends:
+    - ._pack_assets_windows_en-US
+    - ._pack_script_windows_non7z
+    - ._pack_format_zst
+    - ._locale_en-US
+
+pack_linux_en-US_gz:
+  extends:
+    - ._pack_assets_linux_en-US
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_en-US
+
+pack_linux_en-US_zst:
+  extends:
+    - ._pack_assets_linux_en-US
+    - ._pack_script_linux
+    - ._pack_format_zst
+    - ._locale_en-US
+
+pack_macos_en-US_gz:
+  extends:
+    - ._pack_assets_macos_en-US
+    - ._pack_script_macos
+    - ._pack_format_gz
+    - ._locale_en-US
+
+pack_macos_en-US_zst:
+  extends:
+    - ._pack_assets_macos_en-US
+    - ._pack_script_macos
+    - ._pack_format_zst
+    - ._locale_en-US
 
 upload_contents:
   stage: deploy
   dependencies:
-    - pack_windows_zh-CN
+    - pack_windows_zh-CN_7z
   tags: 
     - linux
   script:
-    - apt update; apt -y install mono-complete p7zip-full
-    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
     - 7z x -y -ocontents dist/KoishiPro-$CI_COMMIT_REF_NAME-win32-zh-CN.7z
     - cd contents/update-koishipro
     - chmod +x *.sh
@@ -534,12 +580,20 @@ upload_contents:
 upload_to_minio:
   stage: deploy
   dependencies:
-    - pack_windows_zh-CN
-    - pack_linux_zh-CN
-    - pack_macos_zh-CN
-    - pack_windows_en-US
-    - pack_linux_en-US
-    - pack_macos_en-US
+    - pack_windows_zh-CN_7z
+    - pack_windows_zh-CN_gz
+    - pack_windows_zh-CN_zst
+    - pack_linux_zh-CN_gz
+    - pack_linux_zh-CN_zst
+    - pack_macos_zh-CN_gz
+    - pack_macos_zh-CN_zst
+    - pack_windows_en-US_7z
+    - pack_windows_en-US_gz
+    - pack_windows_en-US_zst
+    - pack_linux_en-US_gz
+    - pack_linux_en-US_zst
+    - pack_macos_en-US_gz
+    - pack_macos_en-US_zst
   tags: 
     - linux
   script:
@@ -547,3 +601,19 @@ upload_to_minio:
   only:
     - tags
     - master
+
+upload_mycard:
+  stage: deploy
+  dependencies:
+    - pack_windows_zh-CN_zst
+    - pack_macos_zh-CN_zst
+    - pack_windows_en-US_zst
+    - pack_linux_en-US_zst
+    - pack_macos_en-US_zst
+  tags: 
+    - linux
+  variables:
+    appVersion: $CI_COMMIT_TAG
+  script: ./.ci/upload-packager.sh
+  only:
+    - tags
