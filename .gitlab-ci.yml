@@ -192,18 +192,10 @@ exec_linux:
       - ygopro
       - lib
 
-exec_macos_platform_x86:
+._exec_macos_platform:
   stage: build
   tags:
     - macos
-  dependencies:
-    - mat_irrklang
-    - mat_macos
-    - mat_common
-    - mat_macos_platform_x86
-  variables:
-    USE_IRRKLANG: "1"
-    TARGET_PATFORM: x86
   cache:
     key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
@@ -211,31 +203,30 @@ exec_macos_platform_x86:
       - obj/
   script:
     - ./.ci/exec-macos-platform.sh
-    - install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ./ygopro-platforms/ygopro-platform-$TARGET_PATFORM
   artifacts:
     paths:
       - ygopro-platforms
+
+exec_macos_platform_x86:
+  extends: ._exec_macos_platform
+  dependencies:
+    - mat_irrklang
+    - mat_macos
+    - mat_common
+    - mat_macos_platform_x86
+  variables:
+    TARGET_ARCH: x86
+    USE_IRRKLANG: "1"
       
 exec_macos_platform_m1:
-  stage: build
-  tags:
-    - macos
+  extends: ._exec_macos_platform
   dependencies:
     - mat_macos
     - mat_common
     - mat_macos_platform_m1
   variables:
-    TARGET_PATFORM: m1
+    TARGET_ARCH: m1
     YGOPRO_TARGET_ARM: '1'
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
-  script: ./.ci/exec-macos-platform.sh
-  artifacts:
-    paths:
-      - ygopro-platforms
 
 exec_macos:
   stage: combine
