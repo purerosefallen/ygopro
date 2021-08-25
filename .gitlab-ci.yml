@@ -311,10 +311,7 @@ assets_windows:
   stage: prepare
   tags:
     - linux
-  image: python
   script:
-    - apt update; apt -y install wget p7zip-full
-    - pip install -U -i https://mirrors.aliyun.com/pypi/simple/ awscli
     - wget https://cdn01.moecube.com/windbot/WindBot.7z
     - 7z x -y WindBot.7z
     - aws s3 --endpoint=https://minio.mycard.moe:9000 sync s3://mycard/koishipro/contents/update-koishipro/ ./update-koishipro
