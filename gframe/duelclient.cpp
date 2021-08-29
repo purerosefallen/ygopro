@@ -1266,6 +1266,10 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				soundManager.StopBGM();
 			}
 		}
+		// lyric
+		case 24: { //HINT_LYRIC
+			mainGame->AddChatMsg(dataManager.GetDesc(data), 15);
+		}
 		}
 		break;
 	}
