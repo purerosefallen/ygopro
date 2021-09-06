@@ -1185,17 +1185,32 @@ void Game::DrawThumb(code_pointer cp, position2di pos, const std::unordered_map<
 			break;
 		}
 	}
-	if(cbLimit->getSelected() >= 4 && ((cp->second.ot & 0x8) || cp->second.ot & 0x3 && (cp->second.ot & 0x3) != 0x3)) {
-		int xOffset = 0, yOffset = 0;
-		if(cp->second.ot & 0x8)
-			xOffset += 128;
-		else if((cp->second.ot & 0x3)== 0x2) {
-			yOffset += 64;
-		}
-		if(!deckManager.IsGameRuleDisallowed(gameConf.defaultOT, cp->second.ot)) {
-			yOffset += 128;
-		}
-		driver->draw2DImage(imageManager.tOT, otloc, recti(xOffset, yOffset, 128 + xOffset, 64 + yOffset), 0, 0, true);
+	bool showAvail = false;
+	bool showNotAvail = false;
+	int filter_lm = cbLimit->getSelected();
+	bool avail = !((filter_lm == 4 && !(cp->second.ot & AVAIL_OCG)
+				|| (filter_lm == 5 && !(cp->second.ot & AVAIL_TCG))
+				|| (filter_lm == 6 && !(cp->second.ot & AVAIL_SC))
+				|| (filter_lm == 7 && !(cp->second.ot & AVAIL_CUSTOM))
+				|| (filter_lm == 8 && (cp->second.ot & AVAIL_OCGTCG) != AVAIL_OCGTCG)));
+	if(filter_lm >= 4) {
+		showAvail = avail;
+		showNotAvail = !avail;
+	} else if(!(cp->second.ot & gameConf.defaultOT)) {
+		showNotAvail = true;
+	}
+	if(showAvail) {
+		if((cp->second.ot & AVAIL_OCG) && !(cp->second.ot & AVAIL_TCG))
+			driver->draw2DImage(imageManager.tOT, otloc, recti(0, 128, 128, 192), 0, 0, true);
+		else if((cp->second.ot & AVAIL_TCG) && !(cp->second.ot & AVAIL_OCG))
+			driver->draw2DImage(imageManager.tOT, otloc, recti(0, 192, 128, 256), 0, 0, true);
+	} else if(showNotAvail) {
+		if(cp->second.ot & AVAIL_OCG)
+			driver->draw2DImage(imageManager.tOT, otloc, recti(0, 0, 128, 64), 0, 0, true);
+		else if(cp->second.ot & AVAIL_TCG)
+			driver->draw2DImage(imageManager.tOT, otloc, recti(0, 64, 128, 128), 0, 0, true);
+		else if(!avail)
+			driver->draw2DImage(imageManager.tLim, otloc, recti(0, 0, 64, 64), 0, 0, true);
 	}
 }
 void Game::DrawDeckBd() {
@@ -1347,11 +1362,11 @@ void Game::DrawDeckBd() {
 				myswprintf(scaleBuffer, L" %d/%d", ptr->second.lscale, ptr->second.rscale);
 				wcscat(textBuffer, scaleBuffer);
 			}
-			if((ptr->second.ot & 0x3) == 1)
+			if((ptr->second.ot & AVAIL_OCGTCG) == AVAIL_OCG)
 				wcscat(textBuffer, L" [OCG]");
-			else if((ptr->second.ot & 0x3) == 2)
+			else if((ptr->second.ot & AVAIL_OCGTCG) == AVAIL_TCG)
 				wcscat(textBuffer, L" [TCG]");
-			else if((ptr->second.ot & 0x7) == 4)
+			else if((ptr->second.ot & AVAIL_CUSTOM) == AVAIL_CUSTOM)
 				wcscat(textBuffer, L" [Custom]");
 			DrawShadowText(textFont, textBuffer, Resize(860, 209 + i * 66, 955, 229 + i * 66), Resize(1, 1, 0, 0));
 		} else {
@@ -1360,11 +1375,11 @@ void Game::DrawDeckBd() {
 			const wchar_t* ptype = dataManager.FormatType(ptr->second.type);
 			DrawShadowText(textFont, ptype, Resize(860, 187 + i * 66, 955, 207 + i * 66), Resize(1, 1, 0, 0));
 			textBuffer[0] = 0;
-			if((ptr->second.ot & 0x3) == 1)
+			if((ptr->second.ot & AVAIL_OCGTCG) == AVAIL_OCG)
 				wcscat(textBuffer, L"[OCG]");
-			else if((ptr->second.ot & 0x3) == 2)
+			else if((ptr->second.ot & AVAIL_OCGTCG) == AVAIL_TCG)
 				wcscat(textBuffer, L"[TCG]");
-			else if((ptr->second.ot & 0x7) == 4)
+			else if((ptr->second.ot & AVAIL_CUSTOM) == AVAIL_CUSTOM)
 				wcscat(textBuffer, L"[Custom]");
 			DrawShadowText(textFont, textBuffer, Resize(860, 209 + i * 66, 955, 229 + i * 66), Resize(1, 1, 0, 0));
 		}
