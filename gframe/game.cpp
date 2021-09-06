@@ -18,7 +18,7 @@
 #include <regex>
 #endif //YGOPRO_SERVER_MODE
 
-unsigned short PRO_VERSION = 0x1352;
+unsigned short PRO_VERSION = 0x1353;
 
 namespace ygo {
 
@@ -114,11 +114,7 @@ bool Game::Initialize() {
 		return false;
 	}
 	dataManager.FileSystem = device->getFileSystem();
-<<<<<<< HEAD
-	LoadExpansions();
 	if(dataManager.LoadDB(GetLocaleDirWide("cards.cdb"))) {} else
-=======
->>>>>>> 2ef8ca22fcca4bf8d4a3a1b5ca9be32922b7a98f
 	if(!dataManager.LoadDB(L"cards.cdb")) {
 		ErrorLog("Failed to load card database (cards.cdb)!");
 		return false;
@@ -254,12 +250,30 @@ bool Game::Initialize() {
 	cbHostLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbHostLFlist->getItemCount() - 1);
 	env->addStaticText(dataManager.GetSysString(1225), rect<s32>(20, 60, 220, 80), false, false, wCreateHost);
 	cbRule = env->addComboBox(rect<s32>(140, 55, 300, 80), wCreateHost);
-	cbRule->addItem(dataManager.GetSysString(1240));
-	cbRule->addItem(dataManager.GetSysString(1241));
-	cbRule->addItem(dataManager.GetSysString(1242));
-	cbRule->addItem(dataManager.GetSysString(1243));
-	cbRule->addItem(dataManager.GetSysString(1249));
-	cbRule->setSelected(gameConf.defaultOT - 1);
+	cbRule->setMaxSelectionRows(10);
+	cbRule->addItem(dataManager.GetSysString(1481));
+	cbRule->addItem(dataManager.GetSysString(1482));
+	cbRule->addItem(dataManager.GetSysString(1483));
+	cbRule->addItem(dataManager.GetSysString(1484));
+	cbRule->addItem(dataManager.GetSysString(1485));
+	cbRule->addItem(dataManager.GetSysString(1486));
+	switch(gameConf.defaultOT) {
+	case 1:
+		cbRule->setSelected(0);
+		break;
+	case 2:
+		cbRule->setSelected(1);
+		break;
+	case 4:
+		cbRule->setSelected(3);
+		break;
+	case 8:
+		cbRule->setSelected(2);
+		break;
+	default:
+		cbRule->setSelected(5);
+		break;
+	}	
 	env->addStaticText(dataManager.GetSysString(1227), rect<s32>(20, 90, 220, 110), false, false, wCreateHost);
 	cbMatchMode = env->addComboBox(rect<s32>(140, 85, 300, 110), wCreateHost);
 	cbMatchMode->addItem(dataManager.GetSysString(1244));
@@ -759,11 +773,11 @@ bool Game::Initialize() {
 	cbLimit->addItem(dataManager.GetSysString(1316));
 	cbLimit->addItem(dataManager.GetSysString(1317));
 	cbLimit->addItem(dataManager.GetSysString(1318));
-	cbLimit->addItem(dataManager.GetSysString(1240));
-	cbLimit->addItem(dataManager.GetSysString(1241));
-	cbLimit->addItem(dataManager.GetSysString(1242));
-	cbLimit->addItem(dataManager.GetSysString(1243));
-	cbLimit->addItem(dataManager.GetSysString(1249));
+	cbLimit->addItem(dataManager.GetSysString(1481));
+	cbLimit->addItem(dataManager.GetSysString(1482));
+	cbLimit->addItem(dataManager.GetSysString(1483));
+	cbLimit->addItem(dataManager.GetSysString(1484));
+	cbLimit->addItem(dataManager.GetSysString(1485));
 	stAttribute = env->addStaticText(dataManager.GetSysString(1319), rect<s32>(10, 22 + 50 / 6, 70, 42 + 50 / 6), false, false, wFilter);
 	cbAttribute = env->addComboBox(rect<s32>(60, 20 + 50 / 6, 190, 40 + 50 / 6), wFilter, COMBOBOX_ATTRIBUTE);
 	cbAttribute->setMaxSelectionRows(10);

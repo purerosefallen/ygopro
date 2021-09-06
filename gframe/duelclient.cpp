@@ -133,7 +133,7 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			if(bot_mode) {
 				BufferIO::CopyWStr(L"Bot Game", cscg.name, 20);
 				BufferIO::CopyWStr(L"", cscg.pass, 20);
-				cscg.info.rule = 2;
+				cscg.info.rule = 5;
 				cscg.info.mode = 0;
 				cscg.info.start_hand = 5;
 				cscg.info.start_lp = 8000;
@@ -340,6 +340,10 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				myswprintf(msgbuf, dataManager.GetSysString(1419), code);
 				break;
 			}
+			case DECKERROR_NOTAVAIL: {
+				myswprintf(msgbuf, dataManager.GetSysString(1432), dataManager.GetName(code));
+				break;
+			}
 			default: {
 				myswprintf(msgbuf, dataManager.GetSysString(1406));
 				break;
@@ -520,7 +524,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		wchar_t msgbuf[256];
 		myswprintf(msgbuf, L"%ls%ls\n", dataManager.GetSysString(1226), deckManager.GetLFListName(pkt->info.lflist));
 		str.append(msgbuf);
-		myswprintf(msgbuf, L"%ls%ls\n", dataManager.GetSysString(1225), dataManager.GetSysString(pkt->info.rule == 4 ? 1249 : 1240 + pkt->info.rule));
+		myswprintf(msgbuf, L"%ls%ls\n", dataManager.GetSysString(1225), dataManager.GetSysString(1481 + pkt->info.rule));
 		str.append(msgbuf);
 		myswprintf(msgbuf, L"%ls%ls\n", dataManager.GetSysString(1227), dataManager.GetSysString(1244 + pkt->info.mode));
 		str.append(msgbuf);
@@ -1271,6 +1275,10 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			} else {
 				soundManager.StopBGM();
 			}
+		}
+		// lyric
+		case 24: { //HINT_LYRIC
+			mainGame->AddChatMsg(dataManager.GetDesc(data), 15);
 		}
 		}
 		break;
@@ -2391,7 +2399,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			soundManager.PlaySoundEffect(SOUND_SHUFFLE);
 			for (int i = 0; i < 5; ++i) {
 				for (auto cit = mainGame->dField.deck[player].begin(); cit != mainGame->dField.deck[player].end(); ++cit) {
-					(*cit)->dPos = irr::core::vector3df(rand() * 0.4f / RAND_MAX - 0.2f, 0, 0);
+					(*cit)->dPos = irr::core::vector3df(rnd.rand() * 0.4f / rnd.rand_max - 0.2f, 0, 0);
 					(*cit)->dRot = irr::core::vector3df(0, 0, 0);
 					(*cit)->is_moving = true;
 					(*cit)->aniFrame = 3;
@@ -2463,7 +2471,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			for (int i = 0; i < 5; ++i) {
 				for (auto cit = mainGame->dField.extra[player].begin(); cit != mainGame->dField.extra[player].end(); ++cit) {
 					if(!((*cit)->position & POS_FACEUP)) {
-						(*cit)->dPos = irr::core::vector3df(rand() * 0.4f / RAND_MAX - 0.2f, 0, 0);
+						(*cit)->dPos = irr::core::vector3df(rnd.rand() * 0.4f / rnd.rand_max - 0.2f, 0, 0);
 						(*cit)->dRot = irr::core::vector3df(0, 0, 0);
 						(*cit)->is_moving = true;
 						(*cit)->aniFrame = 3;
@@ -4294,7 +4302,7 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 			hoststr.append(L"[");
 			hoststr.append(deckManager.GetLFListName(pHP->host.lflist));
 			hoststr.append(L"][");
-			hoststr.append(dataManager.GetSysString(pHP->host.rule + 1240));
+			hoststr.append(dataManager.GetSysString(pHP->host.rule + 1481));
 			hoststr.append(L"][");
 			hoststr.append(dataManager.GetSysString(pHP->host.mode + 1244));
 			hoststr.append(L"][");
