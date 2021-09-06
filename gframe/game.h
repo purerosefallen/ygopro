@@ -875,10 +875,10 @@ extern unsigned int pre_seed[3];
 #define TEXTURE_ATTACK				5
 #define TEXTURE_ACTIVATE			6
 
-#define AVAIL_OCG					0x5
-#define AVAIL_TCG					0x6
+#define AVAIL_OCG					0x1
+#define AVAIL_TCG					0x2
 #define AVAIL_CUSTOM				0x4
-#define AVAIL_SC					0xc
+#define AVAIL_SC					0x8
 #define AVAIL_OCGTCG				(AVAIL_OCG|AVAIL_TCG)
 
 #ifndef DEFAULT_DUEL_RULE
