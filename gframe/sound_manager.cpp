@@ -13,6 +13,7 @@ bool SoundManager::Init() {
 	previous_bgm_scene = -1;
 	RefreshBGMList();
 	bgm_process = false;
+	rnd.reset((unsigned int)time(nullptr));
 	engineSound = irrklang::createIrrKlangDevice();
 	engineMusic = irrklang::createIrrKlangDevice();
 	if(!engineSound || !engineMusic) {
@@ -229,7 +230,7 @@ void SoundManager::PlayBGM(int scene) {
 		if(count <= 0)
 			return;
 		bgm_scene = scene;
-		int bgm = rand() % count;
+		int bgm = rnd.get_random_integer(0, count -1);
 		auto name = BGMList[scene][bgm].c_str();
 		wchar_t fname[1024];
 		myswprintf(fname, L"./sound/BGM/%ls", name);
