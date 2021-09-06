@@ -73,7 +73,7 @@ const std::unordered_map<int, int>* DeckManager::GetLFListContent(int lfhash) {
 	return nullptr;
 }
 static int checkAvail(int ot, int avail) {
-	if(!!(ot && 0x4))
+	if(!!(ot & 0x4))
 		return 0;
 	if((ot & avail) == avail)
 		return 0;
