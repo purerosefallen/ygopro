@@ -2225,14 +2225,15 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 }
 #ifdef YGOPRO_SERVER_MODE
 void SingleDuel::TestCard(int code) {
-	time_t seed = time(0);
-	mtrandom rnd;
-	rnd.reset(seed);
+	std::random_device rd;
+	unsigned int seed = rd();
+	mt19937 rnd(seed);
+	unsigned int duel_seed = rnd.rand();
 	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
 	rnd.reset(seed);
-	unsigned long tduel = create_duel(rnd.rand());
+	unsigned long tduel = create_duel(duel_seed);
 	preload_script(tduel, "./script/special.lua", 0);
 	preload_script(tduel, "./script/init.lua", 0);
 	set_player_info(tduel, 0, 8000, 5, 1);
