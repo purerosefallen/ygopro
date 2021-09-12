@@ -180,11 +180,8 @@ int main(int argc, char* argv[]) {
 		} else if(!wcscmp(wargv[i], L"-k")) { // Keep on return
 			exit_on_return = false;
 			keep_on_return = true;
-<<<<<<< HEAD
 		} else if(!wcscmp(wargv[i], L"--auto-watch")) { // Auto watch mode
 			auto_watch_mode = true;
-=======
->>>>>>> 296ee7aeae5f923b59c29c3460794e85e825e95c
 		} else if(!wcscmp(wargv[i], L"--deck-category")) {
 			++i;
 			if(i < wargc) {
