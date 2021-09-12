@@ -112,8 +112,11 @@ int main(int argc, char* argv[]) {
 		} else if(!wcscmp(wargv[i], L"-k")) { // Keep on return
 			exit_on_return = false;
 			keep_on_return = true;
+<<<<<<< HEAD
 		} else if(!wcscmp(wargv[i], L"--auto-watch")) { // Auto watch mode
 			auto_watch_mode = true;
+=======
+>>>>>>> 296ee7aeae5f923b59c29c3460794e85e825e95c
 		} else if(!wcscmp(wargv[i], L"--deck-category")) {
 			++i;
 			if(i < wargc) {
@@ -132,7 +135,7 @@ int main(int argc, char* argv[]) {
 				if(i < wargc) {
 					open_file = true;
 					wcscpy(open_file_name, wargv[i]);
-					if(deckCategorySpecified) {
+					if(deckCategorySpecified && wcslen(ygo::mainGame->gameConf.lastcategory)) {
 						swprintf(open_file_name_with_category, 256, L"%ls/%ls", ygo::mainGame->gameConf.lastcategory, open_file_name);
 					} else {
 						wcscpy(open_file_name_with_category, open_file_name);
