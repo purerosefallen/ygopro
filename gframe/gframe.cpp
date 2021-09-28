@@ -13,6 +13,7 @@ bool exit_on_return = false;
 bool auto_watch_mode = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
+wchar_t open_file_name_with_category[256] = L"";
 bool bot_mode = false;
 
 void ClickButton(irr::gui::IGUIElement* btn) {
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
 	for (int i = 0; i < 3; ++i)
-		ygo::pre_seed[i] = (time_t)0;
+		ygo::pre_seed[i] = (unsigned int)0;
 	if (argc == 2) {
 		int code = atoi(argv[1]);
 		ygo::mainGame = &_game;
@@ -119,7 +120,7 @@ int main(int argc, char* argv[]) {
 		ygo::replay_mode = atoi(argv[12]);
 		for (int i = 13; (i < argc && i <= 15) ; ++i)
 		{
-			ygo::pre_seed[i - 13] = (time_t)atoi(argv[i]);
+			ygo::pre_seed[i - 13] = (unsigned int)atol(argv[i]);
 		}
 	}
 	ygo::mainGame = &_game;
@@ -144,6 +145,7 @@ int main(int argc, char* argv[]) {
 #endif //_WIN32
 
 	bool keep_on_return = false;
+	bool deckCategorySpecified = false;
 	for(int i = 1; i < wargc; ++i) {
 		if(wargv[i][0] == L'-' && wargv[i][1] == L'e' && wargv[i][2] != L'\0') {
 			ygo::dataManager.LoadDB(&wargv[i][2]);
@@ -180,9 +182,16 @@ int main(int argc, char* argv[]) {
 			keep_on_return = true;
 		} else if(!wcscmp(wargv[i], L"--auto-watch")) { // Auto watch mode
 			auto_watch_mode = true;
+		} else if(!wcscmp(wargv[i], L"--deck-category")) {
+			++i;
+			if(i < wargc) {
+				deckCategorySpecified = true;
+				wcscpy(ygo::mainGame->gameConf.lastcategory, wargv[i]);
+			}
 		} else if(!wcscmp(wargv[i], L"-d")) { // Deck
 			++i;
-			ygo::mainGame->gameConf.lastcategory[0] = 0;
+			if(!deckCategorySpecified)
+				ygo::mainGame->gameConf.lastcategory[0] = 0;
 			if(i + 1 < wargc) { // select deck
 				wcscpy(ygo::mainGame->gameConf.lastdeck, wargv[i]);
 				continue;
@@ -191,6 +200,11 @@ int main(int argc, char* argv[]) {
 				if(i < wargc) {
 					open_file = true;
 					wcscpy(open_file_name, wargv[i]);
+					if(deckCategorySpecified && wcslen(ygo::mainGame->gameConf.lastcategory)) {
+						swprintf(open_file_name_with_category, 256, L"%ls/%ls", ygo::mainGame->gameConf.lastcategory, open_file_name);
+					} else {
+						wcscpy(open_file_name_with_category, open_file_name);
+					}
 				}
 				ClickButton(ygo::mainGame->btnDeckEdit);
 				break;

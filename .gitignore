@@ -9,6 +9,7 @@ build
 
 # dependencies
 /event
+/libevent*
 /freetype
 /sqlite3
 /irrklang
@@ -62,6 +63,7 @@ build
 /update
 /update*
 /locales
+/lib
 
 # ygopro main program
 /ygopro

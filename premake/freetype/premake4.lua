@@ -45,3 +45,5 @@ project "freetype"
 
     configuration "windows"
         files { "builds/windows/ftdebug.c" }
+    configuration "not windows"
+        files { "src/base/ftdebug.c" }

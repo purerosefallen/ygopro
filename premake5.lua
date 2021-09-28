@@ -2,8 +2,41 @@ solution "ygo"
     location "build"
     language "C++"
     objdir "obj"
-    if os.ishost("linux") and os.getenv("YGOPRO_BUILD_LUA") then
+    if os.ishost("macosx") then
         BUILD_LUA=true
+    end
+    if not os.ishost("windows") then
+        if os.getenv("YGOPRO_BUILD_LUA") then
+            BUILD_LUA=true
+        end
+        if os.getenv("YGOPRO_BUILD_SQLITE") then
+            BUILD_SQLITE=true
+        end
+        if os.getenv("YGOPRO_BUILD_FREETYPE") then
+            BUILD_FREETYPE=true
+        end
+        if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
+            BUILD_ALL=true
+        end
+        if os.getenv("YGOPRO_LIBEVENT_STATIC_PATH") then
+            LIBEVENT_ROOT=os.getenv("YGOPRO_LIBEVENT_STATIC_PATH")
+        end
+        if BUILD_ALL then
+            BUILD_LUA=true
+            BUILD_SQLITE=true
+            BUILD_FREETYPE=true
+        end
+        if os.ishost("macosx") then
+            if os.getenv("YGOPRO_TARGET_ARM") then
+                MAC_ARM=true
+            end
+        end
+    end
+    if (os.ishost("windows") or os.getenv("USE_IRRKLANG")) and not os.getenv("NO_IRRKLANG") then
+        USE_IRRKLANG = true
+        if os.getenv("irrklang_pro") then
+            IRRKLANG_PRO = true
+        end
     end
 
     configurations { "Release", "Debug" }
@@ -34,9 +67,14 @@ end
 
     configuration "macosx"
         defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
-        includedirs { "/usr/local/include/event2", "/usr/local/include/freetype2", "/usr/local/opt/sqlite3/include" }
-        libdirs { "/usr/local/lib", "/usr/local/opt/sqlite3/lib" }
+        if not LIBEVENT_ROOT then
+            includedirs { "/usr/local/include/event2" }
+            libdirs { "/usr/local/lib" }
+        end
         buildoptions { "-stdlib=libc++" }
+        if MAC_ARM then
+            buildoptions { "--target=arm64-apple-macos11" }
+        end
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
     configuration "linux"
@@ -60,7 +98,9 @@ end
     configuration { "Release", "not vs*" }
         symbols "On"
         defines "NDEBUG"
-        buildoptions "-march=native"
+        if not MAC_ARM then
+            buildoptions "-march=native"
+        end
 
     configuration { "Debug", "vs*" }
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
@@ -82,11 +122,14 @@ end
     include "ocgcore"
     include "gframe"
     if os.ishost("windows") then
-    include "lua"
-    include "event"
-    include "sqlite3"
-    end
-
-    if os.ishost("macosx") or BUILD_LUA then
         include "lua"
+        include "event"
+        include "sqlite3"
+    else
+        if BUILD_LUA then
+            include "lua"
+        end
+        if BUILD_SQLITE then
+            include "sqlite3/premake4.lua"
+        end
     end

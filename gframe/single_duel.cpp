@@ -71,10 +71,12 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 			is_recorder = true;
 			cache_recorder = dp;
 		}
+#ifndef YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 		if(!wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
 			is_recorder = true;
 			replay_recorder = dp;
 		}
+#endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
 		if(wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
@@ -357,9 +359,7 @@ void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 			if(deck_error[dp->type]) {
 				deckerror = (DECKERROR_UNKNOWNCARD << 28) + deck_error[dp->type];
 			} else {
-				bool allow_ocg = host_info.rule == 0 || host_info.rule == 2;
-				bool allow_tcg = host_info.rule == 1 || host_info.rule == 2;
-				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, allow_ocg, allow_tcg);
+				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, host_info.rule);
 			}
 		}
 		if(deckerror) {
@@ -518,7 +518,6 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 		return;
 	duel_stage = DUEL_STAGE_DUELING;
 	bool swapped = false;
-	mtrandom rnd;
 	pplayer[0] = players[0];
 	pplayer[1] = players[1];
 	if((tp && dp->type == 1) || (!tp && dp->type == 0)) {
@@ -533,39 +532,35 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 		swapped = true;
 	}
 	dp->state = CTOS_RESPONSE;
-	ReplayHeader rh;
-	rh.id = 0x31707279;
-	rh.version = PRO_VERSION;
-	rh.flag = 0;
-	time_t seed = time(0);
+	std::random_device rd;
+	unsigned int seed = rd();
 #ifdef YGOPRO_SERVER_MODE
 	if(pre_seed[duel_count] > 0) {
 		seed = pre_seed[duel_count];
 	}
 #endif
+	mt19937 rnd(seed);
+	unsigned int duel_seed = rnd.rand();
+	ReplayHeader rh;
+	rh.id = 0x31707279;
+	rh.version = PRO_VERSION;
+	rh.flag = REPLAY_UNIFORM;
 	rh.seed = seed;
+	rh.start_time = (unsigned int)time(nullptr);
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
-	rnd.reset(seed);
 	last_replay.WriteData(players[0]->name, 40, false);
 	last_replay.WriteData(players[1]->name, 40, false);
 	if(!host_info.no_shuffle_deck) {
-		for(size_t i = pdeck[0].main.size() - 1; i > 0; --i) {
-			int swap = rnd.real() * (i + 1);
-			std::swap(pdeck[0].main[i], pdeck[0].main[swap]);
-		}
-		for(size_t i = pdeck[1].main.size() - 1; i > 0; --i) {
-			int swap = rnd.real() * (i + 1);
-			std::swap(pdeck[1].main[i], pdeck[1].main[swap]);
-		}
+		rnd.shuffle_vector(pdeck[0].main);
+		rnd.shuffle_vector(pdeck[1].main);
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
 	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
-	rnd.reset(seed);
-	pduel = create_duel(rnd.rand());
+	pduel = create_duel(duel_seed);
 	preload_script(pduel, "./script/special.lua", 0);
 	preload_script(pduel, "./script/init.lua", 0);
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
@@ -793,7 +788,8 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 			case 10:
 			case 21:
 			case 22:
-			case 23: {
+			case 23:
+			case 24: {
 				NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 				NetServer::SendBufferToPlayer(players[1], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -2229,14 +2225,15 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 }
 #ifdef YGOPRO_SERVER_MODE
 void SingleDuel::TestCard(int code) {
-	time_t seed = time(0);
-	mtrandom rnd;
-	rnd.reset(seed);
+	std::random_device rd;
+	unsigned int seed = rd();
+	mt19937 rnd(seed);
+	unsigned int duel_seed = rnd.rand();
 	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
 	rnd.reset(seed);
-	unsigned long tduel = create_duel(rnd.rand());
+	unsigned long tduel = create_duel(duel_seed);
 	preload_script(tduel, "./script/special.lua", 0);
 	preload_script(tduel, "./script/init.lua", 0);
 	set_player_info(tduel, 0, 8000, 5, 1);

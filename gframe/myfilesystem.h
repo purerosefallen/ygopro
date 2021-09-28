@@ -14,10 +14,16 @@
 
 #ifdef _WIN32
 
+#define NOMINMAX
 #include <Windows.h>
 
 class FileSystem {
 public:
+	static void SafeFileName(wchar_t* wfile) {
+		while((wfile = wcspbrk(wfile, L"<>:\"/\\|?*")) != NULL)
+			*wfile++ = '_';
+	}
+
 	static bool IsFileExists(const wchar_t* wfile) {
 		DWORD attr = GetFileAttributesW(wfile);
 		return attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY);
@@ -111,6 +117,11 @@ public:
 
 class FileSystem {
 public:
+	static void SafeFileName(wchar_t* wfile) {
+		while((wfile = wcspbrk(wfile, L"/")) != NULL)
+			*wfile++ = '_';
+	}
+	
 	static bool IsFileExists(const char* file) {
 		struct stat fileStat;
 		return (stat(file, &fileStat) == 0) && !S_ISDIR(fileStat.st_mode);

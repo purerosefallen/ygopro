@@ -38,6 +38,7 @@ ClientField::ClientField() {
 		mzone[p].resize(7, 0);
 		szone[p].resize(8, 0);
 	}
+	rnd.reset(std::random_device()());
 }
 void ClientField::Clear() {
 	for(int i = 0; i < 2; ++i) {
@@ -421,7 +422,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			}
 		}
 		if(has_card_in_grave) {
-			std::random_shuffle(selectable_cards.begin(), selectable_cards.end());
+			rnd.shuffle_vector(selectable_cards);
 		}
 	}
 	int startpos;

@@ -313,7 +313,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					int extra = replay.ReadInt32();
 					for(int j = 0; j < extra; ++j)
 						tmp_deck.extra.push_back(dataManager.GetCodePointer(replay.ReadInt32()));
-					myswprintf(filename, L"./deck/%ls %ls.ydk", ex_filename, namebuf[i]);
+					FileSystem::SafeFileName(namebuf[i]);
+					myswprintf(filename, L"deck/%ls-%d %ls.ydk", ex_filename, i + 1, namebuf[i]);
 					deckManager.SaveDeck(tmp_deck, filename);
 				}
 				mainGame->stACMessage->setText(dataManager.GetSysString(1335));
@@ -402,7 +403,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_DECK_EDIT: {
 				mainGame->RefreshCategoryDeck(mainGame->cbDBCategory, mainGame->cbDBDecks);
-				if(open_file && deckManager.LoadDeck(open_file_name)) {
+				if(open_file && deckManager.LoadDeck(open_file_name_with_category)) {
 #ifdef WIN32
 					wchar_t *dash = wcsrchr(open_file_name, L'\\');
 #else
@@ -509,7 +510,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					break;
 				wchar_t infobuf[256];
 				std::wstring repinfo;
-				time_t curtime = ReplayMode::cur_replay.pheader.seed;
+				time_t curtime;
+				if(ReplayMode::cur_replay.pheader.flag & REPLAY_UNIFORM)
+					curtime = ReplayMode::cur_replay.pheader.start_time;
+				else
+					curtime = ReplayMode::cur_replay.pheader.seed;
 				tm* st = localtime(&curtime);
 				wcsftime(infobuf, 256, L"%Y/%m/%d %H:%M:%S\n", st);
 				repinfo.append(infobuf);

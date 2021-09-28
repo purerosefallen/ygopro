@@ -82,7 +82,11 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 			cd.race = sqlite3_column_int(pStmt, 8);
 			cd.attribute = sqlite3_column_int(pStmt, 9);
 			cd.category = sqlite3_column_int(pStmt, 10);
-			_datas.insert(std::make_pair(cd.code, cd));
+			auto it = _datas.find(cd.code);
+			if(it != _datas.end())
+				it->second = cd;
+			else
+				_datas.insert(std::make_pair(cd.code, cd));
 #ifndef YGOPRO_SERVER_MODE
 			if(const char* text = (const char*)sqlite3_column_text(pStmt, 12)) {
 				BufferIO::DecodeUTF8(text, strBuffer);
@@ -224,10 +228,10 @@ const wchar_t* DataManager::GetText(int code) {
 	return unknown_string;
 }
 const wchar_t* DataManager::GetDesc(int strCode) {
-	if(strCode < 10000)
+	if((unsigned int)strCode < 10000u)
 		return GetSysString(strCode);
-	int code = strCode >> 4;
-	int offset = strCode & 0xf;
+	unsigned int code = strCode >> 4;
+	unsigned int offset = strCode & 0xf;
 	auto csit = _strings.find(code);
 	if(csit == _strings.end())
 		return unknown_string;
