@@ -71,7 +71,7 @@ public:
 		BufferIO::WriteInt8(p, proto);
 		memcpy(p, &st, sizeof(ST));
 #ifdef YGOPRO_MESSAGE_DEBUG
-		printf("CTOS: %d Length: %d\n", proto, sizeof(ST));
+		printf("CTOS: %d Length: %ld\n", proto, sizeof(ST));
 #endif
 		bufferevent_write(client_bev, duel_client_write, sizeof(ST) + 3);
 	}
@@ -81,7 +81,7 @@ public:
 		BufferIO::WriteInt8(p, proto);
 		memcpy(p, buffer, len);
 #ifdef YGOPRO_MESSAGE_DEBUG
-		printf("CTOS: %d Length: %d\n", proto, len);
+		printf("CTOS: %d Length: %ld\n", proto, len);
 #endif
 		bufferevent_write(client_bev, duel_client_write, len + 3);
 	}
