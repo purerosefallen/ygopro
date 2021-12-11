@@ -151,7 +151,6 @@ exec_windows:
   script:
     - git submodule update --init
     - bash -c 'cp -rf premake/* .'
-    - cmd /C "patch -p0 < irrlicht\irrlicht.patch"
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\ygo.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
