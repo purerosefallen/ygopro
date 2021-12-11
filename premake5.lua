@@ -124,7 +124,6 @@ end
         include "lua"
         include "event"
         include "freetype"
-        include "irrlicht"
         include "sqlite3"
     else
         if BUILD_LUA then
@@ -137,8 +136,8 @@ end
             include "freetype"
         end
     end
-    if os.ishost("linux") then
-        include "irrlicht_linux"
+    if not os.ishost("macosx") then
+        include "irrlicht"
     end
     if USE_IRRKLANG then
         include "ikpmp3"

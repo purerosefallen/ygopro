@@ -6,7 +6,7 @@ project "ygopro"
 
     files { "**.cpp", "**.cc", "**.c", "**.h" }
     excludes { "lzma/**", "spmemvfs/**" }
-    includedirs { "../ocgcore" }
+    includedirs { "../ocgcore", "../irrlicht/include" }
     links { "ocgcore", "clzma", "cspmemvfs", "Irrlicht", "sqlite3", "freetype", "event" }
     if USE_IRRKLANG then
         defines { "YGOPRO_USE_IRRKLANG" }
@@ -28,7 +28,7 @@ project "ygopro"
     configuration "windows"
         files "ygopro.rc"
         excludes "CGUIButton.cpp"
-        includedirs { "../irrlicht/include", "../freetype/include", "../event/include", "../sqlite3" }
+        includedirs { "../freetype/include", "../event/include", "../sqlite3" }
         links { "lua" }
         if USE_IRRKLANG then
             links { "irrKlang" }
@@ -69,7 +69,6 @@ project "ygopro"
         links "GL"
     configuration "linux"
         linkoptions { "-static-libstdc++", "-static-libgcc", "-Wl,-rpath=./lib/" }
-        includedirs { "../irrlicht_linux/include" }
         if BUILD_LUA then
             links { "lua" }
         else
@@ -82,7 +81,6 @@ project "ygopro"
         end
     configuration "macosx"
         links { "lua" }
-        includedirs { "../irrlicht/include" }
         libdirs { "../irrlicht" }
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos11" }
