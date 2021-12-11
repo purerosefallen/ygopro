@@ -36,13 +36,13 @@ mat_linux:
     - linux
   script:
     - apt update; apt -y install git wget tar
-    #- git clone --depth=1 https://code.mycard.moe/mycard/irrlicht irrlicht_linux
+    # - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
     - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
       - premake5
-      #- irrlicht_linux
+      #- irrlicht
       - libevent-stable
 
 mat_windows:
