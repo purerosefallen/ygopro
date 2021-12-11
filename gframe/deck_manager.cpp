@@ -353,7 +353,7 @@ int DeckManager::TypeCount(std::vector<code_pointer> list, unsigned int ctype) {
 bool DeckManager::LoadDeckFromCode(Deck& deck, const char *code, int len) {
 	char data[1024], *pdeck = data, *data_ = data;
 	int decoded_len = Base64::DecodedLength(code, len);
-	if(decoded_len < 8 || !Base64::Decode(code, len, data_, decoded_len))
+	if(decoded_len > 1024 || decoded_len < 8 || !Base64::Decode(code, len, data_, decoded_len))
 		return false;
 	int mainc = BufferIO::ReadInt32(pdeck);
 	int sidec = BufferIO::ReadInt32(pdeck);
@@ -372,7 +372,7 @@ int DeckManager::SaveDeckToCode(Deck& deck, char* code) {
 		BufferIO::WriteInt32(pdeck, deck.side[i]->first);
 	int len = pdeck - deckbuf;
 	int encoded_len = Base64::EncodedLength(len);
-	Base64::Encode(deckbuf, len, code, encoded_len);
+	Base64::Encode(deckbuf, len, code, encoded_len+1);
 	return encoded_len;
 }
 bool DeckManager::CreateCategory(const wchar_t* name) {
