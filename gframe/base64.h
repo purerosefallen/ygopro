@@ -2,6 +2,7 @@
 #define BASE64_H
 
 #include <string>
+#include <cstring>
 
 const char kBase64Alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
@@ -60,8 +61,10 @@ class Base64 {
 
     size_t encoded_length = EncodedLength(input_length);
 
-    if (out_length < encoded_length) return false;
-
+    if (out_length < encoded_length + 1) return false;
+    
+    std::memset(out, 0, out_length);
+    
     while (input_length--) {
       a3[i++] = *input++;
       if (i == 3) {
