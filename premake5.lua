@@ -39,6 +39,10 @@ solution "ygo"
         end
     end
 
+    if os.ishost("windows") then
+        BUILD_LUA=true
+    end
+
     configurations { "Release", "Debug" }
 if os.getenv("YGOPRO_NO_LUA_SAFE") then
     defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE" }
