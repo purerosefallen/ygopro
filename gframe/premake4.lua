@@ -30,6 +30,7 @@ project "ygopro"
         excludes "CGUIButton.cpp"
         includedirs { "../freetype/include", "../event/include", "../sqlite3" }
         links { "lua" }
+        defines { "_IRR_WCHAR_FILESYSTEM" }
         if USE_IRRKLANG then
             links { "irrKlang" }
             if not IRRKLANG_PRO then
