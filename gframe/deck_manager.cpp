@@ -150,7 +150,20 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 		if(it != list->end() && dc > it->second)
 			return (DECKERROR_LFLIST << 28) + cit->first;
 	}
+	int spellcount = CheckSpellCount(deck);
+	if (spellcount > 5) {
+		return (DECKERROR_MAINCOUNT << 28) + spellcount;
+	}
 	return 0;
+}
+int DeckManager::CheckSpellCount(Deck& deck) {
+	int spellcount = 0;
+	CardData cd;
+	for (auto cit : deck.main) {
+		if (cit->second.type & TYPE_SPELL)
+			spellcount++;
+	}
+	return spellcount;
 }
 int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 	deck.clear();
@@ -228,6 +241,8 @@ bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 		if(cdit->second != pcount[cdit->first])
 			return false;
 #endif
+	if (CheckSpellCount(ndeck) > 5)
+		return false;
 	deck = ndeck;
 	return true;
 }
