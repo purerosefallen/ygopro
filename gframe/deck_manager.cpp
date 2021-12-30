@@ -160,7 +160,7 @@ int DeckManager::CheckSpellCount(Deck& deck) {
 	int spellcount = 0;
 	CardData cd;
 	for (auto cit : deck.main) {
-		if (cit->second.type & TYPE_SPELL)
+		if (cit->second.type & (TYPE_SPELL | TYPE_TRAP))
 			spellcount++;
 	}
 	return spellcount;
