@@ -7,7 +7,7 @@
 
 namespace ygo {
 
-long ReplayMode::pduel = 0;
+intptr_t ReplayMode::pduel = 0;
 Replay ReplayMode::cur_replay;
 bool ReplayMode::is_continuing = true;
 bool ReplayMode::is_closing = false;
@@ -565,6 +565,8 @@ bool ReplayMode::ReplayAnalyze(char* msg, unsigned int len) {
 			DuelClient::ClientAnalyze(offset, pbuf - offset);
 			if(cl && !(cl & 0x80) && (pl != cl || pc != cc))
 				ReplayRefreshSingle(cc, cl, cs);
+			else if(pl == cl && cl == LOCATION_DECK)
+				ReplayRefreshDeck(cc);
 			break;
 		}
 		case MSG_POS_CHANGE: {
@@ -961,7 +963,7 @@ void ReplayMode::ReplayReload() {
 	/*len = */query_field_card(pduel, 1, LOCATION_REMOVED, flag, queryBuffer, 0);
 	mainGame->dField.UpdateFieldCard(mainGame->LocalPlayer(1), LOCATION_REMOVED, (char*)queryBuffer);
 }
-int ReplayMode::MessageHandler(long fduel, int type) {
+int ReplayMode::MessageHandler(intptr_t fduel, int type) {
 	if(!enable_log)
 		return 0;
 	char msgbuf[1024];
