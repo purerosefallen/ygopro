@@ -13,11 +13,11 @@ BLOCK "080404b0"
 BEGIN
 VALUE "FileDescription", "KoishiPro"
 VALUE "InternalName", "KoishiPro"
-VALUE "LegalCopyright", "Copyright (C) 2021 Nanahira"
+VALUE "LegalCopyright", "Copyright (C) 2022 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "KoishiPro"
-VALUE "FileVersion", "Yurika"
-VALUE "ProductVersion", "Yurika"
+VALUE "FileVersion", "PONPONPON"
+VALUE "ProductVersion", "PONPONPON"
 END
 END
 BLOCK "VarFileInfo"
