@@ -4,7 +4,6 @@ solution "ygo"
     objdir "obj"
 
     configurations { "Release", "Debug" }
-    platforms { "x86_64", "x86" }
     defines { "LUA_COMPAT_5_2" }
     configuration "windows"
         defines { "WIN32", "_WIN32" }
