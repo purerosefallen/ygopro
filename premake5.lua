@@ -37,6 +37,7 @@ solution "ygo"
     end
 
     configurations { "Release", "Debug" }
+    platforms { "x86_64", "x86" }
 if os.getenv("YGOPRO_LUA_SAFE") then
     defines { "LUA_COMPAT_5_2", "YGOPRO_LUA_SAFE" }
 else
