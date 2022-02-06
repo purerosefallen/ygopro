@@ -52,6 +52,9 @@ bool Game::Initialize() {
 				skinSystem->applySkin(skins[index].c_str());
 		}
 	}
+#ifndef _DEBUG
+	//device->getLogger()->setLogLevel(irr::ELOG_LEVEL::ELL_ERROR);
+#endif
 	xScale = 1;
 	yScale = 1;
 	linePatternD3D = 0;
