@@ -2219,7 +2219,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				mainGame->showcardp = 0;
 				mainGame->showcard = 4;
 			}
-			mainGame->WaitFrameSignal(45);
+			mainGame->WaitFrameSignal(count > 5 ? 12 : 45);
 			mainGame->dField.MoveCard(pcard, 5);
 			if (auto_watch_mode) {
 				mainGame->showcard = 0;
