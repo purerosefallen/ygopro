@@ -34,7 +34,10 @@ mat_submodules:
   stage: prepare
   tags: 
     - linux
-  script: git submodule update --init
+  script:
+    - rm -rf ocgcore script
+    - mkdir ocgcore script
+    - git submodule update --init
   artifacts:
     paths:
       - ocgcore
@@ -76,8 +79,8 @@ mat_windows:
 
 ._exec_build:
   stage: build
-  variables:
-    YGOPRO_NO_LUA_SAFE: '1' # on client no lua safe
+  #variables:
+  #  YGOPRO_NO_LUA_SAFE: '1' # on client no lua safe
   cache:
     key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
