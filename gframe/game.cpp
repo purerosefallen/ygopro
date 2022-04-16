@@ -1743,7 +1743,6 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if(!dataManager.GetData(code, &cd))
 		memset(&cd, 0, sizeof(CardData));
 	imgCard->setImage(imageManager.GetTexture(code, true));
-	imgCard->setScaleImage(true);
 	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
 	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
@@ -1976,9 +1975,7 @@ void Game::initUtils() {
 #ifndef YGOPRO_SERVER_MODE
 void Game::ClearTextures() {
 	matManager.mCard.setTexture(0, 0);
-	imgCard->setImage(imageManager.tCover[0]);
-	scrCardText->setVisible(false);
-	imgCard->setScaleImage(true);
+	ClearCardInfo(0);
 	btnPSAU->setImage();
 	btnPSDU->setImage();
 	for(int i=0; i<=4; ++i) {
