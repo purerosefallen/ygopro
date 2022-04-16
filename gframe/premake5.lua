@@ -76,7 +76,6 @@ end
             links { "irrKlang" }
             if IRRKLANG_PRO then
                 defines { "IRRKLANG_STATIC" }
-                links { "ikpmp3" }
                 filter { "not configurations:Debug" }
                     libdirs { IRRKLANG_PRO_RELEASE_LIB_DIR }
                 filter { "configurations:Debug" }
