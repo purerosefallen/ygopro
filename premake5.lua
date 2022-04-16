@@ -203,6 +203,7 @@ if SERVER_MODE then
     BUILD_FREETYPE = false
     BUILD_IRRLICHT = false
     BUILD_IKPMP3 = false
+    USE_IRRKLANG = false
 end
 
 workspace "YGOPro"
