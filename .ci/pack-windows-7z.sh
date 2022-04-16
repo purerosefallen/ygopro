@@ -12,7 +12,6 @@ fi
 TARGET_PLATFORM=win32
 
 apt update && apt -y install p7zip-full git
-git submodule update --init
 mkdir dist replay
 
 7z a -mx9 -xr!.git* dist/KoishiPro-$CI_COMMIT_REF_NAME-win32-$TARGET_LOCALE.7z "${ARCHIVE_FILES[@]}"

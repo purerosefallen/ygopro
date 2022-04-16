@@ -1448,7 +1448,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!strcmp(strbuf, "default_rule")) {
 			gameConf.default_rule = atoi(valbuf);
 			if(gameConf.default_rule <= 0)
-				gameConf.default_rule = DEFAULT_DUEL_RULE;
+				gameConf.default_rule = YGOPRO_DEFAULT_DUEL_RULE;
 		} else if(!strcmp(strbuf, "hide_setname")) {
 			gameConf.hide_setname = atoi(valbuf);
 		} else if(!strcmp(strbuf, "hide_hint_button")) {
@@ -1557,7 +1557,7 @@ void Game::LoadConfig() {
 	gameConf.chkIgnore2 = 0;
 	gameConf.use_lflist = 1;
 	gameConf.default_lflist = 0;
-	gameConf.default_rule = DEFAULT_DUEL_RULE;
+	gameConf.default_rule = YGOPRO_DEFAULT_DUEL_RULE;
 	gameConf.hide_setname = 0;
 	gameConf.hide_hint_button = 0;
 	gameConf.control_mode = 0;
@@ -1691,7 +1691,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "mute_spectators = %d\n", (chkIgnore2->isChecked() ? 1 : 0));
 	fprintf(fp, "use_lflist = %d\n", gameConf.use_lflist);
 	fprintf(fp, "default_lflist = %d\n", gameConf.default_lflist);
-	fprintf(fp, "default_rule = %d\n", gameConf.default_rule == DEFAULT_DUEL_RULE ? 0 : gameConf.default_rule);
+	fprintf(fp, "default_rule = %d\n", gameConf.default_rule == YGOPRO_DEFAULT_DUEL_RULE ? 0 : gameConf.default_rule);
 	fprintf(fp, "hide_setname = %d\n", gameConf.hide_setname);
 	fprintf(fp, "hide_hint_button = %d\n", gameConf.hide_hint_button);
 	fprintf(fp, "#control_mode = 0: Key A/S/D/R Chain Buttons. control_mode = 1: MouseLeft/MouseRight/NULL/F9 Without Chain Buttons\n");
@@ -1743,7 +1743,6 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if(!dataManager.GetData(code, &cd))
 		memset(&cd, 0, sizeof(CardData));
 	imgCard->setImage(imageManager.GetTexture(code, true));
-	imgCard->setScaleImage(true);
 	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
 	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
@@ -1976,9 +1975,7 @@ void Game::initUtils() {
 #ifndef YGOPRO_SERVER_MODE
 void Game::ClearTextures() {
 	matManager.mCard.setTexture(0, 0);
-	imgCard->setImage(imageManager.tCover[0]);
-	scrCardText->setVisible(false);
-	imgCard->setScaleImage(true);
+	ClearCardInfo(0);
 	btnPSAU->setImage();
 	btnPSDU->setImage();
 	for(int i=0; i<=4; ++i) {

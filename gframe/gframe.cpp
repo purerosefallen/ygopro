@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 #ifndef _WIN32
 	setlocale(LC_CTYPE, "UTF-8");
 #endif
-#ifdef __APPLE__
+#if defined __APPLE__ && !defined YGOPRO_SERVER_MODE
 	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
 	CFURLRef bundle_base_url = CFURLCreateCopyDeletingLastPathComponent(NULL, bundle_url);
 	CFRelease(bundle_url);
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.draw_count = 1;
 	ygo::game_info.no_check_deck = false;
 	ygo::game_info.no_shuffle_deck = false;
-	ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
+	ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
 	for (int i = 0; i < 3; ++i)
 		ygo::pre_seed[i] = (unsigned int)0;
@@ -94,15 +94,15 @@ int main(int argc, char* argv[]) {
 			mode = 0;
 		ygo::game_info.mode = mode;
 		if(argv[5][0] == 'T')
-			ygo::game_info.duel_rule = DEFAULT_DUEL_RULE - 1;
+			ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE - 1;
 		else if(argv[5][0] == 'F')
-			ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
+			ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 		else {
 			int master_rule = atoi(argv[5]);
 			if(master_rule)
 				ygo::game_info.duel_rule = master_rule;
 			else
-				ygo::game_info.duel_rule = DEFAULT_DUEL_RULE;
+				ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 		}
 		if(argv[6][0] == 'T')
 			ygo::game_info.no_check_deck = true;

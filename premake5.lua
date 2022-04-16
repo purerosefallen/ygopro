@@ -1,4 +1,220 @@
-solution "ygo"
+-- default global settings
+
+BUILD_LUA = true
+BUILD_EVENT = os.istarget("windows")
+BUILD_FREETYPE = os.istarget("windows")
+BUILD_SQLITE = os.istarget("windows")
+BUILD_IRRLICHT = not os.istarget("macosx")
+USE_IRRKLANG = true
+IRRKLANG_PRO = false
+LUA_LIB_NAME = "lua"
+
+SERVER_MODE = true
+USE_IRRKLANG = false
+
+-- read settings from command line or environment variables
+
+newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
+newoption { trigger = "no-build-lua", category = "YGOPro - lua", description = "" }
+newoption { trigger = "lua-include-dir", category = "YGOPro - lua", description = "", value = "PATH" }
+newoption { trigger = "lua-lib-dir", category = "YGOPro - lua", description = "", value = "PATH" }
+newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME", default = "lua" }
+newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "" }
+
+newoption { trigger = "build-event", category = "YGOPro - event", description = "" }
+newoption { trigger = "no-build-event", category = "YGOPro - event", description = "" }
+newoption { trigger = "event-include-dir", category = "YGOPro - event", description = "", value = "PATH" }
+newoption { trigger = "event-lib-dir", category = "YGOPro - event", description = "", value = "PATH" }
+
+newoption { trigger = "build-freetype", category = "YGOPro - freetype", description = "" }
+newoption { trigger = "no-build-freetype", category = "YGOPro - freetype", description = "" }
+newoption { trigger = "freetype-include-dir", category = "YGOPro - freetype", description = "", value = "PATH" }
+newoption { trigger = "freetype-lib-dir", category = "YGOPro - freetype", description = "", value = "PATH" }
+
+newoption { trigger = "build-sqlite", category = "YGOPro - sqlite", description = "" }
+newoption { trigger = "no-build-sqlite", category = "YGOPro - sqlite", description = "" }
+newoption { trigger = "sqlite-include-dir", category = "YGOPro - sqlite", description = "", value = "PATH" }
+newoption { trigger = "sqlite-lib-dir", category = "YGOPro - sqlite", description = "", value = "PATH" }
+
+newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", description = "" }
+newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
+newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+
+newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "" }
+newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "" }
+newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+
+newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
+newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
+newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
+newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
+newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
+
+newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
+newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
+newoption { trigger = "server-mode", category = "YGOPro", description = "" }
+
+-- koishipro specific
+
+boolOptions = {
+    "compat-mycard",
+    "no-lua-safe",
+    "message-debug",
+    "default-duel-rule",
+    "no-side-check",
+}
+
+for _, boolOption in ipairs(boolOptions) do
+    newoption { trigger = boolOption, category = "YGOPro - Koishi", description = "" }
+end
+
+numberOptions = {
+    "default-rule",
+    "max-deck",
+    "min-deck",
+    "max-extra",
+    "max-side",
+}
+
+for _, numberOption in ipairs(numberOptions) do
+    newoption { trigger = numberOption, category = "YGOPro - Koishi", description = "", value = "NUMBER" }
+end
+
+function GetParam(param)
+    return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
+end
+
+function ApplyBoolean(param)
+    if GetParam(param) then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
+    end
+end
+
+function ApplyNumber(param)
+    local value = GetParam(param)
+    if not value then return end
+    local numberValue = tonumber(value)
+    if numberValue then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
+    end
+end
+
+if GetParam("build-lua") then
+    BUILD_LUA = true
+elseif GetParam("no-build-lua") then
+    BUILD_LUA = false
+end
+if not BUILD_LUA then
+    -- at most times you need to change this if you change BUILD_LUA to false
+    -- make sure your lua lib is built with C++ and version >= 5.3
+    LUA_INCLUDE_DIR = GetParam("lua-include-dir") or "/usr/local/include/lua"
+    LUA_LIB_DIR = GetParam("lua-lib-dir") or "/usr/local/lib"
+    LUA_LIB_NAME = GetParam("lua-lib-name")
+end
+
+if GetParam("lua-deb") then
+    BUILD_LUA = false
+    LUA_LIB_DIR = "/usr/lib/x86_64-linux-gnu"
+    LUA_LIB_NAME = "lua5.3-c++"
+    LUA_INCLUDE_DIR = "/usr/include/lua5.3"
+end
+
+if GetParam("build-event") then
+    BUILD_EVENT = os.istarget("windows") -- only on windows for now
+elseif GetParam("no-build-event") then
+    BUILD_EVENT = false
+end
+if not BUILD_EVENT then
+    EVENT_INCLUDE_DIR = GetParam("event-include-dir") or "/usr/local/include/event2"
+    EVENT_LIB_DIR = GetParam("event-lib-dir") or "/usr/local/lib"
+end
+
+if GetParam("build-freetype") then
+    BUILD_FREETYPE = true
+elseif GetParam("no-build-freetype") then
+    BUILD_FREETYPE = false
+end
+if not BUILD_FREETYPE then
+    if os.istarget("linux") then
+        FREETYPE_INCLUDE_DIR = "/usr/include/freetype2"
+    elseif os.istarget("macosx") then
+        FREETYPE_INCLUDE_DIR = "/usr/local/include/freetype2"
+    end
+    FREETYPE_INCLUDE_DIR = GetParam("freetype-include-dir") or FREETYPE_INCLUDE_DIR
+    FREETYPE_LIB_DIR = GetParam("freetype-lib-dir") or "/usr/local/lib"
+end
+
+if GetParam("build-sqlite") then
+    BUILD_SQLITE = true
+elseif GetParam("no-build-sqlite") then
+    BUILD_SQLITE = false
+end
+if not BUILD_SQLITE then
+    SQLITE_INCLUDE_DIR = GetParam("sqlite-include-dir") or "/usr/local/include"
+    SQLITE_LIB_DIR = GetParam("sqlite-lib-dir") or "/usr/local/lib"
+end
+
+if GetParam("build-irrlicht") then
+    BUILD_IRRLICHT = true
+elseif GetParam("no-build-irrlicht") then
+    BUILD_IRRLICHT = false
+end
+if not BUILD_IRRLICHT then
+    IRRLICHT_INCLUDE_DIR = GetParam("irrlicht-include-dir") or "/usr/local/include/irrlicht"
+    IRRLICHT_LIB_DIR = GetParam("irrlicht-lib-dir") or "/usr/local/lib"
+end
+
+if GetParam("use-irrklang") then
+    USE_IRRKLANG = true
+elseif GetParam("no-use-irrklang") then
+    USE_IRRKLANG = false
+end
+if USE_IRRKLANG then
+    IRRKLANG_INCLUDE_DIR = GetParam("irrklang-include-dir") or "../irrklang/include"
+    if os.istarget("windows") then
+        IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
+    elseif os.istarget("linux") then
+        IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
+        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./"
+    elseif os.istarget("macosx") then
+        IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
+    end
+    IRRKLANG_LIB_DIR = GetParam("irrklang-lib-dir") or IRRKLANG_LIB_DIR
+end
+
+if GetParam("irrklang-pro") and os.istarget("windows") then
+    IRRKLANG_PRO = true
+elseif GetParam("no-irrklang-pro") then
+    IRRKLANG_PRO = false
+end
+if IRRKLANG_PRO then
+    -- irrklang pro can't use the pro lib to debug
+    IRRKLANG_PRO_RELEASE_LIB_DIR = GetParam("irrklang-pro-release-lib-dir") or "../irrklang/lib/Win32-vs2019"
+    IRRKLANG_PRO_DEBUG_LIB_DIR = GetParam("irrklang-pro-debug-lib-dir") or "../irrklang/lib/Win32-visualStudio-debug"  
+end
+
+BUILD_IKPMP3 = USE_IRRKLANG
+
+if GetParam("winxp-support") and os.istarget("windows") then
+    WINXP_SUPPORT = true
+end
+if GetParam("mac-arm") and os.istarget("macosx") then
+    MAC_ARM = true
+end
+if GetParam("server-mode") then
+    SERVER_MODE = true
+end
+
+if SERVER_MODE then
+    BUILD_FREETYPE = false
+    BUILD_IRRLICHT = false
+    BUILD_IKPMP3 = false
+    USE_IRRKLANG = false
+end
+
+workspace "YGOPro"
     location "build"
     language "C++"
     objdir "obj"
@@ -39,101 +255,97 @@ solution "ygo"
         end
     end
 
-    if os.ishost("windows") then
-        BUILD_LUA=true
+    configurations { "Release", "Debug" }
+
+
+    for _, numberOption in ipairs(numberOptions) do
+        ApplyNumber(numberOption)
     end
 
-    configurations { "Release", "Debug" }
-if os.getenv("YGOPRO_NO_LUA_SAFE") then
-    defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE" }
-else
-    defines { "LUA_COMPAT_5_2", "YGOPRO_SERVER_MODE", "YGOPRO_LUA_SAFE" }
-end
-    configuration "windows"
+    for _, boolOption in ipairs(boolOptions) do
+        ApplyBoolean(boolOption)
+    end
+
+
+    filter "system:windows"
         defines { "WIN32", "_WIN32" }
-        startproject "ygopro"
-
-if os.getenv("YGOPRO_USE_XP_TOOLSET") then
-    configuration { "windows", "vs2015" }
-        toolset "v140_xp"
-
-    configuration { "windows", "vs2017" }
-        toolset "v141_xp"
-
-    configuration { "windows", "vs2019" }
-        toolset "v141_xp"
+if not SERVER_MODE then
+        entrypoint "mainCRTStartup"
 end
-
-    configuration "bsd"
-        defines { "LUA_USE_POSIX" }
-        includedirs { "/usr/local/include" }
-        libdirs { "/usr/local/lib" }
-
-    configuration "macosx"
-        defines { "LUA_USE_MACOSX", "DBL_MAX_10_EXP=+308", "DBL_MANT_DIG=53", "GL_SILENCE_DEPRECATION" }
-        if not LIBEVENT_ROOT then
-            includedirs { "/usr/local/include/event2" }
-            libdirs { "/usr/local/lib" }
+        systemversion "latest"
+        startproject "YGOPro"
+        if WINXP_SUPPORT then
+            defines { "WINVER=0x0501" }
+            toolset "v141_xp"
+        else
+            defines { "WINVER=0x0601" } -- WIN7
         end
+
+    filter "system:macosx"
+        libdirs { "/usr/local/lib" }
         buildoptions { "-stdlib=libc++" }
         if MAC_ARM then
-            buildoptions { "--target=arm64-apple-macos11" }
+            buildoptions { "--target=arm64-apple-macos12" }
         end
+if not SERVER_MODE then
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
+end
 
-    configuration "linux"
-        defines { "LUA_USE_LINUX" }
+    filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
 
-    configuration "Release"
+    filter "configurations:Release"
+        optimize "Speed"
         targetdir "bin/release"
 
-    configuration "Debug"
+    filter "configurations:Debug"
         symbols "On"
         defines "_DEBUG"
         targetdir "bin/debug"
 
-    configuration { "Release", "vs*" }
-        optimize "Speed"
+    filter { "configurations:Release", "action:vs*" }
         flags { "LinkTimeOptimization" }
         staticruntime "On"
         disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800" }
 
-    configuration { "Release", "not vs*" }
+    filter { "configurations:Release", "not action:vs*" }
         symbols "On"
         defines "NDEBUG"
         if not MAC_ARM then
             buildoptions "-march=native"
         end
 
-    configuration { "Debug", "vs*" }
+    filter { "configurations:Debug", "action:vs*" }
         defines { "_ITERATOR_DEBUG_LEVEL=0" }
         disablewarnings { "4819", "4828" }
 
-    configuration "vs*"
+    filter "action:vs*"
         vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
+    
+    filter "not action:vs*"
+        buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
 
-    configuration "not vs*"
-        buildoptions { "-fno-strict-aliasing", "-Wno-format-security" }
-
-    configuration {"not vs*", "windows"}
-        buildoptions { "-static-libgcc" }
-
-    startproject "ygopro"
+    filter {}
 
     include "ocgcore"
     include "gframe"
-    if os.ishost("windows") then
+    if BUILD_LUA then
         include "lua"
+    end
+    if BUILD_EVENT then
         include "event"
+    end
+    if BUILD_FREETYPE and not SERVER_MODE then
+        include "freetype"
+    end
+    if BUILD_IRRLICHT and not SERVER_MODE then
+        include "irrlicht"
+    end
+    if BUILD_SQLITE then
         include "sqlite3"
-    else
-        if BUILD_LUA then
-            include "lua"
-        end
-        if BUILD_SQLITE then
-            include "sqlite3/premake4.lua"
-        end
+    end
+    if BUILD_IKPMP3 then
+        include "ikpmp3"
     end
