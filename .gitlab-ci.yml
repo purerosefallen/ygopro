@@ -12,6 +12,7 @@ mat_common:
   stage: prepare
   tags: 
     - linux
+  script:
     # lua
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.6.tar.gz | tar zfx -
     - mv lua-5.3.6 lua
