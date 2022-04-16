@@ -12,16 +12,15 @@ mat_common:
   stage: prepare
   tags: 
     - linux
-  script:
     # lua
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
-    - mv lua-5.3.5/src lua
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.6.tar.gz | tar zfx -
+    - mv lua-5.3.6 lua
     # sqlite3
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
     - mv sqlite-autoconf-3360000 sqlite3
     # freetype
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
-    - mv freetype-2.10.4 freetype
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
+    - mv freetype-2.11.1 freetype
     # premake
     - cp -rf premake/* .;
   artifacts:
@@ -52,7 +51,7 @@ mat_linux:
   script:
     - apt update; apt -y install git wget tar
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-linux.tar.gz | tar zfx -
     - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
@@ -99,7 +98,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-macosx.tar.gz | tar zfx -
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
@@ -116,11 +115,11 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-windows.zip
-    - 7z x -y premake-5.0.0-alpha14-windows.zip
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-windows.zip
+    - 7z x -y premake-5.0.0-beta1-windows.zip
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
+    - mv libevent-2.0.22-stable event
     # irrlicht
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
@@ -151,7 +150,7 @@ exec_windows:
   script:
     - git submodule update --init
     - bash -c 'cp -rf premake/* .'
-    - '.\premake5.exe vs2019'
+    - '.\premake5.exe vs2019 --irrklang-pro'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\ygo.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
   artifacts:
@@ -174,11 +173,14 @@ exec_linux:
     - git submodule update --init
     - mkdir lib
     - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
-    - env YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable ./premake5 gmake
+    # - cp -rf irrklang/bin/linux-gcc-64/ikpMP3.so ./lib/
+    - export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
+    - export EVENT_LIB_DIR=$PWD/libevent-stable/lib
+    - ./premake5 gmake --build-freetype --build-sqlite --build-irrlicht --build-ikpmp3 --irrklang-pro
     - cd build
     - make config=release -j$(nproc)
     - cd ..
-    - mv bin/release/ygopro .
+    - mv bin/release/YGOPro ./ygopro
     - strip ygopro
   artifacts:
     paths:
@@ -204,7 +206,6 @@ exec_macos_platform_x86:
     - mat_macos_platform_x86
   variables:
     TARGET_ARCH: x86
-    USE_IRRKLANG: "1"
       
 exec_macos_platform_m1:
   extends: ._exec_macos_platform
@@ -214,7 +215,6 @@ exec_macos_platform_m1:
     - mat_macos_platform_m1
   variables:
     TARGET_ARCH: m1
-    YGOPRO_TARGET_ARM: '1'
 
 exec_macos:
   stage: combine

@@ -2,18 +2,29 @@
 set -x
 set -o errexit
 
-TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_ARCH
-export YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable
+TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
+export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
+export EVENT_LIB_DIR=$PWD/libevent-stable/lib
+export IRRLICHT_INCLUDE_DIR=$PWD/irrlicht/include
+export IRRLICHT_LIB_DIR=$PWD/irrlicht
 
 git submodule update --init
 
-./premake5 gmake --cc=clang
+if [[ $TARGET_PLATFORM == "x86" ]]; then
+  ./premake5 gmake --cc=clang --build-freetype --build-sqlite --build-ikpmp3
+else
+  ./premake5 gmake --cc=clang --build-freetype --build-sqlite --no-use-irrklang
+fi
+
 cd build
 make config=release -j4
 cd ..
 
 mkdir ygopro-platforms
-mv bin/release/ygopro.app $TARGET_YGOPRO_BINARY_PATH
+mv bin/release/YGOPro.app $TARGET_YGOPRO_BINARY_PATH
 
-install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib $TARGET_YGOPRO_BINARY_PATH
+if [[ $TARGET_PLATFORM == "x86" ]]; then
+  install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib $TARGET_YGOPRO_BINARY_PATH
+fi
+
 strip $TARGET_YGOPRO_BINARY_PATH
