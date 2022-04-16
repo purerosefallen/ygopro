@@ -22,7 +22,7 @@ if SERVER_MODE then
 else
     kind "WindowedApp"
 
-    files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
+    files { "*.cpp", "*.h" }
     includedirs { "../ocgcore" }
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end

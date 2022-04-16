@@ -212,51 +212,15 @@ if SERVER_MODE then
     BUILD_IRRLICHT = false
     BUILD_IKPMP3 = false
     USE_IRRKLANG = false
+    IRRKLANG_PRO = false
 end
 
 workspace "YGOPro"
     location "build"
     language "C++"
     objdir "obj"
-    if os.ishost("macosx") then
-        BUILD_LUA=true
-    end
-    if not os.ishost("windows") then
-        if os.getenv("YGOPRO_BUILD_LUA") then
-            BUILD_LUA=true
-        end
-        if os.getenv("YGOPRO_BUILD_SQLITE") then
-            BUILD_SQLITE=true
-        end
-        if os.getenv("YGOPRO_BUILD_FREETYPE") then
-            BUILD_FREETYPE=true
-        end
-        if os.getenv("YGOPRO_BUILD_ALL") or os.ishost("macosx") then
-            BUILD_ALL=true
-        end
-        if os.getenv("YGOPRO_LIBEVENT_STATIC_PATH") then
-            LIBEVENT_ROOT=os.getenv("YGOPRO_LIBEVENT_STATIC_PATH")
-        end
-        if BUILD_ALL then
-            BUILD_LUA=true
-            BUILD_SQLITE=true
-            BUILD_FREETYPE=true
-        end
-        if os.ishost("macosx") then
-            if os.getenv("YGOPRO_TARGET_ARM") then
-                MAC_ARM=true
-            end
-        end
-    end
-    if (os.ishost("windows") or os.getenv("USE_IRRKLANG")) and not os.getenv("NO_IRRKLANG") then
-        USE_IRRKLANG = true
-        if os.getenv("irrklang_pro") then
-            IRRKLANG_PRO = true
-        end
-    end
 
     configurations { "Release", "Debug" }
-
 
     for _, numberOption in ipairs(numberOptions) do
         ApplyNumber(numberOption)
@@ -265,7 +229,6 @@ workspace "YGOPro"
     for _, boolOption in ipairs(boolOptions) do
         ApplyBoolean(boolOption)
     end
-
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
