@@ -14,14 +14,14 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.5.tar.gz | tar zfx -
-    - mv lua-5.3.5/src lua
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.3.6.tar.gz | tar zfx -
+    - mv lua-5.3.6 lua
     # sqlite3
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3360000.tar.gz | tar zfx -
     - mv sqlite-autoconf-3360000 sqlite3
     # freetype
-    #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.10.4.tar.gz | tar zfx -
-    #- mv freetype-2.10.4 freetype
+    #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
+    #- mv freetype-2.11.1 freetype
     # premake
     - cp -rf premake/* .;
   artifacts:
@@ -30,14 +30,24 @@ mat_common:
       #- freetype
       - sqlite3
 
+mat_submodules:
+  stage: prepare
+  tags: 
+    - linux
+  script: git submodule update --init
+  artifacts:
+    paths:
+      - ocgcore
+      - script
+
 mat_linux:
   stage: prepare
   tags:
     - linux
   script:
     - apt update; apt -y install git wget tar
-    # - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-linux.tar.gz | tar zfx -
+    #- git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-linux.tar.gz | tar zfx -
     - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
@@ -52,11 +62,13 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-alpha14-windows.zip
-    - 7z x -y premake-5.0.0-alpha14-windows.zip
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-windows.zip
+    - 7z x -y premake-5.0.0-beta1-windows.zip
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - mv libevent-2.0.22-stable event ; cp -rf event/WIN32-Code/* event/include
+    - mv libevent-2.0.22-stable event
+    # irrlicht
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5.exe
@@ -64,6 +76,8 @@ mat_windows:
 
 ._exec_build:
   stage: build
+  variables:
+    YGOPRO_NO_LUA_SAFE: '1' # on client no lua safe
   cache:
     key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
@@ -77,14 +91,11 @@ exec_windows:
   dependencies:
     - mat_common
     - mat_windows
-  #variables:
-  #  irrklang_pro: '1'
-  #  USE_IRRKLANG: "1"
+    - mat_submodules
   script:
-    - git submodule update --init
     - bash -c 'cp -rf premake/* .'
     - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\ygo.sln /m /p:Configuration=Release'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
   artifacts:
     paths:
@@ -94,21 +105,37 @@ exec_linux:
   extends: ._exec_build
   tags:
     - linux
-  variables:
-    YGOPRO_BUILD_ALL: '1'
-    #USE_IRRKLANG: "1"
   dependencies:
     - mat_common
-    #- mat_irrklang
     - mat_linux
+    - mat_submodules
   script:
     - apt update; apt -y install git build-essential
-    - git submodule update --init
-    - env YGOPRO_LIBEVENT_STATIC_PATH=$PWD/libevent-stable ./premake5 gmake
+    - ./premake5 gmake --build-sqlite
     - cd build
     - make config=release -j$(nproc)
     - cd ..
-    - mv bin/release/ygopro .
+    - mv bin/release/ygopro ./ygopro
+    - strip ygopro
+  artifacts:
+    paths:
+      - ygopro
+
+exec_debian:
+  extends: ._exec_build
+  tags:
+    - linux
+  dependencies:
+    - mat_common
+    - mat_linux
+    - mat_submodules
+  script:
+    - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
+    - ./premake5 gmake --lua-deb
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mv bin/release/ygopro ./ygopro
     - strip ygopro
   artifacts:
     paths:

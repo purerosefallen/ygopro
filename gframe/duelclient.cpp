@@ -539,7 +539,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		str.append(msgbuf);
 		myswprintf(msgbuf, L"%ls%d\n", dataManager.GetSysString(1233), pkt->info.draw_count);
 		str.append(msgbuf);
-		if(pkt->info.duel_rule != DEFAULT_DUEL_RULE) {
+		if(pkt->info.duel_rule != YGOPRO_DEFAULT_DUEL_RULE) {
 			myswprintf(msgbuf, L"*%ls\n", dataManager.GetSysString(1260 + pkt->info.duel_rule - 1));
 			str.append(msgbuf);
 		}
@@ -2219,7 +2219,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				mainGame->showcardp = 0;
 				mainGame->showcard = 4;
 			}
-			mainGame->WaitFrameSignal(45);
+			mainGame->WaitFrameSignal(count > 5 ? 12 : 45);
 			mainGame->dField.MoveCard(pcard, 5);
 			if (auto_watch_mode) {
 				mainGame->showcard = 0;
@@ -4326,7 +4326,7 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 			hoststr.append(L"][");
 			if(pHP->host.draw_count == 1 && pHP->host.start_hand == 5 && pHP->host.start_lp == 8000
 			        && !pHP->host.no_check_deck && !pHP->host.no_shuffle_deck
-			        && pHP->host.duel_rule == DEFAULT_DUEL_RULE)
+			        && pHP->host.duel_rule == YGOPRO_DEFAULT_DUEL_RULE)
 				hoststr.append(dataManager.GetSysString(1247));
 			else hoststr.append(dataManager.GetSysString(1248));
 			hoststr.append(L"]");
