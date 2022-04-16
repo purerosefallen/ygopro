@@ -7,13 +7,8 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-<<<<<<< HEAD
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip ; exit 0"
-  - 7z x -y premake-5.0.0-alpha14-windows.zip
-=======
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-beta1/premake-5.0.0-beta1-windows.zip ; exit 0"
   - 7z x premake-5.0.0-beta1-windows.zip
->>>>>>> 57ec431355b6eada0eeb74f1a54f0c1e83fa1ba5
   
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
   - tar xf libevent-2.0.22-stable.tar.gz
@@ -37,7 +32,7 @@ install:
 configuration: Release
 
 build: 
-    project: build/ygo.sln
+    project: build/YGOPro.sln
     parallel: true
 
 after_build:
@@ -96,11 +91,5 @@ deploy:
 cache:
   - premake-5.0.0-beta1-windows.zip
   - libevent-2.0.22-stable.tar.gz
-<<<<<<< HEAD
-  - freetype-2.10.1.tar.gz
-  - lua-5.3.5.tar.gz 
-  - irrlicht-1.8.4.zip
-=======
   - lua-5.3.6.tar.gz
->>>>>>> 57ec431355b6eada0eeb74f1a54f0c1e83fa1ba5
   - sqlite-amalgamation-3310100.zip
