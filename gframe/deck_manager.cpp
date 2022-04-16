@@ -89,21 +89,12 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 	if(!list)
 		return 0;
 	int dc = 0;
-#ifdef YGOPRO_SERVER_MODE
-	if(deck.main.size() < DECKCOUNT_MAIN_MIN || deck.main.size() > DECKCOUNT_MAIN_MAX)
+	if(deck.main.size() < YGOPRO_MIN_DECK || deck.main.size() > YGOPRO_MAX_DECK)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > DECKCOUNT_EXTRA)
+	if(deck.extra.size() > YGOPRO_MAX_EXTRA)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > DECKCOUNT_SIDE)
+	if(deck.side.size() > YGOPRO_MAX_SIDE)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
-#else
-	if(deck.main.size() < 40 || deck.main.size() > 60)
-		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 15)
-		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > 15)
-		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
-#endif
 	const int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
 	int avail = rule_map[rule];
 	for(size_t i = 0; i < deck.main.size(); ++i) {
@@ -166,22 +157,10 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		if(cd.type & TYPE_TOKEN)
 			continue;
 		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
-			if(
-#ifdef YGOPRO_SERVER_MODE
-			deck.extra.size() >= DECKCOUNT_EXTRA
-#else
-			deck.extra.size() >= 15
-#endif
-			)
+			if(deck.extra.size() >= YGOPRO_MAX_EXTRA)
 				continue;
-			deck.extra.push_back(dataManager.GetCodePointer(code)); //verified by GetData()
-		} else 
-#ifdef YGOPRO_SERVER_MODE
-		if(deck.main.size() < DECKCOUNT_MAIN_MAX)
-#else
-		if(deck.main.size() < 60)
-#endif
-		{
+			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
+		} else if(deck.main.size() < YGOPRO_MAX_DECK) {
 			deck.main.push_back(dataManager.GetCodePointer(code));
 		}
 	}
@@ -193,11 +172,7 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-#ifdef YGOPRO_SERVER_MODE
-		if(deck.side.size() < DECKCOUNT_SIDE)
-#else
-		if(deck.side.size() < 15)
-#endif
+		if(deck.side.size() < YGOPRO_MAX_SIDE)
 			deck.side.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 	}
 	return errorcode;

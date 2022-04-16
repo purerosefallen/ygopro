@@ -49,13 +49,54 @@ newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", desc
 newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
 newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
 newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
+newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
 
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
 newoption { trigger = "server-mode", category = "YGOPro", description = "" }
 
+-- koishipro specific
+
+boolOptions = {
+    "compat-mycard",
+    "no-lua-safe",
+    "message-debug",
+    "default-duel-rule",
+}
+
+for _, boolOption in ipairs(boolOptions) do
+    newoption { trigger = boolOption, category = "YGOPro - Koishi", description = "" }
+end
+
+numberOptions = {
+    "default-rule",
+    "max-deck",
+    "min-deck",
+    "max-extra",
+    "max-side",
+}
+
+for _, numberOption in ipairs(numberOptions) do
+    newoption { trigger = numberOption, category = "YGOPro - Koishi", description = "", value = "NUMBER" }
+end
+
 function GetParam(param)
     return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
+end
+
+function ApplyBoolean(param)
+    if GetParam(param) then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
+    end
+end
+
+function ApplyNumber(param)
+    local value = GetParam(param)
+    if not value then return end
+    local numberValue = tonumber(value)
+    if numberValue then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
+    end
 end
 
 if GetParam("build-lua") then
@@ -127,7 +168,7 @@ if USE_IRRKLANG then
         IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
     elseif os.istarget("linux") then
         IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
-        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./irrklang/bin/linux-gcc-64/"
+        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./"
     elseif os.istarget("macosx") then
         IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
     end
@@ -145,6 +186,8 @@ if IRRKLANG_PRO then
     IRRKLANG_PRO_DEBUG_LIB_DIR = GetParam("irrklang-pro-debug-lib-dir") or "../irrklang/lib/Win32-visualStudio-debug"  
 end
 
+BUILD_IKPMP3 = USE_IRRKLANG
+
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
 end
@@ -153,6 +196,12 @@ if GetParam("mac-arm") and os.istarget("macosx") then
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
+end
+
+if SERVER_MODE then
+    BUILD_FREETYPE = false
+    BUILD_IRRLICHT = false
+    BUILD_IKPMP3 = false
 end
 
 workspace "YGOPro"
@@ -197,6 +246,16 @@ workspace "YGOPro"
     end
 
     configurations { "Release", "Debug" }
+
+
+    for _, numberOption in ipairs(numberOptions) do
+        ApplyNumber(numberOption)
+    end
+
+    for _, boolOption in ipairs(boolOptions) do
+        ApplyBoolean(boolOption)
+    end
+
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
@@ -277,6 +336,6 @@ end
     if BUILD_SQLITE then
         include "sqlite3"
     end
-    if USE_IRRKLANG and IRRKLANG_PRO and not SERVER_MODE then
+    if BUILD_IKPMP3 then
         include "ikpmp3"
     end

@@ -22,10 +22,13 @@ if SERVER_MODE then
 else
     kind "WindowedApp"
 
-    files { "*.cpp", "*.h" }
+    files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end
+    if BUILD_IKPMP3 then
+        links { "ikpmp3" }
+    end
 
     if BUILD_EVENT then
         includedirs { "../event/include" }
@@ -103,10 +106,11 @@ end
             links { "irrklang" }
         end
     filter "system:linux"
+    linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
 end
         if USE_IRRKLANG then
             links { "IrrKlang" }
-            linkoptions{ IRRKLANG_LINK_RPATH }
+            linkoptions { IRRKLANG_LINK_RPATH }
         end
