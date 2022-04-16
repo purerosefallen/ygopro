@@ -62,6 +62,7 @@ boolOptions = {
     "no-lua-safe",
     "message-debug",
     "default-duel-rule",
+    "no-side-check",
 }
 
 for _, boolOption in ipairs(boolOptions) do
