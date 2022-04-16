@@ -30,6 +30,16 @@ mat_common:
       #- freetype
       - sqlite3
 
+mat_submodules:
+  stage: prepare
+  tags: 
+    - linux
+  script: git submodule update --init
+  artifacts:
+    paths:
+      - ocgcore
+      - script
+
 mat_linux:
   stage: prepare
   tags:
@@ -81,8 +91,8 @@ exec_windows:
   dependencies:
     - mat_common
     - mat_windows
+    - mat_submodules
   script:
-    - git submodule update --init
     - bash -c 'cp -rf premake/* .'
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
@@ -98,9 +108,9 @@ exec_linux:
   dependencies:
     - mat_common
     - mat_linux
+    - mat_submodules
   script:
     - apt update; apt -y install git build-essential
-    - git submodule update --init
     - ./premake5 gmake --build-sqlite
     - cd build
     - make config=release -j$(nproc)
@@ -118,9 +128,9 @@ exec_debian:
   dependencies:
     - mat_common
     - mat_linux
+    - mat_submodules
   script:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
-    - git submodule update --init
     - ./premake5 gmake --lua-deb
     - cd build
     - make config=release -j$(nproc)
