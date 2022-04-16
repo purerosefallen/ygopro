@@ -89,7 +89,7 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < YGOPRO_MMIN_DECK || deck.main.size() > YGOPRO_MAX_DECK)
+	if(deck.main.size() < YGOPRO_MIN_DECK || deck.main.size() > YGOPRO_MAX_DECK)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
 	if(deck.extra.size() > YGOPRO_MAX_EXTRA)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();

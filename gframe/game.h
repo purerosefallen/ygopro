@@ -872,8 +872,8 @@ extern Game* mainGame;
 #define YGOPRO_MAX_DECK					60
 #endif
 
-#ifndef YGOPRO_MMIN_DECK
-#define YGOPRO_MMIN_DECK					40
+#ifndef YGOPRO_MIN_DECK
+#define YGOPRO_MIN_DECK					40
 #endif
 
 #ifndef YGOPRO_MAX_EXTRA
