@@ -30,6 +30,16 @@ mat_common:
       - freetype
       - sqlite3
 
+mat_submodules:
+  stage: prepare
+  tags: 
+    - linux
+  script: git submodule update --init
+  artifacts:
+    paths:
+      - ocgcore
+      - script
+
 mat_irrklang:
   stage: prepare
   tags:
@@ -147,8 +157,8 @@ exec_windows:
     - mat_common
     - mat_irrklang
     - mat_windows
+    - mat_submodules
   script:
-    - git submodule update --init
     - bash -c 'cp -rf premake/* .'
     - '.\premake5.exe vs2019 --irrklang-pro'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
@@ -165,9 +175,9 @@ exec_linux:
     - mat_common
     - mat_irrklang
     - mat_linux
+    - mat_submodules
   script:
     - apt update; apt -y install git build-essential libgl1-mesa-dev libglu-dev libxxf86vm-dev
-    - git submodule update --init
     - mkdir lib
     - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
     # - cp -rf irrklang/bin/linux-gcc-64/ikpMP3.so ./lib/
@@ -201,6 +211,7 @@ exec_macos_platform_x86:
     - mat_macos
     - mat_common
     - mat_macos_platform_x86
+    - mat_submodules
   variables:
     TARGET_PLATFORM: x86
     BUILD_IKPMP3: '1'
@@ -211,6 +222,7 @@ exec_macos_platform_m1:
     - mat_macos
     - mat_common
     - mat_macos_platform_m1
+    - mat_submodules
   variables:
     TARGET_PLATFORM: m1
     MAC_ARM: '1'
@@ -416,6 +428,7 @@ assets_en-US:
     - assets_windows
     - exec_windows
     - assets_zh-CN
+    - mat_submodules
 
 ._pack_assets_linux_zh-CN:
   extends: ._pack
@@ -424,6 +437,7 @@ assets_en-US:
     - assets_nonwindows
     - exec_linux
     - assets_zh-CN
+    - mat_submodules
 
 ._pack_assets_macos_zh-CN:
   extends: ._pack
@@ -432,6 +446,7 @@ assets_en-US:
     - assets_nonwindows
     - exec_macos
     - assets_zh-CN
+    - mat_submodules
 
 ._pack_assets_windows_en-US:
   extends: ._pack
@@ -440,6 +455,7 @@ assets_en-US:
     - assets_windows
     - exec_windows
     - assets_en-US
+    - mat_submodules
 
 ._pack_assets_linux_en-US:
   extends: ._pack
@@ -448,6 +464,7 @@ assets_en-US:
     - assets_nonwindows
     - exec_linux
     - assets_en-US
+    - mat_submodules
 
 ._pack_assets_macos_en-US:
   extends: ._pack
@@ -456,24 +473,28 @@ assets_en-US:
     - assets_nonwindows
     - exec_macos
     - assets_en-US
+    - mat_submodules
 
 ._pack_assets_windows_dlc:
   extends: ._pack
   dependencies:
     - assets
     - exec_windows
+    - mat_submodules
 
 ._pack_assets_linux_dlc:
   extends: ._pack
   dependencies:
     - assets
     - exec_linux
+    - mat_submodules
 
 ._pack_assets_macos_dlc:
   extends: ._pack
   dependencies:
     - assets
     - exec_macos
+    - mat_submodules
 
 pack_windows_dlc_zh-CN:
   extends:

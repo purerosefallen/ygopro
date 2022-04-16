@@ -8,8 +8,6 @@ export EVENT_LIB_DIR=$PWD/libevent-stable/lib
 export IRRLICHT_INCLUDE_DIR=$PWD/irrlicht/include
 export IRRLICHT_LIB_DIR=$PWD/irrlicht
 
-git submodule update --init
-
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build
