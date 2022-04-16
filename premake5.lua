@@ -57,7 +57,7 @@ boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
-    "default-rule",
+    "default-duel-rule",
 }
 
 for _, boolOption in ipairs(boolOptions) do

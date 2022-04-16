@@ -89,11 +89,11 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < 40 || deck.main.size() > 60)
+	if(deck.main.size() < YGOPRO_MMIN_DECK || deck.main.size() > YGOPRO_MAX_DECK)
 		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 15)
+	if(deck.extra.size() > YGOPRO_MAX_EXTRA)
 		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
-	if(deck.side.size() > 15)
+	if(deck.side.size() > YGOPRO_MAX_SIDE)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 	const int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
 	int avail = rule_map[rule];
@@ -157,10 +157,10 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		if(cd.type & TYPE_TOKEN)
 			continue;
 		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
-			if(deck.extra.size() >= 15)
+			if(deck.extra.size() >= YGOPRO_MAX_EXTRA)
 				continue;
 			deck.extra.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
-		} else if(deck.main.size() < 60) {
+		} else if(deck.main.size() < YGOPRO_MAX_DECK) {
 			deck.main.push_back(dataManager.GetCodePointer(code));
 		}
 	}
@@ -172,7 +172,7 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec) {
 		}
 		if(cd.type & TYPE_TOKEN)
 			continue;
-		if(deck.side.size() < 15)
+		if(deck.side.size() < YGOPRO_MAX_SIDE)
 			deck.side.push_back(dataManager.GetCodePointer(code));	//verified by GetData()
 	}
 	return errorcode;

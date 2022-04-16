@@ -131,6 +131,8 @@ mat_windows:
 
 ._exec_build:
   stage: build
+  variables:
+    YGOPRO_NO_LUA_SAFE: '1' # on client no lua safe
   cache:
     key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
@@ -145,14 +147,11 @@ exec_windows:
     - mat_common
     - mat_irrklang
     - mat_windows
-  variables:
-    irrklang_pro: '1'
-    USE_IRRKLANG: "1"
   script:
     - git submodule update --init
     - bash -c 'cp -rf premake/* .'
     - '.\premake5.exe vs2019 --irrklang-pro'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\ygo.sln /m /p:Configuration=Release'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
   artifacts:
     paths:
@@ -162,9 +161,6 @@ exec_linux:
   extends: ._exec_build
   tags:
     - linux
-  variables:
-    YGOPRO_BUILD_ALL: '1'
-    USE_IRRKLANG: "1"
   dependencies:
     - mat_common
     - mat_irrklang
@@ -206,7 +202,8 @@ exec_macos_platform_x86:
     - mat_common
     - mat_macos_platform_x86
   variables:
-    TARGET_ARCH: x86
+    TARGET_PLATFORM: x86
+    BUILD_IKPMP3: '1'
       
 exec_macos_platform_m1:
   extends: ._exec_macos_platform
@@ -215,7 +212,9 @@ exec_macos_platform_m1:
     - mat_common
     - mat_macos_platform_m1
   variables:
-    TARGET_ARCH: m1
+    TARGET_PLATFORM: m1
+    MAC_ARM: '1'
+    NO_USE_IRRKLANG: '1'
 
 exec_macos:
   stage: combine

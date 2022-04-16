@@ -10,11 +10,7 @@ export IRRLICHT_LIB_DIR=$PWD/irrlicht
 
 git submodule update --init
 
-if [[ $TARGET_PLATFORM == "x86" ]]; then
-  ./premake5 gmake --cc=clang --build-freetype --build-sqlite --build-ikpmp3
-else
-  ./premake5 gmake --cc=clang --build-freetype --build-sqlite --no-use-irrklang
-fi
+./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build
 make config=release -j4
