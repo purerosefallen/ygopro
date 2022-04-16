@@ -34,7 +34,10 @@ mat_submodules:
   stage: prepare
   tags: 
     - linux
-  script: git submodule update --init
+  script:
+    - rm -rf ocgcore script
+    - mkdir ocgcore script
+    - git submodule update --init
   artifacts:
     paths:
       - ocgcore
