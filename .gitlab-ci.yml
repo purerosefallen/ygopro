@@ -97,17 +97,31 @@ exec_linux:
     - linux
   dependencies:
     - mat_common
-    #- mat_irrklang
     - mat_linux
   script:
     - apt update; apt -y install git build-essential
     - git submodule update --init
-    - mkdir lib
-    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
-    # - cp -rf irrklang/bin/linux-gcc-64/ikpMP3.so ./lib/
-    - export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
-    - export EVENT_LIB_DIR=$PWD/libevent-stable/lib
     - ./premake5 gmake --build-sqlite
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mv bin/release/YGOPro ./ygopro
+    - strip ygopro
+  artifacts:
+    paths:
+      - ygopro
+
+exec_debian:
+  extends: ._exec_build
+  tags:
+    - linux
+  dependencies:
+    - mat_common
+    - mat_linux
+  script:
+    - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
+    - git submodule update --init
+    - ./premake5 gmake --lua-deb
     - cd build
     - make config=release -j$(nproc)
     - cd ..
