@@ -115,7 +115,7 @@ exec_linux:
     - cd build
     - make config=release -j$(nproc)
     - cd ..
-    - mv bin/release/YGOPro ./ygopro
+    - mv bin/release/ygopro ./ygopro
     - strip ygopro
   artifacts:
     paths:
@@ -135,7 +135,7 @@ exec_debian:
     - cd build
     - make config=release -j$(nproc)
     - cd ..
-    - mv bin/release/YGOPro ./ygopro
+    - mv bin/release/ygopro ./ygopro
     - strip ygopro
   artifacts:
     paths:
