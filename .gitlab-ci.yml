@@ -98,7 +98,6 @@ exec_linux:
   dependencies:
     - mat_common
     #- mat_irrklang
-    - mat_lua
     - mat_linux
   script:
     - apt update; apt -y install git build-essential
