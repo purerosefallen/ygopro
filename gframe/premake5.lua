@@ -30,6 +30,10 @@ end
         links { "ikpmp3" }
     end
 
+    if BUILD_IKPMP3 then
+        links { "ikpmp3" }
+    end
+
     if BUILD_EVENT then
         includedirs { "../event/include" }
     else
