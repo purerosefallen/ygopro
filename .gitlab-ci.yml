@@ -95,16 +95,16 @@ mat_macos_platform_m1:
       - libevent-stable
 
 
-mat_macos_irrklang_patched:
-  stage: build
-  tags:
-    - linux
-  dependencies: []
-  script:
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
-  artifacts:
-    paths:
-      - libirrklang-patched.dylib
+#mat_macos_irrklang_patched:
+#  stage: build
+#  tags:
+#    - linux
+#  dependencies: []
+#  script:
+#    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
+#  artifacts:
+#    paths:
+#      - libirrklang-patched.dylib
 
 mat_macos:
   stage: prepare
@@ -203,6 +203,8 @@ exec_linux:
     - macos
   script:
     - ./.ci/exec-macos-platform.sh
+  variables:
+    NO_USE_IRRKLANG: '1'
   artifacts:
     paths:
       - ygopro-platforms
@@ -210,14 +212,13 @@ exec_linux:
 exec_macos_platform_x86:
   extends: ._exec_macos_platform
   dependencies:
-    - mat_irrklang
+    #- mat_irrklang
     - mat_macos
     - mat_common
     - mat_macos_platform_x86
     - mat_submodules
   variables:
     TARGET_PLATFORM: x86
-    BUILD_IKPMP3: '1'
       
 exec_macos_platform_m1:
   extends: ._exec_macos_platform
@@ -229,7 +230,6 @@ exec_macos_platform_m1:
   variables:
     TARGET_PLATFORM: m1
     MAC_ARM: '1'
-    NO_USE_IRRKLANG: '1'
 
 exec_macos:
   stage: combine
@@ -238,12 +238,12 @@ exec_macos:
   dependencies:
     - exec_macos_platform_x86
     - exec_macos_platform_m1
-    - mat_macos_irrklang_patched
+    #- mat_macos_irrklang_patched
   script:
     - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
     - lipo -create -output ygopro.app/Contents/MacOS/ygopro ygopro-platforms/ygopro-platform-x86 ygopro-platforms/ygopro-platform-m1;
     # do some special things for irrklang
-    - mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
+    #- mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
     #- install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
     #- dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
     #- strip ygopro.app/Contents/MacOS/ygopro;
