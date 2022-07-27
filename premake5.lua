@@ -173,7 +173,7 @@ if USE_IRRKLANG then
         IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
     elseif os.istarget("linux") then
         IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
-        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./"
+        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./lib/"
     elseif os.istarget("macosx") then
         IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
     end
