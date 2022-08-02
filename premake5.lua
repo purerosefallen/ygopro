@@ -201,7 +201,6 @@ if os.istarget("macosx") then
     if GetParam("mac-arm") then
         MAC_ARM = true
     end
-    ON_MAC_ARM = MAC_ARM or os.outputof("arch") == "arm64"
 end
 
 workspace "YGOPro"
@@ -261,7 +260,7 @@ workspace "YGOPro"
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
         defines "NDEBUG"
-        if not ON_MAC_ARM then
+        if not MAC_ARM then
             buildoptions "-march=native"
         end
 

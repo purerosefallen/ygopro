@@ -198,6 +198,8 @@ exec_macos_platform_m1:
   extends: ._exec_macos_platform
   tags:
     - macos-m1
+  variables:
+    MAC_ARM: 1
 
 exec_macos:
   stage: combine
