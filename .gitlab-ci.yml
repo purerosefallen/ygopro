@@ -125,16 +125,16 @@ mat_windows:
   stage: build
   variables:
     NO_LUA_SAFE: '1' # on client no lua safe
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
 
 exec_windows:
   extends: ._exec_build
   tags:
     - vs
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - bin/
+      - obj/
   dependencies:
     - mat_common
     - mat_irrklang
@@ -153,6 +153,11 @@ exec_linux:
   extends: ._exec_build
   tags:
     - linux
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - bin/
+      - obj/
   dependencies:
     - mat_common
     - mat_irrklang
@@ -192,12 +197,23 @@ exec_macos_platform_x86:
   extends: ._exec_macos_platform
   tags:
     - macos
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - bin/
+      - obj/
 
       
 exec_macos_platform_m1:
   extends: ._exec_macos_platform
   tags:
     - macos-m1
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - bin/
+      - obj/
+
 
 exec_macos:
   stage: combine
