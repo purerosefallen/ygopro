@@ -200,8 +200,9 @@ BUILD_IKPMP3 = USE_IRRKLANG
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
 end
-if GetParam("mac-arm") and os.istarget("macosx") then
+if os.istarget("macosx") then
     MAC_ARM = true
+    ON_MAC_ARM = MAC_ARM or io.popen('arch'):read('*l') == "arm64"
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
@@ -274,7 +275,7 @@ end
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
         defines "NDEBUG"
-        if not MAC_ARM then
+        if not ON_MAC_ARM then
             buildoptions "-march=native"
         end
 
