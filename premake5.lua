@@ -205,7 +205,7 @@ if os.istarget("macosx") then
     if GetParam("mac-arm") then
         MAC_ARM = true
     end
-    ON_MAC_ARM = MAC_ARM or io.popen('arch'):read('*l') == "arm64"
+    ON_MAC_ARM = MAC_ARM or os.outputof("arch") == "arm64"
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
@@ -222,7 +222,7 @@ end
 workspace "YGOPro"
     location "build"
     language "C++"
-    objdir "obj"
+    objdir "obj"    
 
     configurations { "Release", "Debug" }
 
