@@ -73,28 +73,6 @@ mat_linux:
       - irrlicht
       - libevent-stable
 
-mat_macos_platform_x86:
-  stage: prepare
-  tags:
-    - macos
-  variables:
-    PROCESSOR_COUNT: '4'
-  script: ./.ci/libevent-prebuild.sh
-  artifacts:
-    paths:
-      - libevent-stable
-
-mat_macos_platform_m1:
-  stage: prepare
-  tags:
-    - linux
-  script:
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-m1mac.tar.gz | tar zfx -
-  artifacts:
-    paths:
-      - libevent-stable
-
-
 #mat_macos_irrklang_patched:
 #  stage: build
 #  tags:
@@ -113,6 +91,7 @@ mat_macos:
   script:
     - apt update; apt -y install wget tar
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta1-macosx.tar.gz | tar zfx -
+    # - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
@@ -199,37 +178,26 @@ exec_linux:
 
 ._exec_macos_platform:
   extends: ._exec_build
-  tags:
-    - macos
+  dependencies:
+    - mat_macos
+    - mat_common
+    - mat_submodules
   script:
     - ./.ci/exec-macos-platform.sh
-  variables:
-    NO_USE_IRRKLANG: '1'
   artifacts:
     paths:
       - ygopro-platforms
 
 exec_macos_platform_x86:
   extends: ._exec_macos_platform
-  dependencies:
-    #- mat_irrklang
-    - mat_macos
-    - mat_common
-    - mat_macos_platform_x86
-    - mat_submodules
-  variables:
-    TARGET_PLATFORM: x86
+  tags:
+    - macos
+
       
 exec_macos_platform_m1:
   extends: ._exec_macos_platform
-  dependencies:
-    - mat_macos
-    - mat_common
-    - mat_macos_platform_m1
-    - mat_submodules
-  variables:
-    TARGET_PLATFORM: m1
-    MAC_ARM: '1'
+  tags:
+    - macos-m1
 
 exec_macos:
   stage: combine
@@ -241,7 +209,7 @@ exec_macos:
     #- mat_macos_irrklang_patched
   script:
     - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
-    - lipo -create -output ygopro.app/Contents/MacOS/ygopro ygopro-platforms/ygopro-platform-x86 ygopro-platforms/ygopro-platform-m1;
+    - lipo -create -output ygopro.app/Contents/MacOS/ygopro $(ls -1 ygopro-platforms/ygopro-platform-*);
     # do some special things for irrklang
     #- mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
     #- install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
