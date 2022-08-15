@@ -200,8 +200,11 @@ BUILD_IKPMP3 = USE_IRRKLANG
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
 end
-if GetParam("mac-arm") and os.istarget("macosx") then
-    MAC_ARM = true
+if os.istarget("macosx") then
+    MAC_ARM = false
+    if GetParam("mac-arm") then
+        MAC_ARM = true
+    end
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
@@ -218,7 +221,7 @@ end
 workspace "YGOPro"
     location "build"
     language "C++"
-    objdir "obj"
+    objdir "obj"    
 
     configurations { "Release", "Debug" }
 

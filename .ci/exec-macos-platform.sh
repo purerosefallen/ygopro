@@ -2,13 +2,16 @@
 set -x
 set -o errexit
 
+TARGET_PLATFORM=$(arch)
 TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
 export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
 export EVENT_LIB_DIR=$PWD/libevent-stable/lib
 export IRRLICHT_INCLUDE_DIR=$PWD/irrlicht/include
 export IRRLICHT_LIB_DIR=$PWD/irrlicht
 
-./premake5 gmake --cc=clang --build-freetype --build-sqlite
+./.ci/libevent-prebuild.sh
+
+./premake5 gmake --cc=clang --build-freetype --build-sqlite --no-use-irrklang
 
 cd build
 make config=release -j4
