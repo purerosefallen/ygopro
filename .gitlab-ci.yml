@@ -91,6 +91,12 @@ exec_windows:
   extends: ._exec_build
   tags:
     - vs
+
+
+exec_windows:
+  extends: ._exec_build
+  tags:
+    - vs
   dependencies:
     - mat_common
     - mat_windows
