@@ -695,6 +695,9 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 	while (pbuf - msgbuffer < (int)len) {
 		offset = pbuf;
 		unsigned char engType = BufferIO::ReadUInt8(pbuf);
+#ifdef YGOPRO_SERVER_MODE
+		last_game_msg = engType;
+#endif
 		switch (engType) {
 		case MSG_RESET_TIME: {
 			player = BufferIO::ReadInt8(pbuf);
