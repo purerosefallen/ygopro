@@ -627,6 +627,9 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 #ifdef YGOPRO_SERVER_MODE
 		time_compensator[0] = host_info.time_limit;
 		time_compensator[1] = host_info.time_limit;
+		time_backed[0] = host_info.time_limit;
+		time_backed[1] = host_info.time_limit;
+		last_game_msg = 0;
 #endif
 		timeval timeout = { 1, 0 };
 		event_add(etimer, &timeout);
@@ -1117,6 +1120,8 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			time_compensator[0] = host_info.time_limit;
 			time_compensator[1] = host_info.time_limit;
+			time_backed[0] = host_info.time_limit;
+			time_backed[1] = host_info.time_limit;
 #endif
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 			NetServer::ReSendToPlayer(players[1]);
@@ -1874,6 +1879,13 @@ void TagDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 			time_limit[resp_type] -= time_elapsed;
 		else time_limit[resp_type] = 0;
 		time_elapsed = 0;
+#ifdef YGOPRO_SERVER_MODE
+		if(time_backed[resp_type] > 0 && time_limit[resp_type] < host_info.time_limit && NetServer::IsCanIncreaseTime(last_game_msg, pdata, len)) {
+			++time_limit[resp_type];
+			++time_compensator[resp_type];
+			--time_backed[resp_type];
+		}
+#endif
 	}
 	Process();
 }
@@ -2346,7 +2358,7 @@ int TagDuel::MessageHandler(intptr_t fduel, int type) {
 void TagDuel::TagTimer(evutil_socket_t fd, short events, void* arg) {
 	TagDuel* sd = static_cast<TagDuel*>(arg);
 	sd->time_elapsed++;
-	if(sd->time_elapsed >= sd->time_limit[sd->last_response]) {
+	if(sd->time_elapsed >= sd->time_limit[sd->last_response] || sd->time_limit[sd->last_response] <= 0) {
 		unsigned char wbuf[3];
 		uint32 player = sd->last_response;
 		wbuf[0] = MSG_WIN;

@@ -311,6 +311,6 @@ end
     if BUILD_SQLITE then
         include "sqlite3"
     end
-    if BUILD_IKPMP3 then
+    if BUILD_IKPMP3 and not SERVER_MODE then
         include "ikpmp3"
     end
