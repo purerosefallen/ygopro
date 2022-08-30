@@ -30,6 +30,7 @@ public:
 	static void InitDuel();
 	static void InitTestCard(int code);
 	static unsigned short StartServer(unsigned short port);
+	static bool IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len);
 #else
 	static bool StartServer(unsigned short port);
 #endif //YGOPRO_SERVER_MODE

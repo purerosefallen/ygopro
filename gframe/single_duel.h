@@ -77,10 +77,12 @@ protected:
 	unsigned char duel_count;
 	unsigned char tp_player;
 	unsigned char match_result[3];
-	unsigned short time_limit[2];
-	unsigned short time_elapsed;
+	short time_limit[2];
+	short time_elapsed;
 #ifdef YGOPRO_SERVER_MODE
-	unsigned short time_compensator[2];
+	short time_compensator[2];
+	short time_backed[2];
+	unsigned char last_game_msg;
 #endif
 };
 
