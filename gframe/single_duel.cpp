@@ -628,6 +628,9 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 #ifdef YGOPRO_SERVER_MODE
 		time_compensator[0] = host_info.time_limit;
 		time_compensator[1] = host_info.time_limit;
+		time_backed[0] = host_info.time_limit;
+		time_backed[1] = host_info.time_limit;
+		last_game_msg = 0;
 #endif
 		timeval timeout = { 1, 0 };
 		event_add(etimer, &timeout);
@@ -742,6 +745,9 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 	while (pbuf - msgbuffer < (int)len) {
 		offset = pbuf;
 		unsigned char engType = BufferIO::ReadUInt8(pbuf);
+#ifdef YGOPRO_SERVER_MODE
+		last_game_msg = engType;
+#endif
 		switch (engType) {
 		case MSG_RESET_TIME: {
 			player = BufferIO::ReadInt8(pbuf);
@@ -1159,6 +1165,8 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			time_compensator[0] = host_info.time_limit;
 			time_compensator[1] = host_info.time_limit;
+			time_backed[0] = host_info.time_limit;
+			time_backed[1] = host_info.time_limit;
 #endif
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 			NetServer::ReSendToPlayer(players[1]);
@@ -1785,6 +1793,13 @@ void SingleDuel::GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {
 			time_limit[dp->type] -= time_elapsed;
 		else time_limit[dp->type] = 0;
 		time_elapsed = 0;
+#ifdef YGOPRO_SERVER_MODE
+		if(time_backed[dp->type] > 0 && time_limit[dp->type] < host_info.time_limit && NetServer::IsCanIncreaseTime(last_game_msg, pdata, len)) {
+			++time_limit[dp->type];
+			++time_compensator[dp->type];
+			--time_backed[dp->type];
+		}
+#endif
 	}
 	Process();
 }
@@ -2195,7 +2210,7 @@ int SingleDuel::MessageHandler(intptr_t fduel, int type) {
 void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 	SingleDuel* sd = static_cast<SingleDuel*>(arg);
 	sd->time_elapsed++;
-	if(sd->time_elapsed >= sd->time_limit[sd->last_response]) {
+	if(sd->time_elapsed >= sd->time_limit[sd->last_response] || sd->time_limit[sd->last_response] <= 0) {
 		unsigned char wbuf[3];
 		uint32 player = sd->last_response;
 		wbuf[0] = MSG_WIN;
