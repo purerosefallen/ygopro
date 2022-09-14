@@ -35,7 +35,7 @@ bool DuelClient::is_refreshing = false;
 int DuelClient::match_kill = 0;
 std::vector<HostPacket> DuelClient::hosts;
 std::vector<std::wstring> DuelClient::hosts_srvpro;
-std::set<unsigned int> DuelClient::remotes;
+std::set<std::pair<unsigned int, unsigned short>> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
 unsigned int DuelClient::temp_ip = 0;
 unsigned short DuelClient::temp_port = 0;
@@ -4309,11 +4309,16 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 		socklen_t sz = sizeof(sockaddr_in);
 		char buf[256];
 		/*int ret = */recvfrom(fd, buf, 256, 0, (sockaddr*)&bc_addr, &sz);
-		unsigned int ipaddr = bc_addr.sin_addr.s_addr;
 		HostPacket* pHP = (HostPacket*)buf;
-		if(!is_closing && pHP->identifier == NETWORK_SERVER_ID && remotes.find(ipaddr) == remotes.end() ) {
+		if(is_closing || pHP->identifier != NETWORK_SERVER_ID)
+			return;
+		//if(pHP->version != PRO_VERSION)
+		//	return;
+		unsigned int ipaddr = bc_addr.sin_addr.s_addr;
+		const auto remote = std::make_pair(ipaddr, pHP->port);
+		if(remotes.find(remote) == remotes.end()) {
 			mainGame->gMutex.lock();
-			remotes.insert(ipaddr);
+			remotes.insert(remote);
 			pHP->ipaddr = ipaddr;
 			hosts.push_back(*pHP);
 			std::wstring hoststr;
