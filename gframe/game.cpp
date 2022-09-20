@@ -201,10 +201,8 @@ bool Game::Initialize() {
 	lstHostList->setItemHeight(18);
 	btnLanRefresh = env->addButton(rect<s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
 	env->addStaticText(dataManager.GetSysString(1221), rect<s32>(10, 360, 220, 380), false, false, wLanWindow);
-	ebJoinHost = env->addEditBox(gameConf.lasthost, rect<s32>(110, 355, 350, 380), true, wLanWindow);
+	ebJoinHost = env->addEditBox(gameConf.lasthost, rect<s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebJoinPort = env->addEditBox(gameConf.lastport, rect<s32>(360, 355, 420, 380), true, wLanWindow);
-	ebJoinPort->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1222), rect<s32>(10, 390, 220, 410), false, false, wLanWindow);
 	ebJoinPass = env->addEditBox(gameConf.roompass, rect<s32>(110, 385, 420, 410), true, wLanWindow);
 	ebJoinPass->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -1381,9 +1379,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!strcmp(strbuf, "lasthost")) {
 			BufferIO::DecodeUTF8(valbuf, wstr);
 			BufferIO::CopyWStr(wstr, gameConf.lasthost, 100);
-		} else if(!strcmp(strbuf, "lastport")) {
-			BufferIO::DecodeUTF8(valbuf, wstr);
-			BufferIO::CopyWStr(wstr, gameConf.lastport, 20);
 		} else if(!strcmp(strbuf, "roompass")) {
 			BufferIO::DecodeUTF8(valbuf, wstr);
 			BufferIO::CopyWStr(wstr, gameConf.roompass, 20);
@@ -1505,7 +1500,6 @@ void Game::LoadConfig() {
 	gameConf.numfont[0] = 0;
 	gameConf.textfont[0] = 0;
 	gameConf.lasthost[0] = 0;
-	gameConf.lastport[0] = 0;
 	gameConf.roompass[0] = 0;
 	//settings
 	gameConf.chkMAutoPos = 0;
@@ -1639,8 +1633,6 @@ void Game::SaveConfig() {
 	fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	fprintf(fp, "lasthost = %s\n", linebuf);
-	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
-	fprintf(fp, "lastport = %s\n", linebuf);
 	//settings
 	fprintf(fp, "automonsterpos = %d\n", (chkMAutoPos->isChecked() ? 1 : 0));
 	fprintf(fp, "autospellpos = %d\n", (chkSTAutoPos->isChecked() ? 1 : 0));
