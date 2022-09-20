@@ -65,6 +65,7 @@ build
 /update*
 /locales
 /lib
+/pack
 
 # ygopro main program
 /ygopro

@@ -257,6 +257,9 @@ assets:
     - cd fonts
     - wget -O - https://cdn01.moecube.com/ygopro-fonts.tar.gz | tar zfx -
     - cd ..
+    # pack
+    - git clone --depth=1 https://code.mycard.moe/mycard/ygopro-card-list
+    - mv ygopro-card-list/pack .
     # locales
     - git clone --depth=1 https://code.mycard.moe/nanahira/ygopro-database
     - mv ygopro-database/locales .
@@ -266,6 +269,7 @@ assets:
       - single
       - sound
       - fonts
+      - pack
       - locales
   only:
     - tags
