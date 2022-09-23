@@ -4427,6 +4427,12 @@ bool DuelClient::LookupSRV(char *hostname, HostResult* result) {
 
 HostResult DuelClient::ParseHost(char *hostname) {
 	HostResult result;
+	unsigned int tryAddress = htonl(inet_addr(hostname));
+	if(tryAddress != -1) {
+		result.host = tryAddress;
+		result.port = 7911;
+		return result;
+	}
 	auto trySplitter = strchr(hostname, ':');
 	if(trySplitter == NULL) {
 		char srvHostname[114];
