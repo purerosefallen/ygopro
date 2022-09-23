@@ -6,7 +6,9 @@
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 char DeckManager::deckBuffer[0x10000];
+#endif
 DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
@@ -253,7 +255,6 @@ bool DeckManager::LoadDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUICom
 		mainGame->deckBuilder.RefreshPackListScroll();
 	return res;
 }
-#endif
 FILE* DeckManager::OpenDeckFile(const wchar_t* file, const char* mode) {
 #ifdef WIN32
 	FILE* fp = _wfopen(file, (wchar_t*)mode);
@@ -412,4 +413,5 @@ bool DeckManager::DeleteCategory(const wchar_t* name) {
 		return false;
 	return FileSystem::DeleteDir(localname);
 }
+#endif //YGOPRO_SERVER_MODE
 }

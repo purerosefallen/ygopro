@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE
 	enable_log = 1;
-	ygo::aServerPort = 7911;
+	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	} else
 	if(argc > 2) {
-		ygo::aServerPort = atoi(argv[1]);
+		ygo::server_port = atoi(argv[1]);
 		int lflist = atoi(argv[2]);
 		if(lflist < 0)
 			lflist = 999;

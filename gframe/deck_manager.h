@@ -5,7 +5,9 @@
 #include "client_card.h"
 #include <unordered_map>
 #include <vector>
+#ifndef YGOPRO_SERVER_MODE
 #include <sstream>
+#endif
 
 namespace ygo {
 
@@ -36,7 +38,9 @@ public:
 	Deck current_deck;
 	std::vector<LFList> _lfList;
 
+#ifndef YGOPRO_SERVER_MODE
 	static char deckBuffer[0x10000];
+#endif
 
 	void LoadLFListSingle(const char* path);
 	void LoadLFList();
@@ -49,7 +53,6 @@ public:
 	void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
 	void GetDeckFile(wchar_t* ret, irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck);
 	bool LoadDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck);
-#endif
 	FILE* OpenDeckFile(const wchar_t* file, const char* mode);
 	IReadFile* OpenDeckReader(const wchar_t* file);
 	bool LoadDeck(const wchar_t* file, bool is_packlist = false);
@@ -63,6 +66,7 @@ public:
 	bool CreateCategory(const wchar_t* name);
 	bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	bool DeleteCategory(const wchar_t* name);
+#endif //YGOPRO_SERVER_MODE
 };
 
 extern DeckManager deckManager;

@@ -185,7 +185,7 @@ bool DataManager::Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt) {
 	spmemvfs_env_fini();
 	return false;
 }
-#endif
+#endif //YGOPRO_SERVER_MODE
 bool DataManager::GetData(int code, CardData* pData) {
 	auto cdit = _datas.find(code);
 	if(cdit == _datas.end())
@@ -402,7 +402,7 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 		if(buffer)
 			return buffer;
 	}
-#endif
+#endif //YGOPRO_SERVER_MODE
 	buffer = ScriptReaderExSingle("specials/", script_name, slen, 9);
 	if(buffer)
 		return buffer;
@@ -417,9 +417,8 @@ byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_nam
 	return ScriptReader(sname, slen);
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
-	FILE *fp;
 #ifdef YGOPRO_SERVER_MODE
-	fp = fopen(script_name, "rb");
+	FILE* fp = fopen(script_name, "rb");
 	if(!fp)
 		return 0;
 	int len = fread(scriptBuffer, 1, sizeof(scriptBuffer), fp);
