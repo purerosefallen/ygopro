@@ -71,7 +71,7 @@ mat_windows:
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
     # irrlicht
-    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    #- git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5.exe
@@ -86,12 +86,6 @@ mat_windows:
     paths:
       - bin/
       - obj/
-
-exec_windows:
-  extends: ._exec_build
-  tags:
-    - vs
-
 
 exec_windows:
   extends: ._exec_build
