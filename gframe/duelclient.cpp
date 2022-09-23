@@ -8,6 +8,9 @@
 #include "game.h"
 #include "replay.h"
 #include "replay_mode.h"
+#ifdef _WIN32
+#include <Windns.h>
+#endif
 
 namespace ygo {
 
@@ -35,7 +38,7 @@ bool DuelClient::is_refreshing = false;
 int DuelClient::match_kill = 0;
 std::vector<HostPacket> DuelClient::hosts;
 std::vector<std::wstring> DuelClient::hosts_srvpro;
-std::set<unsigned int> DuelClient::remotes;
+std::set<std::pair<unsigned int, unsigned short>> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
 unsigned int DuelClient::temp_ip = 0;
 unsigned short DuelClient::temp_port = 0;
@@ -489,6 +492,8 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->deckBuilder.hovered_code = 0;
 		mainGame->deckBuilder.is_draging = false;
 		mainGame->deckBuilder.is_starting_dragging = false;
+		mainGame->deckBuilder.readonly = false;
+		mainGame->deckBuilder.showing_pack = false;
 		mainGame->deckBuilder.pre_mainc = deckManager.current_deck.main.size();
 		mainGame->deckBuilder.pre_extrac = deckManager.current_deck.extra.size();
 		mainGame->deckBuilder.pre_sidec = deckManager.current_deck.side.size();
@@ -705,6 +710,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->btnShuffle->setVisible(false);
 		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
+		if(mainGame->chkDefaultShowChain->isChecked()) {
+			mainGame->always_chain = true;
+			mainGame->ignore_chain = false;
+			mainGame->chain_when_avail = false;
+		}
 		mainGame->device->setEventReceiver(&mainGame->dField);
 		if(!mainGame->dInfo.isTag) {
 			if(selftype > 1) {
@@ -4309,11 +4319,16 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 		socklen_t sz = sizeof(sockaddr_in);
 		char buf[256];
 		/*int ret = */recvfrom(fd, buf, 256, 0, (sockaddr*)&bc_addr, &sz);
-		unsigned int ipaddr = bc_addr.sin_addr.s_addr;
 		HostPacket* pHP = (HostPacket*)buf;
-		if(!is_closing && pHP->identifier == NETWORK_SERVER_ID && remotes.find(ipaddr) == remotes.end() ) {
+		if(is_closing || pHP->identifier != NETWORK_SERVER_ID)
+			return;
+		//if(pHP->version != PRO_VERSION)
+		//	return;
+		unsigned int ipaddr = bc_addr.sin_addr.s_addr;
+		const auto remote = std::make_pair(ipaddr, pHP->port);
+		if(remotes.find(remote) == remotes.end()) {
 			mainGame->gMutex.lock();
-			remotes.insert(ipaddr);
+			remotes.insert(remote);
 			pHP->ipaddr = ipaddr;
 			hosts.push_back(*pHP);
 			std::wstring hoststr;
@@ -4337,5 +4352,97 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 			mainGame->gMutex.unlock();
 		}
 	}
+}
+
+unsigned int DuelClient::LookupHost(char *host) {
+	unsigned int remote_addr = htonl(inet_addr(host));
+	if(remote_addr == -1) {
+		struct evutil_addrinfo hints;
+		struct evutil_addrinfo *answer = NULL;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+		int status = evutil_getaddrinfo(host, NULL, &hints, &answer);
+		if (status != 0) {
+			return 0;
+		}
+		sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+		char ip[20];
+		evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+		remote_addr = htonl(inet_addr(ip));
+		evutil_freeaddrinfo(answer);
+	}
+	return remote_addr;
+}
+
+bool DuelClient::LookupSRV(char *hostname, HostResult* result) {
+	char resolved[100];
+#ifdef _WIN32
+	PDNS_RECORD ret;
+	DNS_STATUS status = DnsQuery_UTF8(hostname, DNS_TYPE_SRV, DNS_QUERY_STANDARD, NULL, &ret, NULL);
+	if(status != 0)
+		return false;
+	memcpy(resolved, ret->Data.SRV.pNameTarget, 100);
+	result->port = ret->Data.SRV.wPort;
+	DnsRecordListFree(ret, DnsFreeRecordListDeep);
+#else
+	struct __res_state res;
+	int status = res_ninit(&res);
+	if(status != 0)
+		return false;
+	unsigned char answer[1024];
+	status = res_nsearch(&res, hostname, C_IN, T_SRV, answer, sizeof(answer));
+	if(status < 0)
+		return false;
+	ns_msg nsMsg;
+	ns_initparse(answer, status, &nsMsg);
+	bool found = false;
+	std::vector<RetrivedSRVRecord> records;
+	unsigned short minPriority = 0xffff;
+	for(int i = 0; i < ns_msg_count(nsMsg, ns_s_an); i++) {
+		auto record = RetrivedSRVRecord(nsMsg, i);
+		if(!record.valid || record.priority > minPriority)
+			continue;
+		for (int j = 0; j < record.weight; ++j) {
+			if(record.priority < minPriority) {
+				records.clear();
+				minPriority = record.priority;
+			}
+			records.push_back(record);
+		}
+	}
+	if (!records.size())
+		return false;
+	rnd.reset((unsigned int)time(nullptr));
+	rnd.shuffle_vector(records);
+	auto record = records.front();
+	memcpy(resolved, record.host, 100);
+	result->port = record.port;
+#endif
+	result->host = LookupHost(resolved);
+	return true;
+}
+
+HostResult DuelClient::ParseHost(char *hostname) {
+	HostResult result;
+	auto trySplitter = strchr(hostname, ':');
+	if(trySplitter == NULL) {
+		char srvHostname[114];
+		sprintf(srvHostname, "_ygopro._tcp.%s", hostname);
+		if(!LookupSRV(srvHostname, &result)) {
+			result.host = LookupHost(hostname);
+			result.port = 7911;
+		}
+	} else {
+		char host[100];
+		auto hostLength = trySplitter - hostname;
+		strncpy(host, hostname, hostLength);
+		host[hostLength] = '\0';
+		result.host = LookupHost(host);
+		result.port = atoi(trySplitter + 1);
+	}
+	return result;
 }
 }

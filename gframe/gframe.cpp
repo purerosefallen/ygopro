@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE
 	enable_log = 1;
-	ygo::aServerPort = 7911;
+	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	} else
 	if(argc > 2) {
-		ygo::aServerPort = atoi(argv[1]);
+		ygo::server_port = atoi(argv[1]);
 		int lflist = atoi(argv[2]);
 		if(lflist < 0)
 			lflist = 999;
@@ -166,10 +166,16 @@ int main(int argc, char* argv[]) {
 			if(i < wargc)
 				ygo::mainGame->ebJoinHost->setText(wargv[i]);
 			continue;
-		} else if(!wcscmp(wargv[i], L"-p")) { // host Port
+		} else if(!wcscmp(wargv[i], L"-p")) { // host port, deprecated, and should use 1.1.1.1:7911 instead
 			++i;
-			if(i < wargc)
-				ygo::mainGame->ebJoinPort->setText(wargv[i]);
+			if(i < wargc) {
+				auto host = ygo::mainGame->ebJoinHost->getText();
+				if(wcslen(host) > 0) {
+					wchar_t appended[100];
+					myswprintf(appended, L"%ls:%ls", host, wargv[i]);
+					ygo::mainGame->ebJoinHost->setText(appended);
+				}
+			}
 			continue;
 		} else if(!wcscmp(wargv[i], L"-w")) { // host passWord
 			++i;
