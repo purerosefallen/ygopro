@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay windbot bot bot.conf locales fonts)
+ARCHIVE_FILES=(ygopro.app LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay windbot bot bot.conf locales fonts pack)
 
 # TARGET_LOCALE
 # ARCHIVE_SUFFIX

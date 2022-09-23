@@ -23,7 +23,7 @@ public:
 #else
 	void ReadStringConfLine(const char* linebuf);
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = 0);
-#endif
+#endif //YGOPRO_SERVER_MODE
 	bool GetData(int code, CardData* pData);
 	code_pointer GetCodePointer(int code);
 	bool GetString(int code, CardString* pStr);
@@ -50,7 +50,7 @@ public:
 	std::unordered_map<unsigned int, std::wstring> _setnameStrings;
 	std::unordered_map<unsigned int, std::wstring> _sysStrings;
 
-	wchar_t numStrings[256][4];
+	wchar_t numStrings[301][4];
 	wchar_t numBuffer[6];
 	wchar_t attBuffer[128];
 	wchar_t racBuffer[128];

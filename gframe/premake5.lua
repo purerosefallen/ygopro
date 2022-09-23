@@ -90,12 +90,12 @@ end
 if SERVER_MODE then
         links { "ws2_32" }
 else
-        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32" }
+        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
 end
     filter "not action:vs*"
         buildoptions { "-std=c++14", "-fno-rtti" }
     filter "not system:windows"
-        links { "event_pthreads", "dl", "pthread" }
+        links { "event_pthreads", "dl", "pthread", "resolv" }
     filter "system:macosx"
 if not SERVER_MODE then
         links { "z" }
