@@ -10,6 +10,8 @@ IRRKLANG_PRO = false
 LUA_LIB_NAME = "lua"
 
 SERVER_MODE = true
+SERVER_ZIP_SUPPORT = false
+SERVER_PRO2_SUPPORT = false
 USE_IRRKLANG = false
 
 -- read settings from command line or environment variables
@@ -54,7 +56,10 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
-newoption { trigger = "server-mode", category = "YGOPro", description = "" }
+
+newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
 
 -- koishipro specific
 
@@ -208,6 +213,14 @@ if os.istarget("macosx") then
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
+    SERVER_ZIP_SUPPORT = false
+end
+if GetParam("server-zip-support") then
+    SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-pro2-support") then
+    SERVER_PRO2_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
 end
 
 if SERVER_MODE then
@@ -235,9 +248,7 @@ workspace "YGOPro"
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
-if not SERVER_MODE then
         entrypoint "mainCRTStartup"
-end
         systemversion "latest"
         startproject "YGOPro"
         if WINXP_SUPPORT then
@@ -307,6 +318,9 @@ end
     end
     if BUILD_IRRLICHT and not SERVER_MODE then
         include "irrlicht"
+    end
+    if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
+        include "irrlicht/premake5-only-zipreader.lua"
     end
     if BUILD_SQLITE then
         include "sqlite3"
