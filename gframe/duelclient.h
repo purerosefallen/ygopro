@@ -96,8 +96,9 @@ public:
 	static void SetResponseB(void* respB, unsigned char len);
 	static void SendResponse();
 	static unsigned int LookupHost(char *host);
-	static bool LookupSRV(char *hostname, HostResult *result);
-	static HostResult ParseHost(char *hostname);
+	static bool LookupSRV(char *hostname, HostResult* result);
+	static bool CheckHostnameSplitter(char *hostname, HostResult *result);
+	static HostResult ParseHost(char *hostname, unsigned short port);
 	static void SendPacketToServer(unsigned char proto) {
 		char* p = duel_client_write;
 		BufferIO::WriteInt16(p, 1);
