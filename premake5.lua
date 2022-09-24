@@ -225,10 +225,12 @@ end
 
 if SERVER_MODE then
     BUILD_FREETYPE = false
-    BUILD_IRRLICHT = false
     BUILD_IKPMP3 = false
     USE_IRRKLANG = false
     IRRKLANG_PRO = false
+    if not SERVER_ZIP_SUPPORT then
+        BUILD_IRRLICHT = false
+    end
 end
 
 workspace "YGOPro"
