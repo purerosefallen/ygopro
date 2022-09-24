@@ -10,7 +10,11 @@ token=$(echo $loginInfo | jq '.token' | sed 's/"//g')
 header="Authorization: $token"
 echo "Login succeeded."
 
+<<<<<<< HEAD
 appName="koishipro"
+=======
+appName="ygopro"
+>>>>>>> 71a8c15521cc6fe09e774c7fa2a62aeb20a0e017
 
 handleErrorMessage() {
   rawJsonInput="$1"
