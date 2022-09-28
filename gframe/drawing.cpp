@@ -780,7 +780,7 @@ void Game::DrawGUI() {
 	while (imageLoading.size()) {
 		auto mit = imageLoading.cbegin();
 		mit->first->setImage(imageManager.GetTexture(mit->second));
-		imageLoading.erase(imageLoading.begin());
+		imageLoading.erase(mit);
 	}
 	for(auto fit = fadingList.begin(); fit != fadingList.end();) {
 		auto fthis = fit++;
