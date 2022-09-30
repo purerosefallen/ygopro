@@ -7,7 +7,7 @@ TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
 export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
 export EVENT_LIB_DIR=$PWD/libevent-stable/lib
 export IRRLICHT_INCLUDE_DIR=$PWD/irrlicht/include
-export IRRLICHT_LIB_DIR=$PWD/irrlicht
+export IRRLICHT_LIB_DIR=$PWD/irrlicht/lib/$(arch)
 
 ./.ci/libevent-prebuild.sh
 

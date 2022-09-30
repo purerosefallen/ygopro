@@ -598,6 +598,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->wChat->setVisible(true);
 		mainGame->gMutex.unlock();
 		mainGame->dInfo.duel_rule = pkt->info.duel_rule;
+		mainGame->dInfo.start_lp = pkt->info.start_lp;
 		watching = 0;
 		connect_state |= 0x4;
 		break;
@@ -684,8 +685,6 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->dInfo.isFinished = false;
 		mainGame->dInfo.lp[0] = 0;
 		mainGame->dInfo.lp[1] = 0;
-		mainGame->dInfo.start_lp[0] = 0;
-		mainGame->dInfo.start_lp[1] = 0;
 		mainGame->dInfo.strLP[0][0] = 0;
 		mainGame->dInfo.strLP[1][0] = 0;
 		mainGame->dInfo.turn = 0;
@@ -1364,8 +1363,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		mainGame->dInfo.duel_rule = BufferIO::ReadInt8(pbuf);
 		mainGame->dInfo.lp[mainGame->LocalPlayer(0)] = BufferIO::ReadInt32(pbuf);
 		mainGame->dInfo.lp[mainGame->LocalPlayer(1)] = BufferIO::ReadInt32(pbuf);
-		mainGame->dInfo.start_lp[0] = mainGame->dInfo.lp[0];
-		mainGame->dInfo.start_lp[1] = mainGame->dInfo.lp[1];
 		myswprintf(mainGame->dInfo.strLP[0], L"%d", mainGame->dInfo.lp[0]);
 		myswprintf(mainGame->dInfo.strLP[1], L"%d", mainGame->dInfo.lp[1]);
 		int deckc = BufferIO::ReadInt16(pbuf);
