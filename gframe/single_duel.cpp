@@ -430,6 +430,30 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
+	/////zdiy/////
+	std::unordered_map<unsigned int, std::wstring*>* _textStrings = new std::unordered_map<unsigned int, std::wstring*>();
+	std::unordered_map<unsigned int, std::wstring*>* _nameStrings = new std::unordered_map<unsigned int, std::wstring*>();
+	for (auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
+		unsigned int code = cit->first;
+		std::wstring* text = &cit->second.text;
+		std::wstring* name = &cit->second.text;
+		_textStrings->emplace(code, text);
+		_nameStrings->emplace(code, name);
+	}
+
+	std::unordered_map<uint32_t, card_data*>* data_cache = new std::unordered_map<uint32_t, card_data*>();
+	uint32_t index = 0;
+	card_data* cardData = nullptr;
+	for (auto& card : dataManager._datas) {
+		if (!card.second.code || card.second.code == 0 || (card.second.type & TYPE_TOKEN)) {
+			continue;
+		}
+		cardData = (card_data*)&card.second;
+		data_cache->emplace(index, cardData);
+		++index;
+	}
+	set_card_data(data_cache, _textStrings, _nameStrings);
+	/////zdiy/////
 	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
