@@ -43,14 +43,14 @@ void Game::MainServerLoop() {
 #ifdef SERVER_ZIP_SUPPORT
 	dataManager.FileSystem = new irr::io::CFileSystem();
 #endif
-#ifdef SERVER_PRO2_SUPPORT
-	dataManager.FileSystem->addFileArchive("data/script.zip");
-#endif
 	initUtils();
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
-	
+#ifdef SERVER_PRO2_SUPPORT
+	dataManager.FileSystem->addFileArchive("data/script.zip", true, false, EFAT_ZIP);
+#endif
+
 	server_port = NetServer::StartServer(server_port);
 	NetServer::InitDuel();
 	printf("%u\n", server_port);
@@ -229,7 +229,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Paranoia", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X DaydreamCafe", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));

@@ -38,6 +38,8 @@ void SingleDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 #ifdef YGOPRO_SERVER_MODE
 	if(cache_recorder)
 		NetServer::ReSendToPlayer(cache_recorder);
+	if(replay_recorder && replay_mode & REPLAY_MODE_INCLUDE_CHAT)
+		NetServer::ReSendToPlayer(replay_recorder);
 #endif
 }
 void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
@@ -1218,7 +1220,7 @@ int SingleDuel::Analyze(char* msgbuffer, unsigned int len) {
 #ifdef YGOPRO_SERVER_MODE
 			NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
-			if (cl != 0 && (cl & 0x80) == 0 && (cl != pl || pc != cc))
+			if (cl != 0 && (cl & LOCATION_OVERLAY) == 0 && (cl != pl || pc != cc))
 				RefreshSingle(cc, cl, cs);
 			break;
 		}
