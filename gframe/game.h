@@ -891,19 +891,19 @@ extern unsigned int pre_seed[3];
 #endif
 
 #ifndef YGOPRO_MAX_DECK
-#define YGOPRO_MAX_DECK					60
+#define YGOPRO_MAX_DECK					6
 #endif
 
 #ifndef YGOPRO_MIN_DECK
-#define YGOPRO_MIN_DECK					40
+#define YGOPRO_MIN_DECK					4
 #endif
 
 #ifndef YGOPRO_MAX_EXTRA
-#define YGOPRO_MAX_EXTRA					15
+#define YGOPRO_MAX_EXTRA					3
 #endif
 
 #ifndef YGOPRO_MAX_SIDE
-#define YGOPRO_MAX_SIDE					15
+#define YGOPRO_MAX_SIDE					2
 #endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
