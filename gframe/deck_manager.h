@@ -71,8 +71,8 @@ public:
 	template <typename T>
 	std::vector<T> DuplicateVector(std::vector<T> vector, int32 count) {
 		std::vector<T> result;
-		for(int32 i = 0; i < count; ++i)
-			for(auto it : vector)
+		for(auto it : vector)
+			for(int32 i = 0; i < count; ++i)
 				result.push_back(it);
 		return result;
 	}
