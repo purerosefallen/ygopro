@@ -67,6 +67,28 @@ public:
 	bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	bool DeleteCategory(const wchar_t* name);
 #endif //YGOPRO_SERVER_MODE
+
+	template <typename T>
+	std::vector<T> DuplicateVector(std::vector<T> vector, int32 count) {
+		std::vector<T> result;
+		for(int32 i = 0; i < count; ++i)
+			for(auto it : vector)
+				result.push_back(it);
+		return result;
+	}
+
+	Deck DuplicateDeck(Deck deck) {
+		Deck result;
+		result.main = DuplicateVector(deck.main, 10);
+		result.extra = DuplicateVector(deck.extra, 5);
+		result.side = DuplicateVector(deck.side, 1);
+		return result;
+	}
+
+	void DuplicateDecks(Deck* originalDecks, Deck* result, int32 count) {
+		for(int32 i = 0; i < count; ++i)
+			result[i] = DuplicateDeck(originalDecks[i]);
+	}
 };
 
 extern DeckManager deckManager;

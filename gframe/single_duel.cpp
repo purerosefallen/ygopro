@@ -452,11 +452,11 @@ void SingleDuel::StartDuel(DuelPlayer* dp) {
 #endif
 	char deckbuff[12];
 	char* pbuf = deckbuff;
-	BufferIO::WriteInt16(pbuf, pdeck[0].main.size());
-	BufferIO::WriteInt16(pbuf, pdeck[0].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[0].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, pdeck[0].extra.size() * 5);
 	BufferIO::WriteInt16(pbuf, pdeck[0].side.size());
-	BufferIO::WriteInt16(pbuf, pdeck[1].main.size());
-	BufferIO::WriteInt16(pbuf, pdeck[1].extra.size());
+	BufferIO::WriteInt16(pbuf, pdeck[1].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, pdeck[1].extra.size() * 5);
 	BufferIO::WriteInt16(pbuf, pdeck[1].side.size());
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
 	char tempbuff[6];
@@ -553,9 +553,11 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteHeader(rh);
 	last_replay.WriteData(players[0]->name, 40, false);
 	last_replay.WriteData(players[1]->name, 40, false);
+	Deck duplicatedDeck[2];
+	deckManager.DuplicateDecks(pdeck, duplicatedDeck, 2);
 	if(!host_info.no_shuffle_deck) {
-		rnd.shuffle_vector(pdeck[0].main);
-		rnd.shuffle_vector(pdeck[1].main);
+		rnd.shuffle_vector(duplicatedDeck[0].main);
+		rnd.shuffle_vector(duplicatedDeck[1].main);
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
@@ -575,30 +577,26 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteInt32(host_info.draw_count, false);
 	last_replay.WriteInt32(opt, false);
 	last_replay.Flush();
-	last_replay.WriteInt32(pdeck[0].main.size() * 10, false);
-	for (int32 o = 0; o < 10; ++o)
-		for(int32 i = (int32)pdeck[0].main.size() - 1; i >= 0; --i) {
-			new_card(pduel, pdeck[0].main[i]->first, 0, 0, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
-			last_replay.WriteInt32(pdeck[0].main[i]->first, false);
-		}
-	last_replay.WriteInt32(pdeck[0].extra.size() * 5, false);
-	for (int32 o = 0; o < 5; ++o)
-		for(int32 i = (int32)pdeck[0].extra.size() - 1; i >= 0; --i) {
-			new_card(pduel, pdeck[0].extra[i]->first, 0, 0, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-			last_replay.WriteInt32(pdeck[0].extra[i]->first, false);
-		}
-	last_replay.WriteInt32(pdeck[1].main.size() * 10, false);
-	for (int32 o = 0; o < 10; ++o)
-		for(int32 i = (int32)pdeck[1].main.size() - 1; i >= 0; --i) {
-			new_card(pduel, pdeck[1].main[i]->first, 1, 1, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
-			last_replay.WriteInt32(pdeck[1].main[i]->first, false);
-		}
-	last_replay.WriteInt32(pdeck[1].extra.size() * 5, false);
-	for (int32 o = 0; o < 5; ++o)
-		for(int32 i = (int32)pdeck[1].extra.size() - 1; i >= 0; --i) {
-			new_card(pduel, pdeck[1].extra[i]->first, 1, 1, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-			last_replay.WriteInt32(pdeck[1].extra[i]->first, false);
-		}
+	last_replay.WriteInt32(duplicatedDeck[0].main.size() * 10, false);
+	for(int32 i = (int32)duplicatedDeck[0].main.size() - 1; i >= 0; --i) {
+		new_card(pduel, duplicatedDeck[0].main[i]->first, 0, 0, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(duplicatedDeck[0].main[i]->first, false);
+	}
+	last_replay.WriteInt32(duplicatedDeck[0].extra.size(), false);
+	for(int32 i = (int32)duplicatedDeck[0].extra.size() - 1; i >= 0; --i) {
+		new_card(pduel, duplicatedDeck[0].extra[i]->first, 0, 0, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(duplicatedDeck[0].extra[i]->first, false);
+	}
+	last_replay.WriteInt32(duplicatedDeck[1].main.size(), false);
+	for(int32 i = (int32)duplicatedDeck[1].main.size() - 1; i >= 0; --i) {
+		new_card(pduel, duplicatedDeck[1].main[i]->first, 1, 1, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(duplicatedDeck[1].main[i]->first, false);
+	}
+	last_replay.WriteInt32(duplicatedDeck[1].extra.size(), false);
+	for(int32 i = (int32)duplicatedDeck[1].extra.size() - 1; i >= 0; --i) {
+		new_card(pduel, duplicatedDeck[1].extra[i]->first, 1, 1, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(duplicatedDeck[1].extra[i]->first, false);
+	}
 	last_replay.Flush();
 	char startbuf[32], *pbuf = startbuf;
 	BufferIO::WriteInt8(pbuf, MSG_START);
