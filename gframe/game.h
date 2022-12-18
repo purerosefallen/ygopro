@@ -903,7 +903,7 @@ extern unsigned int pre_seed[3];
 #endif
 
 #ifndef YGOPRO_MAX_SIDE
-#define YGOPRO_MAX_SIDE					2
+#define YGOPRO_MAX_SIDE					3
 #endif
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
