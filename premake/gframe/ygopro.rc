@@ -16,8 +16,8 @@ VALUE "InternalName", "KoishiPro"
 VALUE "LegalCopyright", "Copyright (C) 2022 Nanahira"
 VALUE "OriginalFilename", "ygopro.exe"
 VALUE "ProductName", "KoishiPro"
-VALUE "FileVersion", "DaydreamCafe"
-VALUE "ProductVersion", "DaydreamCafe"
+VALUE "FileVersion", "Camellia"
+VALUE "ProductVersion", "Camellia"
 END
 END
 BLOCK "VarFileInfo"
