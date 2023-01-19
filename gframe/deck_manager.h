@@ -79,8 +79,8 @@ public:
 
 	Deck DuplicateDeck(Deck deck) {
 		Deck result;
-		result.main = DuplicateVector(deck.main, 5);
-		result.extra = DuplicateVector(deck.extra, 3);
+		result.main = DuplicateVector(deck.main, 10);
+		result.extra = DuplicateVector(deck.extra, 5);
 		result.side = DuplicateVector(deck.side, 1);
 		return result;
 	}
