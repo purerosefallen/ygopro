@@ -577,7 +577,7 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteInt32(host_info.draw_count, false);
 	last_replay.WriteInt32(opt, false);
 	last_replay.Flush();
-	last_replay.WriteInt32(duplicatedDeck[0].main.size() * 10, false);
+	last_replay.WriteInt32(duplicatedDeck[0].main.size(), false);
 	for(int32 i = (int32)duplicatedDeck[0].main.size() - 1; i >= 0; --i) {
 		new_card(pduel, duplicatedDeck[0].main[i]->first, 0, 0, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
 		last_replay.WriteInt32(duplicatedDeck[0].main[i]->first, false);
