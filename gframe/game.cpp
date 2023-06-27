@@ -27,7 +27,7 @@ namespace irr {
 #include <regex>
 #endif //YGOPRO_SERVER_MODE
 
-unsigned short PRO_VERSION = 0x1354;
+unsigned short PRO_VERSION = 0x1360;
 
 namespace ygo {
 
@@ -229,7 +229,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Yumezakura", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Ulysses", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -480,6 +480,9 @@ bool Game::Initialize() {
 	chkIgnore2 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1291));
 	chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
 	posY += 30;
+	chkHidePlayerName = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
+	chkHidePlayerName->setChecked(gameConf.hide_player_name != 0);
+	posY += 30;
 	chkIgnoreDeckChanges = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1357));
 	chkIgnoreDeckChanges->setChecked(gameConf.chkIgnoreDeckChanges != 0);
 	posY += 30;
@@ -534,7 +537,7 @@ bool Game::Initialize() {
 	chkEnablePScale = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1269));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	posY += 30;
-	env->addStaticText(dataManager.GetSysString(1289), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
+	env->addStaticText(dataManager.GetSysString(1267), rect<s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
 	cbLocale = env->addComboBox(rect<s32>(posX + 150, posY + 4, posX + 250, posY + 21), tabSystem, COMBOBOX_LOCALE);
 	RefreshLocales();
 	elmTabSystemLast = cbLocale;
@@ -674,7 +677,7 @@ bool Game::Initialize() {
 	wANRace = env->addWindow(rect<s32>(480, 200, 850, 410), false, dataManager.GetSysString(563));
 	wANRace->getCloseButton()->setVisible(false);
 	wANRace->setVisible(false);
-	for(int filter = 0x1, i = 0; i < 25; filter <<= 1, ++i)
+	for(int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i)
 		chkRace[i] = env->addCheckBox(false, rect<s32>(10 + (i % 4) * 90, 25 + (i / 4) * 25, 100 + (i % 4) * 90, 50 + (i / 4) * 25),
 		                              wANRace, CHECK_RACE, dataManager.FormatRace(filter));
 	//selection hint
@@ -821,7 +824,7 @@ bool Game::Initialize() {
 	cbRace = env->addComboBox(rect<s32>(60, 40 + 75 / 6, 190, 60 + 75 / 6), wFilter, COMBOBOX_RACE);
 	cbRace->setMaxSelectionRows(10);
 	cbRace->addItem(dataManager.GetSysString(1310), 0);
-	for(int filter = 0x1; filter != 0x2000000; filter <<= 1)
+	for(int filter = 0x1; filter < (1 << RACES_COUNT); filter <<= 1)
 		cbRace->addItem(dataManager.FormatRace(filter), filter);
 	stAttack = env->addStaticText(dataManager.GetSysString(1322), rect<s32>(205, 22 + 50 / 6, 280, 42 + 50 / 6), false, false, wFilter);
 	ebAttack = env->addEditBox(L"", rect<s32>(260, 20 + 50 / 6, 340, 40 + 50 / 6), true, wFilter, EDITBOX_INPUTS);
@@ -1531,6 +1534,8 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.auto_save_replay = atoi(valbuf);
 		} else if(!strcmp(strbuf, "draw_single_chain")) {
 			gameConf.draw_single_chain = atoi(valbuf);
+		} else if(!strcmp(strbuf, "hide_player_name")) {
+			gameConf.hide_player_name = atoi(valbuf);
 		} else if(!strcmp(strbuf, "prefer_expansion_script")) {
 			gameConf.prefer_expansion_script = atoi(valbuf);
 		} else if(!strcmp(strbuf, "ask_mset")) {
@@ -1627,6 +1632,7 @@ void Game::LoadConfig() {
 	gameConf.quick_animation = 0;
 	gameConf.auto_save_replay = 0;
 	gameConf.draw_single_chain = 0;
+	gameConf.hide_player_name = 0;
 	gameConf.prefer_expansion_script = 0;
 	gameConf.ask_mset = 0;
 	gameConf.enable_sound = true;
@@ -1766,6 +1772,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
 	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
 	fprintf(fp, "draw_single_chain = %d\n", gameConf.draw_single_chain);
+	fprintf(fp, "hide_player_name = %d\n", gameConf.hide_player_name);
 	fprintf(fp, "prefer_expansion_script = %d\n", gameConf.prefer_expansion_script);
 	fprintf(fp, "ask_mset = %d\n", gameConf.ask_mset);
 	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
@@ -1904,6 +1911,8 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatMsg[0].clear();
 	chatTiming[0] = 1200;
 	chatType[0] = player;
+	if(gameConf.hide_player_name && player < 4)
+		player = 10;
 	switch(player) {
 	case 0: //from host
 		chatMsg[0].append(dInfo.hostname);
@@ -1934,6 +1943,9 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		break;
 	case 9: //error message
 		chatMsg[0].append(L"[Script Error]: ");
+		break;
+	case 10: //hidden name
+		chatMsg[0].append(L"[********]: ");
 		break;
 	default: //from watcher or unknown
 		if(player < 11 || player > 19)
