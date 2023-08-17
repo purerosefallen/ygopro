@@ -98,6 +98,7 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 	const int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
 	int avail = rule_map[rule];
+	int spareCount = 5;
 	for(size_t i = 0; i < deck.main.size(); ++i) {
 		code_pointer cit = deck.main[i];
 		int gameruleDeckError = checkAvail(cit->second.ot, avail);
@@ -111,8 +112,12 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end() && dc > it->second) {
+			if (!spareCount)
+				return (DECKERROR_LFLIST << 28) + cit->first;
+			else
+				--spareCount;
+		}
 	}
 	for(size_t i = 0; i < deck.extra.size(); ++i) {
 		code_pointer cit = deck.extra[i];
@@ -125,8 +130,12 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end() && dc > it->second) {
+			if (!spareCount)
+				return (DECKERROR_LFLIST << 28) + cit->first;
+			else
+				--spareCount;
+		}
 	}
 	for(size_t i = 0; i < deck.side.size(); ++i) {
 		code_pointer cit = deck.side[i];
@@ -139,8 +148,12 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) + cit->first;
 		auto it = list->find(code);
-		if(it != list->end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) + cit->first;
+		if(it != list->end() && dc > it->second) {
+			if (!spareCount)
+				return (DECKERROR_LFLIST << 28) + cit->first;
+			else
+				--spareCount;
+		}
 	}
 	return 0;
 }
