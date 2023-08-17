@@ -134,7 +134,13 @@ public:
 	virtual void Surrender(DuelPlayer* dp) {}
 	virtual void GetResponse(DuelPlayer* dp, void* pdata, unsigned int len) {}
 	virtual void TimeConfirm(DuelPlayer* dp) {}
+#ifdef YGOPRO_SERVER_MODE
+	virtual void RequestField(DuelPlayer* dp) {}
+#endif
 	virtual void EndDuel() {};
+#ifdef YGOPRO_SERVER_MODE
+	virtual void TestCard(int code) {};
+#endif
 
 public:
 	event* etimer;
@@ -176,6 +182,9 @@ public:
 #define CTOS_HS_NOTREADY	0x23
 #define CTOS_HS_KICK		0x24
 #define CTOS_HS_START		0x25
+#ifdef YGOPRO_SERVER_MODE
+#define CTOS_REQUEST_FIELD		0x30
+#endif
 
 #define STOC_GAME_MSG		0x1
 #define STOC_ERROR_MSG		0x2
@@ -198,6 +207,9 @@ public:
 #define STOC_HS_PLAYER_ENTER	0x20
 #define STOC_HS_PLAYER_CHANGE	0x21
 #define STOC_HS_WATCH_CHANGE	0x22
+#ifdef YGOPRO_SERVER_MODE
+#define STOC_FIELD_FINISH	0x30
+#endif
 #define STOC_SRVPRO_ROOMLIST	0x31
 
 #define PLAYERCHANGE_OBSERVE	0x8

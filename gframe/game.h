@@ -2,16 +2,21 @@
 #define GAME_H
 
 #include "config.h"
+#ifndef YGOPRO_SERVER_MODE
 #include "client_field.h"
 #include "deck_con.h"
 #include "menu_handler.h"
 #include "CGUISkinSystem/CGUISkinSystem.h"
+#else
+#include "netserver.h"
+#endif //YGOPRO_SERVER_MODE
 #include <unordered_map>
 #include <vector>
 #include <list>
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 struct Config {
 	bool use_d3d;
 	bool use_image_scale;
@@ -106,7 +111,6 @@ struct DuelInfo {
 	video::SColor card_count_color[2];
 	video::SColor total_attack_color[2];
 	bool isReplaySwapped;
-	std::vector<unsigned int> announce_cache;
 };
 
 struct BotInfo {
@@ -130,11 +134,19 @@ struct FadingUnit {
 	irr::core::vector2di fadingLR;
 	irr::core::vector2di fadingDiff;
 };
+#endif //YGOPRO_SERVER_MODE
 
 class Game {
 
 public:
 	bool Initialize();
+#ifdef YGOPRO_SERVER_MODE
+	void MainServerLoop();
+	void MainTestLoop(int code);
+	void LoadExpansions();
+	void AddDebugMsg(const char* msgbuf);
+	void initUtils();
+#else
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, f32 left, f32 right, f32 bottom, f32 top, f32 znear, f32 zfar);
@@ -633,10 +645,17 @@ public:
 	irr::gui::IGUIButton* btnBigCardZoomIn;
 	irr::gui::IGUIButton* btnBigCardZoomOut;
 	irr::gui::IGUIButton* btnBigCardClose;
+#endif //YGOPRO_SERVER_MODE
 };
 
 extern Game* mainGame;
 
+#ifdef YGOPRO_SERVER_MODE
+extern unsigned short server_port;
+extern unsigned short replay_mode;
+extern HostInfo game_info;
+extern unsigned int pre_seed[3];
+#endif
 }
 
 #define CARD_IMG_WIDTH		177

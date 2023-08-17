@@ -1,0 +1,94 @@
+version: '{build}'
+image: Visual Studio 2019
+
+skip_tags: true
+
+install:
+  - git submodule update --init --recursive
+
+  # environment and system dependency
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-beta2-windows.zip
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
+  - tar xf libevent-2.0.22-stable.tar.gz
+  - move libevent-2.0.22-stable event
+  - xcopy /E event\WIN32-Code event\include
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.4.4.tar.gz ; exit 0"
+  - tar xf lua-5.4.4.tar.gz
+  - move lua-5.4.4 lua
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2022/sqlite-amalgamation-3390300.zip  ; exit 0"
+  - 7z x -y sqlite-amalgamation-3390300.zip
+  - move sqlite-amalgamation-3390300 sqlite3
+
+before_build:
+  - xcopy /E premake\* .
+  - premake5 vs2019
+  
+configuration: Release
+
+build: 
+    project: build/YGOPro.sln
+    parallel: true
+
+after_build:
+  - ps: move bin\release\ygopro.exe .
+
+  # nodejs
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v16.9.1/node-v16.9.1-win-x64.7z ; exit 0"
+  - 7z x -y node-v16.9.1-win-x64.7z
+  - mv node-v16.9.1-win-x64 node
+
+  # srvpro
+  - git clone https://github.com/purerosefallen/ygopro-server
+  - cd ygopro-server
+  - ../node/npm ci
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/releases/download/latest/WindBot.7z ; exit 0"
+  - 7z x -y WindBot.7z
+  - rm -rf Bot.exe bot.conf
+  - mv WindBot windbot_
+  - mv windbot_ windbot # Windows NTFS does not support case sensitive, so renaming the folder twice.
+  - rm -rf WindBot.7z
+  - cp  ../cards.cdb windbot/
+  - mkdir ygopro decks_save
+  - cp -rf ../ygopro.exe ygopro/
+  - mv ../cards.cdb ygopro/
+  - mv ../lflist.conf ygopro/
+  - mv ../script ygopro/
+  - cd ygopro
+  - mkdir gframe
+  - cp -rf ../../gframe/game.cpp gframe/ # Toss game.cpp in for version detection
+  # - cp -rf config_build config
+  - cd ../..
+
+  # start script
+  - bash -c "echo '@echo off' >> run.bat ; echo 'cd ygopro-server/windbot' >> run.bat ; echo 'start WindBot.exe servermode=true serverport=2399' >> run.bat ; echo 'cd ..' >> run.bat ; echo 'start ../node/node.exe ygopro-server.js' >> run.bat"
+  - 7z a -mx9 -xr!.git* ygopro-server-win.zip node ygopro-server run.bat
+
+
+test: off
+
+artifacts:
+  - path: ygopro.exe
+    name: ygopro server mode
+  - path: ygopro-server-win.zip
+    name: Windows version of SRVPro
+
+deploy:
+  release: win
+  description: 'Automatic build commit $(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
+  provider: GitHub
+  force_update: true
+  auth_token:
+    secure: EQ9miMjfX/QAoBvgc6D+JLmHatLyxOEKZ/uo68QijxWW5Gp4MzB/pOH9+u2GlDVO
+  on:
+    branch: server
+
+cache:
+  - premake-5.0.0-beta2-windows.zip
+  - libevent-2.0.22-stable.tar.gz
+  - irrlicht-1.8.5.zip
+  - lua-5.4.4.tar.gz
+  - sqlite-amalgamation-3390300.zip

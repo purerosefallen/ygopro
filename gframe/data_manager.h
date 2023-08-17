@@ -3,7 +3,9 @@
 
 #include "config.h"
 #include "sqlite3.h"
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 #include "spmemvfs/spmemvfs.h"
+#endif
 #include "client_card.h"
 #include <unordered_map>
 
@@ -14,9 +16,15 @@ public:
 	DataManager(): _datas(8192), _strings(8192) {}
 	bool LoadDB(const wchar_t* wfile);
 	bool LoadStrings(const char* file);
+#ifndef YGOPRO_SERVER_MODE
 	bool LoadStrings(IReadFile* reader);
+#endif
 	void ReadStringConfLine(const char* linebuf);
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	bool Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt = 0);
+#else
+	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = 0);
+#endif //YGOPRO_SERVER_MODE
 	bool GetData(int code, CardData* pData);
 	code_pointer GetCodePointer(int code);
 	bool GetString(int code, CardString* pStr);
@@ -57,7 +65,9 @@ public:
 	static byte* ScriptReaderEx(const char* script_name, int* slen);
 	static byte* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 2);
 	static byte* ScriptReader(const char* script_name, int* slen);
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	static IFileSystem* FileSystem;
+#endif
 };
 
 extern DataManager dataManager;
