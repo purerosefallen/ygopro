@@ -80,10 +80,13 @@ struct DuelInfo {
 	bool isTag{ false };
 	bool isSingleMode{ false };
 	bool is_shuffling{ false };
+	bool is_swapped{ false };
 	bool tag_player[2]{ false };
 	bool isReplaySwapped{ false };
 	int lp[2]{ 0 };
 	int start_lp{ 0 };
+	int card_count[2]{ 0 };
+	int total_attack[2]{ 0 };
 	int duel_rule{ 0 };
 	int turn{ 0 };
 	short curMsg{ 0 };
@@ -862,6 +865,7 @@ extern Game* mainGame;
 #define TEXTURE_COVER_O				4
 #define TEXTURE_ATTACK				5
 #define TEXTURE_ACTIVATE			6
+
 //STOC_GAME_MSG messages
 #define MSG_WAITING				3
 #define MSG_START				4

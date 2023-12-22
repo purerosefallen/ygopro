@@ -358,8 +358,8 @@ int DeckManager::TypeCount(std::vector<code_pointer> list, unsigned int ctype) {
 	}
 	return res;
 }
-bool DeckManager::LoadDeckFromCode(Deck& deck, const char *code, int len) {
-	char data[1024], *pdeck = data, *data_ = data;
+bool DeckManager::LoadDeckFromCode(Deck& deck, const unsigned char *code, int len) {
+	unsigned char data[1024], *pdeck = data, *data_ = data;
 	int decoded_len = Base64::DecodedLength(code, len);
 	if(decoded_len > 1024 || decoded_len < 8 || !Base64::Decode(code, len, data_, decoded_len))
 		return false;
@@ -368,8 +368,8 @@ bool DeckManager::LoadDeckFromCode(Deck& deck, const char *code, int len) {
 	int errorcode = LoadDeck(deck, (int*)pdeck, mainc, sidec);
 	return (errorcode == 0);
 }
-int DeckManager::SaveDeckToCode(Deck& deck, char* code) {
-	char deckbuf[1024], *pdeck = deckbuf;
+int DeckManager::SaveDeckToCode(Deck& deck, unsigned char* code) {
+	unsigned char deckbuf[1024], *pdeck = deckbuf;
 	BufferIO::WriteInt32(pdeck, deck.main.size() + deck.extra.size());
 	BufferIO::WriteInt32(pdeck, deck.side.size());
 	for(size_t i = 0; i < deck.main.size(); ++i)

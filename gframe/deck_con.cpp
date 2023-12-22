@@ -233,9 +233,9 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->wDeckCode->setText(dataManager.GetSysString(1387));
 				if(deckManager.current_deck.main.size() > 0 || deckManager.current_deck.extra.size() > 0 || deckManager.current_deck.side.size() > 0) {
 					wchar_t deck_code[2048];
-					char deck_code_utf8[1024];
+					unsigned char deck_code_utf8[1024];
 					deckManager.SaveDeckToCode(deckManager.current_deck, deck_code_utf8);
-					BufferIO::DecodeUTF8(deck_code_utf8, deck_code);
+					BufferIO::DecodeUTF8((char*)deck_code_utf8, deck_code);
 					mainGame->ebDeckCode->setText(deck_code);
 				} else
 					mainGame->ebDeckCode->setText(L"");
@@ -249,9 +249,9 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->HideElement(mainGame->wDeckCode);
 				if(prev_operation == BUTTON_DECK_CODE) {
 					Deck new_deck;
-					char deck_code[1024];
-					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), deck_code);
-					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen(deck_code)))
+					unsigned char deck_code[1024];
+					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), (char*)deck_code);
+					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen((char*)deck_code)))
 						deckManager.current_deck = new_deck;
 					else
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1389));
