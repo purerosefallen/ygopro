@@ -53,9 +53,9 @@ class Base64 {
     return (enc_len == out->size());
   }
 
-  static bool Encode(const char *input, size_t input_length, char *out, size_t out_length) {
+  static bool Encode(const unsigned char *input, size_t input_length, unsigned char *out, size_t out_length) {
     int i = 0, j = 0;
-    char *out_begin = out;
+    unsigned char *out_begin = out;
     unsigned char a3[3];
     unsigned char a4[4];
 
@@ -148,9 +148,9 @@ class Base64 {
     return (dec_len == out->size());
   }
 
-  static bool Decode(const char *input, size_t input_length, char *out, size_t out_length) {
+  static bool Decode(const unsigned char *input, size_t input_length, unsigned char *out, size_t out_length) {
     int i = 0, j = 0;
-    char *out_begin = out;
+    unsigned char *out_begin = out;
     unsigned char a3[3];
     unsigned char a4[4];
 
@@ -198,10 +198,10 @@ class Base64 {
     return (out == (out_begin + decoded_length));
   }
 
-  static int DecodedLength(const char *in, size_t in_length) {
+  static int DecodedLength(const unsigned char *in, size_t in_length) {
     int numEq = 0;
 
-    const char *in_end = in + in_length;
+    const unsigned char *in_end = in + in_length;
     while (*--in_end == '=') ++numEq;
 
     return ((6 * in_length) / 8) - numEq;

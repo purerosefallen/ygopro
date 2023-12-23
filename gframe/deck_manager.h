@@ -62,8 +62,8 @@ public:
 	bool DeleteDeck(const wchar_t* file);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
-	bool LoadDeckFromCode(Deck& deck, const char *code, int len);
-	int SaveDeckToCode(Deck &deck, char *code);
+	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
+	int SaveDeckToCode(Deck &deck, unsigned char *code);
 	bool CreateCategory(const wchar_t* name);
 	bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	bool DeleteCategory(const wchar_t* name);
