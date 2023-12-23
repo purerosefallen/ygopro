@@ -66,6 +66,7 @@ public:
 	int announce_count{ 0 };
 	int select_counter_count{ 0 };
 	int select_counter_type{ 0 };
+	int current_mset_param{ 0 };
 	std::vector<ClientCard*> selectable_cards;
 	std::vector<ClientCard*> selected_cards;
 	std::set<ClientCard*> selectsum_cards;
@@ -123,13 +124,12 @@ public:
 	bool check_sum_trib(std::set<ClientCard*>::const_iterator index, std::set<ClientCard*>::const_iterator end, int acc);
 
 	void UpdateDeclarableList();
-
 	void RefreshCardCountDisplay();
 
-	bool is_dragging_cardtext;
-	int dragging_cardtext_start_pos;
-	int dragging_cardtext_start_y;
 	irr::gui::IGUIElement* panel{ nullptr };
+	bool is_dragging_cardtext{ false };
+	int dragging_cardtext_start_pos{ 0 };
+	int dragging_cardtext_start_y{ 0 };
 	std::vector<int> ancard;
 	int hovered_controler{ 0 };
 	int hovered_location{ 0 };

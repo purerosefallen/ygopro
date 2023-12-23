@@ -85,10 +85,13 @@ struct DuelInfo {
 	bool isTag{ false };
 	bool isSingleMode{ false };
 	bool is_shuffling{ false };
+	bool is_swapped{ false };
 	bool tag_player[2]{ false };
 	bool isReplaySwapped{ false };
 	int lp[2]{ 0 };
 	int start_lp{ 0 };
+	int card_count[2]{ 0 };
+	int total_attack[2]{ 0 };
 	int duel_rule{ 0 };
 	int turn{ 0 };
 	short curMsg{ 0 };
@@ -102,6 +105,13 @@ struct DuelInfo {
 	unsigned char time_player{ 0 };
 	unsigned short time_limit{ 0 };
 	unsigned short time_left[2]{ 0 };
+	wchar_t str_time_left[2][16]{ 0 };
+	video::SColor time_color[2]{ 0 };
+	wchar_t str_card_count[2][16]{ 0 };
+	wchar_t str_total_attack[2][16]{ 0 };
+	video::SColor card_count_color[2]{ 0 };
+	video::SColor total_attack_color[2]{ 0 };
+	std::vector<unsigned int> announce_cache;
 
 	void Clear();
 };

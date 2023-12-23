@@ -33,6 +33,7 @@ namespace ygo {
 
 Game* mainGame;
 
+#ifndef YGOPRO_SERVER_MODE
 void DuelInfo::Clear() {
 	isStarted = false;
 	isFinished = false;
@@ -63,7 +64,22 @@ void DuelInfo::Clear() {
 	time_limit = 0;
 	time_left[0] = 0;
 	time_left[1] = 0;
+
+	str_time_left[0][0] = 0;
+	str_time_left[1][0] = 0;
+	time_color[0] = 0;
+	time_color[1] = 0;
+	str_card_count[0][0] = 0;
+	str_card_count[1][0] = 0;
+	str_total_attack[0][0] = 0;
+	str_total_attack[1][0] = 0;
+	card_count_color[0] = 0;
+	card_count_color[1] = 0;
+	total_attack_color[0] = 0;
+	total_attack_color[1] = 0;
+	announce_cache.clear();
 }
+#endif
 
 #ifdef YGOPRO_SERVER_MODE
 unsigned short server_port;
@@ -261,7 +277,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Tempestissimo", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Testify", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
