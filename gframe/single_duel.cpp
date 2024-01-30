@@ -2210,14 +2210,9 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 		NetServer::ReSendToPlayer(sd->players[1]);
 		for(auto oit = sd->observers.begin(); oit != sd->observers.end(); ++oit)
 			NetServer::ReSendToPlayer(*oit);
-<<<<<<< HEAD
 #ifdef YGOPRO_SERVER_MODE
 		NetServer::ReSendToPlayers(sd->cache_recorder, sd->replay_recorder);
 #endif
-		sd->match_result[sd->duel_count] = sd->players[1 - player]->player_id;
-		++sd->duel_count;
-		sd->tp_player = player;
-=======
 		if(sd->players[player] == sd->pplayer[player]) {
 			sd->match_result[sd->duel_count++] = 1 - player;
 			sd->tp_player = player;
@@ -2225,7 +2220,6 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 			sd->match_result[sd->duel_count++] = player;
 			sd->tp_player = 1 - player;
 		}
->>>>>>> master
 		sd->EndDuel();
 		sd->DuelEndProc();
 		event_del(sd->etimer);
