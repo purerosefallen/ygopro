@@ -167,9 +167,6 @@ bool Game::Initialize() {
 	is_building = false;
 	menuHandler.prev_operation = 0;
 	menuHandler.prev_sel = -1;
-	for (auto i : chatTiming) {
-		i = 0;
-	}
 	deckManager.LoadLFList();
 	driver = device->getVideoDriver();
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
@@ -1387,7 +1384,7 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBo
 }
 void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const wchar_t*)>& additem) {
 	if(!mywcsncasecmp(deckpath, L"./pack", 6)) {
-		for(auto pack : deckBuilder.expansionPacks) {
+		for(auto& pack : deckBuilder.expansionPacks) {
 			additem(pack.substr(5, pack.size() - 9).c_str());
 		}
 	}
@@ -1860,8 +1857,8 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if(!gameConf.hide_setname) {
 		unsigned long long sc = cd.setcode;
 		if(cd.alias) {
-			auto aptr = dataManager._datas.find(cd.alias);
-			if(aptr != dataManager._datas.end())
+			auto aptr = dataManager.GetCodePointer(cd.alias);
+			if(aptr != dataManager.datas_end)
 				sc = aptr->second.setcode;
 		}
 		if(sc) {
