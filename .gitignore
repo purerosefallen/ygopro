@@ -1,7 +1,28 @@
 # data files
 /beta
 /expansions
+<<<<<<< HEAD
 /specials
+=======
+/fonts
+/icon
+/pack
+/pics
+/replay
+/single
+/WindBot
+/cards.cdb
+/error.log
+/bot.conf
+/Bot.exe
+/bot
+
+/ygopro
+/ygopro.exe
+/ygopro.app
+/ikpMP3.dll
+/irrKlang.dll
+>>>>>>> c198123788d9d57e8cdf136e9c2b7dc7a3dcf588
 
 # build files
 /bin
