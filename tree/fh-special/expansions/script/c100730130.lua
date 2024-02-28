@@ -1,0 +1,20 @@
+--高速决斗技能-空手组合技100
+Duel.LoadScript("speed_duel_common.lua")
+function c100730130.initial_effect(c)
+	aux.SpeedDuelMoveCardToFieldCommon(95453143,c)
+	aux.SpeedDuelMoveCardToFieldCommon(81020646,c)
+	aux.SpeedDuelMoveCardToFieldCommon(13582837,c)
+	aux.SpeedDuelMoveCardToFieldCommon(66957584,c)
+	aux.SpeedDuelMoveCardToFieldCommon(77859858,c)
+	aux.SpeedDuelMoveCardToFieldCommon(40555959,c)
+	aux.SpeedDuelMoveCardToFieldCommon(80921533,c)
+	aux.SpeedDuelBeforeDraw(c,c100730130.skill)
+	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730130.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730130)
+	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
+	aux.SpeedDuelSendToDeckWithExile(tp,g)
+	e:Reset()
+end
