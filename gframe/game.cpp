@@ -274,7 +274,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Testify", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Selenadia", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1845,32 +1845,41 @@ void Game::SaveConfig() {
 void Game::ShowCardInfo(int code, bool resize) {
 	if(showingcode == code && !resize)
 		return;
-	CardData cd;
 	wchar_t formatBuffer[256];
-	dataManager.GetData(code, &cd);
+	auto cit = dataManager.GetCodePointer(code);
+	bool is_valid = (cit != dataManager.datas_end);
 	imgCard->setImage(imageManager.GetTexture(code, true));
-	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
-		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
-	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
+	if (is_valid) {
+		auto& cd = cit->second;
+		if (cd.is_alternative())
+			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
+		else
+			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
+	}
+	else {
+		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
+	}
 	stName->setText(formatBuffer);
 	int offset = 0;
-	if(!gameConf.hide_setname) {
-		unsigned long long sc = cd.setcode;
-		if(cd.alias) {
-			auto aptr = dataManager.GetCodePointer(cd.alias);
-			if(aptr != dataManager.datas_end)
-				sc = aptr->second.setcode;
+	if (is_valid && !gameConf.hide_setname) {
+		auto& cd = cit->second;
+		auto target = cit;
+		if (cd.alias && dataManager.GetCodePointer(cd.alias) != dataManager.datas_end) {
+			target = dataManager.GetCodePointer(cd.alias);
 		}
-		if(sc) {
+		if (target->second.setcode[0]) {
 			offset = 23;// *yScale;
-			myswprintf(formatBuffer, L"%ls%ls", dataManager.GetSysString(1329), dataManager.FormatSetName(sc));
+			myswprintf(formatBuffer, L"%ls%ls", dataManager.GetSysString(1329), dataManager.FormatSetName(target->second.setcode));
 			stSetName->setText(formatBuffer);
-		} else
+		}
+		else
 			stSetName->setText(L"");
-	} else {
+	}
+	else {
 		stSetName->setText(L"");
 	}
-	if(cd.type & TYPE_MONSTER) {
+	if(is_valid && cit->second.type & TYPE_MONSTER) {
+		auto& cd = cit->second;
 		myswprintf(formatBuffer, L"[%ls] %ls/%ls", dataManager.FormatType(cd.type), dataManager.FormatRace(cd.race), dataManager.FormatAttribute(cd.attribute));
 		stInfo->setText(formatBuffer);
 		int offset_info = 0;
@@ -1916,8 +1925,12 @@ void Game::ShowCardInfo(int code, bool resize) {
 		stSetName->setRelativePosition(rect<s32>(15, (83 + offset_arrows), 296 * xScale, (83 + offset_arrows) + offset));
 		stText->setRelativePosition(rect<s32>(15, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
 		scrCardText->setRelativePosition(rect<s32>(287 * xScale - 20, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
-	} else {
-		myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cd.type));
+	}
+	else {
+		if (is_valid)
+			myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cit->second.type));
+		else
+			myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(0));
 		stInfo->setText(formatBuffer);
 		stDataInfo->setText(L"");
 		stSetName->setRelativePosition(rect<s32>(15, 60, 296 * xScale, 60 + offset));

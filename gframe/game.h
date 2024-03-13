@@ -950,6 +950,5 @@ extern unsigned int pre_seed[3];
 #define YGOPRO_MAX_SIDE					3
 #endif
 
-#define CARD_ARTWORK_VERSIONS_OFFSET	10
 #define MAX_LAYER_COUNT	6
 #endif // GAME_H

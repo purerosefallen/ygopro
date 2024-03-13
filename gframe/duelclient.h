@@ -59,15 +59,15 @@ public:
 class DuelClient {
 private:
 	static unsigned int connect_state;
-	static unsigned char response_buf[64];
-	static unsigned char response_len;
+	static unsigned char response_buf[SIZE_RETURN_VALUE];
+	static unsigned int response_len;
 	static unsigned int watching;
 	static unsigned char selftype;
 	static bool is_host;
 	static event_base* client_base;
 	static bufferevent* client_bev;
-	static unsigned char duel_client_read[0x2000];
-	static unsigned char duel_client_write[0x2000];
+	static unsigned char duel_client_read[SIZE_NETWORK_BUFFER];
+	static unsigned char duel_client_write[SIZE_NETWORK_BUFFER];
 	static bool is_closing;
 	static bool is_swapping;
 	static int select_hint;
@@ -93,7 +93,7 @@ public:
 	static int ClientAnalyze(unsigned char* msg, unsigned int len);
 	static void SwapField();
 	static void SetResponseI(int respI);
-	static void SetResponseB(void* respB, unsigned char len);
+	static void SetResponseB(void* respB, unsigned int len);
 	static void SendResponse();
 	static unsigned int LookupHost(char *host);
 	static bool LookupSRV(char *hostname, HostResult* result);
@@ -111,23 +111,31 @@ public:
 	template<typename ST>
 	static void SendPacketToServer(unsigned char proto, ST& st) {
 		auto p = duel_client_write;
-		BufferIO::WriteInt16(p, 1 + sizeof(ST));
+		int blen = sizeof(ST);
+		if (blen > MAX_DATA_SIZE)
+			blen = MAX_DATA_SIZE;
+		BufferIO::WriteInt16(p, (short)(1 + blen));
 		BufferIO::WriteInt8(p, proto);
-		memcpy(p, &st, sizeof(ST));
+		memcpy(p, &st, blen);
 #ifdef YGOPRO_MESSAGE_DEBUG
 		printf("CTOS: %d Length: %ld\n", proto, sizeof(ST));
 #endif
-		bufferevent_write(client_bev, duel_client_write, sizeof(ST) + 3);
+		bufferevent_write(client_bev, duel_client_write, blen + 3);
 	}
 	static void SendBufferToServer(unsigned char proto, void* buffer, size_t len) {
 		auto p = duel_client_write;
-		BufferIO::WriteInt16(p, 1 + len);
+		int blen = len;
+		if (blen < 0)
+			return;
+		if (blen > MAX_DATA_SIZE)
+			blen = MAX_DATA_SIZE;
+		BufferIO::WriteInt16(p, (short)(1 + blen));
 		BufferIO::WriteInt8(p, proto);
-		memcpy(p, buffer, len);
+		memcpy(p, buffer, blen);
 #ifdef YGOPRO_MESSAGE_DEBUG
 		printf("CTOS: %d Length: %ld\n", proto, len);
 #endif
-		bufferevent_write(client_bev, duel_client_write, len + 3);
+		bufferevent_write(client_bev, duel_client_write, blen + 3);
 	}
 	
 protected:
