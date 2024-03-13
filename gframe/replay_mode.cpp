@@ -49,7 +49,7 @@ void ReplayMode::Pause(bool is_pause, bool is_step) {
 	}
 }
 bool ReplayMode::ReadReplayResponse() {
-	unsigned char resp[64];
+	unsigned char resp[SIZE_RETURN_VALUE];
 	bool result = cur_replay.ReadNextResponse(resp);
 	if(result)
 		set_responseb(pduel, resp);
@@ -301,7 +301,7 @@ void ReplayMode::Restart(bool refresh) {
 		std::swap(mainGame->dInfo.hostname, mainGame->dInfo.clientname);
 		std::swap(mainGame->dInfo.hostname_tag, mainGame->dInfo.clientname_tag);
 	}
-		skip_turn = 0;
+	skip_turn = 0;
 }
 void ReplayMode::Undo() {
 	if(skip_step > 0 || current_step == 0)

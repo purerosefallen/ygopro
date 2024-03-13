@@ -19,39 +19,39 @@ ClientField::ClientField() {
 }
 ClientField::~ClientField() {
 	for (int i = 0; i < 2; ++i) {
-		for (auto card : deck[i]) {
+		for (auto& card : deck[i]) {
 			delete card;
 		}
 		deck[i].clear();
-		for (auto card : hand[i]) {
+		for (auto& card : hand[i]) {
 			delete card;
 		}
 		hand[i].clear();
-		for (auto card : mzone[i]) {
+		for (auto& card : mzone[i]) {
 			if (card)
 				delete card;
 			card = nullptr;
 		}
-		for (auto card : szone[i]) {
+		for (auto& card : szone[i]) {
 			if (card)
 				delete card;
 			card = nullptr;
 		}
-		for (auto card : grave[i]) {
+		for (auto& card : grave[i]) {
 			delete card;
 		}
 		grave[i].clear();
-		for (auto card : remove[i]) {
+		for (auto& card : remove[i]) {
 			delete card;
 		}
 		remove[i].clear();
 
-		for (auto card : extra[i]) {
+		for (auto& card : extra[i]) {
 			delete card;
 		}
 		extra[i].clear();
 	}
-	for (auto card : overlay_cards) {
+	for (auto& card : overlay_cards) {
 		delete card;
 	}
 	overlay_cards.clear();
@@ -1501,15 +1501,7 @@ static bool is_declarable(T const& cd, const std::vector<int>& opcode) {
 			if (stack.size() >= 1) {
 				int set_code = stack.top();
 				stack.pop();
-				unsigned long long sc = cd.setcode;
-				bool res = false;
-				int settype = set_code & 0xfff;
-				int setsubtype = set_code & 0xf000;
-				while (sc) {
-					if ((sc & 0xfff) == settype && (sc & 0xf000 & setsubtype) == setsubtype)
-						res = true;
-					sc = sc >> 16;
-				}
+				bool res = cd.is_setcode(set_code);
 				stack.push(res);
 			}
 			break;
@@ -1578,9 +1570,11 @@ void ClientField::UpdateDeclarableList() {
 		if(ancard.size())
 			return;
 	}
-	for(auto cit = dataManager._strings.begin(); cit != dataManager._strings.end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname)) {
-			auto cp = dataManager.GetCodePointer(cit->first);	//verified by _strings
+	for(auto cit = dataManager.strings_begin; cit != dataManager.strings_end; ++cit) {
+		if(cit->second.name.find(pname) != std::wstring::npos) {
+			auto cp = dataManager.GetCodePointer(cit->first);
+			if (cp == dataManager.datas_end)
+				continue;
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declare_opcodes)) {
 				if(pname == cit->second.name || mainGame->CheckRegEx(cit->second.name, pname, true)) { //exact match

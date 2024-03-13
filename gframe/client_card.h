@@ -11,21 +11,9 @@
 namespace ygo {
 
 using CardData = card_data;
-struct CardDataC {
-	unsigned int code;
-	unsigned int alias;
-	unsigned long long setcode;
-	unsigned int type;
-	unsigned int level;
-	unsigned int attribute;
-	unsigned int race;
-	int attack;
-	int defense;
-	unsigned int lscale;
-	unsigned int rscale;
-	unsigned int link_marker;
-	unsigned int ot;
-	unsigned int category;
+struct CardDataC : card_data {
+	unsigned int ot{};
+	unsigned int category{};
 };
 struct CardString {
 	std::wstring name;
@@ -33,6 +21,7 @@ struct CardString {
 	std::wstring desc[16];
 };
 typedef std::unordered_map<unsigned int, CardDataC>::const_iterator code_pointer;
+typedef std::unordered_map<unsigned int, CardString>::const_iterator string_pointer;
 
 class ClientCard {
 public:

@@ -786,7 +786,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						myswprintf(formatBuffer, L"%d", select_min);
 						mainGame->stCardPos[id - BUTTON_CARD_0]->setText(formatBuffer);
 						if(select_min == select_max) {
-							unsigned char respbuf[64];
+							unsigned char respbuf[SIZE_RETURN_VALUE];
 							for(int i = 0; i < select_max; ++i)
 								respbuf[i] = sort_list[i] - 1;
 							DuelClient::SetResponseB(respbuf, select_max);
@@ -2281,6 +2281,7 @@ void ClientField::GetHoverField(int x, int y) {
 				hovered_location = LOCATION_REMOVED;
 			}
 		} else if(rule == 1 && boardx >= matManager.vFieldSzone[1][7][rule][1].Pos.X && boardx <= matManager.vFieldSzone[1][7][rule][2].Pos.X) {
+			// deprecated szone[7]
 			if(boardy >= matManager.vFieldSzone[1][7][rule][2].Pos.Y && boardy <= matManager.vFieldSzone[1][7][rule][0].Pos.Y) {
 				hovered_controler = 1;
 				hovered_location = LOCATION_SZONE;
@@ -2312,7 +2313,8 @@ void ClientField::GetHoverField(int x, int y) {
 				hovered_controler = 1;
 				hovered_location = LOCATION_EXTRA;
 			}
-		} else if(rule == 0 && boardx >= matManager.vFieldSzone[0][7][rule][0].Pos.X && boardx <= matManager.vFieldSzone[0][7][rule][1].Pos.X) {
+		} else if(rule == 1 && boardx >= matManager.vFieldSzone[0][7][rule][0].Pos.X && boardx <= matManager.vFieldSzone[0][7][rule][1].Pos.X) {
+			// deprecated szone[7]
 			if(boardy >= matManager.vFieldSzone[0][7][rule][0].Pos.Y && boardy <= matManager.vFieldSzone[0][7][rule][2].Pos.Y) {
 				hovered_controler = 0;
 				hovered_location = LOCATION_SZONE;
@@ -2580,7 +2582,7 @@ void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* e
 	}
 }
 void ClientField::SetResponseSelectedCards() const {
-	unsigned char respbuf[64];
+	unsigned char respbuf[SIZE_RETURN_VALUE];
 	respbuf[0] = selected_cards.size();
 	for (size_t i = 0; i < selected_cards.size(); ++i)
 		respbuf[i + 1] = selected_cards[i]->select_seq;
