@@ -111,6 +111,10 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
 #endif
+	datas_begin = _datas.begin();
+	datas_end = _datas.end();
+	strings_begin = _strings.begin();
+	strings_end = _strings.end();
 	return true;
 }
 bool DataManager::LoadStrings(const char* file) {
@@ -188,16 +192,32 @@ bool DataManager::Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt) {
 	return false;
 }
 #endif //YGOPRO_SERVER_MODE
-bool DataManager::GetData(int code, CardData* pData) {
-	auto cdit = _datas.find(code);
+bool DataManager::GetData(unsigned int code, CardData* pData) {
+	code_pointer cdit = _datas.find(code);
 	if(cdit == _datas.end())
 		return false;
-	if(pData)
-		*pData = *((CardData*)&cdit->second);
+	auto& data = cdit->second;
+	if (pData) {
+		pData->code = data.code;
+		pData->alias = data.alias;
+		pData->setcode = data.setcode;
+		pData->type = data.type;
+		pData->level = data.level;
+		pData->attribute = data.attribute;
+		pData->race = data.race;
+		pData->attack = data.attack;
+		pData->defense = data.defense;
+		pData->lscale = data.lscale;
+		pData->rscale = data.rscale;
+		pData->link_marker = data.link_marker;
+	}
 	return true;
 }
-code_pointer DataManager::GetCodePointer(int code) {
+code_pointer DataManager::GetCodePointer(unsigned int code) const {
 	return _datas.find(code);
+}
+string_pointer DataManager::GetStringPointer(unsigned int code) const {
+	return _strings.find(code);
 }
 bool DataManager::GetString(int code, CardString* pStr) {
 	auto csit = _strings.find(code);
@@ -391,9 +411,9 @@ const wchar_t* DataManager::FormatLinkMarker(int link_marker) {
 		BufferIO::CopyWStrRef(L"[\u2198]", p, 4);
 	return lmBuffer;
 }
-int DataManager::CardReader(int code, void* pData) {
-	if(!dataManager.GetData(code, (CardData*)pData))
-		memset(pData, 0, sizeof(CardData));
+uint32 DataManager::CardReader(uint32 code, card_data* pData) {
+	if (!dataManager.GetData(code, pData))
+		pData->clear();
 	return 0;
 }
 byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {

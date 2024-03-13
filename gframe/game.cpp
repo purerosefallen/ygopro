@@ -33,6 +33,54 @@ namespace ygo {
 
 Game* mainGame;
 
+#ifndef YGOPRO_SERVER_MODE
+void DuelInfo::Clear() {
+	isStarted = false;
+	isFinished = false;
+	isReplay = false;
+	isReplaySkiping = false;
+	isFirst = false;
+	isTag = false;
+	isSingleMode = false;
+	is_shuffling = false;
+	tag_player[0] = false;
+	tag_player[1] = false;
+	isReplaySwapped = false;
+	lp[0] = 0;
+	lp[1] = 0;
+	start_lp = 0;
+	duel_rule = 0;
+	turn = 0;
+	curMsg = 0;
+	hostname[0] = 0;
+	clientname[0] = 0;
+	hostname_tag[0] = 0;
+	clientname_tag[0] = 0;
+	strLP[0][0] = 0;
+	strLP[1][0] = 0;
+	vic_string = 0;
+	player_type = 0;
+	time_player = 0;
+	time_limit = 0;
+	time_left[0] = 0;
+	time_left[1] = 0;
+
+	str_time_left[0][0] = 0;
+	str_time_left[1][0] = 0;
+	time_color[0] = 0;
+	time_color[1] = 0;
+	str_card_count[0][0] = 0;
+	str_card_count[1][0] = 0;
+	str_total_attack[0][0] = 0;
+	str_total_attack[1][0] = 0;
+	card_count_color[0] = 0;
+	card_count_color[1] = 0;
+	total_attack_color[0] = 0;
+	total_attack_color[1] = 0;
+	announce_cache.clear();
+}
+#endif
+
 #ifdef YGOPRO_SERVER_MODE
 unsigned short server_port;
 unsigned short replay_mode;
@@ -68,7 +116,6 @@ void Game::MainTestLoop(int code) {
 }
 #else //YGOPRO_SERVER_MODE
 bool Game::Initialize() {
-	srand(time(0));
 	initUtils();
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
@@ -120,8 +167,6 @@ bool Game::Initialize() {
 	is_building = false;
 	menuHandler.prev_operation = 0;
 	menuHandler.prev_sel = -1;
-	memset(&dInfo, 0, sizeof(DuelInfo));
-	memset(chatTiming, 0, sizeof(chatTiming));
 	deckManager.LoadLFList();
 	driver = device->getVideoDriver();
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
@@ -229,7 +274,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Tempestissimo", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Testify", PRO_VERSION >> 12, (PRO_VERSION >> 4) & 0xff, PRO_VERSION & 0xf);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1339,7 +1384,7 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBo
 }
 void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const wchar_t*)>& additem) {
 	if(!mywcsncasecmp(deckpath, L"./pack", 6)) {
-		for(auto pack : deckBuilder.expansionPacks) {
+		for(auto& pack : deckBuilder.expansionPacks) {
 			additem(pack.substr(5, pack.size() - 9).c_str());
 		}
 	}
@@ -1802,8 +1847,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 		return;
 	CardData cd;
 	wchar_t formatBuffer[256];
-	if(!dataManager.GetData(code, &cd))
-		memset(&cd, 0, sizeof(CardData));
+	dataManager.GetData(code, &cd);
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
@@ -1813,8 +1857,8 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if(!gameConf.hide_setname) {
 		unsigned long long sc = cd.setcode;
 		if(cd.alias) {
-			auto aptr = dataManager._datas.find(cd.alias);
-			if(aptr != dataManager._datas.end())
+			auto aptr = dataManager.GetCodePointer(cd.alias);
+			if(aptr != dataManager.datas_end)
 				sc = aptr->second.setcode;
 		}
 		if(sc) {
