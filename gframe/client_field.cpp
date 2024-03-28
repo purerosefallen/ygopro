@@ -1075,21 +1075,22 @@ void ClientField::GetCardLocation(ClientCard* pcard, irr::core::vector3df* t, ir
 		break;
 	}
 	case LOCATION_OVERLAY: {
-		if (pcard->overlayTarget->location != LOCATION_MZONE) {
+		if (!(pcard->overlayTarget->location & LOCATION_ONFIELD)) {
 			return;
 		}
 		int oseq = pcard->overlayTarget->sequence;
 		int mseq = (sequence < MAX_LAYER_COUNT) ? sequence : (MAX_LAYER_COUNT - 1);
+		auto vFieldZone = (pcard->overlayTarget->location == LOCATION_MZONE) ? matManager.vFieldMzone[pcard->overlayTarget->controler][oseq] : matManager.vFieldSzone[pcard->overlayTarget->controler][oseq][rule];
 		if (pcard->overlayTarget->controler == 0) {
-			t->X = (matManager.vFieldMzone[0][oseq][0].Pos.X + matManager.vFieldMzone[0][oseq][1].Pos.X) / 2 - 0.12f + 0.06f * mseq;
-			t->Y = (matManager.vFieldMzone[0][oseq][0].Pos.Y + matManager.vFieldMzone[0][oseq][2].Pos.Y) / 2 + 0.05f;
+			t->X = (vFieldZone[0].Pos.X + vFieldZone[1].Pos.X) / 2 - 0.12f + 0.06f * mseq;
+			t->Y = (vFieldZone[0].Pos.Y + vFieldZone[2].Pos.Y) / 2 + 0.05f;
 			t->Z = overlay_buttom + mseq * material_height;
 			r->X = 0.0f;
 			r->Y = 0.0f;
 			r->Z = 0.0f;
 		} else {
-			t->X = (matManager.vFieldMzone[1][oseq][0].Pos.X + matManager.vFieldMzone[1][oseq][1].Pos.X) / 2 + 0.12f - 0.06f * mseq;
-			t->Y = (matManager.vFieldMzone[1][oseq][0].Pos.Y + matManager.vFieldMzone[1][oseq][2].Pos.Y) / 2 - 0.05f;
+			t->X = (vFieldZone[0].Pos.X + vFieldZone[1].Pos.X) / 2 + 0.12f - 0.06f * mseq;
+			t->Y = (vFieldZone[0].Pos.Y + vFieldZone[2].Pos.Y) / 2 - 0.05f;
 			t->Z = overlay_buttom + mseq * material_height;
 			r->X = 0.0f;
 			r->Y = 0.0f;
