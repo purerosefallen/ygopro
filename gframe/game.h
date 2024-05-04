@@ -98,7 +98,8 @@ struct Config {
 
 struct DuelInfo {
 	bool isStarted{ false };
-	bool isFinished{ false };
+	bool isInDuel{ false };
+	bool isFinished{false};
 	bool isReplay{ false };
 	bool isReplaySkiping{ false };
 	bool isFirst{ false };
@@ -219,7 +220,7 @@ public:
 	void CloseGameWindow();
 	void CloseDuelWindow();
 
-	int LocalPlayer(int player);
+	int LocalPlayer(int player) const;
 	const wchar_t* LocalName(int local_player);
 	const char* GetLocaleDir(const char* dir);
 	const wchar_t* GetLocaleDirWide(const char* dir);

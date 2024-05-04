@@ -36,6 +36,7 @@ Game* mainGame;
 #ifndef YGOPRO_SERVER_MODE
 void DuelInfo::Clear() {
 	isStarted = false;
+	isInDuel = false;
 	isFinished = false;
 	isReplay = false;
 	isReplaySkiping = false;
@@ -1190,7 +1191,7 @@ void Game::MainLoop() {
 		SingleMode::StopPlay(true);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	SaveConfig();
-//	device->drop();
+	device->drop();
 }
 void Game::RefreshTimeDisplay() {
 	for(int i = 0; i < 2; ++i) {
@@ -2161,8 +2162,9 @@ void Game::CloseDuelWindow() {
 	ClearTextures();
 	closeDoneSignal.Set();
 }
-int Game::LocalPlayer(int player) {
-	return dInfo.isFirst ? player : 1 - player;
+int Game::LocalPlayer(int player) const {
+	int pid = player ? 1 : 0;
+	return dInfo.isFirst ? pid : 1 - pid;
 }
 const wchar_t* Game::LocalName(int local_player) {
 	return local_player == 0 ? dInfo.hostname : dInfo.clientname;
