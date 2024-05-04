@@ -197,7 +197,7 @@ public:
 	void ShowCardInfo(int code, bool resize = false);
 	void ClearCardInfo(int player = 0);
 	void AddLog(const wchar_t* msg, int param = 0);
-	void AddChatMsg(const wchar_t* msg, int player);
+	void AddChatMsg(const wchar_t* msg, int player, bool play_sound = false);
 	void ClearChatMsg();
 	void AddDebugMsg(const char* msgbuf);
 	void ErrorLog(const char* msgbuf);
@@ -208,6 +208,8 @@ public:
 	void CloseDuelWindow();
 
 	int LocalPlayer(int player) const;
+	int OppositePlayer(int player) const;
+	int ChatLocalPlayer(int player) const;
 	const wchar_t* LocalName(int local_player);
 	const char* GetLocaleDir(const char* dir);
 	const wchar_t* GetLocaleDirWide(const char* dir);

@@ -861,31 +861,17 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 	case STOC_CHAT: {
 		STOC_Chat* pkt = (STOC_Chat*)pdata;
 		int player = pkt->player;
+		auto play_sound = false;
 		if(player < 4) {
-			if(!mainGame->dInfo.isTag) {
-				if(mainGame->dInfo.isInDuel) {
-					player = mainGame->LocalPlayer(player);
-					if(player == 1 && mainGame->chkIgnore1->isChecked())
-						break;
-				}
-			} else {
-				if(mainGame->dInfo.isInDuel && !mainGame->dInfo.isFirst)
-					player ^= 2;
-				if(player == 0)
-					player = 0;
-				else if(player == 1)
-					player = 2;
-				else if(player == 2)
-					player = 1;
-				else if(player == 3)
-					player = 3;
-				else
-					player = 10;
-				if(mainGame->dInfo.isStarted && (player == 1 || player == 3) && mainGame->chkIgnore1->isChecked())
-					break;
-			}
+			auto localplayer = mainGame->ChatLocalPlayer(player);
+			player = localplayer & 0xf;
+			if(!(localplayer & 0x10))
+				play_sound = true;
+			if(play_sound && mainGame->chkIgnore1->isChecked())
+				break;
 		} else {
 			if(player == 8) { //system custom message.
+				play_sound = true;
 				if(mainGame->chkIgnore1->isChecked())
 					break;
 			} else if(player < 11 || player > 19) {
@@ -897,7 +883,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		wchar_t msg[256];
 		BufferIO::CopyWStr(pkt->msg, msg, 256);
 		mainGame->gMutex.lock();
-		mainGame->AddChatMsg(msg, player);
+		mainGame->AddChatMsg(msg, player, play_sound);
 		mainGame->gMutex.unlock();
 		break;
 	}
