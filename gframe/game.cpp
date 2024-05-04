@@ -20,6 +20,7 @@ Game* mainGame;
 
 void DuelInfo::Clear() {
 	isStarted = false;
+	isInDuel = false;
 	isFinished = false;
 	isReplay = false;
 	isReplaySkiping = false;

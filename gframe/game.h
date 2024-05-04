@@ -93,7 +93,8 @@ struct Config {
 
 struct DuelInfo {
 	bool isStarted{ false };
-	bool isFinished{ false };
+	bool isInDuel{ false };
+	bool isFinished{false};
 	bool isReplay{ false };
 	bool isReplaySkiping{ false };
 	bool isFirst{ false };

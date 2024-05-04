@@ -239,6 +239,7 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					mainGame->closeDoneSignal.Wait();
 					mainGame->gMutex.lock();
 					mainGame->dInfo.isStarted = false;
+					mainGame->dInfo.isInDuel = false;
 					mainGame->dInfo.isFinished = false;
 					mainGame->is_building = false;
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
@@ -472,6 +473,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 	case STOC_CHANGE_SIDE: {
 		mainGame->gMutex.lock();
 		mainGame->dInfo.isStarted = false;
+		mainGame->dInfo.isInDuel = false;
 		mainGame->dField.Clear();
 		mainGame->is_building = true;
 		mainGame->is_siding = true;
@@ -776,6 +778,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->closeDoneSignal.Wait();
 		mainGame->gMutex.lock();
 		mainGame->dInfo.isStarted = false;
+		mainGame->dInfo.isInDuel = false;
 		mainGame->dInfo.isFinished = true;
 		mainGame->dInfo.announce_cache.clear();
 		mainGame->is_building = false;
@@ -860,13 +863,13 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		int player = pkt->player;
 		if(player < 4) {
 			if(!mainGame->dInfo.isTag) {
-				if(mainGame->dInfo.isStarted) {
+				if(mainGame->dInfo.isInDuel) {
 					player = mainGame->LocalPlayer(player);
 					if(player == 1 && mainGame->chkIgnore1->isChecked())
 						break;
 				}
 			} else {
-				if(mainGame->dInfo.isStarted && !mainGame->dInfo.isFirst)
+				if(mainGame->dInfo.isInDuel && !mainGame->dInfo.isFirst)
 					player ^= 2;
 				if(player == 0)
 					player = 0;
@@ -1111,6 +1114,7 @@ int DuelClient::ClientAnalyze(unsigned char* msg, unsigned int len) {
 			mainGame->closeDoneSignal.Wait();
 			mainGame->gMutex.lock();
 			mainGame->dInfo.isStarted = false;
+			mainGame->dInfo.isInDuel = false;
 			mainGame->dInfo.isFinished = false;
 			mainGame->btnCreateHost->setEnabled(true);
 			mainGame->btnJoinHost->setEnabled(true);
@@ -1362,6 +1366,7 @@ int DuelClient::ClientAnalyze(unsigned char* msg, unsigned int len) {
 		mainGame->showcard = 0;
 		mainGame->gMutex.lock();
 		mainGame->dField.Clear();
+		mainGame->dInfo.isInDuel = true;
 		int playertype = BufferIO::ReadUInt8(pbuf);
 		mainGame->dInfo.isFirst =  (playertype & 0xf) ? false : true;
 		if(playertype & 0xf0)
