@@ -711,7 +711,8 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->btnM2->setVisible(false);
 		mainGame->btnEP->setVisible(false);
 		mainGame->btnShuffle->setVisible(false);
-		if(!mainGame->chkIgnore1->isChecked())
+		mainGame->ResizeChatInputWindow();
+		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
 		if(mainGame->chkDefaultShowChain->isChecked()) {
 			mainGame->always_chain = true;
