@@ -242,6 +242,7 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					mainGame->dInfo.isInDuel = false;
 					mainGame->dInfo.isFinished = false;
 					mainGame->is_building = false;
+					mainGame->ResizeChatInputWindow();
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
 					if(bot_mode)
 						mainGame->ShowElement(mainGame->wSinglePlay);
@@ -478,7 +479,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->is_building = true;
 		mainGame->is_siding = true;
 		mainGame->CloseGameWindow();
-		mainGame->wChat->setVisible(false);
+		mainGame->ResizeChatInputWindow();
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->wFilter->setVisible(false);
 		mainGame->wSort->setVisible(false);
@@ -596,6 +597,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->HideElement(mainGame->wLanWindow);
 		mainGame->HideElement(mainGame->wSinglePlay);
 		mainGame->ShowElement(mainGame->wHostPrepare);
+		mainGame->ResizeChatInputWindow();
 		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
 		mainGame->gMutex.unlock();
@@ -709,7 +711,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->btnM2->setVisible(false);
 		mainGame->btnEP->setVisible(false);
 		mainGame->btnShuffle->setVisible(false);
-		//if(!mainGame->chkIgnore1->isChecked())
+		if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
 		if(mainGame->chkDefaultShowChain->isChecked()) {
 			mainGame->always_chain = true;
@@ -790,6 +792,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->btnStartBot->setEnabled(true);
 		mainGame->btnBotCancel->setEnabled(true);
 		mainGame->stTip->setVisible(false);
+		mainGame->ResizeChatInputWindow();
 		mainGame->device->setEventReceiver(&mainGame->menuHandler);
 		if(bot_mode)
 			mainGame->ShowElement(mainGame->wSinglePlay);
@@ -870,6 +873,23 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 				play_sound = true;
 			if(play_sound && mainGame->chkIgnore1->isChecked())
 				break;
+			if(!mainGame->dInfo.isTag) {
+				if(mainGame->dInfo.isStarted)
+					player = mainGame->LocalPlayer(player);
+			} else {
+				if(mainGame->dInfo.isStarted && !mainGame->dInfo.isFirst)
+					player ^= 2;
+				if(player == 0)
+					player = 0;
+				else if(player == 1)
+					player = 2;
+				else if(player == 2)
+					player = 1;
+				else if(player == 3)
+					player = 3;
+				else
+					player = 10;
+			}
 		} else {
 			if(player == 8) { //system custom message.
 				play_sound = true;
