@@ -2902,7 +2902,7 @@ int DuelClient::ClientAnalyze(unsigned char* msg, unsigned int len) {
 					pcard->overlayTarget = olcard;
 					pcard->location = LOCATION_OVERLAY;
 					pcard->sequence = (unsigned char)(olcard->overlayed.size() - 1);
-					if (olcard->location == LOCATION_MZONE) {
+					if (olcard->location & LOCATION_ONFIELD) {
 						mainGame->gMutex.lock();
 						mainGame->dField.MoveCard(pcard, 10);
 						if (pl == 0x2)
