@@ -62,7 +62,6 @@ private:
 	static unsigned char response_buf[SIZE_RETURN_VALUE];
 	static unsigned int response_len;
 	static unsigned int watching;
-	static unsigned char selftype;
 	static bool is_host;
 	static event_base* client_base;
 	static bufferevent* client_bev;
@@ -82,7 +81,7 @@ public:
 	static unsigned short temp_port;
 	static unsigned short temp_ver;
 	static bool try_needed;
-	
+	static unsigned char selftype;
 	static bool StartClient(unsigned int ip, unsigned short port, bool create_game = true);
 	static void ConnectTimeout(evutil_socket_t fd, short events, void* arg);
 	static void StopClient(bool is_exiting = false);

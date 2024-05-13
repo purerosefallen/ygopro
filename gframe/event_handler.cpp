@@ -127,6 +127,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				if(mainGame->dInfo.player_type == 7) {
 					DuelClient::StopClient();
 					mainGame->dInfo.isStarted = false;
+					mainGame->dInfo.isInDuel = false;
 					mainGame->dInfo.isFinished = false;
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
 					mainGame->CloseDuelWindow();
@@ -1947,7 +1948,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			}
 #endif
 			case CHECKBOX_DISABLE_CHAT: {
-				bool show = !mainGame->is_building;
+				bool show = (mainGame->is_building && !mainGame->is_siding) ? false : true;
 				mainGame->wChat->setVisible(show);
 				/*
 				if(!show)
