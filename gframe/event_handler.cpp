@@ -1947,7 +1947,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			}
 #endif
 			case CHECKBOX_DISABLE_CHAT: {
-				bool show = !mainGame->is_building;
+				bool show = (mainGame->is_building && !mainGame->is_siding) ? false : true;
 				mainGame->wChat->setVisible(show);
 				/*
 				if(!show)

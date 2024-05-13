@@ -242,6 +242,7 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 					mainGame->dInfo.isInDuel = false;
 					mainGame->dInfo.isFinished = false;
 					mainGame->is_building = false;
+					mainGame->ResizeChatInputWindow();
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
 					if(bot_mode)
 						mainGame->ShowElement(mainGame->wSinglePlay);
@@ -478,7 +479,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->is_building = true;
 		mainGame->is_siding = true;
 		mainGame->CloseGameWindow();
-		mainGame->wChat->setVisible(false);
+		mainGame->ResizeChatInputWindow();
 		mainGame->wDeckEdit->setVisible(false);
 		mainGame->wFilter->setVisible(false);
 		mainGame->wSort->setVisible(false);
@@ -504,6 +505,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		break;
 	}
 	case STOC_WAITING_SIDE: {
+		mainGame->dInfo.isInDuel = false;
 		mainGame->gMutex.lock();
 		mainGame->dField.Clear();
 		mainGame->stHintMsg->setText(dataManager.GetSysString(1409));
@@ -595,6 +597,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->HideElement(mainGame->wLanWindow);
 		mainGame->HideElement(mainGame->wSinglePlay);
 		mainGame->ShowElement(mainGame->wHostPrepare);
+		mainGame->ResizeChatInputWindow();
 		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
 		mainGame->gMutex.unlock();
@@ -708,6 +711,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->btnM2->setVisible(false);
 		mainGame->btnEP->setVisible(false);
 		mainGame->btnShuffle->setVisible(false);
+		mainGame->ResizeChatInputWindow();
 		//if(!mainGame->chkIgnore1->isChecked())
 			mainGame->wChat->setVisible(true);
 		if(mainGame->chkDefaultShowChain->isChecked()) {
@@ -789,6 +793,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		mainGame->btnStartBot->setEnabled(true);
 		mainGame->btnBotCancel->setEnabled(true);
 		mainGame->stTip->setVisible(false);
+		mainGame->ResizeChatInputWindow();
 		mainGame->device->setEventReceiver(&mainGame->menuHandler);
 		if(bot_mode)
 			mainGame->ShowElement(mainGame->wSinglePlay);
@@ -861,15 +866,19 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 	case STOC_CHAT: {
 		STOC_Chat* pkt = (STOC_Chat*)pdata;
 		int player = pkt->player;
+		auto play_sound = false;
 		if(player < 4) {
+			auto localplayer = mainGame->ChatLocalPlayer(player);
+			player = localplayer & 0xf;
+			if(!(localplayer & 0x10))
+				play_sound = true;
+			if(play_sound && mainGame->chkIgnore1->isChecked())
+				break;
 			if(!mainGame->dInfo.isTag) {
-				if(mainGame->dInfo.isInDuel) {
+				if(mainGame->dInfo.isStarted)
 					player = mainGame->LocalPlayer(player);
-					if(player == 1 && mainGame->chkIgnore1->isChecked())
-						break;
-				}
 			} else {
-				if(mainGame->dInfo.isInDuel && !mainGame->dInfo.isFirst)
+				if(mainGame->dInfo.isStarted && !mainGame->dInfo.isFirst)
 					player ^= 2;
 				if(player == 0)
 					player = 0;
@@ -881,11 +890,10 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 					player = 3;
 				else
 					player = 10;
-				if(mainGame->dInfo.isStarted && (player == 1 || player == 3) && mainGame->chkIgnore1->isChecked())
-					break;
 			}
 		} else {
 			if(player == 8) { //system custom message.
+				play_sound = true;
 				if(mainGame->chkIgnore1->isChecked())
 					break;
 			} else if(player < 11 || player > 19) {
@@ -897,7 +905,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 		wchar_t msg[256];
 		BufferIO::CopyWStr(pkt->msg, msg, 256);
 		mainGame->gMutex.lock();
-		mainGame->AddChatMsg(msg, player);
+		mainGame->AddChatMsg(msg, player, play_sound);
 		mainGame->gMutex.unlock();
 		break;
 	}
@@ -2894,7 +2902,7 @@ int DuelClient::ClientAnalyze(unsigned char* msg, unsigned int len) {
 					pcard->overlayTarget = olcard;
 					pcard->location = LOCATION_OVERLAY;
 					pcard->sequence = (unsigned char)(olcard->overlayed.size() - 1);
-					if (olcard->location == LOCATION_MZONE) {
+					if (olcard->location & LOCATION_ONFIELD) {
 						mainGame->gMutex.lock();
 						mainGame->dField.MoveCard(pcard, 10);
 						if (pl == 0x2)
