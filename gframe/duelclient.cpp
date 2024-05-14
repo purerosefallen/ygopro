@@ -874,23 +874,6 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, unsigned int len) {
 				play_sound = true;
 			if(play_sound && mainGame->chkIgnore1->isChecked())
 				break;
-			if(!mainGame->dInfo.isTag) {
-				if(mainGame->dInfo.isStarted)
-					player = mainGame->LocalPlayer(player);
-			} else {
-				if(mainGame->dInfo.isStarted && !mainGame->dInfo.isFirst)
-					player ^= 2;
-				if(player == 0)
-					player = 0;
-				else if(player == 1)
-					player = 2;
-				else if(player == 2)
-					player = 1;
-				else if(player == 3)
-					player = 3;
-				else
-					player = 10;
-			}
 		} else {
 			if(player == 8) { //system custom message.
 				play_sound = true;
