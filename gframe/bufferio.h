@@ -1,13 +1,13 @@
 #ifndef BUFFERIO_H
 #define BUFFERIO_H
 
+#include <cstdint>
+#include "../ocgcore/buffer.h"
 
 class BufferIO {
 public:
 	inline static int ReadInt32(unsigned char*& p) {
-		int ret = *(int*)p;
-		p += 4;
-		return ret;
+		return buffer_read<int32_t>(p);
 	}
 	inline static unsigned int ReadUInt32(unsigned char*& p) {
 		unsigned int ret = *(unsigned int*)p;
@@ -15,9 +15,7 @@ public:
 		return ret;
 	}
 	inline static short ReadInt16(unsigned char*& p) {
-		short ret = *(short*)p;
-		p += 2;
-		return ret;
+		return buffer_read<int16_t>(p);
 	}
 	inline static unsigned short ReadUInt16(unsigned char*& p) {
 		unsigned short ret = *(unsigned short*)p;
@@ -25,26 +23,19 @@ public:
 		return ret;
 	}
 	inline static char ReadInt8(unsigned char*& p) {
-		char ret = *(char*)p;
-		p++;
-		return ret;
+		return buffer_read<char>(p);
 	}
 	inline static unsigned char ReadUInt8(unsigned char*& p) {
-		unsigned char ret = *(unsigned char*)p;
-		p++;
-		return ret;
+		return buffer_read<unsigned char>(p);
 	}
 	inline static void WriteInt32(unsigned char*& p, int val) {
-		(*(int*)p) = val;
-		p += 4;
+		buffer_write<int32_t>(p, val);
 	}
 	inline static void WriteInt16(unsigned char*& p, short val) {
-		(*(short*)p) = val;
-		p += 2;
+		buffer_write<int16_t>(p, val);
 	}
 	inline static void WriteInt8(unsigned char*& p, char val) {
-		*p = val;
-		p++;
+		buffer_write<char>(p, val);
 	}
 	template<typename T1, typename T2>
 	inline static int CopyWStr(T1* src, T2* pstr, int bufsize) {
