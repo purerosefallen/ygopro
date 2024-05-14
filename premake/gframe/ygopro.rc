@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 1 ICON "ygopro.ico"
 
 1 VERSIONINFO
@@ -26,32 +25,3 @@ BEGIN
 VALUE "Translation", 0x804, 1200
 END
 END
-=======
-1 ICON "ygopro.ico"
-
-1 VERSIONINFO
-FILEVERSION 1, 0, 36, 0
-PRODUCTVERSION 1, 0, 36, 0
-FILEOS 0x4
-FILETYPE 0x1
-
-BEGIN
-BLOCK "StringFileInfo"
-BEGIN
-BLOCK "080404b0"
-BEGIN
-VALUE "FileDescription", "KoishiPro"
-VALUE "InternalName", "KoishiPro"
-VALUE "LegalCopyright", "Copyright (C) 2023 Nanahira"
-VALUE "OriginalFilename", "ygopro.exe"
-VALUE "ProductName", "KoishiPro"
-VALUE "FileVersion", "Natsukoi"
-VALUE "ProductVersion", "Natsukoi"
-END
-END
-BLOCK "VarFileInfo"
-BEGIN
-VALUE "Translation", 0x804, 1200
-END
-END
->>>>>>> master
