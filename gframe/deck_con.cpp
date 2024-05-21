@@ -233,9 +233,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->HideElement(mainGame->wDeckCode);
 				if(prev_operation == BUTTON_DECK_CODE) {
 					Deck new_deck;
+					char pcode[1024];
+					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), pcode);
 					unsigned char deck_code[1024];
-					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), (char*)deck_code);
-					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen((char*)deck_code)))
+					memcpy(deck_code, pcode, 1024);
+					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen(pcode)))
 						deckManager.current_deck = new_deck;
 					else
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1389));
