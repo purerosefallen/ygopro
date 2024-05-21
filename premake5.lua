@@ -61,13 +61,12 @@ newoption { trigger = "server-mode", category = "YGOPro - server", description =
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
 
--- koishipro specific
-
 boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
     "no-side-check",
+    "tag-surrender-confirm",
 }
 
 for _, boolOption in ipairs(boolOptions) do
