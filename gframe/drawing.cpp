@@ -559,6 +559,8 @@ void Game::DrawMisc() {
 	//finish button
 	if(btnCancelOrFinish->isVisible() && dField.select_ready)
 		DrawSelectionLine(btnCancelOrFinish, 2, 0xffffff00);
+	if(btnLeaveGame->isVisible() && dField.tag_teammate_surrender)
+		DrawSelectionLine(btnLeaveGame, 2, 0xffffff00);
 	//lp bar
 	if((dInfo.turn % 2 && dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && !dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && dInfo.isFirst && dInfo.is_swapped) || (dInfo.turn % 2 && !dInfo.isFirst && dInfo.is_swapped)) {
 		driver->draw2DRectangle(0xa0000000, Resize(327, 8, 630, 51));
