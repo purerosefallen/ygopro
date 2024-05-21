@@ -523,7 +523,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						current_mset_param = (i << 16) + 3;
 						if(mainGame->gameConf.ask_mset) {
 							wchar_t wbuf[256];
-							myswprintf(wbuf, dataManager.GetSysString(1355), dataManager.GetName(clicked_card->code));
+							myswprintf(wbuf, dataManager.GetSysString(1368), dataManager.GetName(clicked_card->code));
 							mainGame->stQMessage->setText(wbuf);
 							mainGame->PopupElement(mainGame->wQuery);
 						} else {
