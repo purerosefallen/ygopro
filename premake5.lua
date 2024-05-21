@@ -67,7 +67,6 @@ boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
-    "default-duel-rule",
     "no-side-check",
 }
 
@@ -76,7 +75,7 @@ for _, boolOption in ipairs(boolOptions) do
 end
 
 numberOptions = {
-    "default-rule",
+    "default-duel-rule",
     "max-deck",
     "min-deck",
     "max-extra",
