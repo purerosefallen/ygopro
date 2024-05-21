@@ -462,7 +462,7 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 }
 byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
 	char sname[256];
-	sprintf(sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+	snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 	return ScriptReader(sname, slen);
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
@@ -477,7 +477,7 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	*slen = len;
 #else
 #ifdef _WIN32
-	wchar_t fname[256];
+	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
 	IReadFile* reader = FileSystem->createAndOpenFile(fname);
 #else
