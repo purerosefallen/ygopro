@@ -680,6 +680,7 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
 		return;
 	uint32 player = dp->type;
+#ifndef YGOPRO_SERVER_MODE
 	if(surrender[player])
 		return;
 	static const uint32 teammatemap[] = { 1, 0, 3, 2 };
@@ -690,6 +691,7 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 		NetServer::SendPacketToPlayer(players[teammate], STOC_TEAMMATE_SURRENDER);
 		return;
 	}
+#endif
 	static const uint32 winplayermap[] = { 1, 1, 0, 0 };
 	unsigned char wbuf[3];
 	wbuf[0] = MSG_WIN;
