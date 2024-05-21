@@ -120,6 +120,8 @@ void ClientField::Clear() {
 	conti_act = false;
 	deck_reversed = false;
 	cant_check_grave = false;
+	tag_surrender = false;
+	tag_teammate_surrender = false;
 	RefreshCardCountDisplay();
 }
 void ClientField::Initial(int player, int deckc, int extrac) {
