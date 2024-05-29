@@ -12,6 +12,7 @@ LUA_LIB_NAME = "lua"
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
+SERVER_TAG_SURRENDER_CONFIRM = false
 USE_IRRKLANG = false
 
 -- read settings from command line or environment variables
@@ -60,13 +61,13 @@ newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
     "no-side-check",
-    "tag-surrender-confirm",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -211,7 +212,6 @@ if os.istarget("macosx") then
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
-    SERVER_ZIP_SUPPORT = false
 end
 if GetParam("server-zip-support") then
     SERVER_ZIP_SUPPORT = true
@@ -219,6 +219,9 @@ end
 if GetParam("server-pro2-support") then
     SERVER_PRO2_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-tag-surrender-confirm") then
+    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 
 if SERVER_MODE then

@@ -159,7 +159,7 @@ public:
 #endif
 	virtual void EndDuel() {}
 #ifdef YGOPRO_SERVER_MODE
-	virtual void TestCard(int code) {};
+	virtual void TestCard(int code) {}
 #endif
 
 public:
