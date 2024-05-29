@@ -41,10 +41,10 @@ int SingleMode::SinglePlayThread() {
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(SingleMode::MessageHandler);
 	pduel = create_duel(rnd.rand());
-	preload_script(pduel, "./script/special.lua", 0);
-	preload_script(pduel, "./script/init.lua", 0);
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
+	preload_script(pduel, "./script/special.lua", 0);
+	preload_script(pduel, "./script/init.lua", 0);
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
 	mainGame->dInfo.start_lp = start_lp;
