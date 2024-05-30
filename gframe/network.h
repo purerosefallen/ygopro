@@ -54,8 +54,6 @@ struct CTOS_JoinGame {
 	unsigned short version;
 	unsigned int gameid;
 	unsigned short pass[20];
-	unsigned short client_type[20];
-	unsigned short hostname[253];
 };
 struct CTOS_Kick {
 	unsigned char pos;
