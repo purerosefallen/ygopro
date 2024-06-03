@@ -143,7 +143,8 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					if(exit_on_return)
 						mainGame->device->closeDevice();
 				} else {
-					mainGame->PopupElement(mainGame->wSurrender);
+					if(!(mainGame->dInfo.isTag && mainGame->dField.tag_surrender))
+						mainGame->PopupElement(mainGame->wSurrender);
 				}
 				break;
 			}
@@ -151,10 +152,12 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				DuelClient::SendPacketToServer(CTOS_SURRENDER);
 				mainGame->HideElement(mainGame->wSurrender);
+				mainGame->dField.tag_surrender = true;
 				break;
 			}
 			case BUTTON_SURRENDER_NO: {
 				soundManager.PlaySoundEffect(SOUND_BUTTON);
+				mainGame->dField.tag_teammate_surrender = false;
 				mainGame->HideElement(mainGame->wSurrender);
 				break;
 			}
@@ -523,7 +526,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						current_mset_param = (i << 16) + 3;
 						if(mainGame->gameConf.ask_mset) {
 							wchar_t wbuf[256];
-							myswprintf(wbuf, dataManager.GetSysString(1355), dataManager.GetName(clicked_card->code));
+							myswprintf(wbuf, dataManager.GetSysString(1368), dataManager.GetName(clicked_card->code));
 							mainGame->stQMessage->setText(wbuf);
 							mainGame->PopupElement(mainGame->wQuery);
 						} else {
@@ -2084,9 +2087,9 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 					break;
 				const wchar_t* input = mainGame->ebChatInput->getText();
 				if(input[0]) {
-					unsigned short msgbuf[256];
-					int len = BufferIO::CopyWStr(input, msgbuf, 256);
-					DuelClient::SendBufferToServer(CTOS_CHAT, msgbuf, (len + 1) * sizeof(short));
+					uint16_t msgbuf[LEN_CHAT_MSG];
+					int len = BufferIO::CopyWStr(input, msgbuf, LEN_CHAT_MSG);
+					DuelClient::SendBufferToServer(CTOS_CHAT, msgbuf, (len + 1) * sizeof(uint16_t));
 					mainGame->ebChatInput->setText(L"");
 					return true;
 				}

@@ -58,16 +58,15 @@ boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
-    "default-duel-rule",
     "no-side-check",
 }
 
 for _, boolOption in ipairs(boolOptions) do
-    newoption { trigger = boolOption, category = "YGOPro - Koishi", description = "" }
+    newoption { trigger = boolOption, category = "YGOPro - options", description = "" }
 end
 
 numberOptions = {
-    "default-rule",
+    "default-duel-rule",
     "max-deck",
     "min-deck",
     "max-extra",
@@ -75,7 +74,7 @@ numberOptions = {
 }
 
 for _, numberOption in ipairs(numberOptions) do
-    newoption { trigger = numberOption, category = "YGOPro - Koishi", description = "", value = "NUMBER" }
+    newoption { trigger = numberOption, category = "YGOPro - options", description = "", value = "NUMBER" }
 end
 
 function GetParam(param)
