@@ -94,6 +94,7 @@ void DeckBuilder::Terminate() {
 	mainGame->btnBigCardZoomIn->setVisible(false);
 	mainGame->btnBigCardZoomOut->setVisible(false);
 	mainGame->btnBigCardClose->setVisible(false);
+	mainGame->ResizeChatInputWindow();
 	mainGame->PopupElement(mainGame->wMainMenu);
 	mainGame->device->setEventReceiver(&mainGame->menuHandler);
 	mainGame->wACMessage->setVisible(false);
@@ -232,9 +233,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->HideElement(mainGame->wDeckCode);
 				if(prev_operation == BUTTON_DECK_CODE) {
 					Deck new_deck;
+					char pcode[1024];
+					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), pcode);
 					unsigned char deck_code[1024];
-					BufferIO::EncodeUTF8(mainGame->ebDeckCode->getText(), (char*)deck_code);
-					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen((char*)deck_code)))
+					memcpy(deck_code, pcode, 1024);
+					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen(pcode)))
 						deckManager.current_deck = new_deck;
 					else
 						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1389));
@@ -1289,7 +1292,7 @@ void DeckBuilder::GetHoveredCard() {
 		} else if(y >= 164 && y <= 435) {
 			int lx = 10, px, py = (y - 164) / 68;
 			hovered_pos = 1;
-			if(deckManager.current_deck.main.size() > 40)
+			if(deckManager.current_deck.main.size() > DECK_MIN_SIZE)
 				lx = (deckManager.current_deck.main.size() - 41) / 4 + 11;
 			if(x >= 750)
 				px = lx - 1;
@@ -1377,14 +1380,14 @@ void DeckBuilder::FilterCards() {
 	results.clear();
 	struct element_t {
 		std::wstring keyword;
-		unsigned int setcode;
+		std::vector<unsigned int> setcodes;
 		enum class type_t {
 			all,
 			name,
 			setcode
 		} type;
 		bool exclude;
-		element_t(): setcode(0), type(type_t::all), exclude(false) {}
+		element_t(): type(type_t::all), exclude(false) {}
 	};
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	std::wstring str = std::wstring(pstr);
@@ -1425,7 +1428,7 @@ void DeckBuilder::FilterCards() {
 				element.keyword = str.substr(element_start, length);
 			} else
 				element.keyword = str.substr(element_start);
-			element.setcode = dataManager.GetSetCode(element.keyword.c_str());
+			element.setcodes = dataManager.GetSetCodes(element.keyword);
 			query_elements.push_back(element);
 			if(element_end == std::wstring::npos)
 				break;
@@ -1443,7 +1446,7 @@ void DeckBuilder::FilterCards() {
 		}
 		if(element_start < str.size()) {
 			element.keyword = str.substr(element_start);
-			element.setcode = dataManager.GetSetCode(element.keyword.c_str());
+			element.setcodes = dataManager.GetSetCodes(element.keyword);
 			query_elements.push_back(element);
 		}
 	}
@@ -1530,7 +1533,7 @@ void DeckBuilder::FilterCards() {
 			if (elements_iterator->type == element_t::type_t::name) {
 				match = CardNameContains(text.name.c_str(), elements_iterator->keyword.c_str());
 			} else if (elements_iterator->type == element_t::type_t::setcode) {
-				match = elements_iterator->setcode && data.is_setcode(elements_iterator->setcode);
+				match = data.is_setcodes(elements_iterator->setcodes);
 			} else {
 				int trycode = BufferIO::GetVal(elements_iterator->keyword.c_str());
 				bool tryresult = dataManager.GetData(trycode, 0);
@@ -1538,7 +1541,7 @@ void DeckBuilder::FilterCards() {
 					match = CardNameContains(text.name.c_str(), elements_iterator->keyword.c_str())
 						|| text.text.find(elements_iterator->keyword) != std::wstring::npos
 						|| mainGame->CheckRegEx(text.text, elements_iterator->keyword)
-						|| (elements_iterator->setcode && data.is_setcode(elements_iterator->setcode));
+						|| data.is_setcodes(elements_iterator->setcodes);
 				} else {
 					match = data.code == trycode || data.alias == trycode;
 				}
@@ -1800,7 +1803,7 @@ bool DeckBuilder::push_main(code_pointer pointer, int seq) {
 	if(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 		return false;
 	auto& container = deckManager.current_deck.main;
-	int maxc = mainGame->is_siding ? YGOPRO_MAX_DECK + 5 : YGOPRO_MAX_DECK;
+	int maxc = mainGame->is_siding ? DECK_MAX_SIZE + 4 : DECK_MAX_SIZE;
 	if((int)container.size() >= maxc)
 		return false;
 	if(seq >= 0 && seq < (int)container.size())
@@ -1815,7 +1818,7 @@ bool DeckBuilder::push_extra(code_pointer pointer, int seq) {
 	if(!(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)))
 		return false;
 	auto& container = deckManager.current_deck.extra;
-	int maxc = mainGame->is_siding ? YGOPRO_MAX_EXTRA + 5 : YGOPRO_MAX_EXTRA;
+	int maxc = mainGame->is_siding ? EXTRA_MAX_SIZE + 5 : EXTRA_MAX_SIZE;
 	if((int)container.size() >= maxc)
 		return false;
 	if(seq >= 0 && seq < (int)container.size())
@@ -1828,7 +1831,7 @@ bool DeckBuilder::push_extra(code_pointer pointer, int seq) {
 }
 bool DeckBuilder::push_side(code_pointer pointer, int seq) {
 	auto& container = deckManager.current_deck.side;
-	int maxc = mainGame->is_siding ? YGOPRO_MAX_SIDE + 5 : YGOPRO_MAX_SIDE;
+	int maxc = mainGame->is_siding ? SIDE_MAX_SIZE + 5 : SIDE_MAX_SIZE;
 	if((int)container.size() >= maxc)
 		return false;
 	if(seq >= 0 && seq < (int)container.size())
