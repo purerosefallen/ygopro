@@ -18,10 +18,10 @@ void Game::DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, 
 		glDisable(GL_TEXTURE_2D);
 		glMaterialfv(GL_FRONT, GL_AMBIENT, cv);
 		glBegin(GL_LINE_LOOP);
-		glVertex3fv((float*)&vec[0].Pos);
-		glVertex3fv((float*)&vec[1].Pos);
-		glVertex3fv((float*)&vec[3].Pos);
-		glVertex3fv((float*)&vec[2].Pos);
+		glVertex3fv(&vec[0].Pos.X);
+		glVertex3fv(&vec[1].Pos.X);
+		glVertex3fv(&vec[3].Pos.X);
+		glVertex3fv(&vec[2].Pos.X);
 		glEnd();
 		glMaterialfv(GL_FRONT, GL_AMBIENT, origin);
 		glDisable(GL_LINE_STIPPLE);
@@ -559,6 +559,8 @@ void Game::DrawMisc() {
 	//finish button
 	if(btnCancelOrFinish->isVisible() && dField.select_ready)
 		DrawSelectionLine(btnCancelOrFinish, 2, 0xffffff00);
+	if(btnLeaveGame->isVisible() && dField.tag_teammate_surrender)
+		DrawSelectionLine(btnLeaveGame, 2, 0xffffff00);
 	//lp bar
 	if((dInfo.turn % 2 && dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && !dInfo.isFirst && !dInfo.is_swapped) || (!(dInfo.turn % 2) && dInfo.isFirst && dInfo.is_swapped) || (dInfo.turn % 2 && !dInfo.isFirst && dInfo.is_swapped)) {
 		driver->draw2DRectangle(0xa0000000, Resize(327, 8, 630, 51));

@@ -41,10 +41,10 @@ int SingleMode::SinglePlayThread() {
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(SingleMode::MessageHandler);
 	pduel = create_duel(rnd.rand());
-	preload_script(pduel, "./script/special.lua", 0);
-	preload_script(pduel, "./script/init.lua", 0);
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
+	preload_script(pduel, "./script/special.lua", 0);
+	preload_script(pduel, "./script/init.lua", 0);
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
 	mainGame->dInfo.start_lp = start_lp;
@@ -758,7 +758,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 			int len = BufferIO::ReadInt16(pbuf);
 			auto begin = pbuf;
 			pbuf += len + 1;
-			memcpy(namebuf, begin, len + 1);
+			std::memcpy(namebuf, begin, len + 1);
 			BufferIO::DecodeUTF8(namebuf, wname);
 			BufferIO::CopyWStr(wname, mainGame->dInfo.clientname, 20);
 			break;
@@ -769,7 +769,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 			int len = BufferIO::ReadInt16(pbuf);
 			auto begin = pbuf;
 			pbuf += len + 1;
-			memcpy(msgbuf, begin, len + 1);
+			std::memcpy(msgbuf, begin, len + 1);
 			BufferIO::DecodeUTF8(msgbuf, msg);
 			mainGame->gMutex.lock();
 			mainGame->SetStaticText(mainGame->stMessage, 310, mainGame->guiFont, msg);
@@ -843,7 +843,7 @@ uint32 SingleMode::MessageHandler(intptr_t fduel, uint32 type) {
 	if(!enable_log)
 		return 0;
 	char msgbuf[1024];
-	get_log_message(fduel, (byte*)msgbuf);
+	get_log_message(fduel, msgbuf);
 	mainGame->AddDebugMsg(msgbuf);
 	return 0;
 }

@@ -83,7 +83,7 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 					if (len > SIZE_SETCODE)
 						len = SIZE_SETCODE;
 					if (len)
-						memcpy(cd.setcode, it->second.data(), len * sizeof(uint16_t));
+						std::memcpy(cd.setcode, it->second.data(), len * sizeof(uint16_t));
 				}
 				else
 					cd.set_setcode(setcode);
@@ -225,7 +225,7 @@ bool DataManager::GetData(unsigned int code, CardData* pData) {
 	if (pData) {
 		pData->code = data.code;
 		pData->alias = data.alias;
-		memcpy(pData->setcode, data.setcode, SIZE_SETCODE);
+		std::memcpy(pData->setcode, data.setcode, SIZE_SETCODE);
 		pData->type = data.type;
 		pData->level = data.level;
 		pData->attribute = data.attribute;
@@ -308,17 +308,27 @@ const wchar_t* DataManager::GetSetName(int code) {
 		return NULL;
 	return csit->second.c_str();
 }
-unsigned int DataManager::GetSetCode(const wchar_t* setname) {
+std::vector<unsigned int> DataManager::GetSetCodes(std::wstring setname) {
+	std::vector<unsigned int> matchingCodes;
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
 		auto xpos = csit->second.find_first_of(L'|');//setname|another setname or extra info
-		if(csit->second.compare(0, xpos, setname) == 0 || csit->second.compare(xpos + 1, csit->second.length(), setname) == 0
 #ifndef YGOPRO_SERVER_MODE
-				|| mainGame->CheckRegEx(csit->second, setname, true)
+		if (mainGame->CheckRegEx(csit->second, setname, true)) {
+			matchingCodes.push_back(csit->first);
+		} else
 #endif
-		)
-			return csit->first;
+		if(setname.size() < 2) {
+			if(csit->second.compare(0, xpos, setname) == 0
+				|| csit->second.compare(xpos + 1, csit->second.length(), setname) == 0)
+				matchingCodes.push_back(csit->first);
+		} else {
+			if(csit->second.substr(0, xpos).find(setname) != std::wstring::npos
+				|| csit->second.substr(xpos + 1).find(setname) != std::wstring::npos) {
+				matchingCodes.push_back(csit->first);
+			}
+		}
 	}
-	return 0;
+	return matchingCodes;
 }
 const wchar_t* DataManager::GetNumString(int num, bool bracket) {
 	if(!bracket)
@@ -462,7 +472,7 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 }
 byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
 	char sname[256];
-	sprintf(sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+	snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 	return ScriptReader(sname, slen);
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
@@ -477,7 +487,7 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	*slen = len;
 #else
 #ifdef _WIN32
-	wchar_t fname[256];
+	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
 	IReadFile* reader = FileSystem->createAndOpenFile(fname);
 #else
