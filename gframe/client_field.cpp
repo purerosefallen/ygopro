@@ -120,6 +120,8 @@ void ClientField::Clear() {
 	conti_act = false;
 	deck_reversed = false;
 	cant_check_grave = false;
+	tag_surrender = false;
+	tag_teammate_surrender = false;
 	RefreshCardCountDisplay();
 }
 void ClientField::Initial(int player, int deckc, int extrac) {
@@ -197,7 +199,7 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	case LOCATION_DECK: {
 		if (sequence != 0 || deck[controler].size() == 0) {
 			deck[controler].push_back(pcard);
-			pcard->sequence = deck[controler].size() - 1;
+			pcard->sequence = (unsigned char)(deck[controler].size() - 1);
 		} else {
 			deck[controler].push_back(0);
 			for(int i = deck[controler].size() - 1; i > 0; --i) {
@@ -212,7 +214,7 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	}
 	case LOCATION_HAND: {
 		hand[controler].push_back(pcard);
-		pcard->sequence = hand[controler].size() - 1;
+		pcard->sequence = (unsigned char)(hand[controler].size() - 1);
 		break;
 	}
 	case LOCATION_MZONE: {
@@ -225,18 +227,18 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	}
 	case LOCATION_GRAVE: {
 		grave[controler].push_back(pcard);
-		pcard->sequence = grave[controler].size() - 1;
+		pcard->sequence = (unsigned char)(grave[controler].size() - 1);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		remove[controler].push_back(pcard);
-		pcard->sequence = remove[controler].size() - 1;
+		pcard->sequence = (unsigned char)(remove[controler].size() - 1);
 		break;
 	}
 	case LOCATION_EXTRA: {
 		if(extra_p_count[controler] == 0 || (pcard->position & POS_FACEUP)) {
 			extra[controler].push_back(pcard);
-			pcard->sequence = extra[controler].size() - 1;
+			pcard->sequence = (unsigned char)(extra[controler].size() - 1);
 		} else {
 			extra[controler].push_back(0);
 			int p = extra[controler].size() - extra_p_count[controler] - 1;
@@ -691,8 +693,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + newheight;
 		mainGame->wOptions->setRelativePosition(pos);
 	} else {
-		mainGame->SetStaticText(mainGame->stOptions, 310, mainGame->guiFont,
-			(wchar_t*)dataManager.GetDesc(select_options[0]));
+		mainGame->SetStaticText(mainGame->stOptions, 310, mainGame->guiFont, dataManager.GetDesc(select_options[0]));
 		mainGame->stOptions->setVisible(true);
 		mainGame->btnOptionp->setVisible(false);
 		mainGame->btnOptionn->setVisible(count > 1);
@@ -1075,21 +1076,22 @@ void ClientField::GetCardLocation(ClientCard* pcard, irr::core::vector3df* t, ir
 		break;
 	}
 	case LOCATION_OVERLAY: {
-		if (pcard->overlayTarget->location != LOCATION_MZONE) {
+		if (!(pcard->overlayTarget->location & LOCATION_ONFIELD)) {
 			return;
 		}
 		int oseq = pcard->overlayTarget->sequence;
 		int mseq = (sequence < MAX_LAYER_COUNT) ? sequence : (MAX_LAYER_COUNT - 1);
+		auto vFieldZone = (pcard->overlayTarget->location == LOCATION_MZONE) ? matManager.vFieldMzone[pcard->overlayTarget->controler][oseq] : matManager.vFieldSzone[pcard->overlayTarget->controler][oseq][rule];
 		if (pcard->overlayTarget->controler == 0) {
-			t->X = (matManager.vFieldMzone[0][oseq][0].Pos.X + matManager.vFieldMzone[0][oseq][1].Pos.X) / 2 - 0.12f + 0.06f * mseq;
-			t->Y = (matManager.vFieldMzone[0][oseq][0].Pos.Y + matManager.vFieldMzone[0][oseq][2].Pos.Y) / 2 + 0.05f;
+			t->X = (vFieldZone[0].Pos.X + vFieldZone[1].Pos.X) / 2 - 0.12f + 0.06f * mseq;
+			t->Y = (vFieldZone[0].Pos.Y + vFieldZone[2].Pos.Y) / 2 + 0.05f;
 			t->Z = overlay_buttom + mseq * material_height;
 			r->X = 0.0f;
 			r->Y = 0.0f;
 			r->Z = 0.0f;
 		} else {
-			t->X = (matManager.vFieldMzone[1][oseq][0].Pos.X + matManager.vFieldMzone[1][oseq][1].Pos.X) / 2 + 0.12f - 0.06f * mseq;
-			t->Y = (matManager.vFieldMzone[1][oseq][0].Pos.Y + matManager.vFieldMzone[1][oseq][2].Pos.Y) / 2 - 0.05f;
+			t->X = (vFieldZone[0].Pos.X + vFieldZone[1].Pos.X) / 2 + 0.12f - 0.06f * mseq;
+			t->Y = (vFieldZone[0].Pos.Y + vFieldZone[2].Pos.Y) / 2 - 0.05f;
 			t->Z = overlay_buttom + mseq * material_height;
 			r->X = 0.0f;
 			r->Y = 0.0f;
