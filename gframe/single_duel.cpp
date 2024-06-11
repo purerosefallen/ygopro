@@ -590,20 +590,33 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 		new_card(pduel, pdeck[0].main[i]->first, 0, 0, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
 		last_replay.WriteInt32(pdeck[0].main[i]->first, false);
 	}
-	last_replay.WriteInt32(pdeck[0].extra.size(), false);
-	for(int32 i = (int32)pdeck[0].extra.size() - 1; i >= 0; --i) {
-		new_card(pduel, pdeck[0].extra[i]->first, 0, 0, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(pdeck[0].extra[i]->first, false);
+	std::vector<ygo::code_pointer> extra_cards;
+	extra_cards.clear();
+	for(auto cit : pdeck[0].extra)
+		extra_cards.push_back(cit);
+	for(auto cit : pdeck[0].side)
+		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+			extra_cards.push_back(cit);
+	last_replay.WriteInt32(extra_cards.size(), false);
+	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
+		new_card(pduel, extra_cards[i]->first, 0, 0, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(extra_cards[i]->first, false);
 	}
 	last_replay.WriteInt32(pdeck[1].main.size(), false);
 	for(int32 i = (int32)pdeck[1].main.size() - 1; i >= 0; --i) {
 		new_card(pduel, pdeck[1].main[i]->first, 1, 1, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
 		last_replay.WriteInt32(pdeck[1].main[i]->first, false);
 	}
-	last_replay.WriteInt32(pdeck[1].extra.size(), false);
-	for(int32 i = (int32)pdeck[1].extra.size() - 1; i >= 0; --i) {
-		new_card(pduel, pdeck[1].extra[i]->first, 1, 1, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(pdeck[1].extra[i]->first, false);
+	extra_cards.clear();
+	for(auto cit : pdeck[1].extra)
+		extra_cards.push_back(cit);
+	for(auto cit : pdeck[1].side)
+		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+			extra_cards.push_back(cit);
+	last_replay.WriteInt32(extra_cards.size(), false);
+	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
+		new_card(pduel, extra_cards[i]->first, 1, 1, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
+		last_replay.WriteInt32(extra_cards[i]->first, false);
 	}
 	last_replay.Flush();
 	unsigned char startbuf[32];
