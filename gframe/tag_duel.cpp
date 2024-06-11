@@ -430,11 +430,19 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 #endif
 	unsigned char deckbuff[12];
 	auto pbuf = deckbuff;
+	short extra_size[2];
+	for(int i = 0; i < 2; ++i) {
+		auto p = i * 2;
+		extra_size[i] = (short)pdeck[p].extra.size();
+		for (auto cit : pdeck[p].side)
+			if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+				++extra_size[i];
+	}
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size());
+	BufferIO::WriteInt16(pbuf, extra_size[0]);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size());
+	BufferIO::WriteInt16(pbuf, extra_size[1]);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
 	NetServer::ReSendToPlayer(players[1]);
