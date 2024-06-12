@@ -1,0 +1,50 @@
+--高速决斗技能-你很弱哎！
+Duel.LoadScript("speed_duel_common.lua")
+function c100730270.initial_effect(c)
+	aux.SpeedDuelAtMainPhase(c,c100730270.skill,c100730270.con,aux.Stringid(100730270,0))
+	aux.RegisterSpeedDuelSkillCardCommon()
+end
+function c100730270.con(e,tp)
+	tp=e:GetLabelObject():GetOwner()
+	return aux.SpeedDuelAtMainPhaseCondition(e,tp)
+		and Duel.IsExistingMatchingCard(c100730270.filter,tp,LOCATION_MZONE,0,1,nil) 
+		and Duel.IsExistingMatchingCard(c100730270.filter,tp,0,LOCATION_MZONE,1,nil) 
+end
+function c100730270.skill(e,tp,eg,ep,ev,re,r,rp)
+	tp=e:GetLabelObject():GetOwner()
+	Duel.Hint(HINT_CARD,1-tp,100730270)
+	local c=e:GetHandler()
+	local g=Duel.SelectMatchingCard(tp,c100730270.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	local sc=g:GetFirst()
+	if sc then
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetCode(EFFECT_DISABLE)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		sc:RegisterEffect(e2)
+		local e3=Effect.CreateEffect(c)
+		e3:SetType(EFFECT_TYPE_SINGLE)
+		e3:SetCode(EFFECT_DISABLE_EFFECT)
+		e3:SetValue(RESET_TURN_SET)
+		e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		sc:RegisterEffect(e3)
+	end
+	local g1=Duel.SelectMatchingCard(tp,c100730270.filter,tp,0,LOCATION_MZONE,1,1,nil)
+	local tc=g1:GetFirst()
+	if tc then
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetCode(EFFECT_DISABLE)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e2)
+		local e3=Effect.CreateEffect(c)
+		e3:SetType(EFFECT_TYPE_SINGLE)
+		e3:SetCode(EFFECT_DISABLE_EFFECT)
+		e3:SetValue(RESET_TURN_SET)
+		e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e3)
+	end
+end
+function c100730270.filter(c)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsType(TYPE_EFFECT)
+end
