@@ -38,7 +38,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 		CTOS_JoinGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
-		const auto* pkt = &packet;
+		auto* pkt = &packet;
 		/* disabled version check
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
@@ -50,6 +50,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 		*/
 		wchar_t jpass[20];
+		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 		if(wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
