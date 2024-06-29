@@ -58,7 +58,6 @@ mat_linux:
       - premake5
       - irrlicht
       - libevent-stable
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
 
 mat_windows:
   stage: prepare
@@ -127,7 +126,6 @@ exec_linux:
   artifacts:
     paths:
       - ygopro
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
 
 exec_debian:
   extends: ._exec_build
