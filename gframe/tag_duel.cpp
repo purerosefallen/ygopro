@@ -54,7 +54,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 		CTOS_JoinGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
-		const auto* pkt = &packet;
+		auto* pkt = &packet;
 		/* disabled version check
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
@@ -66,6 +66,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 		*/
 		wchar_t jpass[20];
+		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 #ifdef YGOPRO_SERVER_MODE
 		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
@@ -1911,7 +1912,7 @@ int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	return 0;
 }
 void TagDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
-	byte resb[SIZE_RETURN_VALUE];
+	byte resb[SIZE_RETURN_VALUE]{};
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);
