@@ -47,7 +47,7 @@ mat_linux:
   stage: prepare
   tags:
     - linux
-  image: git-registry.myard.moe/mycard/docker-runner-base:debian11
+  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
   script:
     - apt update; apt -y install git wget tar
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
@@ -110,7 +110,7 @@ exec_linux:
   extends: ._exec_build
   tags:
     - linux
-  image: git-registry.myard.moe/mycard/docker-runner-base:debian11
+  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
   dependencies:
     - mat_common
     - mat_linux
