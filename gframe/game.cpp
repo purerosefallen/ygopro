@@ -90,8 +90,10 @@ bool Game::Initialize() {
 		size_t count = skins.size();
 		if(count > 0) {
 			int index = -1;
-			if(gameConf.skin_index < 0)
-				index = rand() % count;
+			if(gameConf.skin_index < 0) {
+				std::random_device rd;
+				index = rd() % count;
+			}
 			else if((size_t)gameConf.skin_index <= skins.size())
 				index = skins.size() - gameConf.skin_index; // reverse index
 			if(index >= 0)
