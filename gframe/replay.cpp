@@ -82,7 +82,7 @@ void Replay::WriteData(const void* data, int length, bool flush) {
 		return;
 	if (length < 0 || (int)(pwrite - replay_data) + length > MAX_REPLAY_SIZE)
 		return;
-	std::memcpy(pdata, data, length);
+	std::memcpy(pwrite, data, length);
 	pwrite += length;
 #ifdef YGOPRO_SERVER_MODE
 	if(!(replay_mode & REPLAY_MODE_SAVE_IN_SERVER)) return;
