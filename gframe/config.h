@@ -20,10 +20,6 @@
 
 #define socklen_t int
 
-inline int _wtoi(const wchar_t * str){
-	return (int)wcstol(str, 0, 10);
-}
-
 #else //_WIN32
 
 #include <errno.h>
@@ -48,6 +44,9 @@ inline int _wtoi(const wchar_t * str){
 #endif
 
 #include <wchar.h>
+inline int _wtoi(const wchar_t * str){
+	return (int)wcstol(str, 0, 10);
+}
 template<size_t N, typename... TR>
 inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 	return swprintf(buf, N, fmt, args...);
