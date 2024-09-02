@@ -560,7 +560,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	preload_script(pduel, "./script/special.lua", 0);
 	preload_script(pduel, "./script/init.lua", 0);
-	int opt = (int)host_info.duel_rule << 16;
+	unsigned int opt = (unsigned int)host_info.duel_rule << 16;
 	if(host_info.no_shuffle_deck)
 		opt |= DUEL_PSEUDO_SHUFFLE;
 	opt |= DUEL_TAG_MODE;
@@ -2105,7 +2105,7 @@ if(!dp || dp == players[pid])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 	pid = 2 - pid;
@@ -2158,7 +2158,7 @@ if(!dp || dp == players[pid])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 	pid = 2 - pid;
@@ -2206,7 +2206,7 @@ if(!dp || dp == cur_player[player])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if(!(position & POS_FACEUP))
-			memset(qbuf, 0, slen - 4);
+			std::memset(qbuf, 0, slen - 4);
 		qbuf += slen - 4;
 	}
 	for(int i = 0; i < 4; ++i)
