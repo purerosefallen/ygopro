@@ -1,5 +1,7 @@
 #include "image_manager.h"
 #include "game.h"
+#include <thread>
+#include "myfilesystem.h"
 
 namespace ygo {
 
@@ -71,8 +73,9 @@ irr::video::ITexture* ImageManager::GetRandomImage(int image_type) {
 		return NULL;
 	char ImageName[1024];
 	wchar_t fname[1024];
+	std::random_device rd;
 	if(saved_image_id[image_type] == -1)
-		saved_image_id[image_type] = rand() % count;
+		saved_image_id[image_type] = rd() % count;
 	int image_id = saved_image_id[image_type];
 	auto name = ImageList[image_type][image_id].c_str();
 	myswprintf(fname, L"./textures/%ls", name);
@@ -85,8 +88,9 @@ irr::video::ITexture* ImageManager::GetRandomImage(int image_type, s32 width, s3
 		return NULL;
 	char ImageName[1024];
 	wchar_t fname[1024];
+	std::random_device rd;
 	if(saved_image_id[image_type] == -1)
-		saved_image_id[image_type] = rand() % count;
+		saved_image_id[image_type] = rd() % count;
 	int image_id = saved_image_id[image_type];
 	auto name = ImageList[image_type][image_id].c_str();
 	myswprintf(fname, L"./textures/%ls", name);
