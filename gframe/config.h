@@ -52,18 +52,6 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 	return swprintf(buf, N, fmt, args...);
 }
 
-#ifndef YGOPRO_SERVER_MODE
-#include <irrlicht.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else //__APPLE__
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif //__APPLE__
-#include "CGUITTFont.h"
-#include "CGUIImageButton.h"
-#endif //YGOPRO_SERVER_MODE
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
