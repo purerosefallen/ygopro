@@ -3,6 +3,7 @@
 #include "game.h"
 #include "../ocgcore/common.h"
 #include "../ocgcore/mtrandom.h"
+#include <thread>
 
 namespace ygo {
 
@@ -281,7 +282,6 @@ void ReplayMode::EndDuel() {
 }
 void ReplayMode::Restart(bool refresh) {
 	end_duel(pduel);
-	mainGame->dInfo.isInDuel = false;
 	mainGame->dInfo.isStarted = false;
 	mainGame->dInfo.isInDuel = false;
 	mainGame->dInfo.isFinished = true;
