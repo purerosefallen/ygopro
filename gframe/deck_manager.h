@@ -5,9 +5,7 @@
 #include "client_card.h"
 #include <unordered_map>
 #include <vector>
-#ifndef YGOPRO_SERVER_MODE
 #include <sstream>
-#endif
 
 #ifndef YGOPRO_MAX_DECK
 #define YGOPRO_MAX_DECK					60
