@@ -1,7 +1,5 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
-
-#pragma once
+#ifndef YGOPRO_CONFIG_H
+#define YGOPRO_CONFIG_H
 
 #define _IRR_STATIC_LIB_
 #define IRR_COMPILE_WITH_DX9_DEV_PACK
@@ -41,15 +39,14 @@
 #define SOCKADDR sockaddr
 #define SOCKET_ERRNO() (errno)
 
-#include <wchar.h>
 #define mywcsncasecmp wcsncasecmp
 #define mystrncasecmp strncasecmp
-inline int _wtoi(const wchar_t * s) {
-	wchar_t * endptr;
-	return (int)wcstol(s, &endptr, 10);
-}
 #endif
 
+#include <wchar.h>
+inline int _wtoi(const wchar_t * str){
+	return (int)wcstol(str, 0, 10);
+}
 template<size_t N, typename... TR>
 inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 	return swprintf(buf, N, fmt, args...);
@@ -67,20 +64,17 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 #include "CGUITTFont.h"
 #include "CGUIImageButton.h"
 #endif //YGOPRO_SERVER_MODE
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <thread>
-#include <mutex>
+#include <iostream>
 #include <algorithm>
+#include <string>
 #include "bufferio.h"
-#include "myfilesystem.h"
-#include "mysignal.h"
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 
 #ifndef YGOPRO_SERVER_MODE
+#include <irrlicht.h>
 using namespace irr;
 using namespace core;
 using namespace scene;
