@@ -1,4 +1,5 @@
 #include "sound_manager.h"
+#include "myfilesystem.h"
 #ifdef YGOPRO_USE_IRRKLANG
 #include "../ikpmp3/ikpMP3.h"
 #endif
