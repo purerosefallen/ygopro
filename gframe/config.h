@@ -63,6 +63,20 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 
+inline FILE* myfopen(const char* filename, const char* mode) {
+	FILE* fp{};
+#ifdef _WIN32
+	wchar_t wname[256]{};
+	wchar_t wmode[20]{};
+	BufferIO::DecodeUTF8(filename, wname);
+	BufferIO::CopyWStr(mode, wmode, sizeof wmode / sizeof wmode[0]);
+	fp = _wfopen(wname, wmode);
+#else
+	fp = fopen(filename, mode);
+#endif
+	return fp;
+}
+
 #ifndef YGOPRO_SERVER_MODE
 #include <irrlicht.h>
 using namespace irr;
