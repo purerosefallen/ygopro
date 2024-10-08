@@ -27,20 +27,20 @@ public:
 #else
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = 0);
 #endif //YGOPRO_SERVER_MODE
-	bool GetData(unsigned int code, CardData* pData);
+	bool GetData(unsigned int code, CardData* pData) const;
 	code_pointer GetCodePointer(unsigned int code) const;
 	string_pointer GetStringPointer(unsigned int code) const;
-	bool GetString(unsigned int code, CardString* pStr);
-	const wchar_t* GetName(unsigned int code);
-	const wchar_t* GetText(unsigned int code);
-	const wchar_t* GetDesc(unsigned int strCode);
-	const wchar_t* GetSysString(int code);
-	const wchar_t* GetVictoryString(int code);
-	const wchar_t* GetCounterName(int code);
-	const wchar_t* GetSetName(int code);
-	std::vector<unsigned int> GetSetCodes(std::wstring setname);
+	bool GetString(unsigned int code, CardString* pStr) const;
+	const wchar_t* GetName(unsigned int code) const;
+	const wchar_t* GetText(unsigned int code) const;
+	const wchar_t* GetDesc(unsigned int strCode) const;
+	const wchar_t* GetSysString(int code) const;
+	const wchar_t* GetVictoryString(int code) const;
+	const wchar_t* GetCounterName(int code) const;
+	const wchar_t* GetSetName(int code) const;
+	std::vector<unsigned int> GetSetCodes(std::wstring setname) const;
 	const wchar_t* GetNumString(int num, bool bracket = false);
-	const wchar_t* FormatLocation(int location, int sequence);
+	const wchar_t* FormatLocation(int location, int sequence) const;
 	const wchar_t* FormatAttribute(int attribute);
 	const wchar_t* FormatRace(int race);
 	const wchar_t* FormatType(int type);
