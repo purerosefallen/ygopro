@@ -228,7 +228,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Euphoria", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Do-Dai", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1823,7 +1823,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 		return;
 	wchar_t formatBuffer[256];
 	auto cit = dataManager.GetCodePointer(code);
-	bool is_valid = (cit != dataManager.datas_end);
+	bool is_valid = (cit != dataManager.datas_end());
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	if (is_valid) {
 		auto& cd = cit->second;
@@ -1840,7 +1840,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if (is_valid && !gameConf.hide_setname) {
 		auto& cd = cit->second;
 		auto target = cit;
-		if (cd.alias && dataManager.GetCodePointer(cd.alias) != dataManager.datas_end) {
+		if (cd.alias && dataManager.GetCodePointer(cd.alias) != dataManager.datas_end()) {
 			target = dataManager.GetCodePointer(cd.alias);
 		}
 		if (target->second.setcode[0]) {
