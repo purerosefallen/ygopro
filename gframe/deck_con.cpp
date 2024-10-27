@@ -1058,7 +1058,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			dragx = event.MouseInput.X;
 			dragy = event.MouseInput.Y;
 			draging_pointer = dataManager.GetCodePointer(hovered_code);
-			if(draging_pointer == dataManager.datas_end)
+			if(draging_pointer == dataManager.datas_end())
 				break;
 			if(hovered_pos == 4) {
 				if(!check_limit(draging_pointer))
@@ -1112,7 +1112,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				if(hovered_pos == 0 || hovered_seq == -1)
 					break;
 				auto pointer = dataManager.GetCodePointer(hovered_code);
-				if(pointer == dataManager.datas_end)
+				if(pointer == dataManager.datas_end())
 					break;
 				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				if(hovered_pos == 1) {
@@ -1147,7 +1147,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					pop_side(hovered_seq);
 				} else {
 					auto pointer = dataManager.GetCodePointer(hovered_code);
-					if(pointer == dataManager.datas_end)
+					if(pointer == dataManager.datas_end())
 						break;
 					if(!check_limit(pointer))
 						break;
@@ -1182,7 +1182,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			if (is_draging)
 				break;
 			auto pointer = dataManager.GetCodePointer(hovered_code);
-			if (pointer == dataManager.datas_end)
+			if (pointer == dataManager.datas_end())
 				break;
 			if(!check_limit(pointer))
 				break;
@@ -1452,10 +1452,10 @@ void DeckBuilder::FilterCards() {
 			query_elements.push_back(element);
 		}
 	}
-	for(code_pointer ptr = dataManager.datas_begin; ptr != dataManager.datas_end; ++ptr) {
+	for(code_pointer ptr = dataManager.datas_begin(); ptr != dataManager.datas_end(); ++ptr) {
 		const CardDataC& data = ptr->second;
 		auto strpointer = dataManager.GetStringPointer(ptr->first);
-		if (strpointer == dataManager.strings_end)
+		if (strpointer == dataManager.strings_end())
 			continue;
 		const CardString& text = strpointer->second;
 		if(data.type & TYPE_TOKEN)
