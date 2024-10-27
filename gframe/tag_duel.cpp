@@ -2403,5 +2403,10 @@ void TagDuel::TagTimer(evutil_socket_t fd, short events, void* arg) {
 	timeval timeout = { 1, 0 };
 	event_add(sd->etimer, &timeout);
 }
+#ifdef YGOPRO_SERVER_MODE
+void TagDuel::TestCard(int code) {
+	// not implemented
+}
+#endif
 
 }

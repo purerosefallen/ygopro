@@ -31,6 +31,9 @@ public:
 	void RequestField(DuelPlayer* dp) override;
 #endif
 	void EndDuel() override;
+#ifdef YGOPRO_SERVER_MODE
+	void TestCard(int code) override;
+#endif
 	
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
