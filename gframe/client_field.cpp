@@ -1572,10 +1572,10 @@ void ClientField::UpdateDeclarableList() {
 		if(ancard.size())
 			return;
 	}
-	for(auto cit = dataManager.strings_begin; cit != dataManager.strings_end; ++cit) {
+	for(auto cit = dataManager.strings_begin(); cit != dataManager.strings_end(); ++cit) {
 		if(cit->second.name.find(pname) != std::wstring::npos) {
 			auto cp = dataManager.GetCodePointer(cit->first);
-			if (cp == dataManager.datas_end)
+			if (cp == dataManager.datas_end())
 				continue;
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declare_opcodes)) {

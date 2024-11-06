@@ -44,8 +44,8 @@ int SingleMode::SinglePlayThread() {
 	pduel = create_duel(rnd.rand());
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
-	preload_script(pduel, "./script/special.lua", 0);
-	preload_script(pduel, "./script/init.lua", 0);
+	preload_script(pduel, "./script/special.lua");
+	preload_script(pduel, "./script/init.lua");
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
 	mainGame->dInfo.start_lp = start_lp;
@@ -63,11 +63,11 @@ int SingleMode::SinglePlayThread() {
 	if(open_file) {
 		open_file = false;
 		slen = BufferIO::EncodeUTF8(open_file_name, filename);
-		if(!preload_script(pduel, filename, 0)) {
+		if(!preload_script(pduel, filename)) {
 			wchar_t fname[256];
 			myswprintf(fname, L"./single/%ls", open_file_name);
 			slen = BufferIO::EncodeUTF8(fname, filename);
-			if(!preload_script(pduel, filename, 0))
+			if(!preload_script(pduel, filename))
 				slen = 0;
 		}
 	} else {
@@ -75,7 +75,7 @@ int SingleMode::SinglePlayThread() {
 		wchar_t fname[256];
 		myswprintf(fname, L"./single/%ls", name);
 		slen = BufferIO::EncodeUTF8(fname, filename);
-		if(!preload_script(pduel, filename, 0))
+		if(!preload_script(pduel, filename))
 			slen = 0;
 	}
 	if(slen == 0) {
