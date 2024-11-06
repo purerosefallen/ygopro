@@ -1618,7 +1618,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 									myswprintf(formatBuffer, L"\nLINK-%d", mcard->link);
 									str.append(formatBuffer);
 								}
-								myswprintf(formatBuffer, L" %ls/%ls", dataManager.FormatRace(mcard->race), dataManager.FormatAttribute(mcard->attribute));
+								myswprintf(formatBuffer, L" %ls/%ls", dataManager.FormatRace(mcard->race).c_str(), dataManager.FormatAttribute(mcard->attribute).c_str());
 								str.append(formatBuffer);
 								if(mcard->location == LOCATION_HAND && (mcard->type & TYPE_PENDULUM)) {
 									myswprintf(formatBuffer, L"\n%d/%d", mcard->lscale, mcard->rscale);
@@ -1644,9 +1644,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 								else if(mcard->cHint == CHINT_CARD)
 									myswprintf(formatBuffer, L"\n%ls%ls", dataManager.GetSysString(212), dataManager.GetName(mcard->chValue));
 								else if(mcard->cHint == CHINT_RACE)
-									myswprintf(formatBuffer, L"\n%ls%ls", dataManager.GetSysString(213), dataManager.FormatRace(mcard->chValue));
+									myswprintf(formatBuffer, L"\n%ls%ls", dataManager.GetSysString(213), dataManager.FormatRace(mcard->chValue).c_str());
 								else if(mcard->cHint == CHINT_ATTRIBUTE)
-									myswprintf(formatBuffer, L"\n%ls%ls", dataManager.GetSysString(214), dataManager.FormatAttribute(mcard->chValue));
+									myswprintf(formatBuffer, L"\n%ls%ls", dataManager.GetSysString(214), dataManager.FormatAttribute(mcard->chValue).c_str());
 								else if(mcard->cHint == CHINT_NUMBER)
 									myswprintf(formatBuffer, L"\n%ls%d", dataManager.GetSysString(215), mcard->chValue);
 								str.append(formatBuffer);
@@ -2586,11 +2586,14 @@ void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* e
 	}
 }
 void ClientField::SetResponseSelectedCards() const {
-	unsigned char respbuf[SIZE_RETURN_VALUE];
-	respbuf[0] = selected_cards.size();
-	for (size_t i = 0; i < selected_cards.size(); ++i)
+	unsigned char respbuf[SIZE_RETURN_VALUE]{};
+	int len = (int)selected_cards.size();
+	if (len > UINT8_MAX)
+		len = UINT8_MAX;
+	respbuf[0] = (unsigned char)len;
+	for (int i = 0; i < len; ++i)
 		respbuf[i + 1] = selected_cards[i]->select_seq;
-	DuelClient::SetResponseB(respbuf, selected_cards.size() + 1);
+	DuelClient::SetResponseB(respbuf, len + 1);
 }
 void ClientField::SetResponseSelectedOption() const {
 	if(mainGame->dInfo.curMsg == MSG_SELECT_OPTION) {
