@@ -1502,8 +1502,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lasthost);
 		} else if(!std::strcmp(strbuf, "lastport")) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lastport);
-		} else if(!std::strcmp(strbuf, "roompass")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.roompass);
 		} else if(!std::strcmp(strbuf, "automonsterpos")) {
 			gameConf.chkMAutoPos = strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "autospellpos")) {
@@ -1769,7 +1767,10 @@ void Game::SaveConfig() {
 	fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	fprintf(fp, "lasthost = %s\n", linebuf);
-	fprintf(fp, "lastport = %d\n", gameConf.lastport);
+	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
+	fprintf(fp, "lastport = %s\n", linebuf);
+	BufferIO::EncodeUTF8(gameConf.roompass, linebuf);
+	fprintf(fp, "roompass = %s\n", linebuf);
 	//settings
 	fprintf(fp, "automonsterpos = %d\n", (chkMAutoPos->isChecked() ? 1 : 0));
 	fprintf(fp, "autospellpos = %d\n", (chkSTAutoPos->isChecked() ? 1 : 0));
