@@ -558,8 +558,8 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	pduel = create_duel(duel_seed);
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
-	preload_script(pduel, "./script/special.lua", 0);
-	preload_script(pduel, "./script/init.lua", 0);
+	preload_script(pduel, "./script/special.lua");
+	preload_script(pduel, "./script/init.lua");
 	unsigned int opt = (unsigned int)host_info.duel_rule << 16;
 	if(host_info.no_shuffle_deck)
 		opt |= DUEL_PSEUDO_SHUFFLE;
@@ -2405,5 +2405,10 @@ void TagDuel::TagTimer(evutil_socket_t fd, short events, void* arg) {
 	timeval timeout = { 1, 0 };
 	event_add(sd->etimer, &timeout);
 }
+#ifdef YGOPRO_SERVER_MODE
+void TagDuel::TestCard(int code) {
+	// not implemented
+}
+#endif
 
 }
