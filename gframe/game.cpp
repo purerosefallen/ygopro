@@ -287,7 +287,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Do-Dai", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Shironeko", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1571,8 +1571,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lasthost);
 		} else if(!std::strcmp(strbuf, "lastport")) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lastport);
-		} else if(!std::strcmp(strbuf, "roompass")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.roompass);
 		} else if(!std::strcmp(strbuf, "automonsterpos")) {
 			gameConf.chkMAutoPos = strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "autospellpos")) {
@@ -1838,7 +1836,10 @@ void Game::SaveConfig() {
 	fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	fprintf(fp, "lasthost = %s\n", linebuf);
-	fprintf(fp, "lastport = %d\n", gameConf.lastport);
+	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
+	fprintf(fp, "lastport = %s\n", linebuf);
+	BufferIO::EncodeUTF8(gameConf.roompass, linebuf);
+	fprintf(fp, "roompass = %s\n", linebuf);
 	//settings
 	fprintf(fp, "automonsterpos = %d\n", (chkMAutoPos->isChecked() ? 1 : 0));
 	fprintf(fp, "autospellpos = %d\n", (chkSTAutoPos->isChecked() ? 1 : 0));
