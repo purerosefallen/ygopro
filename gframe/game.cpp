@@ -261,7 +261,7 @@ bool Game::Initialize() {
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	wchar_t lastPortText[6];
 	if(gameConf.lastport)
-		myswprintf(lastPortText, L"%d", gameConf.lastport);
+		myswprintf(lastPortText, L"%ls", gameConf.lastport);
 	else
 		myswprintf(lastPortText, L"");
 	editbox_list.push_back(ebJoinHost);
