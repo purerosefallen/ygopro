@@ -86,6 +86,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				BufferIO::CopyWideString(pstr, mainGame->gameConf.lasthost);
 				BufferIO::CopyWideString(portstr, mainGame->gameConf.lastport);
+				BufferIO::CopyWideString(mainGame->ebJoinPass->getText(), mainGame->gameConf.roompass);
 				if(DuelClient::StartClient(remote.host, remote.port, false)) {
 					mainGame->btnCreateHost->setEnabled(false);
 					mainGame->btnJoinHost->setEnabled(false);
