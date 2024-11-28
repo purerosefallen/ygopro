@@ -30,7 +30,7 @@
 #define YGOPRO_DEFAULT_DUEL_RULE			5
 #endif
 
-constexpr int DEFAULT_DUEL_RULE = YGOPRO_DEFAULT_DUEL_RULE;
+#define DEFAULT_DUEL_RULE YGOPRO_DEFAULT_DUEL_RULE
 constexpr int CONFIG_LINE_SIZE = 1024;
 
 namespace ygo {

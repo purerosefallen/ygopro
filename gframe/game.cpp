@@ -103,6 +103,7 @@ void Game::MainServerLoop() {
 	}
 }
 #else //YGOPRO_SERVER_MODE
+
 bool Game::Initialize() {
 	LoadConfig();
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
@@ -1217,7 +1218,7 @@ void Game::LoadExpansions() {
 	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./cdb/%ls", name);
-		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4)) {
+		if(!isdir && IsExtension(name, L".cdb")) {
 			dataManager.LoadDB(fpath);
 		}
 	});
