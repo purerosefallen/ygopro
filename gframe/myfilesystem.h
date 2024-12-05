@@ -70,9 +70,8 @@ public:
 
 	static bool DeleteDir(const wchar_t* wdir) {
 		wchar_t pdir[256];
-		int len = BufferIO::CopyWStr(wdir, pdir, sizeof pdir / sizeof pdir[0]);
-		pdir[len + 1] = 0;
-		SHFILEOPSTRUCTW lpFileOp;
+		BufferIO::CopyWideString(wdir, pdir);
+		SHFILEOPSTRUCTW lpFileOp{};
 		lpFileOp.hwnd = NULL;
 		lpFileOp.wFunc = FO_DELETE;
 		lpFileOp.pFrom = pdir;
@@ -174,8 +173,12 @@ public:
 	static bool DeleteDir(const char* dir) {
 		bool success = true;
 		TraversalDir(dir, [dir, &success](const char *name, bool isdir) {
-			char full_path[256];
-			snprintf(full_path, sizeof full_path, "%s/%s", dir, name);
+			char full_path[1024];
+			int len = std::snprintf(full_path, sizeof full_path, "%s/%s", dir, name);
+			if (len < 0 || len >= (int)(sizeof full_path)) {
+				success = false;
+				return;
+			}
 			if (isdir)
 			{
 				if(!DeleteDir(full_path))
@@ -207,7 +210,9 @@ public:
 		while((dirp = readdir(dir)) != nullptr) {
 			file_unit funit;
 			char fname[1024];
-			std::snprintf(fname, sizeof fname, "%s/%s", path, dirp->d_name);
+			int len = std::snprintf(fname, sizeof fname, "%s/%s", path, dirp->d_name);
+			if (len < 0 || len >= (int)(sizeof fname))
+				continue;
 			stat(fname, &fileStat);
 			funit.filename = std::string(dirp->d_name);
 			funit.is_dir = S_ISDIR(fileStat.st_mode);

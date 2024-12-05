@@ -51,7 +51,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		*/
 		wchar_t jpass[20];
 		BufferIO::NullTerminate(pkt->pass);
-		BufferIO::CopyWStr(pkt->pass, jpass, 20);
+		BufferIO::CopyCharArray(pkt->pass, jpass);
 		if(wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_JOINERROR;
@@ -69,7 +69,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 	sctc.type = (host_player == dp) ? 0x10 : 0;
 	if(!players[0] || !players[1] || !players[2] || !players[3]) {
 		STOC_HS_PlayerEnter scpe;
-		BufferIO::CopyWStr(dp->name, scpe.name, 20);
+		BufferIO::CopyCharArray(dp->name, scpe.name);
 		if(!players[0])
 			scpe.pos = 0;
 		else if(!players[1])
@@ -103,7 +103,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 	for(int i = 0; i < 4; ++i)
 		if(players[i]) {
 			STOC_HS_PlayerEnter scpe;
-			BufferIO::CopyWStr(players[i]->name, scpe.name, 20);
+			BufferIO::CopyCharArray(players[i]->name, scpe.name);
 			scpe.pos = i;
 			NetServer::SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 			if(ready[i]) {
@@ -159,7 +159,7 @@ void TagDuel::ToDuelist(DuelPlayer* dp) {
 	if(dp->type == NETPLAYER_TYPE_OBSERVER) {
 		observers.erase(dp);
 		STOC_HS_PlayerEnter scpe;
-		BufferIO::CopyWStr(dp->name, scpe.name, 20);
+		BufferIO::CopyCharArray(dp->name, scpe.name);
 		if(!players[0])
 			dp->type = 0;
 		else if(!players[1])
@@ -1554,7 +1554,7 @@ int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	return 0;
 }
 void TagDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
-	byte resb[SIZE_RETURN_VALUE]{};
+	unsigned char resb[SIZE_RETURN_VALUE]{};
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);

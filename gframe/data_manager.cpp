@@ -6,7 +6,7 @@
 namespace ygo {
 
 const wchar_t* DataManager::unknown_string = L"???";
-byte DataManager::scriptBuffer[0x20000];
+unsigned char DataManager::scriptBuffer[0x20000];
 IFileSystem* DataManager::FileSystem;
 DataManager dataManager;
 
@@ -111,23 +111,23 @@ bool DataManager::LoadStrings(const char* file) {
 	FILE* fp = fopen(file, "r");
 	if(!fp)
 		return false;
-	char linebuf[256];
-	while(fgets(linebuf, 256, fp)) {
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(fgets(linebuf, sizeof linebuf, fp)) {
 		ReadStringConfLine(linebuf);
 	}
 	fclose(fp);
 	return true;
 }
 bool DataManager::LoadStrings(IReadFile* reader) {
-	char ch[2] = " ";
-	char linebuf[256] = "";
-	while(reader->read(&ch[0], 1)) {
-		if(ch[0] == '\0')
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
 			break;
-		std::strcat(linebuf, ch);
-		if(ch[0] == '\n') {
-			ReadStringConfLine(linebuf);
-			linebuf[0] = '\0';
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadStringConfLine(linebuf.data());
+			linebuf.clear();
 		}
 	}
 	reader->drop();
@@ -136,7 +136,7 @@ bool DataManager::LoadStrings(IReadFile* reader) {
 void DataManager::ReadStringConfLine(const char* linebuf) {
 	if(linebuf[0] != '!')
 		return;
-	char strbuf[256]{};
+	char strbuf[TEXT_LINE_SIZE]{};
 	int value{};
 	wchar_t strBuffer[4096]{};
 	if (sscanf(linebuf, "!%63s", strbuf) != 1)
@@ -393,8 +393,8 @@ uint32 DataManager::CardReader(uint32 code, card_data* pData) {
 		pData->clear();
 	return 0;
 }
-byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
-	byte* buffer;
+unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
+	unsigned char* buffer;
 	if(!mainGame->gameConf.prefer_expansion_script) {
 		buffer = ScriptReaderExSingle("", script_name, slen);
 		if(buffer)
@@ -408,12 +408,12 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 		return buffer;
 	return ScriptReaderExSingle("", script_name, slen);
 }
-byte* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
+unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
 	char sname[256];
 	snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 	return ScriptReader(sname, slen);
 }
-byte* DataManager::ScriptReader(const char* script_name, int* slen) {
+unsigned char* DataManager::ScriptReader(const char* script_name, int* slen) {
 #ifdef _WIN32
 	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
@@ -421,16 +421,16 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 #else
 	IReadFile* reader = FileSystem->createAndOpenFile(script_name);
 #endif
-	if(reader == NULL)
-		return 0;
+	if (!reader)
+		return nullptr;
 	size_t size = reader->getSize();
-	if(size > sizeof(scriptBuffer)) {
+	if (size > sizeof scriptBuffer) {
 		reader->drop();
-		return 0;
+		return nullptr;
 	}
 	reader->read(scriptBuffer, size);
 	reader->drop();
-	*slen = size;
+	*slen = (int)size;
 	return scriptBuffer;
 }
 
