@@ -63,7 +63,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 		*/
 		wchar_t jpass[20];
 		BufferIO::NullTerminate(pkt->pass);
-		BufferIO::CopyWStr(pkt->pass, jpass, 20);
+		BufferIO::CopyCharArray(pkt->pass, jpass);
 #ifdef YGOPRO_SERVER_MODE
 		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
 			is_recorder = true;
@@ -101,7 +101,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 #endif
 	if(!players[0] || !players[1]) {
 		STOC_HS_PlayerEnter scpe;
-		BufferIO::CopyWStr(dp->name, scpe.name, 20);
+		BufferIO::CopyCharArray(dp->name, scpe.name);
 		if(!players[0])
 			scpe.pos = 0;
 		else
@@ -152,7 +152,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 	NetServer::SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 	if(players[0]) {
 		STOC_HS_PlayerEnter scpe;
-		BufferIO::CopyWStr(players[0]->name, scpe.name, 20);
+		BufferIO::CopyCharArray(players[0]->name, scpe.name);
 		scpe.pos = 0;
 		NetServer::SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 		if(ready[0]) {
@@ -163,7 +163,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 	}
 	if(players[1]) {
 		STOC_HS_PlayerEnter scpe;
-		BufferIO::CopyWStr(players[1]->name, scpe.name, 20);
+		BufferIO::CopyCharArray(players[1]->name, scpe.name);
 		scpe.pos = 1;
 		NetServer::SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 		if(ready[1]) {
@@ -285,7 +285,7 @@ void SingleDuel::ToDuelist(DuelPlayer* dp) {
 		return;
 	observers.erase(dp);
 	STOC_HS_PlayerEnter scpe;
-	BufferIO::CopyWStr(dp->name, scpe.name, 20);
+	BufferIO::CopyCharArray(dp->name, scpe.name);
 	if(!players[0]) {
 		players[0] = dp;
 		dp->type = NETPLAYER_TYPE_PLAYER1;
@@ -1802,7 +1802,7 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	return 0;
 }
 void SingleDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
-	byte resb[SIZE_RETURN_VALUE]{};
+	unsigned char resb[SIZE_RETURN_VALUE]{};
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);
