@@ -51,20 +51,20 @@ int SingleMode::SinglePlayThread() {
 	mainGame->dInfo.start_lp = start_lp;
 	myswprintf(mainGame->dInfo.strLP[0], L"%d", mainGame->dInfo.lp[0]);
 	myswprintf(mainGame->dInfo.strLP[1], L"%d", mainGame->dInfo.lp[1]);
-	BufferIO::CopyWStr(mainGame->ebNickName->getText(), mainGame->dInfo.hostname, 20);
+	BufferIO::CopyWideString(mainGame->ebNickName->getText(), mainGame->dInfo.hostname);
 	mainGame->dInfo.clientname[0] = 0;
 	mainGame->dInfo.player_type = 0;
 	mainGame->dInfo.turn = 0;
 	mainGame->dInfo.announce_cache.clear();
 	if(mainGame->chkSinglePlayReturnDeckTop->isChecked())
 		opt |= DUEL_RETURN_DECK_TOP;
-	char filename[256];
+	char filename[256]{};
 	int slen = 0;
 	if(open_file) {
 		open_file = false;
 		slen = BufferIO::EncodeUTF8(open_file_name, filename);
 		if(!preload_script(pduel, filename)) {
-			wchar_t fname[256];
+			wchar_t fname[256]{};
 			myswprintf(fname, L"./single/%ls", open_file_name);
 			slen = BufferIO::EncodeUTF8(fname, filename);
 			if(!preload_script(pduel, filename))
@@ -72,7 +72,7 @@ int SingleMode::SinglePlayThread() {
 		}
 	} else {
 		const wchar_t* name = mainGame->lstSinglePlayList->getListItem(mainGame->lstSinglePlayList->getSelected());
-		wchar_t fname[256];
+		wchar_t fname[256]{};
 		myswprintf(fname, L"./single/%ls", name);
 		slen = BufferIO::EncodeUTF8(fname, filename);
 		if(!preload_script(pduel, filename))
@@ -112,11 +112,12 @@ int SingleMode::SinglePlayThread() {
 		is_continuing = SinglePlayAnalyze(engineBuffer.data(), len);
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
-	unsigned short buffer[20];
-	BufferIO::CopyWStr(mainGame->dInfo.hostname, buffer, 20);
-	last_replay.WriteData(buffer, 40, false);
-	BufferIO::CopyWStr(mainGame->dInfo.clientname, buffer, 20);
-	last_replay.WriteData(buffer, 40, false);
+	uint16_t host_name[20]{};
+	BufferIO::CopyCharArray(mainGame->dInfo.hostname, host_name);
+	last_replay.WriteData(host_name, sizeof host_name, false);
+	uint16_t client_name[20]{};
+	BufferIO::CopyCharArray(mainGame->dInfo.clientname, client_name);
+	last_replay.WriteData(client_name, sizeof client_name, false);
 	last_replay.WriteInt32(start_lp, false);
 	last_replay.WriteInt32(start_hand, false);
 	last_replay.WriteInt32(draw_count, false);
@@ -754,14 +755,14 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_AI_NAME: {
-			char namebuf[128];
-			wchar_t wname[128];
+			char namebuf[128]{};
+			wchar_t wname[20]{};
 			int len = BufferIO::ReadInt16(pbuf);
 			auto begin = pbuf;
 			pbuf += len + 1;
 			std::memcpy(namebuf, begin, len + 1);
 			BufferIO::DecodeUTF8(namebuf, wname);
-			BufferIO::CopyWStr(wname, mainGame->dInfo.clientname, 20);
+			BufferIO::CopyCharArray(wname, mainGame->dInfo.clientname);
 			break;
 		}
 		case MSG_SHOW_HINT: {
@@ -821,7 +822,7 @@ void SingleMode::SinglePlayRefreshSingle(int player, int location, int sequence,
 	mainGame->dField.UpdateCard(mainGame->LocalPlayer(player), location, sequence, queryBuffer);
 }
 void SingleMode::SinglePlayReload() {
-	std::vector<byte> queryBuffer;
+	std::vector<unsigned char> queryBuffer;
 	queryBuffer.resize(SIZE_QUERY_BUFFER);
 	unsigned int flag = 0xffdfff;
 	ReloadLocation(0, LOCATION_MZONE, flag, queryBuffer);
