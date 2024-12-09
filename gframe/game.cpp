@@ -84,12 +84,11 @@ void DuelInfo::Clear() {
 #endif
 
 bool IsExtension(const wchar_t* filename, const wchar_t* extension) {
-	int flen = std::wcslen(filename);
-	int elen = std::wcslen(extension);
-	if (!flen || !elen || flen < elen)
+	auto flen = std::wcslen(filename);
+	auto elen = std::wcslen(extension);
+	if (!elen || flen < elen)
 		return false;
-	auto fend = filename + flen;
-	return !mywcsncasecmp(fend - elen, extension, elen);
+	return !mywcsncasecmp(filename + (flen - elen), extension, elen);
 }
 
 #ifdef YGOPRO_SERVER_MODE
@@ -287,7 +286,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Shironeko", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Arcahv", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(rect<s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(rect<s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -311,13 +310,8 @@ bool Game::Initialize() {
 	env->addStaticText(dataManager.GetSysString(1221), rect<s32>(10, 360, 220, 380), false, false, wLanWindow);
 	ebJoinHost = env->addEditBox(gameConf.lasthost, rect<s32>(110, 355, 350, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	wchar_t lastPortText[6];
-	if(gameConf.lastport)
-		myswprintf(lastPortText, L"%d", gameConf.lastport);
-	else
-		myswprintf(lastPortText, L"");
 	editbox_list.push_back(ebJoinHost);
-	ebJoinPort = env->addEditBox(lastPortText, rect<s32>(360, 355, 420, 380), true, wLanWindow);
+	ebJoinPort = env->addEditBox(gameConf.lastport, rect<s32>(360, 355, 420, 380), true, wLanWindow);
 	ebJoinPort->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebJoinPort);
 	env->addStaticText(dataManager.GetSysString(1222), rect<s32>(10, 390, 220, 410), false, false, wLanWindow);
@@ -1433,9 +1427,10 @@ void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const w
 	FileSystem::TraversalDir(deckpath, [additem](const wchar_t* name, bool isdir) {
 		if (!isdir && IsExtension(name, L".ydk")) {
 			size_t len = std::wcslen(name);
-			wchar_t deckname[256];
-			std::wcsncpy(deckname, name, len - 4);
-			deckname[len - 4] = 0;
+			wchar_t deckname[256]{};
+			size_t count = std::min(len - 4, sizeof deckname / sizeof deckname[0] - 1);
+			std::wcsncpy(deckname, name, count);
+			deckname[count] = 0;
 			additem(deckname);
 		}
 	});
