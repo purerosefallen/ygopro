@@ -34,7 +34,13 @@ public:
 	static void WriteInt8(unsigned char*& p, char val) {
 		buffer_write<char>(p, val);
 	}
-	// return: string length
+	/**
+	* @brief Copy a C-style string to another C-style string.
+	* @param src The source wide string
+	* @param pstr The destination char string
+	* @param bufsize The size of the destination buffer
+	* @return The length of the copied string
+	*/
 	template<typename T1, typename T2>
 	static int CopyWStr(const T1* src, T2* pstr, int bufsize) {
 		int l = 0;
@@ -56,8 +62,12 @@ public:
 		*pstr = 0;
 		return l;
 	}
+	template<typename T1, typename T2, size_t N>
+	static int CopyCharArray(const T1* src, T2(&dst)[N]) {
+		return CopyWStr(src, dst, N);
+	}
 	template<size_t N>
-	static void CopyString(const char* src, wchar_t(&dst)[N]) {
+	static void CopyString(const char* src, char(&dst)[N]) {
 		dst[0] = 0;
 		std::strncat(dst, src, N - 1);
 	}
@@ -252,14 +262,18 @@ public:
 		str[N - 1] = 0;
 	}
 	static int GetVal(const wchar_t* pstr) {
-		unsigned int ret = 0;
-		while(*pstr >= L'0' && *pstr <= L'9') {
-			ret = ret * 10 + (*pstr - L'0');
-			pstr++;
+		if (*pstr >= L'0' && *pstr <= L'9') {
+			int ret{};
+			wchar_t* str_end{};
+			ret = std::wcstol(pstr, &str_end, 10);
+			if (*str_end == 0)
+				return ret;
+			else
+				return 0;
 		}
-		if (*pstr == 0)
-			return (int)ret;
-		return 0;
+		else
+			return 0;
+	
 	}
 };
 
