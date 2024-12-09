@@ -1354,8 +1354,10 @@ void Game::LoadExpansions() {
 			const char* uname = archive->getFullFileName(j).c_str();
 			BufferIO::DecodeUTF8(uname, fname);
 #endif
-			if (IsExtension(fname, L".cdb"))
+			if (IsExtension(fname, L".cdb")) {
 				dataManager.LoadDB(fname);
+				continue;
+			}
 #ifndef YGOPRO_SERVER_MODE
 			if (IsExtension(fname, L".conf")) {
 #ifdef _WIN32
