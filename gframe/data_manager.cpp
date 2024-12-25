@@ -491,18 +491,5 @@ unsigned char* DataManager::DefaultScriptReader(const char* script_name, int* sl
 	*slen = (int)len;
 	return scriptBuffer;
 }
-unsigned char* DataManager::DefaultScriptReader(const char* script_name, int* slen) {
-	wchar_t fname[256]{};
-	BufferIO::DecodeUTF8(script_name, fname);
-	FILE* fp = myfopen(fname, "rb");
-	if (!fp)
-		return nullptr;
-	size_t len = std::fread(scriptBuffer, 1, sizeof scriptBuffer, fp);
-	std::fclose(fp);
-	if (len >= sizeof scriptBuffer)
-		return nullptr;
-	*slen = (int)len;
-	return scriptBuffer;
-}
 
 }
