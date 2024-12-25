@@ -1,7 +1,7 @@
 #include "single_mode.h"
 #include "duelclient.h"
 #include "game.h"
-#include "../ocgcore/common.h"
+#include "data_manager.h"
 #include "../ocgcore/mtrandom.h"
 #include <thread>
 
@@ -135,7 +135,7 @@ int SingleMode::SinglePlayThread() {
 	}
 	last_replay.EndRecord();
 	mainGame->gMutex.lock();
-	time_t nowtime = time(NULL);
+	time_t nowtime = time(nullptr);
 	tm* localedtime = localtime(&nowtime);
 	wchar_t timetext[40];
 	wcsftime(timetext, 40, L"%Y-%m-%d %H-%M-%S", localedtime);
@@ -834,7 +834,7 @@ void SingleMode::SinglePlayReload() {
 	ReloadLocation(0, LOCATION_REMOVED, flag, queryBuffer);
 	ReloadLocation(1, LOCATION_REMOVED, flag, queryBuffer);
 }
-uint32 SingleMode::MessageHandler(intptr_t fduel, uint32 type) {
+uint32_t SingleMode::MessageHandler(intptr_t fduel, uint32_t type) {
 	if(!enable_log)
 		return 0;
 	char msgbuf[1024];
