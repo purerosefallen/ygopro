@@ -1,8 +1,8 @@
+#include "config.h"
 #include "tag_duel.h"
 #include "netserver.h"
 #include "game.h"
-#include "../ocgcore/ocgapi.h"
-#include "../ocgcore/common.h"
+#include "data_manager.h"
 #include "../ocgcore/mtrandom.h"
 
 namespace ygo {
@@ -286,7 +286,7 @@ void TagDuel::ToDuelist(DuelPlayer* dp) {
 	} else {
 		if(ready[dp->type])
 			return;
-		uint8 dptype = (dp->type + 1) % 4;
+		unsigned char dptype = (dp->type + 1) % 4;
 		while(players[dptype])
 			dptype = (dptype + 1) % 4;
 		STOC_HS_PlayerChange scpc;
@@ -575,77 +575,40 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteInt32(host_info.draw_count, false);
 	last_replay.WriteInt32(opt, false);
 	last_replay.Flush();
-	//
-	last_replay.WriteInt32(pdeck[0].main.size(), false);
-	for(int32 i = (int32)pdeck[0].main.size() - 1; i >= 0; --i) {
-		new_card(pduel, pdeck[0].main[i]->first, 0, 0, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(pdeck[0].main[i]->first, false);
-	}
+	auto load_single = [&](const std::vector<code_pointer>& deck_container, uint8_t p, uint8_t location) {
+		last_replay.WriteInt32(deck_container.size(), false);
+		for (auto cit = deck_container.rbegin(); cit != deck_container.rend(); ++cit) {
+			new_card(pduel, (*cit)->first, p, p, location, 0, POS_FACEDOWN_DEFENSE);
+			last_replay.WriteInt32((*cit)->first, false);
+		}
+	};
+	auto load_tag = [&](const std::vector<code_pointer>& deck_container, uint8_t p, uint8_t location) {
+		last_replay.WriteInt32(deck_container.size(), false);
+		for (auto cit = deck_container.rbegin(); cit != deck_container.rend(); ++cit) {
+			new_tag_card(pduel, (*cit)->first, p, location);
+			last_replay.WriteInt32((*cit)->first, false);
+		}
+	};
 	std::vector<ygo::code_pointer> extra_cards;
-	extra_cards.clear();
-	for(auto cit : pdeck[0].extra)
-		extra_cards.push_back(cit);
-	for(auto cit : pdeck[0].side)
-		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+	auto load_extra = [&](uint8_t p) {
+		extra_cards.clear();
+		for(auto cit : pdeck[p].extra)
 			extra_cards.push_back(cit);
-	last_replay.WriteInt32(extra_cards.size(), false);
-	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
-		new_card(pduel, extra_cards[i]->first, 0, 0, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(extra_cards[i]->first, false);
-	}
-	//
-	last_replay.WriteInt32(pdeck[1].main.size(), false);
-	for(int32 i = (int32)pdeck[1].main.size() - 1; i >= 0; --i) {
-		new_tag_card(pduel, pdeck[1].main[i]->first, 0, LOCATION_DECK);
-		last_replay.WriteInt32(pdeck[1].main[i]->first, false);
-	}
-	extra_cards.clear();
-	for(auto cit : pdeck[1].extra)
-		extra_cards.push_back(cit);
-	for(auto cit : pdeck[1].side)
-		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
-			extra_cards.push_back(cit);
-	last_replay.WriteInt32(extra_cards.size(), false);
-	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
-		new_tag_card(pduel, extra_cards[i]->first, 0, LOCATION_EXTRA);
-		last_replay.WriteInt32(extra_cards[i]->first, false);
-	}
-	//
-	last_replay.WriteInt32(pdeck[3].main.size(), false);
-	for(int32 i = (int32)pdeck[3].main.size() - 1; i >= 0; --i) {
-		new_card(pduel, pdeck[3].main[i]->first, 1, 1, LOCATION_DECK, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(pdeck[3].main[i]->first, false);
-	}
-	extra_cards.clear();
-	for(auto cit : pdeck[3].extra)
-		extra_cards.push_back(cit);
-	for(auto cit : pdeck[3].side)
-		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
-			extra_cards.push_back(cit);
-	last_replay.WriteInt32(extra_cards.size(), false);
-	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
-		new_card(pduel, extra_cards[i]->first, 1, 1, LOCATION_EXTRA, 0, POS_FACEDOWN_DEFENSE);
-		last_replay.WriteInt32(extra_cards[i]->first, false);
-	}
-	//
-	last_replay.WriteInt32(pdeck[2].main.size(), false);
-	for(int32 i = (int32)pdeck[2].main.size() - 1; i >= 0; --i) {
-		new_tag_card(pduel, pdeck[2].main[i]->first, 1, LOCATION_DECK);
-		last_replay.WriteInt32(pdeck[2].main[i]->first, false);
-	}
-	extra_cards.clear();
-	for(auto cit : pdeck[2].extra)
-		extra_cards.push_back(cit);
-	for(auto cit : pdeck[2].side)
-		if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
-			extra_cards.push_back(cit);
-	last_replay.WriteInt32(extra_cards.size(), false);
-	for(int32 i = (int32)extra_cards.size() - 1; i >= 0; --i) {
-		new_tag_card(pduel, extra_cards[i]->first, 1, LOCATION_EXTRA);
-		last_replay.WriteInt32(extra_cards[i]->first, false);
-	}
+		for(auto cit : pdeck[p].side)
+			if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+				extra_cards.push_back(cit);
+		return extra_cards;
+	};
+	load_single(pdeck[0].main, 0, LOCATION_DECK);
+	load_single(load_extra(0), 0, LOCATION_EXTRA);
+	load_tag(pdeck[1].main, 0, LOCATION_DECK);
+	load_tag(load_extra(1), 0, LOCATION_EXTRA);
+	load_single(pdeck[3].main, 1, LOCATION_DECK);
+	load_single(load_extra(3), 1, LOCATION_EXTRA);
+	load_tag(pdeck[2].main, 1, LOCATION_DECK);
+	load_tag(load_extra(2), 1, LOCATION_EXTRA);
 	last_replay.Flush();
-	unsigned char startbuf[32];
+	unsigned char startbuf[32]{};
 	auto pbuf = startbuf;
 	BufferIO::WriteInt8(pbuf, MSG_START);
 	BufferIO::WriteInt8(pbuf, 0);
@@ -730,12 +693,12 @@ void TagDuel::DuelEndProc() {
 void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
 		return;
-	uint32 player = dp->type;
+	uint32_t player = dp->type;
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_TAG_SURRENDER_CONFIRM)
 	if(surrender[player])
 		return;
-	static const uint32 teammatemap[] = { 1, 0, 3, 2 };
-	uint32 teammate = teammatemap[player];
+	static const uint32_t teammatemap[] = { 1, 0, 3, 2 };
+	uint32_t teammate = teammatemap[player];
 	if(!surrender[teammate]) {
 		surrender[player] = true;
 		NetServer::SendPacketToPlayer(players[player], STOC_TEAMMATE_SURRENDER);
@@ -743,7 +706,7 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 		return;
 	}
 #endif
-	static const uint32 winplayermap[] = { 1, 1, 0, 0 };
+	static const uint32_t winplayermap[] = { 1, 1, 0, 0 };
 	unsigned char wbuf[3];
 	wbuf[0] = MSG_WIN;
 	wbuf[1] = winplayermap[player];
@@ -1949,7 +1912,7 @@ void TagDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);
-	last_replay.WriteInt8(len);
+	last_replay.Write<uint8_t>(len);
 	last_replay.WriteData(resb, len);
 	set_responseb(pduel, resb);
 	players[dp->type]->state = 0xff;
@@ -2407,7 +2370,7 @@ void TagDuel::RefreshSingle(int player, int location, int sequence, int flag) {
 		}
 	}
 }
-uint32 TagDuel::MessageHandler(intptr_t fduel, uint32 type) {
+uint32_t TagDuel::MessageHandler(intptr_t fduel, uint32_t type) {
 	if(!enable_log)
 		return 0;
 	char msgbuf[1024];
@@ -2420,7 +2383,7 @@ void TagDuel::TagTimer(evutil_socket_t fd, short events, void* arg) {
 	sd->time_elapsed++;
 	if(sd->time_elapsed >= sd->time_limit[sd->last_response] || sd->time_limit[sd->last_response] <= 0) {
 		unsigned char wbuf[3];
-		uint32 player = sd->last_response;
+		uint32_t player = sd->last_response;
 		wbuf[0] = MSG_WIN;
 		wbuf[1] = 1 - player;
 		wbuf[2] = 0x3;
