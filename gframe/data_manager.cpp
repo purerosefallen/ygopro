@@ -68,7 +68,8 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 				BufferIO::DecodeUTF8(text, strBuffer);
 				cs.text = strBuffer;
 			}
-			for (int i = 0; i < 16; ++i) {
+			constexpr int desc_count = sizeof cs.desc / sizeof cs.desc[0];
+			for (int i = 0; i < desc_count; ++i) {
 				if (const char* text = (const char*)sqlite3_column_text(pStmt, i + 14)) {
 					BufferIO::DecodeUTF8(text, strBuffer);
 					cs.desc[i] = strBuffer;
@@ -88,7 +89,7 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 #else
 	IReadFile* reader = FileSystem->createAndOpenFile(file);
 #endif
-	if(reader == NULL)
+	if(reader == nullptr)
 		return false;
 	spmemvfs_db_t db;
 	spmembuffer_t* mem = (spmembuffer_t*)calloc(sizeof(spmembuffer_t), 1);
@@ -177,16 +178,16 @@ code_pointer DataManager::GetCodePointer(unsigned int code) const {
 string_pointer DataManager::GetStringPointer(unsigned int code) const {
 	return _strings.find(code);
 }
-code_pointer DataManager::datas_begin() {
+code_pointer DataManager::datas_begin() const {
 	return _datas.cbegin();
 }
-code_pointer DataManager::datas_end() {
+code_pointer DataManager::datas_end() const {
 	return _datas.cend();
 }
-string_pointer DataManager::strings_begin() {
+string_pointer DataManager::strings_begin() const {
 	return _strings.cbegin();
 }
-string_pointer DataManager::strings_end() {
+string_pointer DataManager::strings_end() const {
 	return _strings.cend();
 }
 bool DataManager::GetData(unsigned int code, CardData* pData) const {
@@ -388,12 +389,14 @@ std::wstring DataManager::FormatLinkMarker(unsigned int link_marker) const {
 		buffer.append(L"[\u2198]");
 	return buffer;
 }
-uint32 DataManager::CardReader(uint32 code, card_data* pData) {
+uint32_t DataManager::CardReader(uint32_t code, card_data* pData) {
 	if (!dataManager.GetData(code, pData))
 		pData->clear();
 	return 0;
 }
 unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
+	if (std::strncmp(script_name, "./script", 8) != 0)
+		return DefaultScriptReader(script_name, slen);
 	unsigned char* buffer;
 	if(!mainGame->gameConf.prefer_expansion_script) {
 		buffer = ScriptReaderExSingle("", script_name, slen);
@@ -406,12 +409,18 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
 	if(buffer)
 		return buffer;
+	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
+	if(buffer)
+		return buffer;
 	return ScriptReaderExSingle("", script_name, slen);
 }
-unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len) {
+unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
 	char sname[256];
 	snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
-	return ScriptReader(sname, slen);
+	if (use_irr) {
+		return ScriptReader(sname, slen);
+	}
+	return DefaultScriptReader(sname, slen);
 }
 unsigned char* DataManager::ScriptReader(const char* script_name, int* slen) {
 #ifdef _WIN32
@@ -431,6 +440,19 @@ unsigned char* DataManager::ScriptReader(const char* script_name, int* slen) {
 	reader->read(scriptBuffer, size);
 	reader->drop();
 	*slen = (int)size;
+	return scriptBuffer;
+}
+unsigned char* DataManager::DefaultScriptReader(const char* script_name, int* slen) {
+	wchar_t fname[256]{};
+	BufferIO::DecodeUTF8(script_name, fname);
+	FILE* fp = myfopen(fname, "rb");
+	if (!fp)
+		return nullptr;
+	size_t len = std::fread(scriptBuffer, 1, sizeof scriptBuffer, fp);
+	std::fclose(fp);
+	if (len >= sizeof scriptBuffer)
+		return nullptr;
+	*slen = (int)len;
 	return scriptBuffer;
 }
 
