@@ -89,10 +89,10 @@ public:
 #endif //YGOPRO_SERVER_MODE
 
 	template <typename T>
-	std::vector<T> DuplicateVector(std::vector<T> vector, int32 count) {
+	std::vector<T> DuplicateVector(std::vector<T> vector, int32_t count) {
 		std::vector<T> result;
 		for(auto it : vector)
-			for(int32 i = 0; i < count; ++i)
+			for(int32_t i = 0; i < count; ++i)
 				result.push_back(it);
 		return result;
 	}
@@ -105,8 +105,8 @@ public:
 		return result;
 	}
 
-	void DuplicateDecks(Deck* originalDecks, Deck* result, int32 count) {
-		for(int32 i = 0; i < count; ++i)
+	void DuplicateDecks(Deck* originalDecks, Deck* result, int32_t count) {
+		for(int32_t i = 0; i < count; ++i)
 			result[i] = DuplicateDeck(originalDecks[i]);
 	}
 };
