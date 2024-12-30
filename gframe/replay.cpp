@@ -26,15 +26,15 @@ void Replay::BeginRecord() {
 	if(is_recording)
 		CloseHandle(recording_fp);
 #ifdef YGOPRO_SERVER_MODE
-	time_t nowtime = time(NULL);
+	time_t nowtime = time(nullptr);
 	struct tm *localedtime = localtime(&nowtime);
 	wchar_t tmppath[80];
 	wcsftime(tmppath, 80, L"./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
 	wchar_t path[80];
 	myswprintf(path, tmppath, server_port);
-	recording_fp = CreateFileW(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, NULL);
+	recording_fp = CreateFileW(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, nullptr);
 #else
-	recording_fp = CreateFileW(L"./replay/_LastReplay.yrp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, NULL);
+	recording_fp = CreateFileW(L"./replay/_LastReplay.yrp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, nullptr);
 #endif //YGOPRO_SERVER_MODE
 	if(recording_fp == INVALID_HANDLE_VALUE)
 		return;
@@ -42,7 +42,7 @@ void Replay::BeginRecord() {
 	if(is_recording)
 		fclose(fp);
 #ifdef YGOPRO_SERVER_MODE
-	time_t nowtime = time(NULL);
+	time_t nowtime = time(nullptr);
 	struct tm *localedtime = localtime(&nowtime);
 	char tmppath[40];
 	strftime(tmppath, 40, "./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
@@ -71,7 +71,7 @@ void Replay::WriteHeader(ReplayHeader& header) {
 #endif
 #ifdef _WIN32
 	DWORD size;
-	WriteFile(recording_fp, &header, sizeof(header), &size, NULL);
+	WriteFile(recording_fp, &header, sizeof(header), &size, nullptr);
 #else
 	fwrite(&header, sizeof(header), 1, fp);
 	fflush(fp);
@@ -89,7 +89,7 @@ void Replay::WriteData(const void* data, int length, bool flush) {
 #endif
 #ifdef _WIN32
 	DWORD size;
-	WriteFile(recording_fp, data, length, &size, NULL);
+	WriteFile(recording_fp, data, length, &size, nullptr);
 #else
 	fwrite(data, length, 1, fp);
 	if(flush)
