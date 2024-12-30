@@ -58,7 +58,6 @@ void Replay::BeginRecord() {
 #ifdef YGOPRO_SERVER_MODE
 	}
 #endif //YGOPRO_SERVER_MODE
-	pwrite = replay_data;
 	replay_size = 0;
 	comp_size = 0;
 	is_replaying = false;
@@ -77,13 +76,13 @@ void Replay::WriteHeader(ReplayHeader& header) {
 	fflush(fp);
 #endif
 }
-void Replay::WriteData(const void* data, int length, bool flush) {
+void Replay::WriteData(const void* data, size_t length, bool flush) {
 	if(!is_recording)
 		return;
-	if (length < 0 || (int)(pwrite - replay_data) + length > MAX_REPLAY_SIZE)
+	if (replay_size + length > MAX_REPLAY_SIZE)
 		return;
-	std::memcpy(pwrite, data, length);
-	pwrite += length;
+	std::memcpy(replay_data + replay_size, data, length);
+	replay_size += length;
 #ifdef YGOPRO_SERVER_MODE
 	if(!(replay_mode & REPLAY_MODE_SAVE_IN_SERVER)) return;
 #endif
@@ -96,14 +95,8 @@ void Replay::WriteData(const void* data, int length, bool flush) {
 		fflush(fp);
 #endif
 }
-void Replay::WriteInt32(int data, bool flush) {
-	WriteData(&data, sizeof data, flush);
-}
-void Replay::WriteInt16(short data, bool flush) {
-	WriteData(&data, sizeof data, flush);
-}
-void Replay::WriteInt8(char data, bool flush) {
-	WriteData(&data, sizeof data, flush);
+void Replay::WriteInt32(int32_t data, bool flush) {
+	Write<int32_t>(data, flush);
 }
 void Replay::Flush() {
 	if(!is_recording)
@@ -130,7 +123,6 @@ void Replay::EndRecord() {
 #ifdef YGOPRO_SERVER_MODE
 	}
 #endif
-	replay_size = pwrite - replay_data;
 	pheader.datasize = replay_size;
 	pheader.flag |= REPLAY_COMPRESSED;
 	size_t propsize = 5;
@@ -164,7 +156,7 @@ bool Replay::OpenReplay(const wchar_t* name) {
 	if(!rfp)
 		return false;
 
-	pdata = replay_data;
+	data_position = 0;
 	is_recording = false;
 	is_replaying = false;
 	replay_size = 0;
@@ -254,37 +246,26 @@ bool Replay::ReadName(wchar_t* data) {
 	BufferIO::CopyWStr(buffer, data, 20);
 	return true;
 }
-bool Replay::ReadData(void* data, int length) {
+void Replay::ReadHeader(ReplayHeader& header) {
+	header = pheader;
+}
+bool Replay::ReadData(void* data, size_t length) {
 	if(!is_replaying)
 		return false;
-	if (length < 0)
-		return false;
-	if ((int)(pdata - replay_data) + length > (int)replay_size) {
+	if (data_position + length > replay_size) {
 		is_replaying = false;
 		return false;
 	}
-	std::memcpy(data, pdata, length);
-	pdata += length;
+	if (length)
+		std::memcpy(data, &replay_data[data_position], length);
+	data_position += length;
 	return true;
 }
-template<typename T>
-T Replay::ReadValue() {
-	T ret{};
-	if (!ReadData(&ret, sizeof ret))
-		return -1;
-	return ret;
-}
-int Replay::ReadInt32() {
-	return ReadValue<int32_t>();
-}
-short Replay::ReadInt16() {
-	return ReadValue<int16_t>();
-}
-char Replay::ReadInt8() {
-	return ReadValue<char>();
+int32_t Replay::ReadInt32() {
+	return Read<int32_t>();
 }
 void Replay::Rewind() {
-	pdata = replay_data;
+	data_position = 0;
 }
 
 }
