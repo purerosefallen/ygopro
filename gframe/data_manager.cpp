@@ -437,7 +437,7 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
 	if(buffer)
 		return buffer;
-#if defined(YGOPRO_SERVER_MODE) && !defined(SERVER_ZIP_SUPPORT)
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
 	if(buffer)
 		return buffer;
