@@ -8,9 +8,9 @@
 namespace ygo {
 
 const wchar_t* DataManager::unknown_string = L"???";
-unsigned char DataManager::scriptBuffer[0x20000];
+unsigned char DataManager::scriptBuffer[0x100000] = {};
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
-IFileSystem* DataManager::FileSystem;
+IFileSystem* DataManager::FileSystem = nullptr;
 #endif
 DataManager dataManager;
 
@@ -467,14 +467,11 @@ unsigned char* DataManager::ScriptReader(const char* script_name, int* slen) {
 #endif
 	if (!reader)
 		return nullptr;
-	size_t size = reader->getSize();
-	if (size > sizeof scriptBuffer) {
-		reader->drop();
-		return nullptr;
-	}
-	reader->read(scriptBuffer, size);
+	int size = reader->read(scriptBuffer, sizeof scriptBuffer);
 	reader->drop();
-	*slen = (int)size;
+	if (size >= (int)sizeof scriptBuffer)
+		return nullptr;
+	*slen = size;
 #endif //YGOPRO_SERVER_MODE
 	return scriptBuffer;
 }
