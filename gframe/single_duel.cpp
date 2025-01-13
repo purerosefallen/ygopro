@@ -393,6 +393,7 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if(dp->type > 1 || ready[dp->type])
 		return;
 	bool valid = true;
+	const int deck_size = len - 2 * sizeof(int32_t);
 	CTOS_DeckData deckbuf;
 	std::memcpy(&deckbuf, pdata, len);
 	if (deckbuf.mainc < 0 || deckbuf.mainc > MAINC_MAX)
