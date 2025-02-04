@@ -63,18 +63,18 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyCharArray(pkt->pass, jpass);
 #ifdef YGOPRO_SERVER_MODE
-		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
+		if(!std::wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
 			is_recorder = true;
 			cache_recorder = dp;
 		}
 #ifndef YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
-		if(!wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
+		if(!std::wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
 			is_recorder = true;
 			replay_recorder = dp;
 		}
 #endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
-		if(wcscmp(jpass, pass)) {
+		if(std::wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_JOINERROR;
 			scem.code = 1;
@@ -391,6 +391,8 @@ void SingleDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 }
 void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if(dp->type > 1 || ready[dp->type])
+		return;
+	if (len < 8 || len > sizeof(CTOS_DeckData))
 		return;
 	bool valid = true;
 	const int deck_size = len - 2 * sizeof(int32_t);
