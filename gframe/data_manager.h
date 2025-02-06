@@ -91,9 +91,11 @@ public:
 	static uint32_t CardReader(uint32_t, card_data*);
 	static unsigned char* ScriptReaderEx(const char* script_name, int* slen);
 	static unsigned char* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 2, unsigned int use_irr = FALSE);
-	
+
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	//read by IFileSystem
 	static unsigned char* ReadScriptFromIrrFS(const char* script_name, int* slen);
+#endif
 	//read by fread
 	static unsigned char* ReadScriptFromFile(const char* script_name, int* slen);
 	

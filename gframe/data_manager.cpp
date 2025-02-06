@@ -449,15 +449,15 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
 	char sname[256];
 	snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	if (use_irr) {
 		return ReadScriptFromIrrFS(sname, slen);
 	}
+#endif
 	return ReadScriptFromFile(sname, slen);
 }
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* slen) {
-#if defined(YGOPRO_SERVER_MODE) && !defined(SERVER_ZIP_SUPPORT)
-	return ReadScriptFromFile(script_name, slen);
-#else
 #ifdef _WIN32
 	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
@@ -473,8 +473,8 @@ unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* sl
 		return nullptr;
 	*slen = size;
 	return scriptBuffer;
-#endif //YGOPRO_SERVER_MODE
 }
+#endif
 unsigned char* DataManager::ReadScriptFromFile(const char* script_name, int* slen) {
 	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
