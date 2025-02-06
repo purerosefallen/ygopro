@@ -69,12 +69,12 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyCharArray(pkt->pass, jpass);
 #ifdef YGOPRO_SERVER_MODE
-		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
+		if(!std::wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
 			is_recorder = true;
 			cache_recorder = dp;
 		}
 #ifndef YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
-		if(!wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
+		if(!std::wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
 			is_recorder = true;
 			replay_recorder = dp;
 		}

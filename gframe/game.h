@@ -30,14 +30,16 @@
 #ifndef YGOPRO_DEFAULT_DUEL_RULE
 #define YGOPRO_DEFAULT_DUEL_RULE			5
 #endif
+
+#define DEFAULT_DUEL_RULE YGOPRO_DEFAULT_DUEL_RULE
 constexpr int CONFIG_LINE_SIZE = 1024;
 constexpr int TEXT_LINE_SIZE = 256;
 
 namespace ygo {
 
 bool IsExtension(const wchar_t* filename, const wchar_t* extension);
-#ifndef YGOPRO_SERVER_MODE
 
+#ifndef YGOPRO_SERVER_MODE
 struct Config {
 	bool use_d3d{ false };
 	bool use_image_scale{ true };

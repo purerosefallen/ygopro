@@ -19,9 +19,9 @@ install:
   - tar xf lua-5.4.4.tar.gz
   - move lua-5.4.4 lua
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2022/sqlite-amalgamation-3390300.zip  ; exit 0"
-  - 7z x -y sqlite-amalgamation-3390300.zip
-  - move sqlite-amalgamation-3390300 sqlite3
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2024/sqlite-amalgamation-3470000.zip  ; exit 0"
+  - 7z x sqlite-amalgamation-3470000.zip
+  - move sqlite-amalgamation-3470000 sqlite3
 
 before_build:
   - xcopy /E premake\* .

@@ -99,14 +99,14 @@ HostInfo game_info;
 
 void Game::MainServerLoop() {
 #ifdef SERVER_ZIP_SUPPORT
-	dataManager.FileSystem = new irr::io::CFileSystem();
+	DataManager::FileSystem = new irr::io::CFileSystem();
 #endif
 	initUtils();
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
 #ifdef SERVER_PRO2_SUPPORT
-	dataManager.FileSystem->addFileArchive("data/script.zip", true, false, EFAT_ZIP);
+	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
@@ -1310,7 +1310,7 @@ void Game::LoadExpansions() {
 	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./cdb/%ls", name);
-		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4)) {
+		if(!isdir && IsExtension(name, L".cdb")) {
 			dataManager.LoadDB(fpath);
 		}
 	});
