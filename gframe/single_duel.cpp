@@ -397,13 +397,19 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if (len < 8 || len > sizeof(CTOS_DeckData))
 		return;
 	bool valid = true;
+	const int deck_size = len - 2 * sizeof(int32_t);
 	CTOS_DeckData deckbuf;
 	std::memcpy(&deckbuf, pdata, len);
 	if (deckbuf.mainc < 0 || deckbuf.mainc > MAINC_MAX)
 		valid = false;
 	else if (deckbuf.sidec < 0 || deckbuf.sidec > SIDEC_MAX)
 		valid = false;
-	else if (len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
+	else if
+#ifdef YGOPRO_SERVER_MODE
+(deck_size < (deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
+#else
+(len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
+#endif
 		valid = false;
 	if (!valid) {
 		STOC_ErrorMsg scem;

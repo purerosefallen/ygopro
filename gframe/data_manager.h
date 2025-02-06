@@ -108,6 +108,11 @@ public:
 	static bool deck_sort_name(code_pointer l1, code_pointer l2);
 #endif
 
+	static bool deck_sort_lv(code_pointer l1, code_pointer l2);
+	static bool deck_sort_atk(code_pointer l1, code_pointer l2);
+	static bool deck_sort_def(code_pointer l1, code_pointer l2);
+	static bool deck_sort_name(code_pointer l1, code_pointer l2);
+
 private:
 	std::unordered_map<unsigned int, CardDataC> _datas;
 	std::unordered_map<unsigned int, CardString> _strings;
