@@ -80,7 +80,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 #endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
-		if(wcscmp(jpass, pass)) {
+		if(std::wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_JOINERROR;
 			scem.code = 1;
@@ -380,6 +380,8 @@ void TagDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if(dp->type > 3 || ready[dp->type])
 		return;
+	if (len < 8 || len > sizeof(CTOS_DeckData))
+		return;
 	bool valid = true;
 	CTOS_DeckData deckbuf;
 	std::memcpy(&deckbuf, pdata, len);
@@ -387,12 +389,7 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		valid = false;
 	else if (deckbuf.sidec < 0 || deckbuf.sidec > SIDEC_MAX)
 		valid = false;
-	else if
-#ifdef YGOPRO_SERVER_MODE
-(len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t) || len > (2 + MAINC_MAX + SIDEC_MAX) * (int)sizeof(int32_t))
-#else
-(len != (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
-#endif
+	else if (len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
 		valid = false;
 	if (!valid) {
 		STOC_ErrorMsg scem;

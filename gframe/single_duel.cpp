@@ -76,7 +76,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 		}
 #endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
-		if(wcscmp(jpass, pass)) {
+		if(std::wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_JOINERROR;
 			scem.code = 1;
@@ -355,7 +355,7 @@ void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 		unsigned int deckerror = 0;
 		if(!host_info.no_check_deck) {
 			if(deck_error[dp->type]) {
-				deckerror = (DECKERROR_UNKNOWNCARD << 28) + deck_error[dp->type];
+				deckerror = (DECKERROR_UNKNOWNCARD << 28) | deck_error[dp->type];
 			} else {
 				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, host_info.rule);
 			}
@@ -394,6 +394,8 @@ void SingleDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if(dp->type > 1 || ready[dp->type])
 		return;
+	if (len < 8 || len > sizeof(CTOS_DeckData))
+		return;
 	bool valid = true;
 	CTOS_DeckData deckbuf;
 	std::memcpy(&deckbuf, pdata, len);
@@ -401,12 +403,7 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		valid = false;
 	else if (deckbuf.sidec < 0 || deckbuf.sidec > SIDEC_MAX)
 		valid = false;
-	else if
-#ifdef YGOPRO_SERVER_MODE
-(len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t) || len > (2 + MAINC_MAX + SIDEC_MAX) * (int)sizeof(int32_t))
-#else
-(len != (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
-#endif
+	else if (len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
 		valid = false;
 	if (!valid) {
 		STOC_ErrorMsg scem;
