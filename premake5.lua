@@ -9,6 +9,12 @@ USE_IRRKLANG = true
 IRRKLANG_PRO = false
 LUA_LIB_NAME = "lua"
 
+SERVER_MODE = true
+SERVER_ZIP_SUPPORT = false
+SERVER_PRO2_SUPPORT = false
+SERVER_TAG_SURRENDER_CONFIRM = false
+USE_IRRKLANG = false
+
 -- read settings from command line or environment variables
 
 newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
@@ -52,13 +58,17 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
 
--- koishipro specific
+newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
     "no-side-check",
+    "enable-debug-func"
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -201,6 +211,29 @@ if os.istarget("macosx") then
         MAC_ARM = true
     end
 end
+if GetParam("server-mode") then
+    SERVER_MODE = true
+end
+if GetParam("server-zip-support") then
+    SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-pro2-support") then
+    SERVER_PRO2_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-tag-surrender-confirm") then
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+
+if SERVER_MODE then
+    BUILD_FREETYPE = false
+    BUILD_IKPMP3 = false
+    USE_IRRKLANG = false
+    IRRKLANG_PRO = false
+    if not SERVER_ZIP_SUPPORT then
+        BUILD_IRRLICHT = false
+    end
+end
 
 workspace "YGOPro"
     location "build"
@@ -209,7 +242,6 @@ workspace "YGOPro"
 
     configurations { "Release", "Debug" }
 
-
     for _, numberOption in ipairs(numberOptions) do
         ApplyNumber(numberOption)
     end
@@ -217,7 +249,6 @@ workspace "YGOPro"
     for _, boolOption in ipairs(boolOptions) do
         ApplyBoolean(boolOption)
     end
-
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
@@ -237,7 +268,9 @@ workspace "YGOPro"
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos12" }
         end
+if not SERVER_MODE then
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
+end
 
     filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
@@ -284,15 +317,18 @@ workspace "YGOPro"
     if BUILD_EVENT then
         include "event"
     end
-    if BUILD_FREETYPE then
+    if BUILD_FREETYPE and not SERVER_MODE then
         include "freetype"
     end
-    if BUILD_IRRLICHT then
+    if BUILD_IRRLICHT and not SERVER_MODE then
         include "irrlicht"
+    end
+    if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
+        include "irrlicht/premake5-only-zipreader.lua"
     end
     if BUILD_SQLITE then
         include "sqlite3"
     end
-    if BUILD_IKPMP3 then
+    if BUILD_IKPMP3 and not SERVER_MODE then
         include "ikpmp3"
     end

@@ -6,7 +6,9 @@
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 char DeckManager::deckBuffer[0x10000]{};
+#endif
 DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
@@ -50,6 +52,9 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	}
 }
 void DeckManager::LoadLFList() {
+#ifdef SERVER_PRO2_SUPPORT
+	LoadLFListSingle("config/lflist.conf");
+#endif
 	LoadLFListSingle("expansions/lflist.conf");
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
@@ -190,6 +195,7 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_p
 	}
 	return errorcode;
 }
+#ifndef YGOPRO_SERVER_MODE
 int DeckManager::LoadDeck(Deck& deck, std::istringstream& deckStream, bool is_packlist) {
 	int ct = 0, mainc = 0, sidec = 0, code = 0;
 	int cardlist[PACK_MAX_SIZE]{};
@@ -211,6 +217,7 @@ int DeckManager::LoadDeck(Deck& deck, std::istringstream& deckStream, bool is_pa
 	}
 	return LoadDeck(current_deck, cardlist, mainc, sidec, is_packlist);
 }
+#endif
 bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 	std::unordered_map<int, int> pcount;
 	std::unordered_map<int, int> ncount;
@@ -240,6 +247,7 @@ bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 	deck = ndeck;
 	return true;
 }
+#ifndef YGOPRO_SERVER_MODE
 void DeckManager::GetCategoryPath(wchar_t* ret, int index, const wchar_t* text) {
 	wchar_t catepath[256];
 	switch(index) {
@@ -441,4 +449,5 @@ bool DeckManager::SaveDeckBuffer(const int deckbuf[], const wchar_t* name) {
 	fclose(fp);
 	return true;
 }
+#endif //YGOPRO_SERVER_MODE
 }

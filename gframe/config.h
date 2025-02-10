@@ -78,6 +78,7 @@ inline FILE* myfopen(const wchar_t* filename, const char* mode) {
 	return fp;
 }
 
+#ifndef YGOPRO_SERVER_MODE
 #include <irrlicht.h>
 using namespace irr;
 using namespace core;
@@ -85,6 +86,13 @@ using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+#endif //YGOPRO_SERVER_MODE
+
+#ifdef SERVER_ZIP_SUPPORT
+#include <irrlicht.h>
+using namespace irr;
+using namespace io;
+#endif
 
 extern unsigned short PRO_VERSION;
 extern unsigned int enable_log;

@@ -10,6 +10,7 @@ namespace ygo {
 
 class ClientCard {
 public:
+#ifndef YGOPRO_SERVER_MODE
 	irr::core::matrix4 mTransform;
 	irr::core::vector3df curPos;
 	irr::core::vector3df curRot;
@@ -80,6 +81,7 @@ public:
 	void ClearTarget();
 	void ClearData();
 	static bool client_card_sort(ClientCard* c1, ClientCard* c2);
+#endif //YGOPRO_SERVER_MODE
 };
 
 }
