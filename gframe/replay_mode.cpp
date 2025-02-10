@@ -337,6 +337,13 @@ bool ReplayMode::ReplayAnalyze(unsigned char* msg, unsigned int len) {
 			pbuf += 3;
 			break;
 		}
+		case MSG_UPDATE_CARD: {
+			pbuf += 3;
+			const int clen = BufferIO::ReadInt32(pbuf);
+			pbuf += (clen - 4);
+			DuelClient::ClientAnalyze(offset, pbuf - offset);
+			break;
+		}
 		case MSG_RETRY: {
 			if(mainGame->dInfo.isReplaySkiping) {
 				mainGame->dInfo.isReplaySkiping = false;

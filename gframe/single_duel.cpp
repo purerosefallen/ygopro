@@ -65,18 +65,18 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyCharArray(pkt->pass, jpass);
 #ifdef YGOPRO_SERVER_MODE
-		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
+		if(!std::wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
 			is_recorder = true;
 			cache_recorder = dp;
 		}
 #ifndef YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
-		if(!wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
+		if(!std::wcscmp(jpass, L"Marshtomp") && !replay_recorder) {
 			is_recorder = true;
 			replay_recorder = dp;
 		}
 #endif //YGOPRO_SERVER_MODE_DISABLE_CLOUD_REPLAY
 #else
-		if(wcscmp(jpass, pass)) {
+		if(std::wcscmp(jpass, pass)) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_JOINERROR;
 			scem.code = 1;
@@ -355,7 +355,7 @@ void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 		unsigned int deckerror = 0;
 		if(!host_info.no_check_deck) {
 			if(deck_error[dp->type]) {
-				deckerror = (DECKERROR_UNKNOWNCARD << 28) + deck_error[dp->type];
+				deckerror = (DECKERROR_UNKNOWNCARD << 28) | deck_error[dp->type];
 			} else {
 				deckerror = deckManager.CheckDeck(pdeck[dp->type], host_info.lflist, host_info.rule);
 			}
@@ -394,22 +394,21 @@ void SingleDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	if(dp->type > 1 || ready[dp->type])
 		return;
-	if (len < 8)
+	if (len < 8 || len > sizeof(CTOS_DeckData))
 		return;
 	bool valid = true;
-	auto deckbuf = pdata;
-	int mainc = BufferIO::ReadInt32(deckbuf);
-	int sidec = BufferIO::ReadInt32(deckbuf);
 	const int deck_size = len - 2 * sizeof(int32_t);
-	if (mainc < 0 || mainc > MAINC_MAX)
+	CTOS_DeckData deckbuf;
+	std::memcpy(&deckbuf, pdata, len);
+	if (deckbuf.mainc < 0 || deckbuf.mainc > MAINC_MAX)
 		valid = false;
-	else if (sidec < 0 || sidec > SIDEC_MAX)
+	else if (deckbuf.sidec < 0 || deckbuf.sidec > SIDEC_MAX)
 		valid = false;
 	else if
 #ifdef YGOPRO_SERVER_MODE
-(deck_size < (mainc + sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
+(deck_size < (deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
 #else
-(deck_size != (mainc + sidec) * (int)sizeof(int32_t))
+(len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
 #endif
 		valid = false;
 	if (!valid) {
@@ -419,12 +418,10 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		NetServer::SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
 		return;
 	}
-	int deck_list[SIZE_NETWORK_BUFFER / sizeof(int32_t)];
-	std::memcpy(deck_list, deckbuf, deck_size);
 	if(duel_count == 0) {
-		deck_error[dp->type] = deckManager.LoadDeck(pdeck[dp->type], deck_list, mainc, sidec);
+		deck_error[dp->type] = deckManager.LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
 	} else {
-		if(deckManager.LoadSide(pdeck[dp->type], deck_list, mainc, sidec)) {
+		if(deckManager.LoadSide(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec)) {
 			ready[dp->type] = true;
 			NetServer::SendPacketToPlayer(dp, STOC_DUEL_START);
 			if(ready[0] && ready[1]) {
@@ -787,6 +784,16 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 					time_limit[player] = host_info.time_limit;				
 			}
 			break;			
+		}
+		case MSG_UPDATE_CARD: {
+			auto controller = BufferIO::ReadUInt8(pbuf);
+			auto location = BufferIO::ReadUInt8(pbuf);
+			auto sequence = BufferIO::ReadUInt8(pbuf);
+			auto clen = BufferIO::ReadInt32(pbuf);
+			auto query_flag = BufferIO::ReadUInt32(pbuf);
+			pbuf += (clen - 8);
+			RefreshSingle(controller, location, sequence, query_flag);
+			break;
 		}
 		case MSG_RETRY: {
 			WaitforResponse(last_response);

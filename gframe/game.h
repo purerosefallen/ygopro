@@ -30,14 +30,16 @@
 #ifndef YGOPRO_DEFAULT_DUEL_RULE
 #define YGOPRO_DEFAULT_DUEL_RULE			5
 #endif
+
+#define DEFAULT_DUEL_RULE YGOPRO_DEFAULT_DUEL_RULE
 constexpr int CONFIG_LINE_SIZE = 1024;
 constexpr int TEXT_LINE_SIZE = 256;
 
 namespace ygo {
 
 bool IsExtension(const wchar_t* filename, const wchar_t* extension);
-#ifndef YGOPRO_SERVER_MODE
 
+#ifndef YGOPRO_SERVER_MODE
 struct Config {
 	bool use_d3d{ false };
 	bool use_image_scale{ true };
@@ -920,18 +922,6 @@ extern unsigned int pre_seed[3];
 #define TEXTURE_COVER_O				4
 #define TEXTURE_ATTACK				5
 #define TEXTURE_ACTIVATE			6
-//STOC_GAME_MSG messages
-#define MSG_WAITING				3
-#define MSG_START				4
-#define MSG_UPDATE_DATA			6	// flag=0: clear
-#define MSG_UPDATE_CARD			7	// flag=QUERY_CODE, code=0: clear
-#define MSG_REQUEST_DECK		8
-#define MSG_REFRESH_DECK		34
-#define MSG_CARD_SELECTED		80
-#define MSG_UNEQUIP				95
-#define MSG_BE_CHAIN_TARGET		121
-#define MSG_CREATE_RELATION		122
-#define MSG_RELEASE_RELATION	123
 
 #define AVAIL_OCG					0x1
 #define AVAIL_TCG					0x2

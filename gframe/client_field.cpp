@@ -131,7 +131,7 @@ void ClientField::Initial(int player, int deckc, int extrac) {
 		deck[player].push_back(pcard);
 		pcard->owner = player;
 		pcard->controler = player;
-		pcard->location = 0x1;
+		pcard->location = LOCATION_DECK;
 		pcard->sequence = i;
 		pcard->position = POS_FACEDOWN_DEFENSE;
 		GetCardLocation(pcard, &pcard->curPos, &pcard->curRot, true);
@@ -141,7 +141,7 @@ void ClientField::Initial(int player, int deckc, int extrac) {
 		extra[player].push_back(pcard);
 		pcard->owner = player;
 		pcard->controler = player;
-		pcard->location = 0x40;
+		pcard->location = LOCATION_EXTRA;
 		pcard->sequence = i;
 		pcard->position = POS_FACEDOWN_DEFENSE;
 		GetCardLocation(pcard, &pcard->curPos, &pcard->curRot, true);
@@ -201,15 +201,15 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 			deck[controler].push_back(pcard);
 			pcard->sequence = (unsigned char)(deck[controler].size() - 1);
 		} else {
-			deck[controler].push_back(0);
-			for(int i = deck[controler].size() - 1; i > 0; --i) {
-				deck[controler][i] = deck[controler][i - 1];
-				deck[controler][i]->sequence++;
-			}
-			deck[controler][0] = pcard;
+			for (auto& pcard : deck[controler])
+				pcard->sequence++;
+			deck[controler].insert(deck[controler].begin(), pcard);
 			pcard->sequence = 0;
 		}
 		pcard->is_reversed = false;
+		pcard->ClearData();
+		pcard->ClearTarget();
+		SetShowMark(pcard, false);
 		break;
 	}
 	case LOCATION_HAND: {
@@ -240,15 +240,13 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 			extra[controler].push_back(pcard);
 			pcard->sequence = (unsigned char)(extra[controler].size() - 1);
 		} else {
-			extra[controler].push_back(0);
 			int p = extra[controler].size() - extra_p_count[controler] - 1;
 			for(int i = extra[controler].size() - 1; i > p; --i) {
-				extra[controler][i] = extra[controler][i - 1];
 				extra[controler][i]->sequence++;
 				extra[controler][i]->curPos += irr::core::vector3df(0, 0, 0.01f);
 				extra[controler][i]->mTransform.setTranslation(extra[controler][i]->curPos);
 			}
-			extra[controler][p] = pcard;
+			extra[controler].insert(extra[controler].begin() + p, pcard);
 			pcard->sequence = p;
 		}
 		if (pcard->position & POS_FACEUP)
@@ -259,69 +257,54 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	RefreshCardCountDisplay();
 }
 ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
-	ClientCard* pcard = 0;
+	ClientCard* pcard = nullptr;
+	auto erase_card = [](std::vector<ClientCard*>& lst, int seq) {
+		for (int i = seq; i < (int)lst.size() - 1; ++i) {
+			lst[i] = lst[i + 1];
+			lst[i]->sequence--;
+			lst[i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
+			lst[i]->mTransform.setTranslation(lst[i]->curPos);
+		}
+		lst.pop_back();
+	};
 	switch (location) {
 	case LOCATION_DECK: {
 		pcard = deck[controler][sequence];
-		for (size_t i = sequence; i < deck[controler].size() - 1; ++i) {
-			deck[controler][i] = deck[controler][i + 1];
-			deck[controler][i]->sequence--;
-			deck[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
-			deck[controler][i]->mTransform.setTranslation(deck[controler][i]->curPos);
-		}
-		deck[controler].erase(deck[controler].end() - 1);
+		erase_card(deck[controler], sequence);
 		break;
 	}
 	case LOCATION_HAND: {
 		pcard = hand[controler][sequence];
-		for (size_t i = sequence; i < hand[controler].size() - 1; ++i) {
+		for (int i = sequence; i < (int)hand[controler].size() - 1; ++i) {
 			hand[controler][i] = hand[controler][i + 1];
 			hand[controler][i]->sequence--;
 		}
-		hand[controler].erase(hand[controler].end() - 1);
+		hand[controler].pop_back();
 		break;
 	}
 	case LOCATION_MZONE: {
 		pcard = mzone[controler][sequence];
-		mzone[controler][sequence] = 0;
+		mzone[controler][sequence] = nullptr;
 		break;
 	}
 	case LOCATION_SZONE: {
 		pcard = szone[controler][sequence];
-		szone[controler][sequence] = 0;
+		szone[controler][sequence] = nullptr;
 		break;
 	}
 	case LOCATION_GRAVE: {
 		pcard = grave[controler][sequence];
-		for (size_t i = sequence; i < grave[controler].size() - 1; ++i) {
-			grave[controler][i] = grave[controler][i + 1];
-			grave[controler][i]->sequence--;
-			grave[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
-			grave[controler][i]->mTransform.setTranslation(grave[controler][i]->curPos);
-		}
-		grave[controler].erase(grave[controler].end() - 1);
+		erase_card(grave[controler], sequence);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		pcard = remove[controler][sequence];
-		for (size_t i = sequence; i < remove[controler].size() - 1; ++i) {
-			remove[controler][i] = remove[controler][i + 1];
-			remove[controler][i]->sequence--;
-			remove[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
-			remove[controler][i]->mTransform.setTranslation(remove[controler][i]->curPos);
-		}
-		remove[controler].erase(remove[controler].end() - 1);
+		erase_card(remove[controler], sequence);
 		break;
 	}
 	case LOCATION_EXTRA: {
 		pcard = extra[controler][sequence];
-		for (size_t i = sequence; i < extra[controler].size() - 1; ++i) {
-			extra[controler][i] = extra[controler][i + 1];
-			extra[controler][i]->sequence--;
-			extra[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
-			extra[controler][i]->mTransform.setTranslation(extra[controler][i]->curPos);
-		}
-		extra[controler].erase(extra[controler].end() - 1);
+		erase_card(extra[controler], sequence);
 		if (pcard->position & POS_FACEUP)
 			extra_p_count[controler]--;
 		break;
@@ -434,8 +417,8 @@ void ClientField::ClearChainSelect() {
 void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 	if(cant_check_grave) {
 		bool has_card_in_grave = false;
-		for(size_t i = 0; i < selectable_cards.size(); ++i) {
-			if(selectable_cards[i]->location == LOCATION_GRAVE) {
+		for (auto& pcard : selectable_cards) {
+			if (pcard->location == LOCATION_GRAVE) {
 				has_card_in_grave = true;
 				break;
 			}
@@ -445,7 +428,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		}
 	}
 	int startpos;
-	size_t ct;
+	int ct;
 	if(selectable_cards.size() <= 5) {
 		startpos = 30 + 125 * (5 - selectable_cards.size()) / 2;
 		ct = selectable_cards.size();
@@ -453,7 +436,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		startpos = 30;
 		ct = 5;
 	}
-	for(size_t i = 0; i < ct; ++i) {
+	for(int i = 0; i < ct; ++i) {
 		mainGame->stCardPos[i]->enableOverrideColor(false);
 		// image
 		if(selectable_cards[i]->code)
@@ -539,7 +522,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 }
 void ClientField::ShowChainCard() {
 	int startpos;
-	size_t ct;
+	int ct;
 	if(selectable_cards.size() <= 5) {
 		startpos = 30 + 125 * (5 - selectable_cards.size()) / 2;
 		ct = selectable_cards.size();
@@ -547,7 +530,7 @@ void ClientField::ShowChainCard() {
 		startpos = 30;
 		ct = 5;
 	}
-	for(size_t i = 0; i < ct; ++i) {
+	for(int i = 0; i < ct; ++i) {
 		if(selectable_cards[i]->code)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->code));
 		else
@@ -593,7 +576,7 @@ void ClientField::ShowChainCard() {
 }
 void ClientField::ShowLocationCard() {
 	int startpos;
-	size_t ct;
+	int ct;
 	if(display_cards.size() <= 5) {
 		startpos = 30 + 125 * (5 - display_cards.size()) / 2;
 		ct = display_cards.size();
@@ -601,7 +584,7 @@ void ClientField::ShowLocationCard() {
 		startpos = 30;
 		ct = 5;
 	}
-	for(size_t i = 0; i < ct; ++i) {
+	for(int i = 0; i < ct; ++i) {
 		mainGame->stDisplayPos[i]->enableOverrideColor(false);
 		if(display_cards[i]->code)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardDisplay[i], display_cards[i]->code));
@@ -1141,50 +1124,43 @@ void ClientField::FadeCard(ClientCard * pcard, int alpha, int frame) {
 	pcard->aniFrame = frame;
 }
 bool ClientField::ShowSelectSum(bool panelmode) {
-	if(panelmode) {
-		if(CheckSelectSum()) {
-			if(selectsum_cards.size() == 0 || selectable_cards.size() == 0) {
-				SetResponseSelectedCards();
-				ShowCancelOrFinishButton(0);
-				if(mainGame->wCardSelect->isVisible())
-					mainGame->HideElement(mainGame->wCardSelect, true);
-				else {
-					DuelClient::SendResponse();
-					return true;
-				}
-			} else {
-				select_ready = true;
-				mainGame->wCardSelect->setVisible(false);
-				wchar_t wbuf[256], *pwbuf = wbuf;
-				BufferIO::CopyWStrRef(dataManager.GetSysString(209), pwbuf, 256);
-				*pwbuf++ = L'\n';
-				BufferIO::CopyWStrRef(dataManager.GetSysString(210), pwbuf, 256);
-				mainGame->stQMessage->setText(wbuf);
-				mainGame->PopupElement(mainGame->wQuery);
-			}
-		} else {
-			select_ready = false;
-			mainGame->wCardSelect->setVisible(false);
-			mainGame->dField.ShowSelectCard();
-		}
+	select_ready = CheckSelectSum();
+	if(select_ready && (selectsum_cards.size() == 0 || selectable_cards.size() == 0)) {
+		SetResponseSelectedCards();
+		ShowCancelOrFinishButton(0);
+		if(mainGame->wCardSelect->isVisible())
+			mainGame->HideElement(mainGame->wCardSelect, true);
+		else 
+			DuelClient::SendResponse();
+		return true;
+	}
+
+	auto display_hint = select_hint ? dataManager.GetDesc(select_hint) : dataManager.GetSysString(560);
+
+	wchar_t cur_hint[20];
+	if (select_curval_l == select_curval_h) {
+		myswprintf(cur_hint, L"%d", select_curval_l);
 	} else {
-		if(CheckSelectSum()) {
-			if(selectsum_cards.size() == 0 || selectable_cards.size() == 0) {
-				SetResponseSelectedCards();
-				ShowCancelOrFinishButton(0);
-				DuelClient::SendResponse();
-				return true;
-			} else {
-				select_ready = true;
-				wchar_t wbuf[256], *pwbuf = wbuf;
-				BufferIO::CopyWStrRef(dataManager.GetSysString(209), pwbuf, 256);
-				*pwbuf++ = L'\n';
-				BufferIO::CopyWStrRef(dataManager.GetSysString(210), pwbuf, 256);
-				mainGame->stQMessage->setText(wbuf);
-				mainGame->PopupElement(mainGame->wQuery);
-			}
-		} else
-			select_ready = false;
+		myswprintf(cur_hint, L"%d-%d", select_curval_l, select_curval_h);
+	}
+
+	wchar_t target_hint[20];
+	if (select_mode == 0) { // sum equal
+		myswprintf(target_hint, L"%d", select_sumval);
+	} else { // sum greater
+		myswprintf(target_hint, L"%d+", select_sumval);
+	}
+
+	wchar_t textBuffer[256];
+	myswprintf(textBuffer, L"%ls(%ls/%ls)", display_hint, cur_hint, target_hint);
+
+	if(panelmode) {
+		mainGame->wCardSelect->setText(textBuffer);
+		mainGame->wCardSelect->setVisible(false);
+		mainGame->dField.ShowSelectCard();
+	} else {
+		mainGame->stHintMsg->setText(textBuffer);
+		mainGame->stHintMsg->setVisible(true);
 	}
 	if (select_ready) {
 		ShowCancelOrFinishButton(2);
@@ -1195,34 +1171,46 @@ bool ClientField::ShowSelectSum(bool panelmode) {
 }
 bool ClientField::CheckSelectSum() {
 	std::set<ClientCard*> selable;
-	for(auto sit = selectsum_all.begin(); sit != selectsum_all.end(); ++sit) {
-		(*sit)->is_selectable = false;
-		(*sit)->is_selected = false;
-		selable.insert(*sit);
+	for(auto sc : selectsum_all) {
+		sc->is_selectable = false;
+		sc->is_selected = false;
+		selable.insert(sc);
 	}
-	for(size_t i = 0; i < selected_cards.size(); ++i) {
-		if((int)i < must_select_count)
+	select_curval_l = 0;
+	select_curval_h = 0;
+	for(int i = 0; i < (int)selected_cards.size(); ++i) {
+		if(i < must_select_count)
 			selected_cards[i]->is_selectable = false;
 		else
 			selected_cards[i]->is_selectable = true;
 		selected_cards[i]->is_selected = true;
 		selable.erase(selected_cards[i]);
+
+		int op1 = selected_cards[i]->opParam & 0xffff;
+		int op2 = selected_cards[i]->opParam >> 16;
+		int opmin = (op2 > 0 && op1 > op2) ? op2 : op1;
+		int opmax = op2 > op1 ? op2 : op1;
+		select_curval_l += opmin;
+		select_curval_h += opmax;
 	}
 	selectsum_cards.clear();
-	if (select_mode == 0) {
+	if (select_mode == 0) { // sum equal
 		bool ret = check_sel_sum_s(selable, 0, select_sumval);
 		selectable_cards.clear();
-		for(auto sit = selectsum_cards.begin(); sit != selectsum_cards.end(); ++sit) {
-			(*sit)->is_selectable = true;
-			selectable_cards.push_back(*sit);
+		for(auto sc : selectsum_cards) {
+			sc->is_selectable = true;
+			selectable_cards.push_back(sc);
+		}
+		for(auto sc : selected_cards) {
+			selectable_cards.push_back(sc);
 		}
 		return ret;
-	} else {
+	} else { // sum greater
 		int mm = -1, mx = -1, max = 0, sumc = 0;
 		bool ret = false;
-		for (auto sit = selected_cards.begin(); sit != selected_cards.end(); ++sit) {
-			int op1 = (*sit)->opParam & 0xffff;
-			int op2 = (*sit)->opParam >> 16;
+		for (auto sc : selected_cards) {
+			int op1 = sc->opParam & 0xffff;
+			int op2 = sc->opParam >> 16;
 			int opmin = (op2 > 0 && op1 > op2) ? op2 : op1;
 			int opmax = op2 > op1 ? op2 : op1;
 			if (mm == -1 || opmin < mm)
@@ -1236,9 +1224,9 @@ bool ClientField::CheckSelectSum() {
 			return true;
 		if (select_sumval <= max && select_sumval > max - mx)
 			ret = true;
-		for(auto sit = selable.begin(); sit != selable.end(); ++sit) {
-			int op1 = (*sit)->opParam & 0xffff;
-			int op2 = (*sit)->opParam >> 16;
+		for(auto sc : selable) {
+			int op1 = sc->opParam & 0xffff;
+			int op2 = sc->opParam >> 16;
 			int m = op1;
 			int sums = sumc;
 			sums += m;
@@ -1247,12 +1235,12 @@ bool ClientField::CheckSelectSum() {
 				ms = m;
 			if (sums >= select_sumval) {
 				if (sums - ms < select_sumval)
-					selectsum_cards.insert(*sit);
+					selectsum_cards.insert(sc);
 			} else {
 				std::set<ClientCard*> left(selable);
-				left.erase(*sit);
+				left.erase(sc);
 				if (check_min(left, left.begin(), select_sumval - sums, select_sumval - sums + ms - 1))
-					selectsum_cards.insert(*sit);
+					selectsum_cards.insert(sc);
 			}
 			if (op2 == 0)
 				continue;
@@ -1264,18 +1252,21 @@ bool ClientField::CheckSelectSum() {
 				ms = m;
 			if (sums >= select_sumval) {
 				if (sums - ms < select_sumval)
-					selectsum_cards.insert(*sit);
+					selectsum_cards.insert(sc);
 			} else {
 				std::set<ClientCard*> left(selable);
-				left.erase(*sit);
+				left.erase(sc);
 				if (check_min(left, left.begin(), select_sumval - sums, select_sumval - sums + ms - 1))
-					selectsum_cards.insert(*sit);
+					selectsum_cards.insert(sc);
 			}
 		}
 		selectable_cards.clear();
-		for(auto sit = selectsum_cards.begin(); sit != selectsum_cards.end(); ++sit) {
-			(*sit)->is_selectable = true;
-			selectable_cards.push_back(*sit);
+		for(auto sc : selectsum_cards) {
+			sc->is_selectable = true;
+			selectable_cards.push_back(sc);
+		}
+		for(auto sc : selected_cards) {
+			selectable_cards.push_back(sc);
 		}
 		return ret;
 	}
@@ -1287,7 +1278,7 @@ bool ClientField::CheckSelectTribute() {
 		(*sit)->is_selected = false;
 		selable.insert(*sit);
 	}
-	for(size_t i = 0; i < selected_cards.size(); ++i) {
+	for(int i = 0; i < (int)selected_cards.size(); ++i) {
 		selected_cards[i]->is_selectable = true;
 		selected_cards[i]->is_selected = true;
 		selable.erase(selected_cards[i]);
