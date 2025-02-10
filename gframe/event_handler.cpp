@@ -757,7 +757,19 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				}
 				case MSG_SELECT_SUM: {
 					command_card = selectable_cards[id - BUTTON_CARD_0 + mainGame->scrCardList->getPos() / 10];
-					selected_cards.push_back(command_card);
+					if (command_card->is_selected) {
+						command_card->is_selected = false;
+						int i = 0;
+						while(selected_cards[i] != command_card) i++;
+						selected_cards.erase(selected_cards.begin() + i);
+						if(command_card->controler)
+							mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffd0d0d0);
+						else mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffffffff);
+					} else {
+						command_card->is_selected = true;
+						mainGame->stCardPos[id - BUTTON_CARD_0]->setBackgroundColor(0xffffff00);
+						selected_cards.push_back(command_card);
+					}
 					ShowSelectSum(true);
 					break;
 				}
@@ -1589,7 +1601,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 							myswprintf(formatBuffer, L"%ls", dataManager.GetName(mcard->code));
 							str.append(formatBuffer);
 							if(mcard->type & TYPE_MONSTER) {
-								if(mcard->alias && wcscmp(dataManager.GetName(mcard->code), dataManager.GetName(mcard->alias))) {
+								if(mcard->alias && std::wcscmp(dataManager.GetName(mcard->code), dataManager.GetName(mcard->alias))) {
 									myswprintf(formatBuffer, L"\n(%ls)", dataManager.GetName(mcard->alias));
 									str.append(formatBuffer);
 								}
@@ -1611,7 +1623,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 									str.append(formatBuffer);
 								}
 							} else {
-								if(mcard->alias && wcscmp(dataManager.GetName(mcard->code), dataManager.GetName(mcard->alias))) {
+								if(mcard->alias && std::wcscmp(dataManager.GetName(mcard->code), dataManager.GetName(mcard->alias))) {
 									myswprintf(formatBuffer, L"\n(%ls)", dataManager.GetName(mcard->alias));
 									str.append(formatBuffer);
 								}
@@ -2512,19 +2524,19 @@ void ClientField::ShowCancelOrFinishButton(int buttonOp) {
 void ClientField::SetShowMark(ClientCard* pcard, bool enable) {
 	if(pcard->equipTarget)
 		pcard->equipTarget->is_showequip = enable;
-	for(auto cit = pcard->equipped.begin(); cit != pcard->equipped.end(); ++cit)
-		(*cit)->is_showequip = enable;
-	for(auto cit = pcard->cardTarget.begin(); cit != pcard->cardTarget.end(); ++cit)
-		(*cit)->is_showtarget = enable;
-	for(auto cit = pcard->ownerTarget.begin(); cit != pcard->ownerTarget.end(); ++cit)
-		(*cit)->is_showtarget = enable;
-	for(auto chit = chains.begin(); chit != chains.end(); ++chit) {
-		if(pcard == chit->chain_card) {
-			for(auto tgit = chit->target.begin(); tgit != chit->target.end(); ++tgit)
-				(*tgit)->is_showchaintarget = enable;
+	for (auto& card : pcard->equipped)
+		card->is_showequip = enable;
+	for (auto& card : pcard->cardTarget)
+		card->is_showtarget = enable;
+	for (auto& card : pcard->ownerTarget)
+		card->is_showtarget = enable;
+	for (auto& ch : chains) {
+		if (pcard == ch.chain_card) {
+			for (auto& tg : ch.target)
+				tg->is_showchaintarget = enable;
 		}
-		if(chit->target.find(pcard) != chit->target.end())
-			chit->chain_card->is_showchaintarget = enable;
+		if (ch.target.find(pcard) != ch.target.end())
+			ch.chain_card->is_showchaintarget = enable;
 	}
 }
 void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* element, irr::gui::IGUIElement* parent) {
@@ -2533,26 +2545,28 @@ void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* e
 	if(pcard->code) {
 		str.append(dataManager.GetName(pcard->code));
 	}
-	if(pcard->overlayTarget) {
-		myswprintf(formatBuffer, dataManager.GetSysString(225), dataManager.GetName(pcard->overlayTarget->code), pcard->overlayTarget->sequence + 1);
-		str.append(L"\n").append(formatBuffer);
-	}
-	if((pcard->status & STATUS_PROC_COMPLETE)
-		&& (pcard->type & (TYPE_RITUAL | TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_SPSUMMON)))
-		str.append(L"\n").append(dataManager.GetSysString(224));
-	for(auto iter = pcard->desc_hints.begin(); iter != pcard->desc_hints.end(); ++iter) {
-		myswprintf(formatBuffer, L"\n*%ls", dataManager.GetDesc(iter->first));
-		str.append(formatBuffer);
-	}
-	for(size_t i = 0; i < chains.size(); ++i) {
-		auto chit = chains[i];
-		if(pcard == chit.chain_card) {
-			myswprintf(formatBuffer, dataManager.GetSysString(216), i + 1);
+	if (pcard->location != LOCATION_DECK) {
+		if (pcard->overlayTarget) {
+			myswprintf(formatBuffer, dataManager.GetSysString(225), dataManager.GetName(pcard->overlayTarget->code), pcard->overlayTarget->sequence + 1);
 			str.append(L"\n").append(formatBuffer);
 		}
-		if(chit.target.find(pcard) != chit.target.end()) {
-			myswprintf(formatBuffer, dataManager.GetSysString(217), i + 1, dataManager.GetName(chit.chain_card->code));
-			str.append(L"\n").append(formatBuffer);
+		if ((pcard->status & STATUS_PROC_COMPLETE)
+			&& (pcard->type & (TYPE_RITUAL | TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_SPSUMMON)))
+			str.append(L"\n").append(dataManager.GetSysString(224));
+		for (auto iter = pcard->desc_hints.begin(); iter != pcard->desc_hints.end(); ++iter) {
+			myswprintf(formatBuffer, L"\n*%ls", dataManager.GetDesc(iter->first));
+			str.append(formatBuffer);
+		}
+		for (size_t i = 0; i < chains.size(); ++i) {
+			const auto& chit = chains[i];
+			if (pcard == chit.chain_card) {
+				myswprintf(formatBuffer, dataManager.GetSysString(216), i + 1);
+				str.append(L"\n").append(formatBuffer);
+			}
+			if (chit.target.find(pcard) != chit.target.end()) {
+				myswprintf(formatBuffer, dataManager.GetSysString(217), i + 1, dataManager.GetName(chit.chain_card->code));
+				str.append(L"\n").append(formatBuffer);
+			}
 		}
 	}
 	if(str.length() > 0) {
@@ -2700,11 +2714,14 @@ void ClientField::CancelOrFinish() {
 		break;
 	}
 	case MSG_SELECT_SUM: {
-		if(mainGame->wQuery->isVisible()) {
+		if (select_ready) {
 			SetResponseSelectedCards();
 			ShowCancelOrFinishButton(0);
-			mainGame->HideElement(mainGame->wQuery, true);
-			break;
+
+			if(mainGame->wCardSelect->isVisible())
+				mainGame->HideElement(mainGame->wCardSelect, true);
+			else
+				DuelClient::SendResponse();
 		}
 		break;
 	}
