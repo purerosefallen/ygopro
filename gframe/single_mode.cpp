@@ -141,7 +141,7 @@ int SingleMode::SinglePlayThread() {
 	time_t nowtime = time(nullptr);
 	tm* localedtime = localtime(&nowtime);
 	wchar_t timetext[40];
-	wcsftime(timetext, 40, L"%Y-%m-%d %H-%M-%S", localedtime);
+	std::wcsftime(timetext, 40, L"%Y-%m-%d %H-%M-%S", localedtime);
 	mainGame->ebRSName->setText(timetext);
 	if(!mainGame->chkAutoSaveReplay->isChecked()) {
 		mainGame->wReplaySave->setText(dataManager.GetSysString(1340));
@@ -192,6 +192,13 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 		switch (mainGame->dInfo.curMsg) {
 		case MSG_RESET_TIME: {
 			pbuf += 3;
+			break;
+		}
+		case MSG_UPDATE_CARD: {
+			pbuf += 3;
+			const int clen = BufferIO::ReadInt32(pbuf);
+			pbuf += (clen - 4);
+			DuelClient::ClientAnalyze(offset, pbuf - offset);
 			break;
 		}
 		case MSG_RETRY: {
