@@ -43,16 +43,12 @@
 #define mystrncasecmp strncasecmp
 #endif
 
-#include <wchar.h>
 #ifndef _WIN32
+#include <wchar.h>
 inline int _wtoi(const wchar_t * str){
 	return (int)wcstol(str, 0, 10);
 }
 #endif
-template<size_t N, typename... TR>
-inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
-	return swprintf(buf, N, fmt, args...);
-}
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,6 +58,11 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 #include "bufferio.h"
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
+
+template<size_t N, typename... TR>
+inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
+	return std::swprintf(buf, N, fmt, args...);
+}
 
 inline FILE* myfopen(const wchar_t* filename, const char* mode) {
 	FILE* fp{};
