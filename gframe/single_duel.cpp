@@ -768,6 +768,16 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			}
 			break;			
 		}
+		case MSG_UPDATE_CARD: {
+			auto controller = BufferIO::ReadUInt8(pbuf);
+			auto location = BufferIO::ReadUInt8(pbuf);
+			auto sequence = BufferIO::ReadUInt8(pbuf);
+			auto clen = BufferIO::ReadInt32(pbuf);
+			auto query_flag = BufferIO::ReadUInt32(pbuf);
+			pbuf += (clen - 8);
+			RefreshSingle(controller, location, sequence, query_flag);
+			break;
+		}
 		case MSG_RETRY: {
 			WaitforResponse(last_response);
 			NetServer::SendBufferToPlayer(players[last_response], STOC_GAME_MSG, offset, pbuf - offset);
