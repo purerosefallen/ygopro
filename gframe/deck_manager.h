@@ -65,12 +65,8 @@ public:
 	void LoadLFList();
 	const wchar_t* GetLFListName(int lfhash);
 	const std::unordered_map<int, int>* GetLFListContent(int lfhash);
-<<<<<<< HEAD
 	unsigned int CheckDeck(Deck& deck, int lfhash, int rule);
 	int CheckSpellCount(Deck& deck);
-=======
-	unsigned int CheckDeck(Deck& deck, int lfhash, int rule);
->>>>>>> server
 	int LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_packlist = false);
 	bool LoadSide(Deck& deck, int* dbuf, int mainc, int sidec);
 #ifndef YGOPRO_SERVER_MODE
