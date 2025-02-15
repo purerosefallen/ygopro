@@ -2006,10 +2006,9 @@ void Game::ErrorLog(const char* msg) {
 	FILE* fp = fopen("error.log", "at");
 	if(!fp)
 		return;
-	time_t nowtime = time(nullptr);
-	tm* localedtime = localtime(&nowtime);
+	time_t nowtime = std::time(nullptr);
 	char timebuf[40];
-	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
+	std::strftime(timebuf, sizeof timebuf, "%Y-%m-%d %H:%M:%S", std::localtime(&nowtime));
 	fprintf(fp, "[%s]%s\n", timebuf, msg);
 	fclose(fp);
 }
@@ -2459,8 +2458,8 @@ void Game::SetWindowsIcon() {
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(nullptr);
 	HICON hSmallIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCEW(1), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
 	HICON hBigIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCEW(1), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
-	SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (long)hSmallIcon);
-	SendMessageW(hWnd, WM_SETICON, ICON_BIG, (long)hBigIcon);
+	SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+	SendMessageW(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 #endif
 }
 void Game::SetWindowsScale(float scale) {

@@ -14,7 +14,7 @@ bool SoundManager::Init() {
 	previous_bgm_scene = -1;
 	RefreshBGMList();
 	bgm_process = false;
-	rnd.reset((unsigned int)time(nullptr));
+	rnd.reset((unsigned int)std::time(nullptr));
 	engineSound = irrklang::createIrrKlangDevice();
 	engineMusic = irrklang::createIrrKlangDevice();
 	if(!engineSound || !engineMusic) {
