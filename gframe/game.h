@@ -17,6 +17,9 @@
 #include "deck_con.h"
 #include "menu_handler.h"
 #include <ctime>
+#else
+#include "netserver.h"
+#endif //YGOPRO_SERVER_MODE
 #include <unordered_map>
 #include <vector>
 #include <list>
