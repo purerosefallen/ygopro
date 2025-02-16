@@ -1934,7 +1934,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 			case CHECKBOX_ENABLE_MUSIC: {
 				if(!mainGame->chkEnableMusic->isChecked())
 					soundManager.StopBGM();
@@ -2053,7 +2053,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 			case SCROLL_VOLUME: {
 				mainGame->gameConf.sound_volume = (double)mainGame->scrSoundVolume->getPos() / 100;
 				mainGame->gameConf.music_volume = (double)mainGame->scrMusicVolume->getPos() / 100;

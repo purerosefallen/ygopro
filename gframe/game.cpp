@@ -1563,7 +1563,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.window_height = strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "resize_popup_menu")) {
 			gameConf.resize_popup_menu = strtol(valbuf, nullptr, 10) > 0;
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 		} else if(!std::strcmp(strbuf, "enable_sound")) {
 			gameConf.enable_sound = strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "sound_volume")) {
@@ -1804,7 +1804,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
 	fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
@@ -2035,7 +2035,7 @@ void Game::initUtils() {
 	FileSystem::MakeDir("textures/cover2");
 	FileSystem::MakeDir("textures/pscale");
 	//sound
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 	FileSystem::MakeDir("sound");
 	FileSystem::MakeDir("sound/BGM");
 	FileSystem::MakeDir("sound/BGM/advantage");
