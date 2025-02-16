@@ -16,10 +16,7 @@
 #include "client_field.h"
 #include "deck_con.h"
 #include "menu_handler.h"
-#include <time.h>
-#else
-#include "netserver.h"
-#endif //YGOPRO_SERVER_MODE
+#include <ctime>
 #include <unordered_map>
 #include <vector>
 #include <list>

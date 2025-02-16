@@ -63,7 +63,7 @@ void DeckBuilder::Initialize() {
 	mainGame->btnSideReload->setVisible(false);
 	filterList = &deckManager._lfList[mainGame->gameConf.use_lflist ? mainGame->gameConf.default_lflist : deckManager._lfList.size() - 1].content;
 	ClearSearch();
-	rnd.reset((uint_fast32_t)time(nullptr));
+	rnd.reset((uint_fast32_t)std::time(nullptr));
 	mouse_pos.set(0, 0);
 	hovered_code = 0;
 	hovered_pos = 0;
@@ -1343,13 +1343,12 @@ void DeckBuilder::FilterCards() {
 			all,
 			name,
 			setcode
-		} type;
-		bool exclude;
-		element_t(): type(type_t::all), exclude(false) {}
+		} type{ type_t::all };
+		bool exclude{ false };
 	};
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	int trycode = BufferIO::GetVal(pstr);
-	std::wstring str = std::wstring(pstr);
+	std::wstring str{ pstr };
 	std::vector<element_t> query_elements;
 	if(mainGame->gameConf.search_multiple_keywords) {
 		const wchar_t separator = mainGame->gameConf.search_multiple_keywords == 1 ? L' ' : L'+';
