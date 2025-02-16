@@ -5,8 +5,6 @@ BUILD_EVENT = os.istarget("windows")
 BUILD_FREETYPE = os.istarget("windows")
 BUILD_SQLITE = os.istarget("windows")
 BUILD_IRRLICHT = not os.istarget("macosx")
-USE_IRRKLANG = true
-IRRKLANG_PRO = false
 LUA_LIB_NAME = "lua"
 
 SERVER_MODE = true
@@ -43,11 +41,6 @@ newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", descript
 newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-
-newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "" }
-newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "" }
-newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
-newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
 
 newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
 newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
@@ -171,36 +164,7 @@ if not BUILD_IRRLICHT then
     IRRLICHT_LIB_DIR = GetParam("irrlicht-lib-dir") or "/usr/local/lib"
 end
 
-if GetParam("use-irrklang") then
-    USE_IRRKLANG = true
-elseif GetParam("no-use-irrklang") then
-    USE_IRRKLANG = false
-end
-if USE_IRRKLANG then
-    IRRKLANG_INCLUDE_DIR = GetParam("irrklang-include-dir") or "../irrklang/include"
-    if os.istarget("windows") then
-        IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
-    elseif os.istarget("linux") then
-        IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
-        IRRKLANG_LINK_RPATH = "-Wl,-rpath=./lib/"
-    elseif os.istarget("macosx") then
-        IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
-    end
-    IRRKLANG_LIB_DIR = GetParam("irrklang-lib-dir") or IRRKLANG_LIB_DIR
-end
-
-if GetParam("irrklang-pro") and os.istarget("windows") then
-    IRRKLANG_PRO = true
-elseif GetParam("no-irrklang-pro") then
-    IRRKLANG_PRO = false
-end
-if IRRKLANG_PRO then
-    -- irrklang pro can't use the pro lib to debug
-    IRRKLANG_PRO_RELEASE_LIB_DIR = GetParam("irrklang-pro-release-lib-dir") or "../irrklang/lib/Win32-vs2019"
-    IRRKLANG_PRO_DEBUG_LIB_DIR = GetParam("irrklang-pro-debug-lib-dir") or "../irrklang/lib/Win32-visualStudio-debug"  
-end
-
-BUILD_IKPMP3 = USE_IRRKLANG
+USE_AUDIO = not SERVER_MODE and not GetParam("no-audio")
 
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
@@ -328,7 +292,4 @@ end
     end
     if BUILD_SQLITE then
         include "sqlite3"
-    end
-    if BUILD_IKPMP3 and not SERVER_MODE then
-        include "ikpmp3"
     end

@@ -2,6 +2,9 @@ include "lzma/."
 if (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
 include "spmemvfs/."
 end
+if USE_AUDIO then
+include "miniaudio/."
+end
 
 project "ygopro"
 if SERVER_MODE then
@@ -39,13 +42,6 @@ else
     includedirs { "../ocgcore" }
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end
-    if BUILD_IKPMP3 then
-        links { "ikpmp3" }
-    end
-
-    if BUILD_IKPMP3 then
-        links { "ikpmp3" }
-    end
 
     if BUILD_EVENT then
         includedirs { "../event/include" }
@@ -75,12 +71,9 @@ end
         libdirs { SQLITE_LIB_DIR }
     end
 
-    if USE_IRRKLANG then
-        defines { "YGOPRO_USE_IRRKLANG" }
-        includedirs { IRRKLANG_INCLUDE_DIR }
-        if not IRRKLANG_PRO then
-            libdirs { IRRKLANG_LIB_DIR }
-        end
+    if USE_AUDIO then
+        defines { "YGOPRO_USE_AUDIO" }
+        links { "cminiaudio" }
     end
 
     filter "system:windows"
@@ -92,17 +85,6 @@ end
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
-        if USE_IRRKLANG then
-            links { "irrKlang" }
-            if IRRKLANG_PRO then
-                defines { "IRRKLANG_STATIC" }
-                filter { "not configurations:Debug" }
-                    libdirs { IRRKLANG_PRO_RELEASE_LIB_DIR }
-                filter { "configurations:Debug" }
-                    libdirs { IRRKLANG_PRO_DEBUG_LIB_DIR }
-                filter {}
-            end
-        end
 if SERVER_MODE then
         links { "ws2_32" }
 else
@@ -121,15 +103,8 @@ end
             buildoptions { "--target=arm64-apple-macos12" }
             linkoptions { "-arch arm64" }
         end
-        if USE_IRRKLANG then
-            links { "irrklang" }
-        end
     filter "system:linux"
     linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
 end
-        if USE_IRRKLANG then
-            links { "IrrKlang" }
-            linkoptions { IRRKLANG_LINK_RPATH }
-        end

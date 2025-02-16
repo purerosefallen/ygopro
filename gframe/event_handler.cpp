@@ -1933,7 +1933,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 			case CHECKBOX_ENABLE_MUSIC: {
 				if(!mainGame->chkEnableMusic->isChecked())
 					soundManager.StopBGM();
@@ -2052,7 +2052,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 			case SCROLL_VOLUME: {
 				mainGame->gameConf.sound_volume = (double)mainGame->scrSoundVolume->getPos() / 100;
 				mainGame->gameConf.music_volume = (double)mainGame->scrMusicVolume->getPos() / 100;
@@ -2130,46 +2130,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			if(!event.KeyInput.PressedDown && !mainGame->HasFocus(EGUIET_EDIT_BOX))
 				mainGame->takeScreenshot();
 			return true;
-			break;
-		}
-		default: break;
-		}
-		break;
-	}
-	case irr::EET_MOUSE_INPUT_EVENT: {
-		switch(event.MouseInput.Event) {
-		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
-			IGUIElement* root = mainGame->env->getRootGUIElement();
-			position2di mousepos = position2di(event.MouseInput.X, event.MouseInput.Y);
-			if(root->getElementFromPoint(mousepos) == mainGame->stText) {
-				if(!mainGame->scrCardText->isVisible()) {
-					break;
-				}
-				is_dragging_cardtext = true;
-				dragging_cardtext_start_pos = mainGame->scrCardText->getPos();
-				dragging_cardtext_start_y = event.MouseInput.Y;
-				return true;
-			}
-			break;
-		}
-		case irr::EMIE_LMOUSE_LEFT_UP: {
-			is_dragging_cardtext = false;
-			break;
-		}
-		case irr::EMIE_MOUSE_MOVED: {
-			if(is_dragging_cardtext) {
-				if(!mainGame->scrCardText->isVisible()) {
-					is_dragging_cardtext = false;
-					break;
-				}
-				int step = mainGame->guiFont->getDimension(L"A").Height + mainGame->guiFont->getKerningHeight();
-				int pos = dragging_cardtext_start_pos + (dragging_cardtext_start_y - event.MouseInput.Y) / step;
-				int max = mainGame->scrCardText->getMax();
-				if(pos < 0) pos = 0;
-				if(pos > max) pos = max;
-				mainGame->scrCardText->setPos(pos);
-				mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth() - 25, mainGame->guiFont, mainGame->showingtext, pos);
-			}
 			break;
 		}
 		default: break;

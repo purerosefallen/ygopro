@@ -20,7 +20,7 @@
 #else
 #include "netserver.h"
 #endif //YGOPRO_SERVER_MODE
-#include <time.h>
+#include <ctime>
 #include <unordered_map>
 #include <vector>
 #include <list>

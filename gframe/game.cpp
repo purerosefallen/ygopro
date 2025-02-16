@@ -1634,7 +1634,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.window_height = strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "resize_popup_menu")) {
 			gameConf.resize_popup_menu = strtol(valbuf, nullptr, 10) > 0;
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 		} else if(!std::strcmp(strbuf, "enable_sound")) {
 			gameConf.enable_sound = strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "sound_volume")) {
@@ -1875,7 +1875,7 @@ void Game::SaveConfig() {
 	fprintf(fp, "window_width = %d\n", gameConf.window_width);
 	fprintf(fp, "window_height = %d\n", gameConf.window_height);
 	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
 	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
 	fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
@@ -2083,10 +2083,9 @@ void Game::ErrorLog(const char* msg) {
 	FILE* fp = fopen("error.log", "at");
 	if(!fp)
 		return;
-	time_t nowtime = time(nullptr);
-	tm* localedtime = localtime(&nowtime);
+	time_t nowtime = std::time(nullptr);
 	char timebuf[40];
-	strftime(timebuf, 40, "%Y-%m-%d %H:%M:%S", localedtime);
+	std::strftime(timebuf, sizeof timebuf, "%Y-%m-%d %H:%M:%S", std::localtime(&nowtime));
 	fprintf(fp, "[%s]%s\n", timebuf, msg);
 	fclose(fp);
 }
@@ -2118,7 +2117,7 @@ void Game::initUtils() {
 	FileSystem::MakeDir("textures/cover2");
 	FileSystem::MakeDir("textures/pscale");
 	//sound
-#ifdef YGOPRO_USE_IRRKLANG
+#ifdef YGOPRO_USE_AUDIO
 	FileSystem::MakeDir("sound");
 	FileSystem::MakeDir("sound/BGM");
 	FileSystem::MakeDir("sound/BGM/advantage");
@@ -2543,8 +2542,8 @@ void Game::SetWindowsIcon() {
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(nullptr);
 	HICON hSmallIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCEW(1), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
 	HICON hBigIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCEW(1), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
-	SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (long)hSmallIcon);
-	SendMessageW(hWnd, WM_SETICON, ICON_BIG, (long)hBigIcon);
+	SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+	SendMessageW(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 #endif
 }
 void Game::SetWindowsScale(float scale) {
