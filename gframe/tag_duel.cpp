@@ -428,12 +428,30 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 #endif
 	unsigned char deckbuff[12];
 	auto pbuf = deckbuff;
+#ifdef YGOPRO_SERVER_MODE
+	short extra_size[2];
+	for(int i = 0; i < 2; ++i) {
+		auto p = i * 2;
+		extra_size[i] = (short)pdeck[p].extra.size();
+		if(duel_flags & DUEL_FLAG_SIDEINS)
+			for (auto cit : pdeck[p].side)
+				if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+					++extra_size[i];
+	}
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[0]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[1]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
+#else
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
+#endif
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
 	NetServer::ReSendToPlayer(players[1]);
 	char tempbuff[6];
@@ -578,6 +596,27 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 			last_replay.WriteInt32((*cit)->first, false);
 		}
 	};
+#ifdef YGOPRO_SERVER_MODE
+	std::vector<ygo::code_pointer> extra_cards;
+	auto load_extra = [&](uint8_t p) {
+		extra_cards.clear();
+		for(auto cit : pdeck[p].extra)
+			extra_cards.push_back(cit);
+		if(duel_flags & DUEL_FLAG_SIDEINS)
+			for(auto cit : pdeck[p].side)
+				if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+					extra_cards.push_back(cit);
+		return extra_cards;
+	};
+	load_single(pdeck[0].main, 0, LOCATION_DECK);
+	load_single(load_extra(0), 0, LOCATION_EXTRA);
+	load_tag(pdeck[1].main, 0, LOCATION_DECK);
+	load_tag(load_extra(1), 0, LOCATION_EXTRA);
+	load_single(pdeck[3].main, 1, LOCATION_DECK);
+	load_single(load_extra(3), 1, LOCATION_EXTRA);
+	load_tag(pdeck[2].main, 1, LOCATION_DECK);
+	load_tag(load_extra(2), 1, LOCATION_EXTRA);
+#else
 	load_single(pdeck[0].main, 0, LOCATION_DECK);
 	load_single(pdeck[0].extra, 0, LOCATION_EXTRA);
 	load_tag(pdeck[1].main, 0, LOCATION_DECK);
@@ -586,6 +625,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	load_single(pdeck[3].extra, 1, LOCATION_EXTRA);
 	load_tag(pdeck[2].main, 1, LOCATION_DECK);
 	load_tag(pdeck[2].extra, 1, LOCATION_EXTRA);
+#endif
 	last_replay.Flush();
 	unsigned char startbuf[32]{};
 	auto pbuf = startbuf;
