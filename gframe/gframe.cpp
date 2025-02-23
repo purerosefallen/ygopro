@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
 	enable_log = 1;
 	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
+	ygo::duel_flags = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
 	ygo::game_info.mode = 0;
@@ -100,7 +101,8 @@ int main(int argc, char* argv[]) {
 		else if(argv[5][0] == 'F')
 			ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 		else {
-			int master_rule = atoi(argv[5]);
+			ygo::duel_flags = atoi(argv[5]);
+			auto master_rule = ygo::duel_flags & 0xF;
 			if(master_rule)
 				ygo::game_info.duel_rule = master_rule;
 			else
