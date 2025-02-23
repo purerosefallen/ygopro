@@ -688,7 +688,7 @@ extern Game* mainGame;
 extern unsigned short server_port;
 extern unsigned short replay_mode;
 extern HostInfo game_info;
-extern unsigned int pre_seed[3];
+extern unsigned int pre_seed[5];
 extern unsigned int duel_flags;
 #endif
 }

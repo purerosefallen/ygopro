@@ -94,7 +94,7 @@ bool IsExtension(const wchar_t* filename, const wchar_t* extension) {
 #ifdef YGOPRO_SERVER_MODE
 unsigned short server_port;
 unsigned short replay_mode;
-unsigned int pre_seed[3];
+unsigned int pre_seed[5];
 unsigned int duel_flags;
 HostInfo game_info;
 
