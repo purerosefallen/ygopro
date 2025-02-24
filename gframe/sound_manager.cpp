@@ -40,7 +40,6 @@ void SoundManager::RefershBGMDir(std::wstring path, int scene) {
 			std::wstring filename = path + L"/" + name;
 			BGMList[BGM_ALL].push_back(filename);
 			BGMList[scene].push_back(filename);
-			printf("Found BGM %ls in scene %d\n", filename.c_str(), scene);
 		}
 	});
 }
@@ -225,7 +224,6 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		ma_sound_init_from_file_w(&engineMusic, song_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
 #else
 		auto res = ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
-		printf("res = %d\n", res);
 #endif
 		ma_sound_set_looping(&soundBGM, loop);
 		ma_sound_start(&soundBGM);
@@ -249,7 +247,6 @@ void SoundManager::PlayBGM(int scene) {
 		wchar_t fname[1024];
 		myswprintf(fname, L"./sound/BGM/%ls", name);
 		BufferIO::EncodeUTF8(fname, BGMName);
-		printf("Playing BGM %s in scene %d\n", BGMName, scene);
 		PlayMusic(BGMName, false);
 	}
 #endif
