@@ -176,7 +176,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 		break;
 	}
 	char soundPath[40];
-	snprintf(soundPath, 40, "./sound/%s.wav", soundName);
+	std::snprintf(soundPath, 40, "./sound/%s.wav", soundName);
 #ifdef YGOPRO_USE_AUDIO
 	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
 	auto res = ma_engine_play_sound(&engineSound, soundPath, nullptr);
@@ -223,7 +223,7 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		BufferIO::DecodeUTF8(song, song_w);
 		ma_sound_init_from_file_w(&engineMusic, song_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
 #else
-		ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
+		auto res = ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
 #endif
 		ma_sound_set_looping(&soundBGM, loop);
 		ma_sound_start(&soundBGM);

@@ -42,12 +42,6 @@ newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", descr
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 
-newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
-newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
-newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
-newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
-newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
-
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
 

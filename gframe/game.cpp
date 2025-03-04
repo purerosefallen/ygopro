@@ -130,7 +130,7 @@ void Game::MainTestLoop(int code) {
 bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
-	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	irr::SIrrlichtCreationParameters params{};
 	params.LoggingLevel = ELL_NONE;
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
@@ -178,8 +178,6 @@ bool Game::Initialize() {
 	ignore_chain = false;
 	chain_when_avail = false;
 	is_building = false;
-	menuHandler.prev_operation = 0;
-	menuHandler.prev_sel = -1;
 	deckManager.LoadLFList();
 	driver = device->getVideoDriver();
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
@@ -1471,34 +1469,34 @@ void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
 		return;
 	botInfo.clear();
-	FILE* fp = fopen(GetLocaleDir("bot.conf"), "r");
+	FILE* fp = std::fopen(GetLocaleDir("bot.conf"), "r");
 	if(!fp)
-		fp = fopen("bot.conf", "r");
+		fp = std::fopen("bot.conf", "r");
 	char linebuf[256]{};
 	char strbuf[256]{};
 	if(fp) {
-		while(fgets(linebuf, 256, fp)) {
+		while(std::fgets(linebuf, 256, fp)) {
 			if(linebuf[0] == '#')
 				continue;
 			if(linebuf[0] == '!') {
 				BotInfo newinfo;
-				if (sscanf(linebuf, "!%240[^\n]", strbuf) != 1)
+				if (std::sscanf(linebuf, "!%240[^\n]", strbuf) != 1)
 					continue;
 				BufferIO::DecodeUTF8(strbuf, newinfo.name);
-				if (!fgets(linebuf, 256, fp))
+				if (!std::fgets(linebuf, 256, fp))
 					break;
-				if (sscanf(linebuf, "%240[^\n]", strbuf) != 1)
+				if (std::sscanf(linebuf, "%240[^\n]", strbuf) != 1)
 					continue;
 #ifndef _WIN32
 				bool skipRandom = !!strstr(strbuf, "Random=");
 #endif
 				BufferIO::DecodeUTF8(strbuf, newinfo.command);
-				if (!fgets(linebuf, 256, fp))
+				if (!std::fgets(linebuf, 256, fp))
 					break;
-				if (sscanf(linebuf, "%240[^\n]", strbuf) != 1)
+				if (std::sscanf(linebuf, "%240[^\n]", strbuf) != 1)
 					continue;
 				BufferIO::DecodeUTF8(strbuf, newinfo.desc);
-				if (!fgets(linebuf, 256, fp))
+				if (!std::fgets(linebuf, 256, fp))
 					break;
 #ifndef _WIN32
 				if(skipRandom) {
@@ -1517,7 +1515,7 @@ void Game::RefreshBot() {
 				continue;
 			}
 		}
-		fclose(fp);
+		std::fclose(fp);
 	}
 	lstBotList->clear();
 	stBotInfo->setText(L"");
@@ -1534,15 +1532,15 @@ void Game::RefreshBot() {
 	}
 }
 bool Game::LoadConfigFromFile(const char* file) {
-	FILE* fp = fopen(file, "r");
+	FILE* fp = std::fopen(file, "r");
 	if(!fp){
 		return false;
 	}
 	char linebuf[CONFIG_LINE_SIZE]{};
 	char strbuf[64]{};
 	char valbuf[960]{};
-	while(fgets(linebuf, sizeof linebuf, fp)) {
-		if (sscanf(linebuf, "%63s = %959s", strbuf, valbuf) != 2)
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		if (std::sscanf(linebuf, "%63s = %959s", strbuf, valbuf) != 2)
 			continue;
 		if(!std::strcmp(strbuf, "antialias")) {
 			gameConf.antialias = strtol(valbuf, nullptr, 10);
@@ -1557,7 +1555,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 			enable_log = val & 0xff;
 		} else if(!std::strcmp(strbuf, "textfont")) {
 			int textfontsize = 0;
-			if (sscanf(linebuf, "%63s = %959s %d", strbuf, valbuf, &textfontsize) != 3)
+			if (std::sscanf(linebuf, "%63s = %959s %d", strbuf, valbuf, &textfontsize) != 3)
 				continue;
 			gameConf.textfontsize = textfontsize;
 			BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
@@ -1663,7 +1661,7 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.skin_index = atoi(valbuf);
 		} else {
 			// options allowing multiple words
-			if (sscanf(linebuf, "%63s = %959[^\n]", strbuf, valbuf) != 2)
+			if (std::sscanf(linebuf, "%63s = %959[^\n]", strbuf, valbuf) != 2)
 				continue;
 			if (!std::strcmp(strbuf, "nickname")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.nickname);
@@ -1807,90 +1805,90 @@ void Game::LoadConfig() {
 }
 void Game::SaveConfig() {
 #ifdef YGOPRO_COMPAT_MYCARD
-	FILE* fp = fopen("system.conf", "w");
+	FILE* fp = std::fopen("system.conf", "w");
 #else
-	FILE* fp = fopen("system_user.conf", "w");
+	FILE* fp = std::fopen("system_user.conf", "w");
 #endif //YGOPRO_COMPAT_MYCARD
-	fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
+	std::fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
 	char linebuf[CONFIG_LINE_SIZE];
-	fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
-	fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
-	fprintf(fp, "pro_version = %d\n", PRO_VERSION);
-	fprintf(fp, "antialias = %d\n", gameConf.antialias);
-	fprintf(fp, "errorlog = %u\n", enable_log);
+	std::fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
+	std::fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
+	std::fprintf(fp, "pro_version = %d\n", PRO_VERSION);
+	std::fprintf(fp, "antialias = %d\n", gameConf.antialias);
+	std::fprintf(fp, "errorlog = %u\n", enable_log);
 	BufferIO::CopyWideString(ebNickName->getText(), gameConf.nickname);
 	BufferIO::EncodeUTF8(gameConf.nickname, linebuf);
-	fprintf(fp, "nickname = %s\n", linebuf);
+	std::fprintf(fp, "nickname = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.gamename, linebuf);
-	fprintf(fp, "gamename = %s\n", linebuf);
+	std::fprintf(fp, "gamename = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastcategory, linebuf);
-	fprintf(fp, "lastcategory = %s\n", linebuf);
+	std::fprintf(fp, "lastcategory = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastdeck, linebuf);
-	fprintf(fp, "lastdeck = %s\n", linebuf);
+	std::fprintf(fp, "lastdeck = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.textfont, linebuf);
-	fprintf(fp, "textfont = %s %d\n", linebuf, gameConf.textfontsize);
+	std::fprintf(fp, "textfont = %s %d\n", linebuf, gameConf.textfontsize);
 	BufferIO::EncodeUTF8(gameConf.numfont, linebuf);
-	fprintf(fp, "numfont = %s\n", linebuf);
-	fprintf(fp, "serverport = %d\n", gameConf.serverport);
+	std::fprintf(fp, "numfont = %s\n", linebuf);
+	std::fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
-	fprintf(fp, "lasthost = %s\n", linebuf);
+	std::fprintf(fp, "lasthost = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
-	fprintf(fp, "lastport = %s\n", linebuf);
+	std::fprintf(fp, "lastport = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.roompass, linebuf);
-	fprintf(fp, "roompass = %s\n", linebuf);
+	std::fprintf(fp, "roompass = %s\n", linebuf);
 	//settings
-	fprintf(fp, "automonsterpos = %d\n", (chkMAutoPos->isChecked() ? 1 : 0));
-	fprintf(fp, "autospellpos = %d\n", (chkSTAutoPos->isChecked() ? 1 : 0));
-	fprintf(fp, "randompos = %d\n", (chkRandomPos->isChecked() ? 1 : 0));
-	fprintf(fp, "autochain = %d\n", (chkAutoChain->isChecked() ? 1 : 0));
-	fprintf(fp, "waitchain = %d\n", (chkWaitChain->isChecked() ? 1 : 0));
-	fprintf(fp, "showchain = %d\n", (chkDefaultShowChain->isChecked() ? 1 : 0));
-	fprintf(fp, "mute_opponent = %d\n", (chkIgnore1->isChecked() ? 1 : 0));
-	fprintf(fp, "mute_spectators = %d\n", (chkIgnore2->isChecked() ? 1 : 0));
-	fprintf(fp, "use_lflist = %d\n", gameConf.use_lflist);
-	fprintf(fp, "default_lflist = %d\n", gameConf.default_lflist);
-	fprintf(fp, "default_rule = %d\n", gameConf.default_rule == YGOPRO_DEFAULT_DUEL_RULE ? 0 : gameConf.default_rule);
-	fprintf(fp, "hide_setname = %d\n", gameConf.hide_setname);
-	fprintf(fp, "hide_hint_button = %d\n", gameConf.hide_hint_button);
-	fprintf(fp, "#control_mode = 0: Key A/S/D/R Chain Buttons. control_mode = 1: MouseLeft/MouseRight/NULL/F9 Without Chain Buttons\n");
-	fprintf(fp, "control_mode = %d\n", gameConf.control_mode);
-	fprintf(fp, "draw_field_spell = %d\n", gameConf.draw_field_spell);
-	fprintf(fp, "separate_clear_button = %d\n", gameConf.separate_clear_button);
-	fprintf(fp, "#auto_search_limit >= 0: Start search automatically when the user enters N chars\n");
-	fprintf(fp, "auto_search_limit = %d\n", gameConf.auto_search_limit);
-	fprintf(fp, "#search_multiple_keywords = 0: Disable. 1: Search mutiple keywords with separator \" \". 2: with separator \"+\"\n");
-	fprintf(fp, "search_multiple_keywords = %d\n", gameConf.search_multiple_keywords);
-	fprintf(fp, "search_regex = %d\n", gameConf.search_regex);
-	fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
-	fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
-	fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
+	std::fprintf(fp, "automonsterpos = %d\n", (chkMAutoPos->isChecked() ? 1 : 0));
+	std::fprintf(fp, "autospellpos = %d\n", (chkSTAutoPos->isChecked() ? 1 : 0));
+	std::fprintf(fp, "randompos = %d\n", (chkRandomPos->isChecked() ? 1 : 0));
+	std::fprintf(fp, "autochain = %d\n", (chkAutoChain->isChecked() ? 1 : 0));
+	std::fprintf(fp, "waitchain = %d\n", (chkWaitChain->isChecked() ? 1 : 0));
+	std::fprintf(fp, "showchain = %d\n", (chkDefaultShowChain->isChecked() ? 1 : 0));
+	std::fprintf(fp, "mute_opponent = %d\n", (chkIgnore1->isChecked() ? 1 : 0));
+	std::fprintf(fp, "mute_spectators = %d\n", (chkIgnore2->isChecked() ? 1 : 0));
+	std::fprintf(fp, "use_lflist = %d\n", gameConf.use_lflist);
+	std::fprintf(fp, "default_lflist = %d\n", gameConf.default_lflist);
+	std::fprintf(fp, "default_rule = %d\n", gameConf.default_rule == YGOPRO_DEFAULT_DUEL_RULE ? 0 : gameConf.default_rule);
+	std::fprintf(fp, "hide_setname = %d\n", gameConf.hide_setname);
+	std::fprintf(fp, "hide_hint_button = %d\n", gameConf.hide_hint_button);
+	std::fprintf(fp, "#control_mode = 0: Key A/S/D/R Chain Buttons. control_mode = 1: MouseLeft/MouseRight/NULL/F9 Without Chain Buttons\n");
+	std::fprintf(fp, "control_mode = %d\n", gameConf.control_mode);
+	std::fprintf(fp, "draw_field_spell = %d\n", gameConf.draw_field_spell);
+	std::fprintf(fp, "separate_clear_button = %d\n", gameConf.separate_clear_button);
+	std::fprintf(fp, "#auto_search_limit >= 0: Start search automatically when the user enters N chars\n");
+	std::fprintf(fp, "auto_search_limit = %d\n", gameConf.auto_search_limit);
+	std::fprintf(fp, "#search_multiple_keywords = 0: Disable. 1: Search mutiple keywords with separator \" \". 2: with separator \"+\"\n");
+	std::fprintf(fp, "search_multiple_keywords = %d\n", gameConf.search_multiple_keywords);
+	std::fprintf(fp, "search_regex = %d\n", gameConf.search_regex);
+	std::fprintf(fp, "ignore_deck_changes = %d\n", (chkIgnoreDeckChanges->isChecked() ? 1 : 0));
+	std::fprintf(fp, "default_ot = %d\n", gameConf.defaultOT);
+	std::fprintf(fp, "enable_bot_mode = %d\n", gameConf.enable_bot_mode);
 	BufferIO::EncodeUTF8(gameConf.bot_deck_path, linebuf);
-	fprintf(fp, "bot_deck_path = %s\n", linebuf);
-	fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
-	fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
-	fprintf(fp, "draw_single_chain = %d\n", gameConf.draw_single_chain);
-	fprintf(fp, "hide_player_name = %d\n", gameConf.hide_player_name);
-	fprintf(fp, "prefer_expansion_script = %d\n", gameConf.prefer_expansion_script);
-	fprintf(fp, "ask_mset = %d\n", gameConf.ask_mset);
-	fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
-	fprintf(fp, "window_width = %d\n", gameConf.window_width);
-	fprintf(fp, "window_height = %d\n", gameConf.window_height);
-	fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
+	std::fprintf(fp, "bot_deck_path = %s\n", linebuf);
+	std::fprintf(fp, "quick_animation = %d\n", gameConf.quick_animation);
+	std::fprintf(fp, "auto_save_replay = %d\n", (chkAutoSaveReplay->isChecked() ? 1 : 0));
+	std::fprintf(fp, "draw_single_chain = %d\n", gameConf.draw_single_chain);
+	std::fprintf(fp, "hide_player_name = %d\n", gameConf.hide_player_name);
+	std::fprintf(fp, "prefer_expansion_script = %d\n", gameConf.prefer_expansion_script);
+	std::fprintf(fp, "ask_mset = %d\n", gameConf.ask_mset);
+	std::fprintf(fp, "window_maximized = %d\n", (gameConf.window_maximized ? 1 : 0));
+	std::fprintf(fp, "window_width = %d\n", gameConf.window_width);
+	std::fprintf(fp, "window_height = %d\n", gameConf.window_height);
+	std::fprintf(fp, "resize_popup_menu = %d\n", gameConf.resize_popup_menu ? 1 : 0);
 #ifdef YGOPRO_USE_AUDIO
-	fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
-	fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
-	fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
+	std::fprintf(fp, "enable_sound = %d\n", (chkEnableSound->isChecked() ? 1 : 0));
+	std::fprintf(fp, "enable_music = %d\n", (chkEnableMusic->isChecked() ? 1 : 0));
+	std::fprintf(fp, "#Volume of sound and music, between 0 and 100\n");
 	int vol = gameConf.sound_volume * 100;
-	fprintf(fp, "sound_volume = %d\n", vol);
+	std::fprintf(fp, "sound_volume = %d\n", vol);
 	vol = gameConf.music_volume * 100;
-	fprintf(fp, "music_volume = %d\n", vol);
-	fprintf(fp, "music_mode = %d\n", (chkMusicMode->isChecked() ? 1 : 0));
+	std::fprintf(fp, "music_volume = %d\n", vol);
+	std::fprintf(fp, "music_mode = %d\n", (chkMusicMode->isChecked() ? 1 : 0));
 #endif
-	fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
-	fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
+	std::fprintf(fp, "enable_pendulum_scale = %d\n", ((mainGame->chkEnablePScale->isChecked()) ? 1 : 0));
+	std::fprintf(fp, "skin_index = %d\n", gameConf.skin_index);
 	BufferIO::EncodeUTF8(gameConf.locale, linebuf);
-	fprintf(fp, "locale = %s\n", linebuf);
-	fclose(fp);
+	std::fprintf(fp, "locale = %s\n", linebuf);
+	std::fclose(fp);
 }
 void Game::ShowCardInfo(int code, bool resize) {
 	if(showingcode == code && !resize)
@@ -2074,21 +2072,21 @@ void Game::AddDebugMsg(const char* msg) {
 	}
 	if (enable_log & 0x2) {
 		char msgbuf[1040];
-		snprintf(msgbuf, sizeof msgbuf, "[Script Error]: %s", msg);
+		std::snprintf(msgbuf, sizeof msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
 #endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::ErrorLog(const char* msg) {
-	FILE* fp = fopen("error.log", "at");
+	FILE* fp = std::fopen("error.log", "a");
 	if(!fp)
 		return;
 	time_t nowtime = std::time(nullptr);
 	char timebuf[40];
 	std::strftime(timebuf, sizeof timebuf, "%Y-%m-%d %H:%M:%S", std::localtime(&nowtime));
-	fprintf(fp, "[%s]%s\n", timebuf, msg);
-	fclose(fp);
+	std::fprintf(fp, "[%s]%s\n", timebuf, msg);
+	std::fclose(fp);
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::initUtils() {
@@ -2464,15 +2462,15 @@ recti Game::Resize(s32 x, s32 y, s32 x2, s32 y2, s32 dx, s32 dy, s32 dx2, s32 dy
 	y2 = y2 * yScale + dy2;
 	return recti(x, y, x2, y2);
 }
-position2di Game::Resize(s32 x, s32 y) {
+irr::core::vector2di Game::Resize(s32 x, s32 y) {
 	x = x * xScale;
 	y = y * yScale;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
-position2di Game::ResizeReverse(s32 x, s32 y) {
+irr::core::vector2di Game::ResizeReverse(s32 x, s32 y) {
 	x = x / xScale;
 	y = y / yScale;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
 recti Game::ResizeWin(s32 x, s32 y, s32 x2, s32 y2) {
 	s32 w = x2 - x;
@@ -2503,7 +2501,7 @@ recti Game::ResizeCardImgWin(s32 x, s32 y, s32 mx, s32 my) {
 recti Game::ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2) {
 	return ResizeCardMid(x, y, x2, y2, (x + x2) * 0.5, (y + y2) * 0.5);
 }
-position2di Game::ResizeCardHint(s32 x, s32 y) {
+irr::core::vector2di Game::ResizeCardHint(s32 x, s32 y) {
 	return ResizeCardMid(x, y, x + CARD_IMG_WIDTH * 0.5, y + CARD_IMG_HEIGHT * 0.5);
 }
 recti Game::ResizeCardMid(s32 x, s32 y, s32 x2, s32 y2, s32 midx, s32 midy) {
@@ -2518,7 +2516,7 @@ recti Game::ResizeCardMid(s32 x, s32 y, s32 x2, s32 y2, s32 midx, s32 midy) {
 	y2 = cy + (y2 - midy) * mul;
 	return recti(x, y, x2, y2);
 }
-position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
+irr::core::vector2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
 	float mul = xScale;
 	if(xScale > yScale)
 		mul = yScale;
@@ -2526,7 +2524,7 @@ position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
 	s32 cy = midy * yScale;
 	x = cx + (x - midx) * mul;
 	y = cy + (y - midy) * mul;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
 recti Game::ResizeFit(s32 x, s32 y, s32 x2, s32 y2) {
 	float mul = xScale;
@@ -2579,7 +2577,7 @@ void Game::takeScreenshot() {
 	irr::video::IImage* const image = driver->createScreenShot();
 	if(image) {
 		irr::c8 filename[64];
-		snprintf(filename, 64, "screenshots/ygopro_%u.png", device->getTimer()->getRealTime());
+		std::snprintf(filename, 64, "screenshots/ygopro_%u.png", device->getTimer()->getRealTime());
 		if (!driver->writeImageToFile(image, filename))
 			device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
 		image->drop();
