@@ -74,10 +74,18 @@ bool IsExtension(const wchar_t* filename, const wchar_t* extension) {
 	return !mywcsncasecmp(filename + (flen - elen), extension, elen);
 }
 
+bool IsExtension(const char* filename, const char* extension) {
+	auto flen = std::strlen(filename);
+	auto elen = std::strlen(extension);
+	if (!elen || flen < elen)
+		return false;
+	return !mystrncasecmp(filename + (flen - elen), extension, elen);
+}
+
 bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
-	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	irr::SIrrlichtCreationParameters params{};
 	params.LoggingLevel = ELL_NONE;
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
@@ -125,8 +133,6 @@ bool Game::Initialize() {
 	ignore_chain = false;
 	chain_when_avail = false;
 	is_building = false;
-	menuHandler.prev_operation = 0;
-	menuHandler.prev_sel = -1;
 	deckManager.LoadLFList();
 	driver = device->getVideoDriver();
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
@@ -2003,7 +2009,7 @@ void Game::AddDebugMsg(const char* msg) {
 	}
 }
 void Game::ErrorLog(const char* msg) {
-	FILE* fp = std::fopen("error.log", "at");
+	FILE* fp = std::fopen("error.log", "a");
 	if(!fp)
 		return;
 	time_t nowtime = std::time(nullptr);
@@ -2379,15 +2385,15 @@ recti Game::Resize(s32 x, s32 y, s32 x2, s32 y2, s32 dx, s32 dy, s32 dx2, s32 dy
 	y2 = y2 * yScale + dy2;
 	return recti(x, y, x2, y2);
 }
-position2di Game::Resize(s32 x, s32 y) {
+irr::core::vector2di Game::Resize(s32 x, s32 y) {
 	x = x * xScale;
 	y = y * yScale;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
-position2di Game::ResizeReverse(s32 x, s32 y) {
+irr::core::vector2di Game::ResizeReverse(s32 x, s32 y) {
 	x = x / xScale;
 	y = y / yScale;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
 recti Game::ResizeWin(s32 x, s32 y, s32 x2, s32 y2) {
 	s32 w = x2 - x;
@@ -2418,7 +2424,7 @@ recti Game::ResizeCardImgWin(s32 x, s32 y, s32 mx, s32 my) {
 recti Game::ResizeCardHint(s32 x, s32 y, s32 x2, s32 y2) {
 	return ResizeCardMid(x, y, x2, y2, (x + x2) * 0.5, (y + y2) * 0.5);
 }
-position2di Game::ResizeCardHint(s32 x, s32 y) {
+irr::core::vector2di Game::ResizeCardHint(s32 x, s32 y) {
 	return ResizeCardMid(x, y, x + CARD_IMG_WIDTH * 0.5, y + CARD_IMG_HEIGHT * 0.5);
 }
 recti Game::ResizeCardMid(s32 x, s32 y, s32 x2, s32 y2, s32 midx, s32 midy) {
@@ -2433,7 +2439,7 @@ recti Game::ResizeCardMid(s32 x, s32 y, s32 x2, s32 y2, s32 midx, s32 midy) {
 	y2 = cy + (y2 - midy) * mul;
 	return recti(x, y, x2, y2);
 }
-position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
+irr::core::vector2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
 	float mul = xScale;
 	if(xScale > yScale)
 		mul = yScale;
@@ -2441,7 +2447,7 @@ position2di Game::ResizeCardMid(s32 x, s32 y, s32 midx, s32 midy) {
 	s32 cy = midy * yScale;
 	x = cx + (x - midx) * mul;
 	y = cy + (y - midy) * mul;
-	return position2di(x, y);
+	return irr::core::vector2di(x, y);
 }
 recti Game::ResizeFit(s32 x, s32 y, s32 x2, s32 y2) {
 	float mul = xScale;

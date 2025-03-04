@@ -15,7 +15,7 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	char linebuf[256]{};
 	wchar_t strBuffer[256]{};
 	if(fp) {
-		while(std::fgets(linebuf, 256, fp)) {
+		while(std::fgets(linebuf, sizeof linebuf, fp)) {
 			if(linebuf[0] == '#')
 				continue;
 			if(linebuf[0] == '!') {
@@ -29,15 +29,15 @@ void DeckManager::LoadLFListSingle(const char* path) {
 				cur = _lfList.rbegin();
 				continue;
 			}
+			if (cur == _lfList.rend())
+				continue;
 			int code = 0;
 			int count = -1;
-			if (std::sscanf(linebuf, "%d %d", &code, &count) != 2)
+			if (std::sscanf(linebuf, "%9d%*[ ]%9d", &code, &count) != 2)
 				continue;
 			if (code <= 0 || code > MAX_CARD_ID)
 				continue;
 			if (count < 0 || count > 2)
-				continue;
-			if (cur == _lfList.rend())
 				continue;
 			unsigned int hcode = code;
 			cur->content[code] = count;
@@ -188,25 +188,29 @@ int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_p
 	return errorcode;
 }
 int DeckManager::LoadDeck(Deck& deck, std::istringstream& deckStream, bool is_packlist) {
-	int ct = 0, mainc = 0, sidec = 0, code = 0;
+	size_t ct = 0;
+	int mainc = 0, sidec = 0, code = 0;
 	int cardlist[PACK_MAX_SIZE]{};
 	bool is_side = false;
 	std::string linebuf;
-	while (std::getline(deckStream, linebuf, '\n') && ct < (int)(sizeof cardlist / sizeof cardlist[0])) {
+	while (std::getline(deckStream, linebuf, '\n') && ct < (sizeof cardlist / sizeof cardlist[0])) {
 		if (linebuf[0] == '!') {
 			is_side = true;
 			continue;
 		}
 		if (linebuf[0] < '0' || linebuf[0] > '9')
 			continue;
-		code = std::stoi(linebuf);
+		errno = 0;
+		code = strtol(linebuf.c_str(), nullptr, 10);
+		if (errno == ERANGE)
+			continue;
 		cardlist[ct++] = code;
 		if (is_side)
 			++sidec;
 		else
 			++mainc;
 	}
-	return LoadDeck(current_deck, cardlist, mainc, sidec, is_packlist);
+	return LoadDeck(deck, cardlist, mainc, sidec, is_packlist);
 }
 bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 	std::unordered_map<int, int> pcount;
