@@ -2,7 +2,7 @@
 #include "game.h"
 #include "data_manager.h"
 #include <event2/thread.h>
-#include <locale.h>
+#include <clocale>
 #include <memory>
 #ifdef __APPLE__
 #import <CoreFoundation/CoreFoundation.h>
@@ -26,7 +26,7 @@ void ClickButton(irr::gui::IGUIElement* btn) {
 
 int main(int argc, char* argv[]) {
 #ifndef _WIN32
-	setlocale(LC_CTYPE, "UTF-8");
+	std::setlocale(LC_CTYPE, "UTF-8");
 #endif
 #if defined __APPLE__ && !defined YGOPRO_SERVER_MODE
 	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
