@@ -53,7 +53,7 @@ inline int _wtoi(const wchar_t * str){
 #endif
 
 #include <cstdio>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -80,12 +80,6 @@ inline FILE* mywfopen(const wchar_t* filename, const char* mode) {
 }
 
 #include <irrlicht.h>
-using namespace irr;
-using namespace core;
-using namespace scene;
-using namespace video;
-using namespace io;
-using namespace gui;
 
 extern unsigned short PRO_VERSION;
 extern unsigned int enable_log;

@@ -6,6 +6,7 @@ end
 
 project "YGOPro"
     kind "WindowedApp"
+    cppdialect "C++14"
 
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
@@ -50,7 +51,7 @@ project "YGOPro"
         libdirs { "$(DXSDK_DIR)Lib/x86" }
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
     filter "not action:vs*"
-        buildoptions { "-std=c++14", "-fno-rtti" }
+        buildoptions { "-fno-rtti" }
     filter "not system:windows"
         links { "event_pthreads", "dl", "pthread", "resolv" }
     filter "system:macosx"
