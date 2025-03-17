@@ -91,6 +91,14 @@ bool IsExtension(const wchar_t* filename, const wchar_t* extension) {
 	return !mywcsncasecmp(filename + (flen - elen), extension, elen);
 }
 
+bool IsExtension(const char* filename, const char* extension) {
+	auto flen = std::strlen(filename);
+	auto elen = std::strlen(extension);
+	if (!elen || flen < elen)
+		return false;
+	return !mystrncasecmp(filename + (flen - elen), extension, elen);
+}
+
 #ifdef YGOPRO_SERVER_MODE
 unsigned short server_port;
 unsigned short replay_mode;
