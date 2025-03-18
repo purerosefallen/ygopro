@@ -76,7 +76,7 @@ build
 /ygopro_*.app
 /premake4
 /premake4.exe
-/premake5
+/premake5*
 /premake5.exe
 
 # others
