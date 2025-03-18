@@ -460,12 +460,29 @@ void SingleDuel::StartDuel(DuelPlayer* dp) {
 #endif
 	unsigned char deckbuff[12];
 	auto pbuf = deckbuff;
+#ifdef YGOPRO_SERVER_MODE
+	short extra_size[2];
+	for(int i = 0; i < 2; ++i) {
+		extra_size[i] = (short)pdeck[i].extra.size();
+		if(duel_flags & DUEL_FLAG_SIDEINS)
+			for (auto cit : pdeck[i].side)
+				if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+					++extra_size[i];
+	}
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[0]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[1].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[1]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[1].side.size());
+#else
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[1].main.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[1].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[1].side.size());
+#endif
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
 	char tempbuff[6];
 	std::memcpy(tempbuff, deckbuff, 6);
@@ -556,7 +573,7 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	rh.version = PRO_VERSION;
 	rh.flag = REPLAY_UNIFORM;
 	rh.seed = seed;
-	rh.start_time = (unsigned int)time(nullptr);
+	rh.start_time = (unsigned int)std::time(nullptr);
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
 	last_replay.WriteData(players[0]->name, 40, false);
@@ -590,10 +607,28 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 			last_replay.WriteInt32((*cit)->first, false);
 		}
 	};
+#ifdef YGOPRO_SERVER_MODE
+	std::vector<ygo::code_pointer> extra_cards;
+	auto load_extra = [&](uint8_t p) {
+		extra_cards.clear();
+		for(auto cit : pdeck[p].extra)
+			extra_cards.push_back(cit);
+		if(duel_flags & DUEL_FLAG_SIDEINS)
+			for(auto cit : pdeck[p].side)
+				if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+					extra_cards.push_back(cit);
+		return extra_cards;
+	};
+	load(pdeck[0].main, 0, LOCATION_DECK);
+	load(load_extra(0), 0, LOCATION_EXTRA);
+	load(pdeck[1].main, 1, LOCATION_DECK);
+	load(load_extra(1), 1, LOCATION_EXTRA);
+#else
 	load(pdeck[0].main, 0, LOCATION_DECK);
 	load(pdeck[0].extra, 0, LOCATION_EXTRA);
 	load(pdeck[1].main, 1, LOCATION_DECK);
 	load(pdeck[1].extra, 1, LOCATION_EXTRA);
+#endif
 	last_replay.Flush();
 	unsigned char startbuf[32]{};
 	auto pbuf = startbuf;
@@ -678,10 +713,21 @@ void SingleDuel::DuelEndProc() {
 		int winc[3] = {0, 0, 0};
 		for(int i = 0; i < duel_count; ++i)
 			winc[match_result[i]]++;
-		if(match_kill
-		        || (winc[0] == 2 || (winc[0] == 1 && winc[2] == 2))
+#ifdef YGOPRO_SERVER_MODE
+		auto best_of_count = (duel_flags & DUEL_FLAG_BO5) ? 3 : 2;
+		auto total_count = (duel_flags & DUEL_FLAG_BO5) ? 5 : 3;
+#endif
+		if(match_kill ||
+#ifdef YGOPRO_SERVER_MODE
+						duel_count >= total_count
+						|| winc[0] >= best_of_count
+						|| winc[1] >= best_of_count
+#else
+		        (winc[0] == 2 || (winc[0] == 1 && winc[2] == 2))
 		        || (winc[1] == 2 || (winc[1] == 1 && winc[2] == 2))
-		        || (winc[2] == 3 || (winc[0] == 1 && winc[1] == 1 && winc[2] == 1)) ) {
+		        || (winc[2] == 3 || (winc[0] == 1 && winc[1] == 1 && winc[2] == 1))
+#endif
+		) {
 			NetServer::SendPacketToPlayer(players[0], STOC_DUEL_END);
 			NetServer::ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)

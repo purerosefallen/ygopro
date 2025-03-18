@@ -2,7 +2,7 @@
 #include "game.h"
 #include "data_manager.h"
 #include <event2/thread.h>
-#include <locale.h>
+#include <clocale>
 #include <memory>
 
 #ifdef __APPLE__
@@ -28,7 +28,7 @@ void ClickButton(irr::gui::IGUIElement* btn) {
 
 int main(int argc, char* argv[]) {
 #ifndef _WIN32
-	setlocale(LC_CTYPE, "UTF-8");
+	std::setlocale(LC_CTYPE, "UTF-8");
 #endif
 #if defined __APPLE__ && !defined YGOPRO_SERVER_MODE
 	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
@@ -40,17 +40,15 @@ int main(int argc, char* argv[]) {
 	CFRelease(path);
 #endif //__APPLE__
 #ifdef _WIN32
-#ifndef _DEBUG
-	char* pstrext;
-	if(argc == 2 && (pstrext = std::strrchr(argv[1], '.'))
-		&& (!mystrncasecmp(pstrext, ".ydk", 4) || !mystrncasecmp(pstrext, ".yrp", 4))) {
+	if (argc == 2 && (ygo::IsExtension(argv[1], ".ydk") || ygo::IsExtension(argv[1], ".yrp"))) { // open file from explorer
 		wchar_t exepath[MAX_PATH];
 		GetModuleFileNameW(nullptr, exepath, MAX_PATH);
-		wchar_t* p = std::wcsrchr(exepath, '\\');
-		*p = '\0';
-		SetCurrentDirectoryW(exepath);
+		wchar_t* p = std::wcsrchr(exepath, L'\\');
+		if (p) {
+			*p = 0;
+			SetCurrentDirectoryW(exepath);
+		}
 	}
-#endif //_DEBUG
 #endif //_WIN32
 #ifdef _WIN32
 	WORD wVersionRequested;
@@ -66,6 +64,7 @@ int main(int argc, char* argv[]) {
 	enable_log = 1;
 	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
+	ygo::duel_flags = 0;
 	ygo::game_info.lflist = 0;
 	ygo::game_info.rule = 0;
 	ygo::game_info.mode = 0;
@@ -100,7 +99,8 @@ int main(int argc, char* argv[]) {
 		else if(argv[5][0] == 'F')
 			ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 		else {
-			int master_rule = atoi(argv[5]);
+			ygo::duel_flags = atoi(argv[5]);
+			auto master_rule = ygo::duel_flags & 0xF;
 			if(master_rule)
 				ygo::game_info.duel_rule = master_rule;
 			else
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
 		ygo::game_info.draw_count = atoi(argv[10]);
 		ygo::game_info.time_limit = atoi(argv[11]);
 		ygo::replay_mode = atoi(argv[12]);
-		for (int i = 13; (i < argc && i <= 15) ; ++i)
+		for (int i = 13; (i < argc && i <= 17) ; ++i)
 		{
 			ygo::pre_seed[i - 13] = (unsigned int)atol(argv[i]);
 		}
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 
 #ifdef _WIN32
-	int wargc;
+	int wargc = 0;
 	std::unique_ptr<wchar_t*[], void(*)(wchar_t**)> wargv(CommandLineToArgvW(GetCommandLineW(), &wargc), [](wchar_t** wargv) {
 		LocalFree(wargv);
 	});
@@ -149,6 +149,24 @@ int main(int argc, char* argv[]) {
 	bool deckCategorySpecified = false;
 	bool portSpecified = false;
 	for(int i = 1; i < wargc; ++i) {
+		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
+			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
+			if (!mywcsncasecmp(pstrext, L".ydk", 4)) {
+				open_file = true;
+				BufferIO::CopyWideString(wargv[1], open_file_name);
+				exit_on_return = true;
+				ClickButton(ygo::mainGame->btnDeckEdit);
+				break;
+			}
+			if (!mywcsncasecmp(pstrext, L".yrp", 4)) {
+				open_file = true;
+				BufferIO::CopyWideString(wargv[1], open_file_name);
+				exit_on_return = true;
+				ClickButton(ygo::mainGame->btnReplayMode);
+				ClickButton(ygo::mainGame->btnLoadReplay);
+				break;
+			}
+		}
 		if(wargv[i][0] == L'-' && wargv[i][1] == L'e' && wargv[i][2] != L'\0') {
 			ygo::dataManager.LoadDB(&wargv[i][2]);
 			continue;
@@ -258,23 +276,6 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
-		} else if(wargc == 2 && std::wcslen(wargv[1]) >= 4) {
-			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
-			if(!mywcsncasecmp(pstrext, L".ydk", 4)) {
-				open_file = true;
-				BufferIO::CopyWideString(wargv[i], open_file_name);
-				exit_on_return = !keep_on_return;
-				ClickButton(ygo::mainGame->btnDeckEdit);
-				break;
-			}
-			if(!mywcsncasecmp(pstrext, L".yrp", 4)) {
-				open_file = true;
-				BufferIO::CopyWideString(wargv[i], open_file_name);
-				exit_on_return = !keep_on_return;
-				ClickButton(ygo::mainGame->btnReplayMode);
-				ClickButton(ygo::mainGame->btnLoadReplay);
-				break;
-			}
 		}
 	}
 	ygo::mainGame->MainLoop();

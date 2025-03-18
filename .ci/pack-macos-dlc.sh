@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro.app cards.cdb locales fonts textures strings.conf system.conf pack)
+ARCHIVE_FILES=(ygopro.app cards.cdb locales fonts sound textures strings.conf system.conf pack)
 
 TARGET_PLATFORM=darwin
 
