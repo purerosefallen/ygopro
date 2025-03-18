@@ -134,8 +134,7 @@ exec_windows:
 .exec_debian:
   extends: .exec_linux_common
   variables:
-    BUILD_SQLITE: '1'
-    SERVER_ZIP_SUPPORT: '1'
+    LUA_DEB: '1'
   before_script:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
 
