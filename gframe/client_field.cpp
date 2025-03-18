@@ -83,6 +83,11 @@ void ClientField::Clear() {
 		for(auto cit = extra[i].begin(); cit != extra[i].end(); ++cit)
 			delete *cit;
 		extra[i].clear();
+		deck_act[i] = false;
+		grave_act[i] = false;
+		remove_act[i] = false;
+		extra_act[i] = false;
+		pzone_act[i] = false;
 	}
 	for(auto cit = limbo_temp.begin(); cit != limbo_temp.end(); ++cit)
 			delete *cit;
@@ -111,12 +116,6 @@ void ClientField::Clear() {
 	hovered_controler = 0;
 	hovered_location = 0;
 	hovered_sequence = 0;
-	deck_act = false;
-	grave_act = false;
-	remove_act = false;
-	extra_act = false;
-	pzone_act[0] = false;
-	pzone_act[1] = false;
 	conti_act = false;
 	deck_reversed = false;
 	cant_check_grave = false;
@@ -147,6 +146,16 @@ void ClientField::Initial(int player, int deckc, int extrac) {
 		GetCardLocation(pcard, &pcard->curPos, &pcard->curRot, true);
 	}
 	RefreshCardCountDisplay();
+}
+void ClientField::ResetSequence(std::vector<ClientCard*>& list, bool reset_height) {
+	unsigned char seq = 0;
+	for (auto& pcard : list) {
+		pcard->sequence = seq++;
+		if (reset_height) {
+			pcard->curPos.Z = 0.01f + 0.01f * pcard->sequence;
+			pcard->mTransform.setTranslation(pcard->curPos);
+		}
+	}
 }
 ClientCard* ClientField::GetCard(int controler, int location, int sequence, int sub_seq) {
 	std::vector<ClientCard*>* lst = 0;
@@ -199,13 +208,10 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	case LOCATION_DECK: {
 		if (sequence != 0 || deck[controler].size() == 0) {
 			deck[controler].push_back(pcard);
-			pcard->sequence = (unsigned char)(deck[controler].size() - 1);
 		} else {
-			for (auto& pcard : deck[controler])
-				pcard->sequence++;
 			deck[controler].insert(deck[controler].begin(), pcard);
-			pcard->sequence = 0;
 		}
+		ResetSequence(deck[controler], true);
 		pcard->is_reversed = false;
 		pcard->ClearData();
 		pcard->ClearTarget();
@@ -214,7 +220,7 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	}
 	case LOCATION_HAND: {
 		hand[controler].push_back(pcard);
-		pcard->sequence = (unsigned char)(hand[controler].size() - 1);
+		ResetSequence(hand[controler], false);
 		break;
 	}
 	case LOCATION_MZONE: {
@@ -227,28 +233,22 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	}
 	case LOCATION_GRAVE: {
 		grave[controler].push_back(pcard);
-		pcard->sequence = (unsigned char)(grave[controler].size() - 1);
+		ResetSequence(grave[controler], false);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		remove[controler].push_back(pcard);
-		pcard->sequence = (unsigned char)(remove[controler].size() - 1);
+		ResetSequence(remove[controler], false);
 		break;
 	}
 	case LOCATION_EXTRA: {
 		if(extra_p_count[controler] == 0 || (pcard->position & POS_FACEUP)) {
 			extra[controler].push_back(pcard);
-			pcard->sequence = (unsigned char)(extra[controler].size() - 1);
 		} else {
-			int p = extra[controler].size() - extra_p_count[controler] - 1;
-			for(int i = extra[controler].size() - 1; i > p; --i) {
-				extra[controler][i]->sequence++;
-				extra[controler][i]->curPos += irr::core::vector3df(0, 0, 0.01f);
-				extra[controler][i]->mTransform.setTranslation(extra[controler][i]->curPos);
-			}
-			extra[controler].insert(extra[controler].begin() + p, pcard);
-			pcard->sequence = p;
+			size_t faceup_begin = extra[controler].size() - extra_p_count[controler];
+			extra[controler].insert(extra[controler].begin() + faceup_begin, pcard);
 		}
+		ResetSequence(extra[controler], true);
 		if (pcard->position & POS_FACEUP)
 			extra_p_count[controler]++;
 		break;
@@ -258,28 +258,17 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 }
 ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	ClientCard* pcard = nullptr;
-	auto erase_card = [](std::vector<ClientCard*>& lst, int seq) {
-		for (int i = seq; i < (int)lst.size() - 1; ++i) {
-			lst[i] = lst[i + 1];
-			lst[i]->sequence--;
-			lst[i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
-			lst[i]->mTransform.setTranslation(lst[i]->curPos);
-		}
-		lst.pop_back();
-	};
 	switch (location) {
 	case LOCATION_DECK: {
 		pcard = deck[controler][sequence];
-		erase_card(deck[controler], sequence);
+		deck[controler].erase(deck[controler].begin() + sequence);
+		ResetSequence(deck[controler], true);
 		break;
 	}
 	case LOCATION_HAND: {
 		pcard = hand[controler][sequence];
-		for (int i = sequence; i < (int)hand[controler].size() - 1; ++i) {
-			hand[controler][i] = hand[controler][i + 1];
-			hand[controler][i]->sequence--;
-		}
-		hand[controler].pop_back();
+		hand[controler].erase(hand[controler].begin() + sequence);
+		ResetSequence(hand[controler], false);
 		break;
 	}
 	case LOCATION_MZONE: {
@@ -294,21 +283,26 @@ ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	}
 	case LOCATION_GRAVE: {
 		pcard = grave[controler][sequence];
-		erase_card(grave[controler], sequence);
+		grave[controler].erase(grave[controler].begin() + sequence);
+		ResetSequence(grave[controler], true);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		pcard = remove[controler][sequence];
-		erase_card(remove[controler], sequence);
+		remove[controler].erase(remove[controler].begin() + sequence);
+		ResetSequence(remove[controler], true);
 		break;
 	}
 	case LOCATION_EXTRA: {
 		pcard = extra[controler][sequence];
-		erase_card(extra[controler], sequence);
+		extra[controler].erase(extra[controler].begin() + sequence);
+		ResetSequence(extra[controler], true);
 		if (pcard->position & POS_FACEUP)
 			extra_p_count[controler]--;
 		break;
 	}
+	default:
+		return nullptr;
 	}
 	pcard->location = 0;
 	RefreshCardCountDisplay();
@@ -372,13 +366,14 @@ void ClientField::ClearCommandFlag() {
 		(*cit)->cmdFlag = 0;
 	for(auto cit = attackable_cards.begin(); cit != attackable_cards.end(); ++cit)
 		(*cit)->cmdFlag = 0;
+	for(int i = 0; i < 2; ++i) {
+		deck_act[i] = false;
+		extra_act[i] = false;
+		grave_act[i] = false;
+		remove_act[i] = false;
+		pzone_act[i] = false;
+	}
 	conti_cards.clear();
-	deck_act = false;
-	extra_act = false;
-	grave_act = false;
-	remove_act = false;
-	pzone_act[0] = false;
-	pzone_act[1] = false;
 	conti_act = false;
 }
 void ClientField::ClearSelect() {
@@ -406,11 +401,14 @@ void ClientField::ClearChainSelect() {
 		(*cit)->is_selectable = false;
 		(*cit)->is_selected = false;
 	}
+	for(int i = 0; i < 2; ++i) {
+		deck_act[i] = false;
+		extra_act[i] = false;
+		grave_act[i] = false;
+		remove_act[i] = false;
+		pzone_act[i] = false;
+	}
 	conti_cards.clear();
-	deck_act = false;
-	grave_act = false;
-	remove_act = false;
-	extra_act = false;
 	conti_act = false;
 }
 // needs to be synchronized with EGET_SCROLL_BAR_CHANGED
@@ -445,7 +443,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->chain_code));
 		else
 			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler + 2]);
-		mainGame->btnCardSelect[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
+		mainGame->btnCardSelect[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		if(mainGame->dInfo.curMsg != MSG_SORT_CARD) {
@@ -502,7 +500,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
 		}
 		mainGame->stCardPos[i]->setVisible(true);
-		mainGame->stCardPos[i]->setRelativePosition(rect<s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
+		mainGame->stCardPos[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
 	}
 	if(selectable_cards.size() <= 5) {
 		for(int i = selectable_cards.size(); i < 5; ++i) {
@@ -535,7 +533,7 @@ void ClientField::ShowChainCard() {
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->code));
 		else
 			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler + 2]);
-		mainGame->btnCardSelect[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
+		mainGame->btnCardSelect[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		wchar_t formatBuffer[2048];
@@ -554,7 +552,7 @@ void ClientField::ShowChainCard() {
 			else mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
 		}
 		mainGame->stCardPos[i]->setVisible(true);
-		mainGame->stCardPos[i]->setRelativePosition(rect<s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
+		mainGame->stCardPos[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
 	} 
 	if(selectable_cards.size() <= 5) {
 		for(int i = selectable_cards.size(); i < 5; ++i) {
@@ -590,7 +588,7 @@ void ClientField::ShowLocationCard() {
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardDisplay[i], display_cards[i]->code));
 		else
 			mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[display_cards[i]->controler + 2]);
-		mainGame->btnCardDisplay[i]->setRelativePosition(rect<s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
+		mainGame->btnCardDisplay[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
 		mainGame->btnCardDisplay[i]->setPressed(false);
 		mainGame->btnCardDisplay[i]->setVisible(true);
 		wchar_t formatBuffer[2048];
@@ -623,7 +621,7 @@ void ClientField::ShowLocationCard() {
 				mainGame->stDisplayPos[i]->setBackgroundColor(0xffffffff);
 		}
 		mainGame->stDisplayPos[i]->setVisible(true);
-		mainGame->stDisplayPos[i]->setRelativePosition(rect<s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
+		mainGame->stDisplayPos[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 30, startpos + 120 + i * 125, 50));
 	}
 	if(display_cards.size() <= 5) {
 		for(int i = display_cards.size(); i < 5; ++i) {
@@ -668,7 +666,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		mainGame->btnOptionOK->setVisible(false);
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(i < count);
-		recti pos = mainGame->wOptions->getRelativePosition();
+		irr::core::recti pos = mainGame->wOptions->getRelativePosition();
 		int newheight = 30 + 40 * (scrollbar ? 5 : count);
 		int oldheight = pos.LowerRightCorner.Y - pos.UpperLeftCorner.Y;
 		pos.UpperLeftCorner.Y = pos.UpperLeftCorner.Y + (oldheight - newheight) / 2;
@@ -683,7 +681,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		mainGame->btnOptionOK->setVisible(true);
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(false);
-		recti pos = mainGame->wOptions->getRelativePosition();
+		irr::core::recti pos = mainGame->wOptions->getRelativePosition();
 		pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 140;
 		mainGame->wOptions->setRelativePosition(pos);
 	}

@@ -52,13 +52,9 @@ mat_linux:
   script:
     - apt update; apt -y install git wget tar
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-linux.tar.gz | tar zfx -
-    - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
-      - premake5
       - irrlicht
-      - libevent-stable
 
 mat_windows:
   stage: prepare
@@ -67,8 +63,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-windows.zip
-    - 7z x -y premake-5.0.0-beta2-windows.zip
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
+    - 7z x -y premake-5.0.0-beta5-windows.zip
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
@@ -107,18 +103,17 @@ exec_windows:
     paths:
       - ygopro.exe
 
-exec_linux:
+.exec_linux_common:
   extends: ._exec_build
   tags:
     - linux
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder
   dependencies:
     - mat_common
     - mat_linux
     - mat_submodules
   script:
-    - apt update; apt -y install git build-essential
-    - ./premake5 gmake --build-sqlite --server-zip-support
+    - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -128,25 +123,40 @@ exec_linux:
     paths:
       - ygopro
 
-exec_debian:
-  extends: ._exec_build
-  tags:
-    - linux
-  dependencies:
-    - mat_common
-    - mat_linux
-    - mat_submodules
-  script:
+.exec_linux:
+  extends: .exec_linux_common
+  variables:
+    BUILD_SQLITE: '1'
+    SERVER_ZIP_SUPPORT: '1'
+    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
+    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
+
+.exec_debian:
+  extends: .exec_linux_common
+  variables:
+    LUA_DEB: '1'
+  before_script:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
-    - ./premake5 gmake --lua-deb
-    - cd build
-    - make config=release -j$(nproc)
-    - cd ..
-    - mv bin/release/ygopro ./ygopro
-    - strip ygopro
-  artifacts:
-    paths:
-      - ygopro
+
+.use_arm:
+  tags:
+    - arm
+
+exec_linux:
+  extends: .exec_linux
+
+exec_debian:
+  extends: .exec_debian
+
+exec_linuxarm:
+  extends:
+    - .exec_linux
+    - .use_arm
+
+exec_debianarm:
+  extends:
+    - .exec_debian
+    - .use_arm
 
 #win_server_pack:
 #  stage: pack
@@ -157,7 +167,6 @@ exec_debian:
 #  script:
 #    - apt update; apt -y install p7zip-full wget
 #    - wget https://nodejs.org/dist/v14.17.0/node-v14.17.0-win-x64.7z
-
 
 upload_to_minio:
   stage: deploy
