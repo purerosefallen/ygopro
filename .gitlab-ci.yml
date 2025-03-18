@@ -132,7 +132,7 @@ exec_windows:
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
   script:
-    - ./premake5 gmake --build-freetype --build-sqlite --build-irrlicht
+    - premake5 gmake --build-freetype --build-sqlite --build-irrlicht
     - cd build
     - make config=release -j$(nproc)
     - cd ..
