@@ -63,6 +63,7 @@ mat_macos:
   script:
     - apt update; apt -y install wget tar
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - chmod +x premake5
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
