@@ -602,9 +602,9 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 		mainGame->dInfo.time_left[0] = 0;
 		mainGame->dInfo.time_left[1] = 0;
 		mainGame->RefreshTimeDisplay();
-		mainGame->deckBuilder.filterList = deckManager.GetLFListContent(pkt->info.lflist);
+		mainGame->deckBuilder.filterList = deckManager.GetLFList(pkt->info.lflist);
 		if(mainGame->deckBuilder.filterList == nullptr)
-			mainGame->deckBuilder.filterList = &deckManager._lfList[0].content;
+			mainGame->deckBuilder.filterList = &deckManager._lfList[0];
 		mainGame->stHostPrepOB->setText(L"");
 		mainGame->SetStaticText(mainGame->stHostPrepRule, 180, mainGame->guiFont, str.c_str());
 		mainGame->RefreshCategoryDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
@@ -843,9 +843,8 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 		else
 			starttime = new_replay.pheader.seed;
 		
-		tm* localedtime = localtime(&starttime);
 		wchar_t timetext[40];
-		std::wcsftime(timetext, 40, L"%Y-%m-%d %H-%M-%S", localedtime);
+		std::wcsftime(timetext, sizeof timetext / sizeof timetext[0], L"%Y-%m-%d %H-%M-%S", std::localtime(&starttime));
 		mainGame->ebRSName->setText(timetext);
 		if(!mainGame->chkAutoSaveReplay->isChecked()) {
 			if (!auto_watch_mode) {
@@ -1496,14 +1495,12 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 				mainGame->dField.conti_act = true;
 			} else {
 				pcard->cmdFlag |= COMMAND_ACTIVATE;
-				if(pcard->controler == 0) {
-					if(pcard->location == LOCATION_GRAVE)
-						mainGame->dField.grave_act = true;
-					else if(pcard->location == LOCATION_REMOVED)
-						mainGame->dField.remove_act = true;
-					else if(pcard->location == LOCATION_EXTRA)
-						mainGame->dField.extra_act = true;
-				}
+				if(pcard->location == LOCATION_GRAVE)
+					mainGame->dField.grave_act[con] = true;
+				else if(pcard->location == LOCATION_REMOVED)
+					mainGame->dField.remove_act[con] = true;
+				else if(pcard->location == LOCATION_EXTRA)
+					mainGame->dField.extra_act[con] = true;
 			}
 		}
 		mainGame->dField.attackable_cards.clear();
@@ -1561,17 +1558,17 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 			pcard->cmdFlag |= COMMAND_SPSUMMON;
 			if (pcard->location == LOCATION_DECK) {
 				pcard->SetCode(code);
-				mainGame->dField.deck_act = true;
+				mainGame->dField.deck_act[con] = true;
 			} else if (pcard->location == LOCATION_GRAVE)
-				mainGame->dField.grave_act = true;
+				mainGame->dField.grave_act[con] = true;
 			else if (pcard->location == LOCATION_REMOVED)
-				mainGame->dField.remove_act = true;
+				mainGame->dField.remove_act[con] = true;
 			else if (pcard->location == LOCATION_EXTRA)
-				mainGame->dField.extra_act = true;
+				mainGame->dField.extra_act[con] = true;
 			else {
 				int left_seq = mainGame->dInfo.duel_rule >= 4 ? 0 : 6;
 				if (pcard->location == LOCATION_SZONE && pcard->sequence == left_seq && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget)
-					mainGame->dField.pzone_act[pcard->controler] = true;
+					mainGame->dField.pzone_act[con] = true;
 			}
 		}
 		mainGame->dField.reposable_cards.clear();
@@ -1631,14 +1628,12 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 				mainGame->dField.conti_act = true;
 			} else {
 				pcard->cmdFlag |= COMMAND_ACTIVATE;
-				if(pcard->controler == 0) {
-					if(pcard->location == LOCATION_GRAVE)
-						mainGame->dField.grave_act = true;
-					else if(pcard->location == LOCATION_REMOVED)
-						mainGame->dField.remove_act = true;
-					else if(pcard->location == LOCATION_EXTRA)
-						mainGame->dField.extra_act = true;
-				}
+				if(pcard->location == LOCATION_GRAVE)
+					mainGame->dField.grave_act[con] = true;
+				else if(pcard->location == LOCATION_REMOVED)
+					mainGame->dField.remove_act[con] = true;
+				else if(pcard->location == LOCATION_EXTRA)
+					mainGame->dField.extra_act[con] = true;
 			}
 		}
 		if(BufferIO::ReadUInt8(pbuf)) {
@@ -1925,13 +1920,13 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 					pcard->cmdFlag |= COMMAND_ACTIVATE;
 				if(pcard->location == LOCATION_DECK) {
 					pcard->SetCode(code);
-					mainGame->dField.deck_act = true;
+					mainGame->dField.deck_act[c] = true;
 				} else if(l == LOCATION_GRAVE)
-					mainGame->dField.grave_act = true;
+					mainGame->dField.grave_act[c] = true;
 				else if(l == LOCATION_REMOVED)
-					mainGame->dField.remove_act = true;
+					mainGame->dField.remove_act[c] = true;
 				else if(l == LOCATION_EXTRA)
-					mainGame->dField.extra_act = true;
+					mainGame->dField.extra_act[c] = true;
 				else if(l == LOCATION_OVERLAY)
 					panelmode = true;
 			}
@@ -2083,23 +2078,23 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		else startpos = 155;
 		if(positions & 0x1) {
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnPSAU, code));
-			mainGame->btnPSAU->setRelativePosition(rect<s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSAU->setRelativePosition(irr::core::rect<irr::s32>(startpos, 45, startpos + 140, 185));
 			mainGame->btnPSAU->setVisible(true);
 			startpos += 145;
 		} else mainGame->btnPSAU->setVisible(false);
 		if(positions & 0x2) {
-			mainGame->btnPSAD->setRelativePosition(rect<s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSAD->setRelativePosition(irr::core::rect<irr::s32>(startpos, 45, startpos + 140, 185));
 			mainGame->btnPSAD->setVisible(true);
 			startpos += 145;
 		} else mainGame->btnPSAD->setVisible(false);
 		if(positions & 0x4) {
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnPSDU, code));
-			mainGame->btnPSDU->setRelativePosition(rect<s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSDU->setRelativePosition(irr::core::rect<irr::s32>(startpos, 45, startpos + 140, 185));
 			mainGame->btnPSDU->setVisible(true);
 			startpos += 145;
 		} else mainGame->btnPSDU->setVisible(false);
 		if(positions & 0x8) {
-			mainGame->btnPSDD->setRelativePosition(rect<s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSDD->setRelativePosition(irr::core::rect<irr::s32>(startpos, 45, startpos + 140, 185));
 			mainGame->btnPSDD->setVisible(true);
 			startpos += 145;
 		} else mainGame->btnPSDD->setVisible(false);
@@ -3681,11 +3676,11 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 			float xd = mainGame->dField.attack_target->curPos.X;
 			float yd = mainGame->dField.attack_target->curPos.Y;
 			sy = (float)sqrt((xa - xd) * (xa - xd) + (ya - yd) * (ya - yd)) / 2;
-			mainGame->atk_t = vector3df((xa + xd) / 2, (ya + yd) / 2, 0);
+			mainGame->atk_t = irr::core::vector3df((xa + xd) / 2, (ya + yd) / 2, 0);
 			if (ca == 0)
-				mainGame->atk_r = vector3df(0, 0, -atan((xd - xa) / (yd - ya)));
+				mainGame->atk_r = irr::core::vector3df(0, 0, -atan((xd - xa) / (yd - ya)));
 			else
-				mainGame->atk_r = vector3df(0, 0, 3.1415926 - atan((xd - xa) / (yd - ya)));
+				mainGame->atk_r = irr::core::vector3df(0, 0, 3.1415926 - atan((xd - xa) / (yd - ya)));
 		} else {
 			soundManager.PlaySoundEffect(SOUND_DIRECT_ATTACK);
 			myswprintf(event_string, dataManager.GetSysString(1620), dataManager.GetName(mainGame->dField.attacker->code));
@@ -3696,11 +3691,11 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 			if (ca == 0)
 				yd = -3.5f;
 			sy = (float)sqrt((xa - xd) * (xa - xd) + (ya - yd) * (ya - yd)) / 2;
-			mainGame->atk_t = vector3df((xa + xd) / 2, (ya + yd) / 2, 0);
+			mainGame->atk_t = irr::core::vector3df((xa + xd) / 2, (ya + yd) / 2, 0);
 			if (ca == 0)
-				mainGame->atk_r = vector3df(0, 0, -atan((xd - xa) / (yd - ya)));
+				mainGame->atk_r = irr::core::vector3df(0, 0, -atan((xd - xa) / (yd - ya)));
 			else
-				mainGame->atk_r = vector3df(0, 0, 3.1415926 - atan((xd - xa) / (yd - ya)));
+				mainGame->atk_r = irr::core::vector3df(0, 0, 3.1415926 - atan((xd - xa) / (yd - ya)));
 		}
 		if (auto_watch_mode) {
 			int code = mainGame->dField.attacker->code;
@@ -3937,9 +3932,9 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		mainGame->cbANNumber->setSelected(0);
 		if(quickmode) {
 			mainGame->cbANNumber->setVisible(false);
-			mainGame->btnANNumberOK->setRelativePosition(rect<s32>(20, 195, 210, 230));
+			mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(20, 195, 210, 230));
 			mainGame->btnANNumberOK->setEnabled(false);
-			recti pos = mainGame->wANNumber->getRelativePosition();
+			irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
 			pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 250;
 			mainGame->wANNumber->setRelativePosition(pos);
 		} else {
@@ -3947,8 +3942,8 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 				mainGame->btnANNumber[i]->setVisible(false);
 			}
 			mainGame->cbANNumber->setVisible(true);
-			mainGame->btnANNumberOK->setRelativePosition(rect<s32>(80, 60, 150, 85));
-			recti pos = mainGame->wANNumber->getRelativePosition();
+			mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(80, 60, 150, 85));
+			irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
 			pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 95;
 			mainGame->wANNumber->setRelativePosition(pos);
 		}
