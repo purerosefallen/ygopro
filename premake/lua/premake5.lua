@@ -3,7 +3,11 @@ project "lua"
     compileas "C++"
 
     files { "src/*.c", "src/*.h" }
-    removefiles { "src/lua.c", "src/luac.c", "src/linit.c", "src/onelua.c" }
+    removefiles { "src/lua.c", "src/luac.c", "src/onelua.c" }
+
+    if not GetParam("no-lua-safe") then
+        removefiles { "src/linit.c" }
+    end
 
     filter "configurations:Debug"
         defines { "LUA_USE_APICHECK" }
