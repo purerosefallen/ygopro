@@ -80,7 +80,11 @@ protected:
 	int match_kill{ 0 };
 	unsigned char duel_count{ 0 };
 	unsigned char tp_player{ 0 };
+#ifdef YGOPRO_SERVER_MODE
+	unsigned char match_result[5]{};
+#else
 	unsigned char match_result[3]{};
+#endif
 	short time_limit[2]{};
 	short time_elapsed{ 0 };
 #ifdef YGOPRO_SERVER_MODE
@@ -93,4 +97,3 @@ protected:
 }
 
 #endif //SINGLE_DUEL_H
-
