@@ -143,10 +143,10 @@ exec_windows:
       - ygopro
 
 exec_linux:
-  extends: ._exec_linux
+  extends: .exec_linux
 
 exec_linuxarm:
-  extends: ._exec_linux
+  extends: .exec_linux
   tags:
     - arm
 
