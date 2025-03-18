@@ -44,21 +44,6 @@ mat_submodules:
       - ocgcore
       - script
 
-mat_irrklang:
-  stage: prepare
-  tags:
-    - linux
-  script:
-    - apt update; apt -y install git
-    - mkdir -p ~/.ssh; chmod 700 ~/.ssh; echo "$NANAHIRA_SSH_KEY" | base64 --decode > ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan git.mycard.moe >> ~/.ssh/known_hosts
-    - git clone --depth=1 git@git.mycard.moe:nanahira/irrklang
-    #- mv -f irrklang/plugins/ikpmp3 .
-  artifacts:
-    paths:
-      - irrklang
-      - ikpmp3
-
 mat_linux:
   stage: prepare
   tags:
@@ -67,24 +52,9 @@ mat_linux:
   script:
     - apt update; apt -y install git wget tar
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-linux.tar.gz | tar zfx -
-    - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
-      - premake5
       - irrlicht
-      - libevent-stable
-
-#mat_macos_irrklang_patched:
-#  stage: build
-#  tags:
-#    - linux
-#  dependencies: []
-#  script:
-#    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
-#  artifacts:
-#    paths:
-#      - libirrklang-patched.dylib
 
 mat_macos:
   stage: prepare
@@ -92,8 +62,8 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-macosx.tar.gz | tar zfx -
-    # - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libirrklang-patched-dylib.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - chmod +x premake5
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
@@ -110,8 +80,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-windows.zip
-    - 7z x -y premake-5.0.0-beta2-windows.zip
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
+    - 7z x -y premake-5.0.0-beta5-windows.zip
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
@@ -139,36 +109,31 @@ exec_windows:
     - vs
   dependencies:
     - mat_common
-    - mat_irrklang
     - mat_windows
     - mat_submodules
   script:
     - bash -c 'cp -rf premake/* .'
-    - '.\premake5.exe vs2019 --irrklang-pro'
+    - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
   artifacts:
     paths:
       - ygopro.exe
 
-exec_linux:
+.exec_linux:
   extends: ._exec_build
   tags:
     - linux
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder
   dependencies:
     - mat_common
-    - mat_irrklang
     - mat_linux
     - mat_submodules
+  variables:
+    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
+    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
   script:
-    - apt update; apt -y install git build-essential libgl1-mesa-dev libglu-dev libxxf86vm-dev
-    - mkdir lib
-    - cp -rf irrklang/bin/linux-gcc-64/libIrrKlang.so ./lib/
-    # - cp -rf irrklang/bin/linux-gcc-64/ikpMP3.so ./lib/
-    - export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
-    - export EVENT_LIB_DIR=$PWD/libevent-stable/lib
-    - ./premake5 gmake --build-freetype --build-sqlite --build-irrlicht --build-ikpmp3 --irrklang-pro
+    - premake5 gmake --build-freetype --build-sqlite --build-irrlicht
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -177,7 +142,14 @@ exec_linux:
   artifacts:
     paths:
       - ygopro
-      - lib
+
+exec_linux:
+  extends: .exec_linux
+
+exec_linuxarm:
+  extends: .exec_linux
+  tags:
+    - arm
 
 ._exec_macos_platform:
   extends: ._exec_build
@@ -211,15 +183,9 @@ exec_macos:
   dependencies:
     - exec_macos_platform_x86
     - exec_macos_platform_m1
-    #- mat_macos_irrklang_patched
   script:
     - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
     - lipo -create -output ygopro.app/Contents/MacOS/ygopro $(ls -1 ygopro-platforms/ygopro-platform-*);
-    # do some special things for irrklang
-    #- mv ./libirrklang-patched.dylib ygopro.app/Contents/Frameworks/libirrklang.dylib 
-    #- install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib ygopro.app/Contents/MacOS/ygopro
-    #- dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
-    #- strip ygopro.app/Contents/MacOS/ygopro;
     - mkdir ygopro.app/Contents/Resources;
     - mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
     - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
@@ -419,6 +385,15 @@ assets_en-US:
     - assets_zh-CN
     - mat_submodules
 
+._pack_assets_linuxarm_zh-CN:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linuxarm
+    - assets_zh-CN
+    - mat_submodules
+
 ._pack_assets_macos_zh-CN:
   extends: ._pack
   dependencies:
@@ -443,6 +418,15 @@ assets_en-US:
     - assets
     - assets_nonwindows
     - exec_linux
+    - assets_en-US
+    - mat_submodules
+
+._pack_assets_linuxarm_en-US:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linuxarm
     - assets_en-US
     - mat_submodules
 
@@ -539,6 +523,13 @@ pack_linux_zh-CN_gz:
     - ._pack_format_gz
     - ._locale_zh-CN
 
+pack_linuxarm_zh-CN_gz:
+  extends:
+    - ._pack_assets_linuxarm_zh-CN
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_zh-CN
+
 #pack_linux_zh-CN_zst:
 #  extends:
 #    - ._pack_assets_linux_zh-CN
@@ -584,6 +575,13 @@ pack_windows_en-US_7z:
 pack_linux_en-US_gz:
   extends:
     - ._pack_assets_linux_en-US
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_en-US
+
+pack_linuxarm_en-US_gz:
+  extends:
+    - ._pack_assets_linuxarm_en-US
     - ._pack_script_linux
     - ._pack_format_gz
     - ._locale_en-US
