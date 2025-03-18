@@ -52,13 +52,9 @@ mat_linux:
   script:
     - apt update; apt -y install git wget tar
     - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-linux.tar.gz | tar zfx -
-    - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
   artifacts:
     paths:
-      - premake5
       - irrlicht
-      - libevent-stable
 
 mat_macos:
   stage: prepare
@@ -66,7 +62,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
     - mkdir irrlicht
     - cd irrlicht
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
@@ -83,8 +79,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta2-windows.zip
-    - 7z x -y premake-5.0.0-beta2-windows.zip
+    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
+    - 7z x -y premake-5.0.0-beta5-windows.zip
     # event
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
@@ -123,19 +119,19 @@ exec_windows:
     paths:
       - ygopro.exe
 
-exec_linux:
+.exec_linux:
   extends: ._exec_build
   tags:
     - linux
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder
   dependencies:
     - mat_common
     - mat_linux
     - mat_submodules
+  variables:
+    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
+    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
   script:
-    - apt update; apt -y install git build-essential libgl1-mesa-dev libglu-dev libxxf86vm-dev
-    - export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
-    - export EVENT_LIB_DIR=$PWD/libevent-stable/lib
     - ./premake5 gmake --build-freetype --build-sqlite --build-irrlicht
     - cd build
     - make config=release -j$(nproc)
@@ -145,6 +141,14 @@ exec_linux:
   artifacts:
     paths:
       - ygopro
+
+exec_linux:
+  extends: ._exec_linux
+
+exec_linuxarm:
+  extends: ._exec_linux
+  tags:
+    - arm
 
 ._exec_macos_platform:
   extends: ._exec_build
@@ -380,6 +384,15 @@ assets_en-US:
     - assets_zh-CN
     - mat_submodules
 
+._pack_assets_linuxarm_zh-CN:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linuxarm
+    - assets_zh-CN
+    - mat_submodules
+
 ._pack_assets_macos_zh-CN:
   extends: ._pack
   dependencies:
@@ -404,6 +417,15 @@ assets_en-US:
     - assets
     - assets_nonwindows
     - exec_linux
+    - assets_en-US
+    - mat_submodules
+
+._pack_assets_linuxarm_en-US:
+  extends: ._pack
+  dependencies:
+    - assets
+    - assets_nonwindows
+    - exec_linuxarm
     - assets_en-US
     - mat_submodules
 
@@ -500,6 +522,13 @@ pack_linux_zh-CN_gz:
     - ._pack_format_gz
     - ._locale_zh-CN
 
+pack_linuxarm_zh-CN_gz:
+  extends:
+    - ._pack_assets_linuxarm_zh-CN
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_zh-CN
+
 #pack_linux_zh-CN_zst:
 #  extends:
 #    - ._pack_assets_linux_zh-CN
@@ -545,6 +574,13 @@ pack_windows_en-US_7z:
 pack_linux_en-US_gz:
   extends:
     - ._pack_assets_linux_en-US
+    - ._pack_script_linux
+    - ._pack_format_gz
+    - ._locale_en-US
+
+pack_linuxarm_en-US_gz:
+  extends:
+    - ._pack_assets_linuxarm_en-US
     - ._pack_script_linux
     - ._pack_format_gz
     - ._locale_en-US
