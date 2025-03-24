@@ -38,6 +38,7 @@ if SERVER_MODE then
 else
     kind "WindowedApp"
     cppdialect "C++14"
+    rtti "Off"
 
     files { "*.cpp", "*.h" }
     includedirs { "../ocgcore" }
@@ -91,8 +92,6 @@ if SERVER_MODE then
 else
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
 end
-    filter "not action:vs*"
-        buildoptions { "-fno-rtti" }
     filter "not system:windows"
         links { "event_pthreads", "dl", "pthread", "resolv" }
     filter "system:macosx"
