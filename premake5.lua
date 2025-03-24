@@ -211,7 +211,7 @@ workspace "YGOPro"
             flags { "LinkTimeOptimization" }
         end
         staticruntime "On"
-        disablewarnings { "4244", "4267", "4838", "4577", "4018", "4996", "4477", "4091", "4800", "6011", "6031", "6054", "6262" }
+        disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
@@ -224,6 +224,7 @@ workspace "YGOPro"
         disablewarnings { "6011", "6031", "6054", "6262" }
 
     filter "action:vs*"
+        cdialect "C11"
         vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
