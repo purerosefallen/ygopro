@@ -631,6 +631,7 @@ upload_to_minio:
     #- pack_windows_zh-CN_gz
     #- pack_windows_zh-CN_zst
     - pack_linux_zh-CN_gz
+    - pack_linuxarm_zh-CN_gz
     #- pack_linux_zh-CN_zst
     - pack_macos_zh-CN_gz
     #- pack_macos_zh-CN_zst
@@ -638,6 +639,7 @@ upload_to_minio:
     #- pack_windows_en-US_gz
     #- pack_windows_en-US_zst
     - pack_linux_en-US_gz
+    - pack_linuxarm_en-US_gz
     #- pack_linux_en-US_zst
     - pack_macos_en-US_gz
     #- pack_macos_en-US_zst
