@@ -529,6 +529,8 @@ pack_linuxarm_zh-CN_gz:
     - ._pack_script_linux
     - ._pack_format_gz
     - ._locale_zh-CN
+  variables:
+    TARGET_PLATFORM: linuxarm
 
 #pack_linux_zh-CN_zst:
 #  extends:
@@ -585,6 +587,8 @@ pack_linuxarm_en-US_gz:
     - ._pack_script_linux
     - ._pack_format_gz
     - ._locale_en-US
+  variables:
+    TARGET_PLATFORM: linuxarm
 
 #pack_linux_en-US_zst:
 #  extends:

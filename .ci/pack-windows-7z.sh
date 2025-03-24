@@ -9,7 +9,9 @@ if [[ "$TARGET_LOCALE" == "zh-CN" ]]; then
 fi
 
 # TARGET_LOCALE
-TARGET_PLATFORM=win32
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=win32
+fi
 
 apt update && apt -y install p7zip-full git
 mkdir dist replay

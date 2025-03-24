@@ -6,7 +6,9 @@ ARCHIVE_FILES=(ygopro LICENSE README.md lflist.conf strings.conf system.conf car
 
 # TARGET_LOCALE
 # ARCHIVE_SUFFIX
-TARGET_PLATFORM=linux
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=linux
+fi
 
 apt update && apt -y install tar git zstd
 mkdir dist replay
