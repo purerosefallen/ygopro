@@ -94,7 +94,7 @@ mat_windows:
     - mat_common
     - mat_windows
     - mat_submodules
-  befpre_script:
+  before_script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
   artifacts:
     paths:
