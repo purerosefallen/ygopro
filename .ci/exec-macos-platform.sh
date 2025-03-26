@@ -14,7 +14,7 @@ export IRRLICHT_LIB_DIR=$PWD/irrlicht/lib/$(arch)
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build
-make config=release -j4
+make config=release -j$(nproc)
 cd ..
 
 mkdir ygopro-platforms
