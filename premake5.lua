@@ -215,7 +215,9 @@ workspace "YGOPro"
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
+if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
+end
         systemversion "latest"
         startproject "YGOPro"
         if WINXP_SUPPORT then
