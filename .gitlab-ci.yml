@@ -74,7 +74,7 @@ mat_windows:
     paths:
       - premake5.exe
       - event
-      # - irrlicht
+      - irrlicht
 
 ._exec_build:
   stage: build
@@ -86,7 +86,7 @@ mat_windows:
       - bin/
       - obj/
 
-exec_windows:
+.exec_windows:
   extends: ._exec_build
   tags:
     - vs
@@ -94,14 +94,27 @@ exec_windows:
     - mat_common
     - mat_windows
     - mat_submodules
-  script:
+  befpre_script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
-    - '.\premake5.exe vs2019 --server-zip-support'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
-    - copy bin\release\ygopro.exe .
   artifacts:
     paths:
-      - ygopro.exe
+      - dist
+
+exec_windows:
+  script:
+    - '.\premake5.exe vs2019 --server-zip-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\ygopro.exe dist\windows\ygopro.exe
+
+exec_windows_pro3:
+  script:
+    - '.\premake5.exe vs2019 --server-pro3-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\ygoserver.dll dist\windows\ygoserver.dll
 
 .exec_linux_common:
   extends: ._exec_build
@@ -112,16 +125,20 @@ exec_windows:
     - mat_common
     - mat_linux
     - mat_submodules
+  variables:
+    RELEASE_DIR: ''
+    TARGET_FILE: ygopro
   script:
     - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
-    - mv bin/release/ygopro ./ygopro
-    - strip ygopro
+    - mkdir -p dist/$RELEASE_DIR
+    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
+    - strip dist/$RELEASE_DIR/$TARGET_FILE
   artifacts:
     paths:
-      - ygopro
+      - dist
 
 .exec_linux:
   extends: .exec_linux_common
@@ -130,11 +147,13 @@ exec_windows:
     SERVER_ZIP_SUPPORT: '1'
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
+    RELEASE_DIR: linux-x64
 
 .exec_debian:
   extends: .exec_linux_common
   variables:
     LUA_DEB: '1'
+    RELEASE_DIR: debian-x64
   before_script:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
 
@@ -142,8 +161,20 @@ exec_windows:
   tags:
     - arm
 
+.use_pro3:
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    TARGET_FILE: libygoserver.so
+
+
 exec_linux:
   extends: .exec_linux
+
+exec_linux_pro3:
+  extends:
+    - .exec_linux
+    - .use_pro3
 
 exec_debian:
   extends: .exec_debian
@@ -152,11 +183,23 @@ exec_linuxarm:
   extends:
     - .exec_linux
     - .use_arm
+  variables:
+    RELEASE_DIR: linux-arm
+
+exec_linuxarm_pro3:
+  extends:
+    - .exec_linux
+    - .use_arm
+    - .use_pro3
+  variables:
+    RELEASE_DIR: linux-arm
 
 exec_debianarm:
   extends:
     - .exec_debian
     - .use_arm
+  variables:
+    RELEASE_DIR: debian-arm
 
 #win_server_pack:
 #  stage: pack
@@ -172,9 +215,14 @@ upload_to_minio:
   stage: deploy
   dependencies:
     - exec_windows
+    - exec_linux
+    - exec_linuxarm
+    - exec_debian
+    - exec_debianarm
   tags: 
     - linux
   script:
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 cp ygopro.exe s3://mycard/koishipro/server/ygopro.exe
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/koishipro/server
   only:
     - server
+    - tags
