@@ -14,7 +14,7 @@ fi
 install_path="$PWD/libevent-stable"
 
 cd libevent-2.0.22-stable
-./configure "--prefix=$install_path" --disable-openssl --enable-static=yes --enable-shared=no
+./configure "--prefix=$install_path" --disable-openssl --enable-static=yes --enable-shared=no "$@"
 make -j$(nproc)
 make install
 cd ..
