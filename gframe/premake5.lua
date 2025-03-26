@@ -6,9 +6,15 @@ if USE_AUDIO then
 include "miniaudio/."
 end
 
-project "ygopro"
+if SERVER_PRO3_SUPPORT then
+project "ygoserver"
+    kind "SharedLib"
+end
 if SERVER_MODE then
+if not SERVER_PRO3_SUPPORT then
+project "ygopro"
     kind "ConsoleApp"
+end
 
     defines { "YGOPRO_SERVER_MODE" }
 
@@ -20,6 +26,10 @@ if SERVER_MODE then
             "netserver.cpp", "netserver.h",
             "single_duel.cpp", "single_duel.h",
             "tag_duel.cpp", "tag_duel.h" }
+    if SERVER_PRO3_SUPPORT then
+        files { "gframe.h", "serverapi.cpp", "serverapi.h" }
+        defines { "SERVER_PRO3_SUPPORT" }
+    end
     includedirs { "../ocgcore" }
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
@@ -36,6 +46,7 @@ if SERVER_MODE then
         defines { "SERVER_TAG_SURRENDER_CONFIRM" }
     end
 else
+project "ygopro"
     kind "WindowedApp"
     cppdialect "C++14"
     rtti "Off"
@@ -104,7 +115,7 @@ end
             linkoptions { "-arch arm64" }
         end
     filter "system:linux"
-    linkoptions { "-static-libstdc++", "-static-libgcc" }
+        linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
 end

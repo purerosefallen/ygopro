@@ -114,8 +114,8 @@ void Game::MainServerLoop() {
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
-#ifdef SERVER_PRO2_SUPPORT
-	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, EFAT_ZIP);
+#if defined SERVER_PRO2_SUPPORT || defined SERVER_PRO3_SUPPORT
+	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
@@ -1306,6 +1306,15 @@ void Game::LoadExpansions() {
 		}
 	});
 #endif // SERVER_PRO2_SUPPORT
+#ifdef SERVER_PRO3_SUPPORT
+	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
+		if(!isdir && IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif // SERVER_PRO3_SUPPORT
 	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./expansions/%ls", name);

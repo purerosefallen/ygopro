@@ -10,6 +10,7 @@ LUA_LIB_NAME = "lua"
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
+SERVER_PRO3_SUPPORT = false
 SERVER_TAG_SURRENDER_CONFIRM = false
 USE_IRRKLANG = false
 
@@ -48,6 +49,7 @@ newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross compi
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
@@ -173,6 +175,12 @@ end
 if GetParam("server-pro2-support") then
     SERVER_PRO2_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-pro3-support") then
+    SERVER_PRO3_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 if GetParam("server-tag-surrender-confirm") then
     SERVER_TAG_SURRENDER_CONFIRM = true
@@ -264,6 +272,11 @@ end
 
     filter "not action:vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
+
+if SERVER_PRO3_SUPPORT then
+    filter "not action:vs*"
+        pic "On"
+end
 
     filter {}
 
