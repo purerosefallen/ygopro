@@ -6,12 +6,11 @@ if USE_AUDIO then
 include "miniaudio/."
 end
 
+if SERVER_MODE then
 if SERVER_PRO3_SUPPORT then
 project "ygoserver"
     kind "SharedLib"
-end
-if SERVER_MODE then
-if not SERVER_PRO3_SUPPORT then
+else
 project "ygopro"
     kind "ConsoleApp"
 end
@@ -103,6 +102,9 @@ if SERVER_MODE then
         links { "ws2_32" }
 else
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
+end
+if SERVER_PRO3_SUPPORT then
+        architecture "x86_64"
 end
     filter "not system:windows"
         links { "event_pthreads", "dl", "pthread", "resolv" }
