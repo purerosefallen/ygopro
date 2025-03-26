@@ -101,6 +101,7 @@ mat_windows:
       - dist
 
 exec_windows:
+  extends: .exec_windows
   script:
     - '.\premake5.exe vs2019 --server-zip-support'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
@@ -109,6 +110,7 @@ exec_windows:
     - copy bin\release\ygopro.exe dist\windows\ygopro.exe
 
 exec_windows_pro3:
+  extends: .exec_windows
   script:
     - '.\premake5.exe vs2019 --server-pro3-support'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
