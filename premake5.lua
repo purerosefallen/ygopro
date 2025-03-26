@@ -224,6 +224,9 @@ workspace "YGOPro"
         else
             defines { "WINVER=0x0601" } -- WIN7
         end
+        if SERVER_PRO3_SUPPORT then
+            architecture "x86_64"
+        end
 
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
