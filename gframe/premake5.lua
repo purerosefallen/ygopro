@@ -15,6 +15,7 @@ if not SERVER_PRO3_SUPPORT then
 project "ygopro"
     kind "ConsoleApp"
 end
+    cppdialect "C++14"
 
     defines { "YGOPRO_SERVER_MODE" }
 

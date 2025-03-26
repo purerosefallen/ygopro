@@ -56,6 +56,20 @@ mat_linux:
     paths:
       - irrlicht
 
+mat_macos:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install wget tar git
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - chmod +x premake5
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
+  artifacts:
+    paths:
+      - premake5
+      - irrlicht
+
 mat_windows:
   stage: prepare
   tags:
@@ -69,7 +83,7 @@ mat_windows:
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
     # irrlicht
-    - git clone --depth=1 -b develop https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5.exe
@@ -118,8 +132,29 @@ exec_windows_pro3:
     - mkdir dist\windows
     - copy bin\release\ygoserver.dll dist\windows\ygoserver.dll
 
-.exec_linux_common:
+.exec_unix_common:
   extends: ._exec_build
+  variables:
+    RELEASE_DIR: ''
+    TARGET_FILE: ygopro
+    PREMAKE5_BIN: premake5
+  script:
+    - $PREMAKE5_BIN gmake
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mkdir -p dist/$RELEASE_DIR
+    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
+    - |
+      if [ "$TARGET_FILE" = "ygopro" ]; then
+        strip dist/$RELEASE_DIR/$TARGET_FILE
+      fi
+  artifacts:
+    paths:
+      - dist
+
+.exec_linux_common:
+  extends: .exec_unix_common
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
@@ -127,20 +162,6 @@ exec_windows_pro3:
     - mat_common
     - mat_linux
     - mat_submodules
-  variables:
-    RELEASE_DIR: ''
-    TARGET_FILE: ygopro
-  script:
-    - premake5 gmake
-    - cd build
-    - make config=release -j$(nproc)
-    - cd ..
-    - mkdir -p dist/$RELEASE_DIR
-    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
-    - strip dist/$RELEASE_DIR/$TARGET_FILE
-  artifacts:
-    paths:
-      - dist
 
 .exec_linux:
   extends: .exec_linux_common
@@ -169,6 +190,11 @@ exec_windows_pro3:
     SERVER_PRO3_SUPPORT: '1'
     TARGET_FILE: libygoserver.so
 
+.use_pro3_macos:
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    TARGET_FILE: libygoserver.dylib
+    LIBEVENT_PREBUILD_FLAGS: '-fPIC'
 
 exec_linux:
   extends: .exec_linux
@@ -186,7 +212,7 @@ exec_linuxarm:
     - .exec_linux
     - .use_arm
   variables:
-    RELEASE_DIR: linux-arm
+    RELEASE_DIR: linux-arm64
 
 exec_linuxarm_pro3:
   extends:
@@ -194,7 +220,7 @@ exec_linuxarm_pro3:
     - .use_arm
     - .use_pro3
   variables:
-    RELEASE_DIR: linux-arm
+    RELEASE_DIR: linux-arm64
 
 exec_debianarm:
   extends:
@@ -202,6 +228,72 @@ exec_debianarm:
     - .use_arm
   variables:
     RELEASE_DIR: debian-arm
+
+
+.exec_macos_platform:
+  extends: .exec_unix_common
+  dependencies:
+    - mat_common
+    - mat_macos
+    - mat_submodules
+  before_script:
+    - env CFLAGS=$LIBEVENT_PREBUILD_FLAGS CXXFLAGS=$LIBEVENT_PREBUILD_FLAGS ./.ci/libevent-prebuild.sh
+  variables:
+    PREMAKE5_BIN: ./premake5
+    BUILD_SQLITE: '1'
+    SERVER_ZIP_SUPPORT: '1'
+    EVENT_INCLUDE_DIR: ../libevent-stable/include
+    EVENT_LIB_DIR: ../libevent-stable/lib
+
+exec_macos_x64:
+  extends: .exec_macos_platform
+  tags:
+    - macos
+  variables:
+    RELEASE_DIR: macos-x64
+
+exec_macos_arm64:
+  extends: .exec_macos_platform
+  tags:
+    - macos-m1
+  variables:
+    RELEASE_DIR: macos-arm64
+
+exec_macos_x64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos
+  variables:
+    RELEASE_DIR: macos-x64
+
+exec_macos_arm64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos-m1
+  variables:
+    RELEASE_DIR: macos-arm64
+
+exec_macos:
+  stage: combine
+  tags:
+    - macos
+  dependencies:
+    - exec_macos_x64
+    - exec_macos_arm64
+    - exec_macos_x64_pro3
+    - exec_macos_arm64_pro3
+  script:
+    - mkdir -p dist/macos
+    - lipo -create -output dist/macos/ygopro dist/macos-x64/ygopro dist/macos-arm64/ygopro
+    - lipo -create -output dist/macos/libygoserver.dylib dist/macos-x64/libygoserver.dylib dist/macos-arm64/libygoserver.dylib
+    - rm -rf dist/macos-x64 dist/macos-arm64
+  artifacts:
+    paths:
+      - dist
 
 #win_server_pack:
 #  stage: pack
@@ -219,8 +311,12 @@ upload_to_minio:
     - exec_windows
     - exec_linux
     - exec_linuxarm
+    - exec_windows_pro3
+    - exec_linux_pro3
+    - exec_linuxarm_pro3
     - exec_debian
     - exec_debianarm
+    - exec_macos
   tags: 
     - linux
   script:

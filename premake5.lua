@@ -193,6 +193,8 @@ if SERVER_MODE then
     IRRKLANG_PRO = false
     if not SERVER_ZIP_SUPPORT then
         BUILD_IRRLICHT = false
+    else
+        BUILD_IRRLICHT = true
     end
 end
 
