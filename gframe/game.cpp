@@ -1314,6 +1314,15 @@ void Game::LoadExpansions() {
 			dataManager.LoadDB(fpath);
 		}
 	});
+#ifndef _WIN32
+	FileSystem::TraversalDir(L"./Expansions", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./Expansions/%ls", name);
+		if(!isdir && IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif
 #endif // SERVER_PRO3_SUPPORT
 	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
