@@ -150,6 +150,8 @@ exec_linuxarm:
   extends: .exec_linux
   tags:
     - arm
+  variables:
+    NO_AUDIO: '1'
 
 ._exec_macos_platform:
   extends: ._exec_build
