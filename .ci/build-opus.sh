@@ -13,7 +13,7 @@ fi
 
 maybe_patch_configure_output() {
   if $is_macos; then
-    sed -i.bak 's/-force_cpusubtype_ALL//g' Makefile
+    sed -i.bak 's/-force_cpusubtype_ALL//g' *
   fi
 }
 
