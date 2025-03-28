@@ -30,10 +30,16 @@ project "miniaudio"
             }
         else
             includedirs { OPUS_INCLUDE_DIR, VORBIS_INCLUDE_DIR, OGG_INCLUDE_DIR }
-            links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
-            libdirs { OPUS_LIB_DIR, VORBIS_LIB_DIR, OGG_LIBDIR }
         end
     end
 
     filter "system:linux"
         links { "dl", "pthread", "m" }
+
+    filter { "architecture:ARM" }
+        defines { "MA_NO_NEON" }
+
+    filter { "architecture:ARM64" }
+        defines { "MA_NO_NEON" }
+
+    filter {}
