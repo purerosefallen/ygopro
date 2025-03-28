@@ -1,8 +1,8 @@
 #include "sound_manager.h"
 #include "myfilesystem.h"
 #if defined(YGOPRO_USE_MINIAUDIO) && defined(YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS)
-#include <miniaudio_libvorbis.h>
 #include <miniaudio_libopus.h>
+#include <miniaudio_libvorbis.h>
 #endif
 #ifdef IRRKLANG_STATIC
 #include "../ikpmp3/ikpMP3.h"
@@ -270,13 +270,7 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		StopBGM();
 #ifdef YGOPRO_USE_MINIAUDIO
 		strcpy(currentPlayingMusic, song);
-#ifdef _WIN32
-		wchar_t song_w[1024];
-		BufferIO::DecodeUTF8(song, song_w);
-		ma_sound_init_from_file_w(&engineMusic, song_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
-#else
-		auto res = ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
-#endif
+		ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
 		ma_sound_set_looping(&soundBGM, loop);
 		ma_sound_start(&soundBGM);
 #endif
@@ -330,8 +324,14 @@ void SoundManager::PlayCustomSound(char* SoundName) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
+#ifdef YGOPRO_USE_MINIAUDIO
 	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
 	ma_engine_play_sound(&engineSound, SoundName, nullptr);
+#endif
+#ifdef YGOPRO_USE_IRRKLANG
+	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
+	engineSound->play2D(SoundName);
+#endif
 #endif
 }
 void SoundManager::StopBGM() {
