@@ -1,8 +1,5 @@
 include "lzma/."
 include "spmemvfs/."
-if USE_AUDIO then
-    include "miniaudio/."
-end
 
 project "YGOPro"
     kind "WindowedApp"
@@ -43,7 +40,16 @@ project "YGOPro"
 
     if USE_AUDIO then
         defines { "YGOPRO_USE_AUDIO" }
-        links { "cminiaudio" }
+        includedirs { "../miniaudio/extras/miniaudio_split" }
+        links { "miniaudio" }
+        if MINIAUDIO_SUPPORT_OPUS_VORBIS then
+            defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
+            includedirs { "../miniaudio/extras/decoders/libopus", "../miniaudio/extras/decoders/libvorbis" }
+            if not BUILD_OPUS_VORBIS then
+                links { "opusfile", "vorbisfile" }
+                libdirs { OPUS_LIB_DIR, VORBIS_LIB_DIR }
+            end
+        end
     end
 
     filter "system:windows"
