@@ -131,11 +131,3 @@ project "miniaudio"
 
     filter "system:linux"
         links { "dl", "pthread", "m" }
-
-    filter { "architecture:ARM" }
-        defines { "MA_NO_NEON" }
-
-    filter { "architecture:ARM64" }
-        defines { "MA_NO_NEON" }
-
-    filter {}
