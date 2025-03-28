@@ -4,7 +4,9 @@ namespace ygo {
 	extern "C" DECL_DLLEXPORT int start_server(const char* args) {
 		int argc = 1;
 		char** argv = new char* [13];
-		argv[0] = "ygoserver";
+		const char* server_name = "ygoserver";
+		argv[0] = new char[strlen(server_name) + 1];
+		strcpy(argv[0], server_name);
 		size_t argLength = strlen(args);
 		for (size_t i = 1, j = 0; j < argLength; ) {
 			while (args[j] == ' ' && j < argLength) { ++j; }
@@ -24,6 +26,12 @@ namespace ygo {
 		}
 
 		int result = main(argc, argv);
+		for (int i = 1; i < argc; ++i) {
+			if (argv[i]) {
+				delete[] argv[i];
+				argv[i] = nullptr;
+			}
+		}
 		delete[] argv;
 
 		return result;
