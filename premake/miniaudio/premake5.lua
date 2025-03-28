@@ -1,6 +1,7 @@
 project "miniaudio"
     kind "StaticLib"
     files { "extras/miniaudio_split/miniaudio.*" }
+    defines { "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_NO_NEON" }
 
     if MINIAUDIO_SUPPORT_OPUS_VORBIS then
         files { "extras/decoders/libopus/*", "extras/decoders/libvorbis/*" }
@@ -32,6 +33,12 @@ project "miniaudio"
                 "external/opus/celt/quant_bands.c",
                 "external/opus/celt/rate.c",
                 "external/opus/celt/vq.c",
+
+                "external/opus/celt/x86/pitch_avx.c",
+                "external/opus/celt/x86/pitch_sse.c",
+                "external/opus/celt/x86/vq_sse2.c",
+                "external/opus/celt/x86/x86_celt_map.c",
+                "external/opus/celt/x86/x86cpu.c",
 
                 "external/opus/silk/bwexpander.c",
                 "external/opus/silk/bwexpander_32.c",
@@ -81,7 +88,6 @@ project "miniaudio"
             files {
                 "external/opusfile/src/info.c",
                 "external/opusfile/src/internal.c",
-                "external/opusfile/src/internal.h",
                 "external/opusfile/src/opusfile.c",
                 "external/opusfile/src/stream.c",
             }
@@ -106,16 +112,17 @@ project "miniaudio"
                 "external/vorbis/lib/vorbisfile.c",
                 "external/vorbis/lib/window.c",
             }
-
-            defines { "USE_ALLOCA", "OPUS_BUILD" }
-
             includedirs {
                 "external/ogg/include",
                 "external/opus/include",
                 "external/opus/celt",
                 "external/opus/silk",
                 "external/opusfile/include",
-                "external/vorbis/include"
+                "external/vorbis/include",
+            }
+            defines { "OPUS_BUILD", "USE_ALLOCA",
+                "OPUS_X86_PRESUME_SSE", "OPUS_X86_PRESUME_SSE2",
+                "OPUS_HAVE_RTCD", "OPUS_X86_MAY_HAVE_SSE4_1", "OPUS_X86_MAY_HAVE_AVX2",
             }
         else
             includedirs { OPUS_INCLUDE_DIR, VORBIS_INCLUDE_DIR, OGG_INCLUDE_DIR }
