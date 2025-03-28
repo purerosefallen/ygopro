@@ -11,9 +11,9 @@ if [ "$(uname)" = "Darwin" ]; then
   is_macos=true
 fi
 
-maybe_patch_configure_output() {
+maybe_patch_configure() {
   if $is_macos; then
-    sed -i.bak 's/-force_cpusubtype_ALL//g' *
+    sed -i.bak 's/-force_cpusubtype_ALL//g' configure*
   fi
 }
 
@@ -21,8 +21,8 @@ build_single_thing() {
   lib_name="$1"
   cd "external/$lib_name"
   shift
+  maybe_patch_configure
   PKG_CONFIG_PATH="$external_built_dir/lib/pkgconfig" ./configure --prefix="$external_built_dir" --enable-static=yes --enable-shared=no "$@"
-  maybe_patch_configure_output
   make -j$(nproc)
   make install
   cd ../..
