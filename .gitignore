@@ -16,6 +16,7 @@ build
 /irrklang
 /irrlicht*
 /lua
+/miniaudio
 
 # gframe additionals
 /gframe/ygopro.ico

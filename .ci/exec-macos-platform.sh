@@ -8,8 +8,15 @@ export EVENT_INCLUDE_DIR=$PWD/libevent-stable/include
 export EVENT_LIB_DIR=$PWD/libevent-stable/lib
 export IRRLICHT_INCLUDE_DIR=$PWD/irrlicht/include
 export IRRLICHT_LIB_DIR=$PWD/irrlicht/lib/$(arch)
+export OPUS_INCLUDE_DIR=$PWD/miniaudio/external-built/include/opus
+export OPUS_LIB_DIR=$PWD/miniaudio/external-built/lib
+export VORBIS_INCLUDE_DIR=$PWD/miniaudio/external-built/include
+export VORBIS_LIB_DIR=$PWD/miniaudio/external-built/lib
+export OGG_INCLUDE_DIR=$PWD/miniaudio/external-built/include
+export OGG_LIB_DIR=$PWD/miniaudio/external-built/lib
 
 ./.ci/libevent-prebuild.sh
+./.ci/build-opus.sh
 
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 

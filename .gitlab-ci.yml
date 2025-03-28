@@ -22,6 +22,8 @@ mat_common:
     # freetype
     #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     #- mv freetype-2.11.1 freetype
+    # miniaudio
+    #- ./.ci/prepare-miniaudio.sh
     # premake
     - cp -rf premake/* .;
   artifacts:
@@ -29,6 +31,7 @@ mat_common:
       - lua
       #- freetype
       - sqlite3
+      #- miniaudio
 
 mat_submodules:
   stage: prepare

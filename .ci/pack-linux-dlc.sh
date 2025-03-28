@@ -8,6 +8,10 @@ if [[ -z "$TARGET_PLATFORM" ]]; then
     TARGET_PLATFORM=linux
 fi
 
+if [[ "$TARGET_PLATFORM" != "linuxarm" ]]; then
+    ARCHIVE_FILES+=(sound)
+fi
+
 apt update && apt -y install tar zstd
 mkdir dist replay
 
