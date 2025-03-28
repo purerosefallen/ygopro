@@ -9,8 +9,7 @@ project "miniaudio"
             files {
                 "external/ogg/src/bitwise.c",
                 "external/ogg/src/framing.c",
-            }
-            files {
+
                 "external/opus/src/opus.c",
                 "external/opus/src/opus_decoder.c",
                 "external/opus/src/opus_multistream.c",
@@ -84,14 +83,12 @@ project "miniaudio"
                 "external/opus/silk/tables_other.c",
                 "external/opus/silk/tables_pitch_lag.c",
                 "external/opus/silk/tables_pulses_per_block.c",
-            }
-            files {
+
                 "external/opusfile/src/info.c",
                 "external/opusfile/src/internal.c",
                 "external/opusfile/src/opusfile.c",
                 "external/opusfile/src/stream.c",
-            }
-            files {
+
                 "external/vorbis/lib/bitrate.c",
                 "external/vorbis/lib/block.c",
                 "external/vorbis/lib/codebook.c",
@@ -120,7 +117,8 @@ project "miniaudio"
                 "external/opusfile/include",
                 "external/vorbis/include",
             }
-            defines { "OPUS_BUILD", "USE_ALLOCA",
+            defines {
+                "OPUS_BUILD", "USE_ALLOCA",
                 "OPUS_X86_PRESUME_SSE", "OPUS_X86_PRESUME_SSE2",
                 "OPUS_HAVE_RTCD", "OPUS_X86_MAY_HAVE_SSE", "OPUS_X86_MAY_HAVE_SSE4_1", "OPUS_X86_MAY_HAVE_AVX2",
             }
