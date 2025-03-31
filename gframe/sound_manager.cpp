@@ -93,14 +93,15 @@ void SoundManager::PlaySound(char* sound) {
 #ifdef YGOPRO_USE_MINIAUDIO
 	StopSound();
 	SetSoundVolume(mainGame->gameConf.sound_volume);
+	playingSoundEffect = TRUE;
 #ifdef _WIN32
-		wchar_t sound_w[1024];
-		BufferIO::DecodeUTF8(song, sound_w);
-		ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+	wchar_t sound_w[1024];
+	BufferIO::DecodeUTF8(song, sound_w);
+	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
 #else
-		ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
 #endif
-		ma_sound_start(&soundEffect);
+	ma_sound_start(&soundEffect);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
 	SetSoundVolume(mainGame->gameConf.sound_volume);
@@ -368,7 +369,7 @@ void SoundManager::StopBGM() {
 }
 void SoundManager::StopSound() {
 #ifdef YGOPRO_USE_MINIAUDIO
-	if(!playingSoundEffect || !ma_sound_is_playing(&soundEffect))
+	if(!playingSoundEffect)
 		return;
 	playingSoundEffect = FALSE;
 	ma_sound_uninit(&soundEffect);
