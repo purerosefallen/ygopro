@@ -96,7 +96,7 @@ void SoundManager::PlaySound(char* sound) {
 	playingSoundEffect = TRUE;
 #ifdef _WIN32
 	wchar_t sound_w[1024];
-	BufferIO::DecodeUTF8(song, sound_w);
+	BufferIO::DecodeUTF8(sound, sound_w);
 	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
 #else
 	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
