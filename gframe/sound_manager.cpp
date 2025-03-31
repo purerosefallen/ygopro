@@ -343,18 +343,7 @@ void SoundManager::PlayCustomBGM(char* BGMName) {
 #endif
 }
 void SoundManager::PlayCustomSound(char* SoundName) {
-#ifdef YGOPRO_USE_AUDIO
-	if(!mainGame->chkEnableSound->isChecked())
-		return;
-#ifdef YGOPRO_USE_MINIAUDIO
-	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
-	ma_engine_play_sound(&engineSound, SoundName, nullptr);
-#endif
-#ifdef YGOPRO_USE_IRRKLANG
-	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
-	engineSound->play2D(SoundName);
-#endif
-#endif
+	PlaySound(SoundName);
 }
 void SoundManager::StopBGM() {
 #ifdef YGOPRO_USE_MINIAUDIO
