@@ -4,7 +4,9 @@ set -o errexit
 
 ARCHIVE_FILES=(ygopro.app cards.cdb locales fonts sound textures strings.conf system.conf pack)
 
-TARGET_PLATFORM=darwin
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=darwin
+fi
 
 apt update && apt -y install tar zstd
 mkdir dist replay

@@ -49,6 +49,12 @@ void DeckManager::LoadLFList() {
 #ifdef SERVER_PRO2_SUPPORT
 	LoadLFListSingle("config/lflist.conf");
 #endif
+#ifdef SERVER_PRO3_SUPPORT
+	LoadLFListSingle("Data/lflist.conf");
+#ifndef _WIN32
+	LoadLFListSingle("Expansions/lflist.conf");
+#endif
+#endif
 	LoadLFListSingle("expansions/lflist.conf");
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
@@ -83,7 +89,7 @@ static unsigned int checkAvail(unsigned int ot, unsigned int avail) {
 		return DECKERROR_TCGONLY;
 	return DECKERROR_NOTAVAIL;
 }
-unsigned int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
+unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int rule) {
 	std::unordered_map<int, int> ccount;
 	// rule
 	if(deck.main.size() < DECK_MIN_SIZE || deck.main.size() > DECK_MAX_SIZE)
