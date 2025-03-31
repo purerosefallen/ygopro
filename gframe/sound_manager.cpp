@@ -36,6 +36,7 @@ bool SoundManager::Init() {
 	}
 	engineConfig.pResourceManager = &resourceManager;
 #endif
+	playingSoundEffect = FALSE;
 	if(ma_engine_init(&engineConfig, &engineSound) != MA_SUCCESS || ma_engine_init(&engineConfig, &engineMusic) != MA_SUCCESS) {
 		return false;
 	} else {
@@ -84,6 +85,29 @@ void SoundManager::RefershBGMDir(std::wstring path, int scene) {
 			BGMList[scene].push_back(filename);
 		}
 	});
+}
+void SoundManager::PlaySound(char* sound) {
+#ifdef YGOPRO_USE_AUDIO
+	if(!mainGame->chkEnableSound->isChecked())
+		return;
+#ifdef YGOPRO_USE_MINIAUDIO
+	StopSound();
+	SetSoundVolume(mainGame->gameConf.sound_volume);
+	playingSoundEffect = TRUE;
+#ifdef _WIN32
+	wchar_t sound_w[1024];
+	BufferIO::DecodeUTF8(sound, sound_w);
+	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+#else
+	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+#endif
+	ma_sound_start(&soundEffect);
+#endif
+#ifdef YGOPRO_USE_IRRKLANG
+	SetSoundVolume(mainGame->gameConf.sound_volume);
+	engineSound->play2D(soundPath);
+#endif
+#endif
 }
 void SoundManager::PlaySoundEffect(int sound) {
 #ifdef YGOPRO_USE_AUDIO
@@ -156,7 +180,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 		break;
 	}
 	case SOUND_RECOVER: {
-		strcpy(soundName, "recover");
+		strcpy(soundName, "gainlp");
 		break;
 	}
 	case SOUND_COUNTER_ADD: {
@@ -168,11 +192,11 @@ void SoundManager::PlaySoundEffect(int sound) {
 		break;
 	}
 	case SOUND_COIN: {
-		strcpy(soundName, "coin");
+		strcpy(soundName, "coinflip");
 		break;
 	}
 	case SOUND_DICE: {
-		strcpy(soundName, "dice");
+		strcpy(soundName, "diceroll");
 		break;
 	}
 	case SOUND_NEXT_TURN: {
@@ -212,7 +236,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 		break;
 	}
 	case SOUND_CHAT: {
-		strcpy(soundName, "chat");
+		strcpy(soundName, "chatmessage");
 		break;
 	}
 	default:
@@ -220,14 +244,7 @@ void SoundManager::PlaySoundEffect(int sound) {
 	}
 	char soundPath[40];
 	std::snprintf(soundPath, 40, "./sound/%s.wav", soundName);
-#ifdef YGOPRO_USE_MINIAUDIO
-	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
-	ma_engine_play_sound(&engineSound, soundPath, nullptr);
-#endif
-#ifdef YGOPRO_USE_IRRKLANG
-	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
-	engineSound->play2D(soundPath);
-#endif
+	PlaySound(soundPath);
 #endif // YGOPRO_USE_AUDIO
 }
 void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
@@ -268,15 +285,20 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		return;
 	if(!IsCurrentlyPlaying(song)) {
 		StopBGM();
+	SetMusicVolume(mainGame->gameConf.music_volume);
 #ifdef YGOPRO_USE_MINIAUDIO
 		strcpy(currentPlayingMusic, song);
+#ifdef _WIN32
+		wchar_t song_w[1024];
+		BufferIO::DecodeUTF8(song, song_w);
+		ma_sound_init_from_file_w(&engineMusic, song_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
+#else
 		ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
+#endif
 		ma_sound_set_looping(&soundBGM, loop);
 		ma_sound_start(&soundBGM);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-		engineMusic->stopAllSounds();
-		engineMusic->setSoundVolume(mainGame->gameConf.music_volume);
 		soundBGM = engineMusic->play2D(song, loop, false, true);
 #endif
 	}
@@ -321,18 +343,7 @@ void SoundManager::PlayCustomBGM(char* BGMName) {
 #endif
 }
 void SoundManager::PlayCustomSound(char* SoundName) {
-#ifdef YGOPRO_USE_AUDIO
-	if(!mainGame->chkEnableSound->isChecked())
-		return;
-#ifdef YGOPRO_USE_MINIAUDIO
-	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
-	ma_engine_play_sound(&engineSound, SoundName, nullptr);
-#endif
-#ifdef YGOPRO_USE_IRRKLANG
-	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
-	engineSound->play2D(SoundName);
-#endif
-#endif
+	PlaySound(SoundName);
 }
 void SoundManager::StopBGM() {
 #ifdef YGOPRO_USE_MINIAUDIO
@@ -346,7 +357,15 @@ void SoundManager::StopBGM() {
 #endif
 }
 void SoundManager::StopSound() {
-	// TODO: stop all sounds
+#ifdef YGOPRO_USE_MINIAUDIO
+	if(!playingSoundEffect)
+		return;
+	playingSoundEffect = FALSE;
+	ma_sound_uninit(&soundEffect);
+#endif
+#ifdef YGOPRO_USE_IRRKLANG
+	engineSound->stopAllSounds();
+#endif
 }
 void SoundManager::SetSoundVolume(double volume) {
 #ifdef YGOPRO_USE_MINIAUDIO

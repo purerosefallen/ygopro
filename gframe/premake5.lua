@@ -85,7 +85,7 @@ end
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
-            includedirs { "../miniaudio/extras/miniaudio_split" }
+            includedirs { "../miniaudio" }
             links { "miniaudio" }
             if MINIAUDIO_SUPPORT_OPUS_VORBIS then
                 defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
