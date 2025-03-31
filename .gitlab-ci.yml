@@ -22,6 +22,8 @@ mat_common:
     # freetype
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     - mv freetype-2.11.1 freetype
+    # miniaudio
+    - ./.ci/prepare-miniaudio.sh
     # premake
     - cp -rf premake/* .;
   artifacts:
@@ -29,6 +31,7 @@ mat_common:
       - lua
       - freetype
       - sqlite3
+      - miniaudio
 
 mat_submodules:
   stage: prepare
@@ -112,7 +115,7 @@ exec_windows:
     - mat_windows
     - mat_submodules
   script:
-    - bash -c 'cp -rf premake/* .'
+    - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - copy bin\release\ygopro.exe .
@@ -132,7 +135,14 @@ exec_windows:
   variables:
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
+    OPUS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
+    OPUS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
+    VORBIS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
+    VORBIS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
+    OGG_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
+    OGG_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
   script:
+    - ./.ci/build-opus.sh
     - premake5 gmake --build-freetype --build-sqlite --build-irrlicht
     - cd build
     - make config=release -j$(nproc)
@@ -187,7 +197,7 @@ exec_macos:
     - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
     - lipo -create -output ygopro.app/Contents/MacOS/ygopro $(ls -1 ygopro-platforms/ygopro-platform-*);
     - mkdir ygopro.app/Contents/Resources;
-    - mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    - mv resource/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
     - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
     - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
 
