@@ -313,7 +313,7 @@ void SoundManager::PlayBGM(int scene) {
 	}
 #endif
 }
-void SoundManager::PlayCustomBGM(wchar_t* BGMName) {
+void SoundManager::PlayCustomBGM(char* BGMName) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableMusic->isChecked() || !mainGame->chkMusicMode->isChecked() || bgm_process || IsCurrentlyPlaying(BGMName))
 		return;
@@ -326,19 +326,17 @@ void SoundManager::PlayCustomBGM(wchar_t* BGMName) {
 	bgm_process = false;
 #endif
 }
-void SoundManager::PlayCustomSound(wchar_t* SoundName) {
+void SoundManager::PlayCustomSound(char* SoundName) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
-	char soundNameU[1024];
-	BufferIO::EncodeUTF8(SoundName, soundNameU);
 #ifdef YGOPRO_USE_MINIAUDIO
 	ma_engine_set_volume(&engineSound, mainGame->gameConf.sound_volume);
-	ma_engine_play_sound(&engineSound, soundNameU, nullptr);
+	ma_engine_play_sound(&engineSound, SoundName, nullptr);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
 	engineSound->setSoundVolume(mainGame->gameConf.sound_volume);
-	engineSound->play2D(soundNameU);
+	engineSound->play2D(SoundName);
 #endif
 #endif
 }
