@@ -22,6 +22,8 @@ mat_common:
     # freetype
     #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     #- mv freetype-2.11.1 freetype
+    # miniaudio
+    #- ./.ci/prepare-miniaudio.sh
     # premake
     - cp -rf premake/* .;
   artifacts:
@@ -29,6 +31,7 @@ mat_common:
       - lua
       #- freetype
       - sqlite3
+      #- miniaudio
 
 mat_submodules:
   stage: prepare
@@ -56,6 +59,20 @@ mat_linux:
     paths:
       - irrlicht
 
+mat_macos:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install wget tar git
+    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - chmod +x premake5
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
+  artifacts:
+    paths:
+      - premake5
+      - irrlicht
+
 mat_windows:
   stage: prepare
   tags:
@@ -69,12 +86,12 @@ mat_windows:
     - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
     # irrlicht
-    # - git clone --depth=1 -b develop https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5.exe
       - event
-      # - irrlicht
+      - irrlicht
 
 ._exec_build:
   stage: build
@@ -86,7 +103,7 @@ mat_windows:
       - bin/
       - obj/
 
-exec_windows:
+.exec_windows:
   extends: ._exec_build
   tags:
     - vs
@@ -94,17 +111,53 @@ exec_windows:
     - mat_common
     - mat_windows
     - mat_submodules
-  script:
-    - bash -c 'cp -rf premake/* .'
-    - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
-    - copy bin\release\ygopro.exe .
+  before_script:
+    - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
   artifacts:
     paths:
-      - ygopro.exe
+      - dist
+
+exec_windows:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-zip-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\ygopro.exe dist\windows\ygopro.exe
+
+exec_windows_pro3:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-pro3-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\ygoserver.dll dist\windows\ygoserver.dll
+
+.exec_unix_common:
+  extends: ._exec_build
+  variables:
+    RELEASE_DIR: ''
+    TARGET_FILE: ygopro
+    PREMAKE5_BIN: premake5
+  script:
+    - $PREMAKE5_BIN gmake
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mkdir -p dist/$RELEASE_DIR
+    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
+    - |
+      if [ "$TARGET_FILE" = "ygopro" ]; then
+        strip dist/$RELEASE_DIR/$TARGET_FILE
+      fi
+  artifacts:
+    paths:
+      - dist
 
 .exec_linux_common:
-  extends: ._exec_build
+  extends: .exec_unix_common
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
@@ -112,16 +165,6 @@ exec_windows:
     - mat_common
     - mat_linux
     - mat_submodules
-  script:
-    - premake5 gmake
-    - cd build
-    - make config=release -j$(nproc)
-    - cd ..
-    - mv bin/release/ygopro ./ygopro
-    - strip ygopro
-  artifacts:
-    paths:
-      - ygopro
 
 .exec_linux:
   extends: .exec_linux_common
@@ -130,11 +173,13 @@ exec_windows:
     SERVER_ZIP_SUPPORT: '1'
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
+    RELEASE_DIR: linux-x64
 
 .exec_debian:
   extends: .exec_linux_common
   variables:
     LUA_DEB: '1'
+    RELEASE_DIR: debian-x64
   before_script:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
 
@@ -142,8 +187,25 @@ exec_windows:
   tags:
     - arm
 
+.use_pro3:
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    TARGET_FILE: libygoserver.so
+
+.use_pro3_macos:
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    TARGET_FILE: libygoserver.dylib
+    LIBEVENT_PREBUILD_FLAGS: '-fPIC'
+
 exec_linux:
   extends: .exec_linux
+
+exec_linux_pro3:
+  extends:
+    - .exec_linux
+    - .use_pro3
 
 exec_debian:
   extends: .exec_debian
@@ -152,11 +214,89 @@ exec_linuxarm:
   extends:
     - .exec_linux
     - .use_arm
+  variables:
+    RELEASE_DIR: linux-arm64
+
+exec_linuxarm_pro3:
+  extends:
+    - .exec_linux
+    - .use_arm
+    - .use_pro3
+  variables:
+    RELEASE_DIR: linux-arm64
 
 exec_debianarm:
   extends:
     - .exec_debian
     - .use_arm
+  variables:
+    RELEASE_DIR: debian-arm
+
+
+.exec_macos_platform:
+  extends: .exec_unix_common
+  dependencies:
+    - mat_common
+    - mat_macos
+    - mat_submodules
+  before_script:
+    - env CFLAGS=$LIBEVENT_PREBUILD_FLAGS CXXFLAGS=$LIBEVENT_PREBUILD_FLAGS ./.ci/libevent-prebuild.sh
+  variables:
+    PREMAKE5_BIN: ./premake5
+    BUILD_SQLITE: '1'
+    SERVER_ZIP_SUPPORT: '1'
+    EVENT_INCLUDE_DIR: ../libevent-stable/include
+    EVENT_LIB_DIR: ../libevent-stable/lib
+
+exec_macos_x64:
+  extends: .exec_macos_platform
+  tags:
+    - macos
+  variables:
+    RELEASE_DIR: macos-x64
+
+exec_macos_arm64:
+  extends: .exec_macos_platform
+  tags:
+    - macos-m1
+  variables:
+    RELEASE_DIR: macos-arm64
+
+exec_macos_x64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos
+  variables:
+    RELEASE_DIR: macos-x64
+
+exec_macos_arm64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos-m1
+  variables:
+    RELEASE_DIR: macos-arm64
+
+exec_macos:
+  stage: combine
+  tags:
+    - macos
+  dependencies:
+    - exec_macos_x64
+    - exec_macos_arm64
+    - exec_macos_x64_pro3
+    - exec_macos_arm64_pro3
+  script:
+    - mkdir -p dist/macos
+    - lipo -create -output dist/macos/ygopro dist/macos-x64/ygopro dist/macos-arm64/ygopro
+    - lipo -create -output dist/macos/libygoserver.dylib dist/macos-x64/libygoserver.dylib dist/macos-arm64/libygoserver.dylib
+    - rm -rf dist/macos-x64 dist/macos-arm64
+  artifacts:
+    paths:
+      - dist
 
 #win_server_pack:
 #  stage: pack
@@ -172,9 +312,18 @@ upload_to_minio:
   stage: deploy
   dependencies:
     - exec_windows
+    - exec_linux
+    - exec_linuxarm
+    - exec_windows_pro3
+    - exec_linux_pro3
+    - exec_linuxarm_pro3
+    - exec_debian
+    - exec_debianarm
+    - exec_macos
   tags: 
     - linux
   script:
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 cp ygopro.exe s3://mycard/koishipro/server/ygopro.exe
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/koishipro/server
   only:
     - server
+    - tags

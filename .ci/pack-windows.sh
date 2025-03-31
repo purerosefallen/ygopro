@@ -10,7 +10,9 @@ fi
 
 # TARGET_LOCALE
 # ARCHIVE_SUFFIX
-TARGET_PLATFORM=win32
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=win32
+fi
 
 apt update && apt -y install tar git zstd
 mkdir dist replay

@@ -23,9 +23,11 @@ install:
   - 7z x sqlite-amalgamation-3470000.zip
   - move sqlite-amalgamation-3470000 sqlite3
 
+  - git clone --depth=1 https://github.com/mercury233/irrlicht irrlicht
+
 before_build:
   - xcopy /E premake\* .
-  - premake5 vs2019
+  - premake5 vs2019 --server-zip-support
   
 configuration: Release
 
