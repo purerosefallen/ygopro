@@ -157,7 +157,7 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 	}
 	return 0;
 }
-int DeckManager::CheckSpellCount(Deck& deck) {
+int DeckManager::CheckSpellCount(const Deck& deck) {
 	int spellcount = 0;
 	CardData cd;
 	for (auto cit : deck.main) {
