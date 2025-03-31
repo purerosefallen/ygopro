@@ -121,7 +121,7 @@ void SoundManager::PlaySound(char* sound) {
 	ma_sound_start(usingSoundEffectPointer);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-	engineSound->play2D(soundPath);
+	engineSound->play2D(sound);
 #endif
 #endif
 }
