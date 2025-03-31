@@ -114,8 +114,8 @@ void Game::MainServerLoop() {
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
-#ifdef SERVER_PRO2_SUPPORT
-	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, EFAT_ZIP);
+#if defined SERVER_PRO2_SUPPORT || defined SERVER_PRO3_SUPPORT
+	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
@@ -280,7 +280,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Overdose", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Bumblebee", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1306,6 +1306,24 @@ void Game::LoadExpansions() {
 		}
 	});
 #endif // SERVER_PRO2_SUPPORT
+#ifdef SERVER_PRO3_SUPPORT
+	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
+		if(!isdir && IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#ifndef _WIN32
+	FileSystem::TraversalDir(L"./Expansions", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./Expansions/%ls", name);
+		if(!isdir && IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif
+#endif // SERVER_PRO3_SUPPORT
 	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./expansions/%ls", name);

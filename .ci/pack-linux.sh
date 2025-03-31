@@ -2,11 +2,17 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay sound windbot bot bot.conf locales fonts pack)
+ARCHIVE_FILES=(ygopro LICENSE README.md lflist.conf strings.conf system.conf cards.cdb script textures deck single pics replay windbot bot bot.conf locales fonts pack)
 
 # TARGET_LOCALE
 # ARCHIVE_SUFFIX
-TARGET_PLATFORM=linux
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=linux
+fi
+
+if [[ "$TARGET_PLATFORM" != "linuxarm" ]]; then
+    ARCHIVE_FILES+=(sound)
+fi
 
 apt update && apt -y install tar git zstd
 mkdir dist replay

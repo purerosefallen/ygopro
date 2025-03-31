@@ -1312,11 +1312,11 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		}
 		//playing custom bgm
 		case 21: { //HINT_MUSIC
-			char BGMName[1024];
 			if (data) {
+				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.mp3", dataManager.GetDesc(data));			
-				BufferIO::EncodeUTF8(textBuffer, BGMName);
-				soundManager.PlayCustomBGM(BGMName);
+				BufferIO::EncodeUTF8(textBuffer, textBufferU);
+				soundManager.PlayCustomBGM(textBufferU);
 			} else {
 				soundManager.StopBGM();
 			}
@@ -1324,11 +1324,11 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		}
 		//playing custom sound effect
 		case 22: { //HINT_SOUND
-			char SoundName[1024];
 			if (data) {
+				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/custom/%ls.wav", dataManager.GetDesc(data));
-				BufferIO::EncodeUTF8(textBuffer, SoundName);
-				soundManager.PlayCustomSound(SoundName);
+				BufferIO::EncodeUTF8(textBuffer, textBufferU);
+				soundManager.PlayCustomSound(textBufferU);
 			} else {
 				soundManager.StopSound();
 			}
@@ -1336,11 +1336,11 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		}
 		//playing custom bgm in ogg format
 		case 23: { //HINT_MUSIC_OGG
-			char BGMName[1024];
 			if (data) {
+				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.ogg", dataManager.GetDesc(data));			
-				BufferIO::EncodeUTF8(textBuffer, BGMName);
-				soundManager.PlayCustomBGM(BGMName);
+				BufferIO::EncodeUTF8(textBuffer, textBufferU);
+				soundManager.PlayCustomBGM(textBufferU);
 			} else {
 				soundManager.StopBGM();
 			}
