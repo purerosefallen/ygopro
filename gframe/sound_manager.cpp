@@ -36,7 +36,6 @@ bool SoundManager::Init() {
 	}
 	engineConfig.pResourceManager = &resourceManager;
 #endif
-	playingSoundEffect = FALSE;
 	if(ma_engine_init(&engineConfig, &engineSound) != MA_SUCCESS || ma_engine_init(&engineConfig, &engineMusic) != MA_SUCCESS) {
 		return false;
 	} else {
@@ -90,21 +89,41 @@ void SoundManager::PlaySound(char* sound) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
-#ifdef YGOPRO_USE_MINIAUDIO
-	StopSound();
 	SetSoundVolume(mainGame->gameConf.sound_volume);
-	playingSoundEffect = TRUE;
+#ifdef YGOPRO_USE_MINIAUDIO
+	ma_sound *usingSoundEffectPointer = nullptr;
+	for(int i = 0; i < 10; i++) {
+		if(playingSoundEffect[i] && !ma_sound_is_playing(playingSoundEffect[i])) {
+			ma_sound_uninit(playingSoundEffect[i]);
+			if(usingSoundEffectPointer) {
+				free(playingSoundEffect[i]);
+				playingSoundEffect[i] = nullptr;
+				printf("free sound %d\n", i);
+			} else {
+				usingSoundEffectPointer = playingSoundEffect[i];
+				printf("reusing sound %d\n", i);
+			}
+		}
+		if(!playingSoundEffect[i] && !usingSoundEffectPointer) {
+			usingSoundEffectPointer = playingSoundEffect[i] = (ma_sound*)malloc(sizeof(ma_sound));
+			printf("alloc sound %d\n", i);
+		}
+	}
+	if (!usingSoundEffectPointer) {
+		// force to stop the first sound
+		usingSoundEffectPointer = playingSoundEffect[0];
+		ma_sound_uninit(usingSoundEffectPointer);
+	}
 #ifdef _WIN32
 	wchar_t sound_w[1024];
 	BufferIO::DecodeUTF8(sound, sound_w);
-	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, usingSoundEffectPointer);
 #else
-	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundEffect);
+	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, usingSoundEffectPointer);
 #endif
-	ma_sound_start(&soundEffect);
+	ma_sound_start(usingSoundEffectPointer);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-	SetSoundVolume(mainGame->gameConf.sound_volume);
 	engineSound->play2D(soundPath);
 #endif
 #endif
@@ -358,10 +377,13 @@ void SoundManager::StopBGM() {
 }
 void SoundManager::StopSound() {
 #ifdef YGOPRO_USE_MINIAUDIO
-	if(!playingSoundEffect)
-		return;
-	playingSoundEffect = FALSE;
-	ma_sound_uninit(&soundEffect);
+	for(int i = 0; i < 10; i++) {
+		if(playingSoundEffect[i]) {
+			ma_sound_uninit(playingSoundEffect[i]);
+			free(playingSoundEffect[i]);
+			playingSoundEffect[i] = nullptr;
+		}
+	}
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
 	engineSound->stopAllSounds();
