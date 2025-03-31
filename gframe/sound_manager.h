@@ -30,6 +30,7 @@ private:
 	ma_sound soundBGM;
 	char currentPlayingMusic[1024]{};
 	ma_sound soundEffect;
+	char playingSoundEffect;
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
 	irrklang::ISoundEngine* engineSound;
