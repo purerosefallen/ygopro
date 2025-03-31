@@ -1,15 +1,23 @@
 -- default global settings
 
 BUILD_LUA = true
+LUA_LIB_NAME = "lua"
+
 BUILD_EVENT = os.istarget("windows")
 BUILD_FREETYPE = os.istarget("windows")
 BUILD_SQLITE = os.istarget("windows")
 BUILD_IRRLICHT = not os.istarget("macosx")
-LUA_LIB_NAME = "lua"
+
+USE_AUDIO = true
+AUDIO_LIB = "miniaudio"
+MINIAUDIO_SUPPORT_OPUS_VORBIS = true
+MINIAUDIO_BUILD_OPUS_VORBIS = os.istarget("windows")
+IRRKLANG_PRO_BUILD_IKPMP3 = false
 
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
+SERVER_PRO3_SUPPORT = false
 SERVER_TAG_SURRENDER_CONFIRM = false
 USE_IRRKLANG = false
 
@@ -19,7 +27,7 @@ newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
 newoption { trigger = "no-build-lua", category = "YGOPro - lua", description = "" }
 newoption { trigger = "lua-include-dir", category = "YGOPro - lua", description = "", value = "PATH" }
 newoption { trigger = "lua-lib-dir", category = "YGOPro - lua", description = "", value = "PATH" }
-newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME", default = "lua" }
+newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME", default = LUA_LIB_NAME }
 newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "" }
 
 newoption { trigger = "build-event", category = "YGOPro - event", description = "" }
@@ -41,6 +49,53 @@ newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", descript
 newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "no-audio", category = "YGOPro", description = "" }
+newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "miniaudio, irrklang", default = AUDIO_LIB }
+
+newoption { trigger = "miniaudio-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "miniaudio-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "no-miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "no-build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "opus-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "opus-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "vorbis-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+
+newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use audio-lib=irrklang" }
+newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use no-audio" }
+newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+
+newoption { trigger = "no-audio", category = "YGOPro", description = "" }
+newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "miniaudio, irrklang", default = AUDIO_LIB }
+
+newoption { trigger = "miniaudio-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "miniaudio-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "no-miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "no-build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
+newoption { trigger = "opus-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "opus-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "vorbis-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
+
+newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use audio-lib=irrklang" }
+newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use no-audio" }
+newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+
+newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
+newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
+newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
+newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
+newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
 
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross compile for Apple Silicon" }
@@ -48,6 +103,7 @@ newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross compi
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
@@ -154,6 +210,74 @@ if not BUILD_IRRLICHT then
 end
 
 USE_AUDIO = not SERVER_MODE and not GetParam("no-audio")
+if GetParam("no-audio") then
+    USE_AUDIO = false
+elseif GetParam("no-use-miniaudio") then
+    print("Warning: --no-use-miniaudio is deprecated, use --no-audio")
+    USE_AUDIO = false
+elseif GetParam("use-miniaudio") then
+    print("Warning: --use-miniaudio is deprecated, use --audio-lib=miniaudio")
+    USE_AUDIO = true
+    AUDIO_LIB = "miniaudio"
+elseif GetParam("no-use-irrklang") then
+    print("Warning: --no-use-irrklang is deprecated, use --no-audio")
+    USE_AUDIO = false
+elseif GetParam("use-irrklang") then
+    print("Warning: --use-irrklang is deprecated, use --audio-lib=irrklang")
+    USE_AUDIO = true
+    AUDIO_LIB = "irrklang"
+end
+
+if USE_AUDIO then
+    AUDIO_LIB = GetParam("audio-lib") or AUDIO_LIB
+    if AUDIO_LIB == "miniaudio" then
+        if GetParam("miniaudio-support-opus-vorbis") then
+            MINIAUDIO_SUPPORT_OPUS_VORBIS = true
+        elseif GetParam("no-miniaudio-support-opus-vorbis") then
+            MINIAUDIO_SUPPORT_OPUS_VORBIS = false
+        end
+        if MINIAUDIO_SUPPORT_OPUS_VORBIS then
+            if GetParam("no-build-opus-vorbis") then
+                MINIAUDIO_BUILD_OPUS_VORBIS = false
+            elseif GetParam("build-opus-vorbis") then
+                MINIAUDIO_BUILD_OPUS_VORBIS = true
+            end
+            if not MINIAUDIO_BUILD_OPUS_VORBIS then
+                OPUS_INCLUDE_DIR = GetParam("opus-include-dir") or os.findheader("opus")
+                OPUS_LIB_DIR = GetParam("opus-lib-dir") or os.findlib("opusfile")
+                VORBIS_INCLUDE_DIR = GetParam("vorbis-include-dir") or os.findheader("vorbis")
+                VORBIS_LIB_DIR = GetParam("vorbis-lib-dir") or os.findlib("vorbis")
+                OGG_INCLUDE_DIR = GetParam("ogg-include-dir") or os.findheader("ogg")
+                OCG_LIB_DIR = GetParam("ogg-lib-dir") or os.findlib("ogg")
+            end
+        end
+    elseif AUDIO_LIB == "irrklang" then
+        print("Warning: irrKlang is deprecated and may be removed in future, please consider switching to miniaudio")
+        IRRKLANG_INCLUDE_DIR = GetParam("irrklang-include-dir") or "../irrklang/include"
+        if os.istarget("windows") then
+            IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
+        elseif os.istarget("linux") then
+            IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
+            IRRKLANG_LINK_RPATH = "-Wl,-rpath=./irrklang/bin/linux-gcc-64/"
+        elseif os.istarget("macosx") then
+            IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
+        end
+        IRRKLANG_LIB_DIR = GetParam("irrklang-lib-dir") or IRRKLANG_LIB_DIR
+        if GetParam("irrklang-pro") and os.istarget("windows") then
+            IRRKLANG_PRO = true
+        elseif GetParam("no-irrklang-pro") then
+            IRRKLANG_PRO = false
+        end
+        if IRRKLANG_PRO then
+            -- irrklang pro can't use the pro lib to debug
+            IRRKLANG_PRO_RELEASE_LIB_DIR = GetParam("irrklang-pro-release-lib-dir") or "../irrklang/lib/Win32-vs2019"
+            IRRKLANG_PRO_DEBUG_LIB_DIR = GetParam("irrklang-pro-debug-lib-dir") or "../irrklang/lib/Win32-visualStudio-debug"
+        end
+        IRRKLANG_PRO_BUILD_IKPMP3 = GetParam("build-ikpmp3") or IRRKLANG_PRO
+    else
+        error("Unknown audio library: " .. AUDIO_LIB)
+    end
+end
 
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
@@ -173,6 +297,12 @@ end
 if GetParam("server-pro2-support") then
     SERVER_PRO2_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-pro3-support") then
+    SERVER_PRO3_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 if GetParam("server-tag-surrender-confirm") then
     SERVER_TAG_SURRENDER_CONFIRM = true
@@ -185,6 +315,8 @@ if SERVER_MODE then
     IRRKLANG_PRO = false
     if not SERVER_ZIP_SUPPORT then
         BUILD_IRRLICHT = false
+    else
+        BUILD_IRRLICHT = true
     end
 end
 
@@ -205,7 +337,9 @@ workspace "YGOPro"
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
+if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
+end
         systemversion "latest"
         startproject "YGOPro"
         if WINXP_SUPPORT then
@@ -213,6 +347,9 @@ workspace "YGOPro"
             toolset "v141_xp"
         else
             defines { "WINVER=0x0601" } -- WIN7
+        end
+        if SERVER_PRO3_SUPPORT then
+            architecture "x86_64"
         end
 
     filter "system:macosx"
@@ -244,7 +381,7 @@ end
             flags { "LinkTimeOptimization" }
         end
         staticruntime "On"
-        disablewarnings { "4244", "4267", "4838", "4577", "4018", "4996", "4477", "4091", "4800", "6011", "6031", "6054", "6262" }
+        disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
@@ -257,12 +394,21 @@ end
         disablewarnings { "6011", "6031", "6054", "6262" }
 
     filter "action:vs*"
+        cdialect "C11"
+        if not WINXP_SUPPORT then
+           conformancemode "On" 
+        end
         vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
 
     filter "not action:vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
+
+if SERVER_PRO3_SUPPORT then
+    filter "not action:vs*"
+        pic "On"
+end
 
     filter {}
 
@@ -285,4 +431,12 @@ end
     end
     if BUILD_SQLITE then
         include "sqlite3"
+    end
+    if USE_AUDIO then
+        if AUDIO_LIB=="miniaudio" then
+            include "miniaudio"
+        end
+        if IRRKLANG_PRO_BUILD_IKPMP3 then
+            include "ikpmp3"
+        end
     end
