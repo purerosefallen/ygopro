@@ -45,8 +45,8 @@ public:
 	bool IsCurrentlyPlaying(wchar_t* music);
 	void PlayMusic(wchar_t* music, bool loop);
 	void PlayBGM(int scene);
-	void PlayCustomBGM(char* BGMName);
-	void PlayCustomSound(char* SoundName);	
+	void PlayCustomBGM(wchar_t* BGMName);
+	void PlayCustomSound(wchar_t* SoundName);	
 	void StopBGM();
 	void StopSound();
 	void SetSoundVolume(double volume);
