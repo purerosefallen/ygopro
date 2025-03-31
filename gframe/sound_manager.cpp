@@ -284,7 +284,7 @@ void SoundManager::PlayMusic(char* song, bool loop) {
 		return;
 	if(!IsCurrentlyPlaying(song)) {
 		StopBGM();
-		SetSoundVolume(mainGame->gameConf.music_volume);
+	SetMusicVolume(mainGame->gameConf.music_volume);
 #ifdef YGOPRO_USE_MINIAUDIO
 		strcpy(currentPlayingMusic, song);
 #ifdef _WIN32
