@@ -98,15 +98,12 @@ void SoundManager::PlaySound(char* sound) {
 			if(usingSoundEffectPointer) {
 				free(playingSoundEffect[i]);
 				playingSoundEffect[i] = nullptr;
-				printf("free sound %d\n", i);
 			} else {
 				usingSoundEffectPointer = playingSoundEffect[i];
-				printf("reusing sound %d\n", i);
 			}
 		}
 		if(!playingSoundEffect[i] && !usingSoundEffectPointer) {
 			usingSoundEffectPointer = playingSoundEffect[i] = (ma_sound*)malloc(sizeof(ma_sound));
-			printf("alloc sound %d\n", i);
 		}
 	}
 	if (!usingSoundEffectPointer) {
