@@ -64,7 +64,7 @@ public:
 	void LoadLFList();
 	const wchar_t* GetLFListName(unsigned int lfhash);
 	const LFList* GetLFList(unsigned int lfhash);
-	unsigned int CheckDeck(Deck& deck, int lfhash, int rule);
+	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
 	int CheckSpellCount(Deck& deck);
 	int LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_packlist = false);
 	bool LoadSide(Deck& deck, int* dbuf, int mainc, int sidec);

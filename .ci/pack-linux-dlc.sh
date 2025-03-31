@@ -4,7 +4,13 @@ set -o errexit
 
 ARCHIVE_FILES=(ygopro cards.cdb locales fonts sound textures strings.conf system.conf pack)
 
-TARGET_PLATFORM=linux
+if [[ -z "$TARGET_PLATFORM" ]]; then
+    TARGET_PLATFORM=linux
+fi
+
+if [[ "$TARGET_PLATFORM" != "linuxarm" ]]; then
+    ARCHIVE_FILES+=(sound)
+fi
 
 apt update && apt -y install tar zstd
 mkdir dist replay
