@@ -6,7 +6,7 @@ if [ ! -d "miniaudio" ]; then
   git clone --depth=1 --branch 0.11.22 https://github.com/mackron/miniaudio
 fi
 
-cp -rf extras/miniaudio_split/miniaudio.* .
+cp -rf miniaudio/extras/miniaudio_split/miniaudio.* miniaudio/
 
 mkdir -p miniaudio/external
 
