@@ -111,7 +111,8 @@ boolOptions = {
     "no-lua-safe",
     "message-debug",
     "no-side-check",
-    "enable-debug-func"
+    "enable-debug-func",
+    "log-lua-memory-size",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -124,6 +125,7 @@ numberOptions = {
     "min-deck",
     "max-extra",
     "max-side",
+    "lua-memory-size",
 }
 
 for _, numberOption in ipairs(numberOptions) do
