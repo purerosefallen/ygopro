@@ -113,6 +113,7 @@ boolOptions = {
     "no-side-check",
     "enable-debug-func",
     "log-lua-memory-size",
+    "log-in-chat",
 }
 
 for _, boolOption in ipairs(boolOptions) do

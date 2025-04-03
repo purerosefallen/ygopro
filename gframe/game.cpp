@@ -2072,6 +2072,17 @@ void Game::ClearChatMsg() {
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::AddDebugMsg(const char* msg) {
+#ifdef YGOPRO_LOG_IN_CHAT
+	wchar_t msgbuf_w[1024];
+	wchar_t msgbuf_w2[1024];
+	uint16_t msgbuf_u16[LEN_CHAT_MSG];
+	BufferIO::DecodeUTF8(msg, msgbuf_w);
+	myswprintf(msgbuf_w2, L"[Script Error]: %ls", msgbuf_w); // prefix for debug messages
+	auto len = BufferIO::CopyCharArray(msgbuf_w2, msgbuf_u16);
+	DuelPlayer tmp_dp;
+	tmp_dp.type = 11;
+	NetServer::duel_mode->Chat(&tmp_dp, (unsigned char*)msgbuf_u16, (len + 1) * sizeof(uint16_t)); // send to chat log
+#endif
 #ifdef YGOPRO_SERVER_MODE
 	fprintf(stderr, "%s\n", msg);
 #else

@@ -129,7 +129,7 @@ exec_windows:
 exec_windows_pro3:
   extends: .exec_windows
   script:
-    - '.\premake5.exe vs2019 --server-pro3-support'
+    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - mkdir dist
     - mkdir dist\windows
@@ -191,11 +191,13 @@ exec_windows_pro3:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   variables:
     SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.so
 
 .use_pro3_macos:
   variables:
     SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.dylib
     LIBEVENT_PREBUILD_FLAGS: '-fPIC'
 
