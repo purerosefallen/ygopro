@@ -403,9 +403,9 @@ workspace "YGOPro"
             buildoptions {
                 "-march=armv8-a",
                 "-mtune=cortex-a72",
-                "-fPIC",
                 "-Wno-psabi"
             }
+            pic "On"
         end
 
     filter { "configurations:Debug", "action:vs*" }
