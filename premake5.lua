@@ -290,7 +290,7 @@ end
 
 function isRunningUnderRosetta()
     local rosetta_result=spawn("sysctl -n sysctl.proc_translated 2>/dev/null")
-    return rosetta_result=(tonumber(rosetta_result) == 1)
+    return tonumber(rosetta_result) == 1
 end
 
 function IsRunningUnderARM()
