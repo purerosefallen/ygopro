@@ -10,15 +10,30 @@ class NetServer {
 private:
 	static std::unordered_map<bufferevent*, DuelPlayer> users;
 	static unsigned short server_port;
+#ifndef YGOPRO_SERVER_MODE
 	static event_base* net_evbase;
+#endif
 	static event* broadcast_ev;
 	static evconnlistener* listener;
+#ifndef YGOPRO_LOG_IN_CHAT
 	static DuelMode* duel_mode;
+#endif
 	static unsigned char net_server_write[SIZE_NETWORK_BUFFER];
 	static size_t last_sent;
 
 public:
+#ifdef YGOPRO_LOG_IN_CHAT
+	static DuelMode* duel_mode;
+#endif
+#ifdef YGOPRO_SERVER_MODE
+	static event_base* net_evbase;
+	static void InitDuel();
+	static void InitTestCard(int code);
+	static unsigned short StartServer(unsigned short port);
+	static bool IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len);
+#else
 	static bool StartServer(unsigned short port);
+#endif //YGOPRO_SERVER_MODE
 	static bool StartBroadcast();
 	static void StopServer();
 	static void StopBroadcast();
@@ -67,6 +82,14 @@ public:
 		if(dp)
 			bufferevent_write(dp->bev, net_server_write, last_sent);
 	}
+#ifdef YGOPRO_SERVER_MODE
+	static void ReSendToPlayers(DuelPlayer* dp1, DuelPlayer* dp2) {
+		if(dp1)
+			bufferevent_write(dp1->bev, net_server_write, last_sent);
+		if(dp2)
+			bufferevent_write(dp2->bev, net_server_write, last_sent);
+	}
+#endif //YGOPRO_SERVER_MODE
 };
 
 }

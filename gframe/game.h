@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "config.h"
+#ifndef YGOPRO_SERVER_MODE
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -16,6 +17,9 @@
 #include "deck_con.h"
 #include "menu_handler.h"
 #include "CGUISkinSystem/CGUISkinSystem.h"
+#else
+#include "netserver.h"
+#endif //YGOPRO_SERVER_MODE
 #include <ctime>
 #include <unordered_map>
 #include <vector>
@@ -26,6 +30,8 @@
 #ifndef YGOPRO_DEFAULT_DUEL_RULE
 #define YGOPRO_DEFAULT_DUEL_RULE			5
 #endif
+
+#define DEFAULT_DUEL_RULE YGOPRO_DEFAULT_DUEL_RULE
 constexpr int CONFIG_LINE_SIZE = 1024;
 constexpr int TEXT_LINE_SIZE = 256;
 
@@ -34,6 +40,7 @@ namespace ygo {
 bool IsExtension(const wchar_t* filename, const wchar_t* extension);
 bool IsExtension(const char* filename, const char* extension);
 
+#ifndef YGOPRO_SERVER_MODE
 struct Config {
 	bool use_d3d{ false };
 	bool use_image_scale{ true };
@@ -156,11 +163,19 @@ struct FadingUnit {
 	irr::core::vector2di fadingLR;
 	irr::core::vector2di fadingDiff;
 };
+#endif //YGOPRO_SERVER_MODE
 
 class Game {
 
 public:
 	bool Initialize();
+#ifdef YGOPRO_SERVER_MODE
+	void MainServerLoop();
+	void MainTestLoop(int code);
+	void LoadExpansions();
+	void AddDebugMsg(const char* msgbuf);
+	void initUtils();
+#else
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
@@ -665,13 +680,25 @@ public:
 	irr::gui::IGUIButton* btnBigCardZoomIn;
 	irr::gui::IGUIButton* btnBigCardZoomOut;
 	irr::gui::IGUIButton* btnBigCardClose;
+#endif //YGOPRO_SERVER_MODE
 };
 
 extern Game* mainGame;
 
+#ifdef YGOPRO_SERVER_MODE
+extern unsigned short server_port;
+extern unsigned short replay_mode;
+extern HostInfo game_info;
+extern unsigned int pre_seed[5];
+extern unsigned int duel_flags;
+#endif
 }
 
+#ifdef YGOPRO_SERVER_MODE
+#define SIZE_QUERY_BUFFER	0x40000
+#else
 #define SIZE_QUERY_BUFFER	0x4000
+#endif
 
 #define CARD_IMG_WIDTH		177
 #define CARD_IMG_HEIGHT		254

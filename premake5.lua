@@ -14,6 +14,13 @@ MINIAUDIO_SUPPORT_OPUS_VORBIS = true
 MINIAUDIO_BUILD_OPUS_VORBIS = os.istarget("windows")
 IRRKLANG_PRO_BUILD_IKPMP3 = false
 
+SERVER_MODE = true
+SERVER_ZIP_SUPPORT = false
+SERVER_PRO2_SUPPORT = false
+SERVER_PRO3_SUPPORT = false
+SERVER_TAG_SURRENDER_CONFIRM = false
+USE_IRRKLANG = false
+
 -- read settings from command line or environment variables
 
 newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
@@ -93,14 +100,20 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross compile for Apple Silicon" }
 
--- koishipro specific
+newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
     "compat-mycard",
     "no-lua-safe",
     "message-debug",
     "no-side-check",
+    "enable-debug-func",
     "log-lua-memory-size",
+    "log-in-chat",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -199,6 +212,7 @@ if not BUILD_IRRLICHT then
     IRRLICHT_LIB_DIR = GetParam("irrlicht-lib-dir") or os.findlib("irrlicht")
 end
 
+USE_AUDIO = not SERVER_MODE and not GetParam("no-audio")
 if GetParam("no-audio") then
     USE_AUDIO = false
 elseif GetParam("no-use-miniaudio") then
@@ -287,6 +301,37 @@ function spawn(cmd)
         return nil
     end
 end
+if GetParam("server-mode") then
+    SERVER_MODE = true
+end
+if GetParam("server-zip-support") then
+    SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-pro2-support") then
+    SERVER_PRO2_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-pro3-support") then
+    SERVER_PRO3_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-tag-surrender-confirm") then
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+
+if SERVER_MODE then
+    BUILD_FREETYPE = false
+    BUILD_IKPMP3 = false
+    USE_IRRKLANG = false
+    IRRKLANG_PRO = false
+    if not SERVER_ZIP_SUPPORT then
+        BUILD_IRRLICHT = false
+    else
+        BUILD_IRRLICHT = true
+    end
+end
 
 function isRunningUnderRosetta()
     local rosetta_result=spawn("sysctl -n sysctl.proc_translated 2>/dev/null")
@@ -342,7 +387,6 @@ workspace "YGOPro"
 
     configurations { "Release", "Debug" }
 
-
     for _, numberOption in ipairs(numberOptions) do
         ApplyNumber(numberOption)
     end
@@ -351,10 +395,11 @@ workspace "YGOPro"
         ApplyBoolean(boolOption)
     end
 
-
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
+if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
+end
         systemversion "latest"
         startproject "YGOPro"
         if WINXP_SUPPORT then
@@ -363,6 +408,9 @@ workspace "YGOPro"
         else
             defines { "WINVER=0x0601" } -- WIN7
         end
+        if SERVER_PRO3_SUPPORT then
+            architecture "x86_64"
+        end
 
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
@@ -370,7 +418,9 @@ workspace "YGOPro"
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos12" }
         end
+if not SERVER_MODE then
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
+end
 
     filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
@@ -423,6 +473,11 @@ workspace "YGOPro"
     filter "not action:vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
 
+if SERVER_PRO3_SUPPORT then
+    filter "not action:vs*"
+        pic "On"
+end
+
     filter {}
 
     include "ocgcore"
@@ -433,11 +488,14 @@ workspace "YGOPro"
     if BUILD_EVENT then
         include "event"
     end
-    if BUILD_FREETYPE then
+    if BUILD_FREETYPE and not SERVER_MODE then
         include "freetype"
     end
-    if BUILD_IRRLICHT then
+    if BUILD_IRRLICHT and not SERVER_MODE then
         include "irrlicht"
+    end
+    if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
+        include "irrlicht/premake5-only-zipreader.lua"
     end
     if BUILD_SQLITE then
         include "sqlite3"
