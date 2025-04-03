@@ -161,7 +161,7 @@ exec_linuxarm:
   tags:
     - arm
   variables:
-    OPUS_FLAGS: '-fFPIC' # force position independent code for arm
+    OPUS_FLAGS: '-fPIC' # force position independent code for arm
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic # use a special docker image for arm build, which has fPIC enabled by default
 
 ._exec_macos_platform:
