@@ -160,6 +160,8 @@ exec_linuxarm:
   extends: .exec_linux
   tags:
     - arm
+  variables:
+    OPUS_FLAGS: '-fFPIC' # force position independent code for arm
 
 ._exec_macos_platform:
   extends: ._exec_build
@@ -183,8 +185,8 @@ exec_macos_platform_m1:
   extends: ._exec_macos_platform
   tags:
     - macos-m1
-  variables:
-    MAC_ARM: 1
+  #variables:
+  #  MAC_ARM: 1
 
 exec_macos:
   stage: combine

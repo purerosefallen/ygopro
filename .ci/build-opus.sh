@@ -22,7 +22,7 @@ build_single_thing() {
   cd "external/$lib_name"
   shift
   maybe_patch_configure
-  PKG_CONFIG_PATH="$external_built_dir/lib/pkgconfig" ./configure --prefix="$external_built_dir" --enable-static=yes --enable-shared=no "$@"
+  PKG_CONFIG_PATH="$external_built_dir/lib/pkgconfig" CFLAGS="$OPUS_FLAGS" CXXFLAGS="$OPUS_FLAGS" ./configure --prefix="$external_built_dir" --enable-static=yes --enable-shared=no "$@"
   make -j$(nproc)
   make install
   cd ../..
