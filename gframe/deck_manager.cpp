@@ -102,6 +102,10 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 	if (!lflist)
 		return 0;
 	auto& list = lflist->content;
+	char remaining_limit[3]{};
+	remaining_limit[0] = 0;
+	remaining_limit[1] = 1;
+	remaining_limit[2] = 2;
 	const unsigned int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
 	unsigned int avail = 0;
 	if (rule >= 0 && rule < (int)(sizeof rule_map / sizeof rule_map[0]))
@@ -118,8 +122,14 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->first;
+		if(it != list.end()) {
+			auto limit = it->second;
+			if(limit > 2)
+				limit = 2;
+			if(remaining_limit[limit] == 0)
+				return (DECKERROR_LFLIST << 28) | cit->first;
+				--remaining_limit[limit];
+		}
 	}
 	for (auto& cit : deck.extra) {
 		auto gameruleDeckError = checkAvail(cit->second.ot, avail);
@@ -133,8 +143,14 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->first;
+		if(it != list.end()) {
+			auto limit = it->second;
+			if(limit > 2)
+				limit = 2;
+			if(remaining_limit[limit] == 0)
+				return (DECKERROR_LFLIST << 28) | cit->first;
+				--remaining_limit[limit];
+		}
 	}
 	for (auto& cit : deck.side) {
 		auto gameruleDeckError = checkAvail(cit->second.ot, avail);
@@ -148,8 +164,14 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->first;
+		if(it != list.end()) {
+			auto limit = it->second;
+			if(limit > 2)
+				limit = 2;
+			if(remaining_limit[limit] == 0)
+				return (DECKERROR_LFLIST << 28) | cit->first;
+				--remaining_limit[limit];
+		}
 	}
 	return 0;
 }
