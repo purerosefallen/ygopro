@@ -85,7 +85,7 @@ void SoundManager::RefershBGMDir(std::wstring path, int scene) {
 		}
 	});
 }
-void SoundManager::PlaySound(char* sound) {
+void SoundManager::PlaySound(wchar_t* sound) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableSound->isChecked())
 		return;
@@ -111,17 +111,13 @@ void SoundManager::PlaySound(char* sound) {
 		usingSoundEffectPointer = playingSoundEffect[0];
 		ma_sound_uninit(usingSoundEffectPointer);
 	}
-#ifdef _WIN32
-	wchar_t sound_w[1024];
-	BufferIO::DecodeUTF8(sound, sound_w);
-	ma_sound_init_from_file_w(&engineSound, sound_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, usingSoundEffectPointer);
-#else
-	ma_sound_init_from_file(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, usingSoundEffectPointer);
-#endif
+	ma_sound_init_from_file_w(&engineSound, sound, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, usingSoundEffectPointer);
 	ma_sound_start(usingSoundEffectPointer);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-	engineSound->play2D(sound);
+		char csound[1024];
+		BufferIO::EncodeUTF8(sound, csound);
+	engineSound->play2D(csound);
 #endif
 #endif
 }
@@ -258,12 +254,13 @@ void SoundManager::PlaySoundEffect(int sound) {
 	default:
 		break;
 	}
-	char soundPath[40];
-	std::snprintf(soundPath, 40, "./sound/%s.wav", soundName);
-	PlaySound(soundPath);
+	wchar_t soundPathW[40];
+	myswprintf(soundPathW, L"./sound/%s.wav", soundName);
+	PlaySound(soundPathW);
 #endif // YGOPRO_USE_AUDIO
 }
 void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
+#ifdef YGOPRO_USE_AUDIO
 	if(element == mainGame->wMessage) {
 		PlaySoundEffect(SOUND_INFO);
 	} else if(element == mainGame->wQuery) {
@@ -285,37 +282,44 @@ void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
 	} else if(element == mainGame->wFTSelect) {
 		PlaySoundEffect(SOUND_QUESTION);
 	}
+#endif // YGOPRO_USE_AUDIO
 }
-bool SoundManager::IsCurrentlyPlaying(char* song) {
+bool SoundManager::IsPlayingMusic(wchar_t* music) {
 #ifdef YGOPRO_USE_MINIAUDIO
-	return currentPlayingMusic[0] && strcmp(currentPlayingMusic, song) == 0 && ma_sound_is_playing(&soundBGM);
+	if(music) {
+		return !mywcsncasecmp(currentPlayingMusic, music, 1024) && ma_sound_is_playing(&soundBGM);
+	} else {
+		return ma_sound_is_playing(&soundBGM);
+	}
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-	return engineMusic->isCurrentlyPlaying(song);
+	if(music) {
+		char cmusic[1024];
+		BufferIO::EncodeUTF8(music, cmusic);
+		return engineMusic->isCurrentlyPlaying(cmusic);
+	} else {
+		return soundBGM && !soundBGM->isFinished();
+	}
 #endif
 	return false;
 }
-void SoundManager::PlayMusic(char* song, bool loop) {
+void SoundManager::PlayMusic(wchar_t* music, bool loop) {
 #ifdef YGOPRO_USE_AUDIO
 	if(!mainGame->chkEnableMusic->isChecked())
 		return;
-	if(!IsCurrentlyPlaying(song)) {
+	if(!IsPlayingMusic(music)) {
 		StopBGM();
 	SetMusicVolume(mainGame->gameConf.music_volume);
 #ifdef YGOPRO_USE_MINIAUDIO
-		strcpy(currentPlayingMusic, song);
-#ifdef _WIN32
-		wchar_t song_w[1024];
-		BufferIO::DecodeUTF8(song, song_w);
-		ma_sound_init_from_file_w(&engineMusic, song_w, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
-#else
-		ma_sound_init_from_file(&engineMusic, song, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
-#endif
+		BufferIO::CopyWStr(music, currentPlayingMusic, 1024);
+		ma_sound_init_from_file_w(&engineMusic, music, MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_STREAM, nullptr, nullptr, &soundBGM);
 		ma_sound_set_looping(&soundBGM, loop);
 		ma_sound_start(&soundBGM);
 #endif
 #ifdef YGOPRO_USE_IRRKLANG
-		soundBGM = engineMusic->play2D(song, loop, false, true);
+		char cmusic[1024];
+		BufferIO::EncodeUTF8(music, cmusic);
+		soundBGM = engineMusic->play2D(cmusic, loop, false, true);
 #endif
 	}
 #endif
@@ -326,28 +330,22 @@ void SoundManager::PlayBGM(int scene) {
 		return;
 	if(!mainGame->chkMusicMode->isChecked())
 		scene = BGM_ALL;
-	char BGMName[1024];
-#if defined(YGOPRO_USE_MINIAUDIO)
-	if((scene != bgm_scene) && (bgm_scene != BGM_CUSTOM) || (scene != previous_bgm_scene) && (bgm_scene == BGM_CUSTOM) || !IsCurrentlyPlaying(currentPlayingMusic)) {
-#elif defined(YGOPRO_USE_IRRKLANG)
-	if((scene != bgm_scene) && (bgm_scene != BGM_CUSTOM) || (scene != previous_bgm_scene) && (bgm_scene == BGM_CUSTOM) || (soundBGM && soundBGM->isFinished())) {
-#endif
+	if((scene != bgm_scene) && (bgm_scene != BGM_CUSTOM) || (scene != previous_bgm_scene) && (bgm_scene == BGM_CUSTOM) || !IsPlayingMusic()) {
 		int count = BGMList[scene].size();
 		if(count <= 0)
 			return;
 		bgm_scene = scene;
 		int bgm = rnd.get_random_integer(0, count -1);
 		auto name = BGMList[scene][bgm].c_str();
-		wchar_t fname[1024];
-		myswprintf(fname, L"./sound/BGM/%ls", name);
-		BufferIO::EncodeUTF8(fname, BGMName);
+		wchar_t BGMName[1024];
+		myswprintf(BGMName, L"./sound/BGM/%ls", name);
 		PlayMusic(BGMName, false);
 	}
 #endif
 }
-void SoundManager::PlayCustomBGM(char* BGMName) {
+void SoundManager::PlayCustomBGM(wchar_t* BGMName) {
 #ifdef YGOPRO_USE_AUDIO
-	if(!mainGame->chkEnableMusic->isChecked() || !mainGame->chkMusicMode->isChecked() || bgm_process || IsCurrentlyPlaying(BGMName))
+	if(!mainGame->chkEnableMusic->isChecked() || !mainGame->chkMusicMode->isChecked() || bgm_process || IsPlayingMusic(BGMName))
 		return;
 	bgm_process = true;
 	int pscene = bgm_scene;
@@ -358,7 +356,7 @@ void SoundManager::PlayCustomBGM(char* BGMName) {
 	bgm_process = false;
 #endif
 }
-void SoundManager::PlayCustomSound(char* SoundName) {
+void SoundManager::PlayCustomSound(wchar_t* SoundName) {
 	PlaySound(SoundName);
 }
 void SoundManager::StopBGM() {

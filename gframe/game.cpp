@@ -1479,9 +1479,9 @@ void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
 		return;
 	botInfo.clear();
-	FILE* fp = std::fopen(GetLocaleDir("bot.conf"), "r");
+	FILE* fp = myfopen(GetLocaleDir("bot.conf"), "r");
 	if(!fp)
-		fp = std::fopen("bot.conf", "r");
+		fp = myfopen("bot.conf", "r");
 	char linebuf[256]{};
 	char strbuf[256]{};
 	if(fp) {
@@ -1542,7 +1542,7 @@ void Game::RefreshBot() {
 	}
 }
 bool Game::LoadConfigFromFile(const char* file) {
-	FILE* fp = std::fopen(file, "r");
+	FILE* fp = myfopen(file, "r");
 	if(!fp){
 		return false;
 	}
@@ -1815,9 +1815,9 @@ void Game::LoadConfig() {
 }
 void Game::SaveConfig() {
 #ifdef YGOPRO_COMPAT_MYCARD
-	FILE* fp = std::fopen("system.conf", "w");
+	FILE* fp = myfopen("system.conf", "w");
 #else
-	FILE* fp = std::fopen("system_user.conf", "w");
+	FILE* fp = myfopen("system_user.conf", "w");
 #endif //YGOPRO_COMPAT_MYCARD
 	std::fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
 	char linebuf[CONFIG_LINE_SIZE];
@@ -2100,7 +2100,7 @@ void Game::AddDebugMsg(const char* msg) {
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::ErrorLog(const char* msg) {
-	FILE* fp = std::fopen("error.log", "a");
+	FILE* fp = myfopen("error.log", "a");
 	if(!fp)
 		return;
 	time_t nowtime = std::time(nullptr);

@@ -48,9 +48,9 @@ void Replay::BeginRecord() {
 	strftime(tmppath, 40, "./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
 	char path[40];
 	std::sprintf(path, tmppath, server_port);
-	fp = std::fopen(path, "wb");
+	fp = myfopen(path, "wb");
 #else
-	fp = std::fopen("./replay/_LastReplay.yrp", "wb");
+	fp = myfopen("./replay/_LastReplay.yrp", "wb");
 #endif //YGOPRO_SERVER_MODE
 	if(!fp)
 		return;
