@@ -45,6 +45,7 @@ void DeckManager::LoadLFListSingle(const char* path) {
 }
 void DeckManager::LoadLFList() {
 	LoadLFListSingle("expansions/lflist.conf");
+	LoadLFListSingle("specials/lflist.conf");
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
 	nolimit.listName = L"N/A";
