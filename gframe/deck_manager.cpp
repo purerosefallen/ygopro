@@ -37,7 +37,7 @@ void DeckManager::LoadLFListSingle(const char* path) {
 			int count = -1;
 			if (std::sscanf(linebuf, "%9u%*[ ]%9d", &code, &count) != 2)
 				continue;
-			if (count < 0 || count > 2)
+			if (count < 0 || count > 3)
 				continue;
 			cur->content[code] = count;
 			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
