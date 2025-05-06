@@ -146,6 +146,9 @@ bool Game::Initialize() {
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	if(!numFont) {
 		const wchar_t* numFontPaths[] = {
+			L"./fonts/numFont.ttf",
+			L"./fonts/numFont.ttc",
+			L"./fonts/numFont.otf",
 			L"C:/Windows/Fonts/arialbd.ttf",
 			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
 			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
@@ -153,9 +156,6 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
 			L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
 			L"/System/Library/Fonts/SFNS.ttf",
-			L"./fonts/numFont.ttf",
-			L"./fonts/numFont.ttc",
-			L"./fonts/numFont.otf"
 		};
 		for(const wchar_t* path : numFontPaths) {
 			BufferIO::CopyWideString(path, gameConf.numfont);
@@ -167,6 +167,9 @@ bool Game::Initialize() {
 	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 	if(!textFont) {
 		const wchar_t* textFontPaths[] = {
+			L"./fonts/textFont.ttf",
+			L"./fonts/textFont.ttc",
+			L"./fonts/textFont.otf",
 			L"C:/Windows/Fonts/msyh.ttc",
 			L"C:/Windows/Fonts/msyh.ttf",
 			L"C:/Windows/Fonts/simsun.ttc",
@@ -178,9 +181,7 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
 			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
 			L"/System/Library/Fonts/PingFang.ttc",
-			L"./fonts/textFont.ttf",
-			L"./fonts/textFont.ttc",
-			L"./fonts/textFont.otf"
+			L"/System/Library/Fonts/STHeiti Medium.ttc",
 		};
 		for(const wchar_t* path : textFontPaths) {
 			BufferIO::CopyWideString(path, gameConf.textfont);
@@ -198,7 +199,7 @@ bool Game::Initialize() {
 			}
 		});
 		if(fpath[0] == 0) {
-			ErrorLog("Failed to load font(s)!");
+			ErrorLog("No fonts found! Please place appropriate font file in the fonts directory, or edit system.conf manually.");
 			return false;
 		}
 		if(!numFont) {
@@ -209,6 +210,10 @@ bool Game::Initialize() {
 			BufferIO::CopyWideString(fpath, gameConf.textfont);
 			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 		}
+	}
+	if(!numFont || !textFont) {
+		ErrorLog("Failed to load font(s)!");
+		return false;
 	}
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48);
@@ -1335,7 +1340,7 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBo
 		return;
 	}
 	wchar_t catepath[256];
-	deckManager.GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
+	DeckManager::GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
 	cbDeck->clear();
 	RefreshDeck(catepath, [cbDeck](const wchar_t* item) { cbDeck->addItem(item); });
 }
@@ -1474,14 +1479,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!std::strcmp(strbuf, "errorlog")) {
 			unsigned int val = std::strtol(valbuf, nullptr, 10);
 			enable_log = val & 0xff;
-		} else if(!std::strcmp(strbuf, "textfont")) {
-			int textfontsize = 0;
-			if (std::sscanf(linebuf, "%63s = %959s %d", strbuf, valbuf, &textfontsize) != 3)
-				continue;
-			gameConf.textfontsize = textfontsize;
-			BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
-		} else if(!std::strcmp(strbuf, "numfont")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.numfont);
 		} else if(!std::strcmp(strbuf, "serverport")) {
 			gameConf.serverport = std::strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "lasthost")) {
@@ -1584,7 +1581,18 @@ bool Game::LoadConfigFromFile(const char* file) {
 			// options allowing multiple words
 			if (std::sscanf(linebuf, "%63s = %959[^\n]", strbuf, valbuf) != 2)
 				continue;
-			if (!std::strcmp(strbuf, "nickname")) {
+			if (!std::strcmp(strbuf, "textfont")) {
+				char* last_space = std::strrchr(valbuf, ' ');
+				if (last_space == nullptr)
+					continue;
+				int fontsize = std::strtol(last_space + 1, nullptr, 10);
+				if (fontsize > 0)
+					gameConf.textfontsize = fontsize;
+				*last_space = 0;
+				BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
+			} else if (!std::strcmp(strbuf, "numfont")) {
+				BufferIO::DecodeUTF8(valbuf, gameConf.numfont);
+			} else if (!std::strcmp(strbuf, "nickname")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.nickname);
 			} else if (!std::strcmp(strbuf, "gamename")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.gamename);
@@ -1994,6 +2002,11 @@ void Game::AddDebugMsg(const char* msg) {
 	}
 }
 void Game::ErrorLog(const char* msg) {
+#ifdef _WIN32
+	OutputDebugStringA(msg);
+#else
+	std::fprintf(stderr, "%s\n", msg);
+#endif
 	FILE* fp = myfopen("error.log", "a");
 	if(!fp)
 		return;
