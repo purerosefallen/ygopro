@@ -22,6 +22,8 @@ mat_common:
     # freetype
     - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     - mv freetype-2.11.1 freetype
+    # irrlicht
+    - ./.ci/prepare-irrlicht.sh
     # miniaudio
     - ./.ci/prepare-miniaudio.sh
     # premake
@@ -31,6 +33,7 @@ mat_common:
       - lua
       - freetype
       - sqlite3
+      - irrlicht
       - miniaudio
 
 mat_submodules:
@@ -53,11 +56,12 @@ mat_linux:
     - linux
   image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
   script:
-    - apt update; apt -y install git wget tar
-    - ./.ci/prepare-irrlicht.sh
-  artifacts:
-    paths:
-      - irrlicht
+    - 'true'
+    #- apt update; apt -y install git wget tar
+    #- ./.ci/prepare-irrlicht.sh
+  #artifacts:
+  #  paths:
+  #    - irrlicht
 
 mat_macos:
   stage: prepare
@@ -67,14 +71,9 @@ mat_macos:
     - apt update; apt -y install wget tar
     - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
     - chmod +x premake5
-    - mkdir irrlicht
-    - cd irrlicht
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
-    - cd ..
   artifacts:
     paths:
       - premake5
-      - irrlicht
 
 mat_windows:
   stage: prepare
@@ -88,13 +87,10 @@ mat_windows:
     # event
     - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
-    # irrlicht
-    - ./.ci/prepare-irrlicht.sh
   artifacts:
     paths:
       - premake5.exe
       - event
-      - irrlicht
 
 ._exec_build:
   stage: build
@@ -130,7 +126,7 @@ exec_windows:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
   dependencies:
     - mat_common
-    - mat_linux
+    #- mat_linux
     - mat_submodules
   variables:
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
@@ -143,7 +139,7 @@ exec_windows:
     OGG_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
   script:
     - ./.ci/build-opus.sh
-    - premake5 gmake --build-freetype --build-sqlite --build-irrlicht
+    - premake5 gmake --build-freetype --build-sqlite
     - cd build
     - make config=release -j$(nproc)
     - cd ..
