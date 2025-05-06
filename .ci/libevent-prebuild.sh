@@ -8,7 +8,7 @@ if [ -d "libevent-stable" ]; then
 fi
 
 if [ ! -d "libevent-2.0.22-stable" ]; then
-  wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+  wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
 fi
 
 install_path="$PWD/libevent-stable"

@@ -6,7 +6,7 @@ LUA_LIB_NAME = "lua"
 BUILD_EVENT = os.istarget("windows")
 BUILD_FREETYPE = os.istarget("windows")
 BUILD_SQLITE = os.istarget("windows")
-BUILD_IRRLICHT = not os.istarget("macosx")
+BUILD_IRRLICHT = true
 
 USE_AUDIO = true
 AUDIO_LIB = "miniaudio"
@@ -396,7 +396,6 @@ workspace "YGOPro"
     end
 
     filter "system:windows"
-        defines { "WIN32", "_WIN32" }
 if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
 end
@@ -414,7 +413,6 @@ end
 
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
-        buildoptions { "-stdlib=libc++" }
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos12" }
         end
