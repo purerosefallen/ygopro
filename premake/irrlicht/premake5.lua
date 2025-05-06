@@ -64,6 +64,10 @@ project "irrlicht"
         "PNG_INTEL_SSE",
     }
 
+    if IS_ARM then
+        defines { "PNG_ARM_NEON_OPT=0", "PNG_ARM_NEON_IMPLEMENTATION=0" }
+    end
+
     files {
         "include/*.h",
         "source/Irrlicht/*.cpp",
@@ -159,7 +163,7 @@ project "irrlicht"
 
     filter { "system:macosx" }
         cppdialect "gnu++14"
-        defines { "GL_SILENCE_DEPRECATION", "PNG_ARM_NEON_OPT=0", "PNG_ARM_NEON_IMPLEMENTATION=0" }
+        defines { "GL_SILENCE_DEPRECATION" }
         undefines { "NO_IRR_COMPILE_WITH_JOYSTICK_EVENTS_" }
         files {
             "source/Irrlicht/MacOSX/*.mm",
