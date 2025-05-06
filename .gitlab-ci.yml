@@ -50,18 +50,17 @@ mat_submodules:
       - ocgcore
       - script
 
-mat_linux:
-  stage: prepare
-  tags:
-    - linux
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
-  script:
-    - 'true'
-    #- apt update; apt -y install git wget tar
-    #- ./.ci/prepare-irrlicht.sh
-  #artifacts:
-  #  paths:
-  #    - irrlicht
+#mat_linux:
+#  stage: prepare
+#  tags:
+#    - linux
+#  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
+#  script:
+#    - apt update; apt -y install git wget tar
+#    - ./.ci/prepare-irrlicht.sh
+#  artifacts:
+#    paths:
+#      - irrlicht
 
 mat_macos:
   stage: prepare
