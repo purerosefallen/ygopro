@@ -5,6 +5,7 @@ project "YGOPro"
     kind "WindowedApp"
     cppdialect "C++14"
     rtti "Off"
+    openmp "On"
 
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
@@ -83,6 +84,7 @@ project "YGOPro"
     filter "not system:windows"
         links { "event_pthreads", "dl", "pthread", "resolv" }
     filter "system:macosx"
+        openmp "Off"
         links { "z" }
         defines { "GL_SILENCE_DEPRECATION" }
         if MAC_ARM then
@@ -95,6 +97,7 @@ project "YGOPro"
     filter "system:linux"
         linkoptions { "-static-libstdc++", "-static-libgcc" }
         links { "GL", "X11", "Xxf86vm" }
+        linkoptions { "-fopenmp" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
