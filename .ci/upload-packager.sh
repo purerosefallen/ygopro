@@ -33,9 +33,13 @@ runForDepot() {
   echo "$result" | jq .
 }
 
-runForDepot win32 zh-CN
-runForDepot linux zh-CN
-runForDepot darwin zh-CN
-runForDepot win32 en-US
-runForDepot linux en-US
-runForDepot darwin en-US
+if [[ "$CI_COMMIT_TAG" == *".pre"* ]]; then
+  echo "This is a pre-release, skipping upload."
+else
+  runForDepot win32 zh-CN
+  runForDepot linux zh-CN
+  runForDepot darwin zh-CN
+  runForDepot win32 en-US
+  runForDepot linux en-US
+  runForDepot darwin en-US
+fi

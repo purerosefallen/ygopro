@@ -14,13 +14,13 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
     - mv lua-5.4.4 lua
     # sqlite3
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
     - mv sqlite-autoconf-3390300 sqlite3
     # freetype
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     - mv freetype-2.11.1 freetype
     # miniaudio
     - ./.ci/prepare-miniaudio.sh
@@ -54,7 +54,7 @@ mat_linux:
   image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
   script:
     - apt update; apt -y install git wget tar
-    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    - ./.ci/prepare-irrlicht.sh
   artifacts:
     paths:
       - irrlicht
@@ -65,11 +65,11 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
     - chmod +x premake5
     - mkdir irrlicht
     - cd irrlicht
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/irrlicht-mycard-mac.tar.gz | tar zfx -
     - cd ..
   artifacts:
     paths:
@@ -83,13 +83,13 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
+    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
     - 7z x -y premake-5.0.0-beta5-windows.zip
     # event
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
     # irrlicht
-    - git clone --depth=1 -b develop https://code.mycard.moe/mycard/irrlicht-new irrlicht
+    - ./.ci/prepare-irrlicht.sh
   artifacts:
     paths:
       - premake5.exe
@@ -229,21 +229,21 @@ assets:
   script:
     - apt update; apt -y install tar wget git
     # starter pack
-    - wget -O - https://code.mycard.moe/mycard/ygopro-starter-pack/-/archive/master/ygopro-starter-pack-master.tar.gz | tar zfx -
+    - wget -O - https://code.moenext.com/mycard/ygopro-starter-pack/-/archive/master/ygopro-starter-pack-master.tar.gz | tar zfx -
     - mv ygopro-starter-pack-master/* .
     # sound
-    - wget -O - https://code.mycard.moe/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
+    - wget -O - https://code.moenext.com/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
     - mv ygopro-sounds-master/sound/* sound
     # fonts
     - mkdir fonts
     - cd fonts
-    - wget -O - https://cdn01.moecube.com/ygopro-fonts.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-fonts.tar.gz | tar zfx -
     - cd ..
     # pack
-    - git clone --depth=1 https://code.mycard.moe/mycard/ygopro-card-list
+    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
     - mv ygopro-card-list/pack .
     # locales
-    - git clone --depth=1 https://code.mycard.moe/nanahira/ygopro-database
+    - git clone --depth=1 https://code.moenext.com/nanahira/ygopro-database
     - mv ygopro-database/locales .
   artifacts:
     paths:
@@ -263,7 +263,7 @@ assets_nonwindows:
     - linux
   script:
     - apt update; apt -y install tar wget
-    - wget -O - https://cdn01.moecube.com/windbot/windbot.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/windbot/windbot.tar.gz | tar zfx -
   artifacts:
     paths:
       - bot.conf
@@ -278,7 +278,7 @@ assets_windows:
   tags:
     - linux
   script:
-    - wget https://cdn01.moecube.com/windbot/WindBot.7z
+    - wget https://cdn02.moecube.com:444/windbot/WindBot.7z
     - 7z x -y WindBot.7z
     - aws s3 --endpoint=https://minio.mycard.moe:9000 sync s3://mycard/koishipro/contents/update-koishipro/ ./update-koishipro
     - rm -rf update-koishipro/.git || true
