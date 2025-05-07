@@ -66,10 +66,6 @@ project "irrlicht"
         "PNG_ARM_NEON_IMPLEMENTATION=0",
     }
 
-    if IS_ARM then
-        defines { "PNG_ARM_NEON_OPT=0", "PNG_ARM_NEON_IMPLEMENTATION=0" }
-    end
-
     files {
         "include/*.h",
         "source/Irrlicht/*.cpp",
