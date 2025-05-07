@@ -62,6 +62,8 @@ project "irrlicht"
         "NO__IRR_COMPILE_WITH_WAD_ARCHIVE_LOADER_",
         "NO_IRR_COMPILE_WITH_ZIP_ENCRYPTION_",
         "PNG_INTEL_SSE",
+        "PNG_ARM_NEON_OPT=0",
+        "PNG_ARM_NEON_IMPLEMENTATION=0",
     }
 
     if IS_ARM then
