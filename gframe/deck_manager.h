@@ -51,6 +51,12 @@ struct Deck {
 	}
 };
 
+struct ReplayDeck {
+	std::vector<uint32_t> main;
+	std::vector<uint32_t> extra;
+	std::vector<uint32_t> side;
+};
+
 class DeckManager {
 public:
 	Deck current_deck;
@@ -69,7 +75,6 @@ public:
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
-	bool SaveDeckBuffer(const int deckbuf[], const wchar_t* name);
 
 	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
 	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
@@ -83,6 +88,7 @@ public:
 	static bool CreateCategory(const wchar_t* name);
 	static bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	static bool DeleteCategory(const wchar_t* name);
+	static bool SaveReplayDeck(const ReplayDeck& deck, const wchar_t* name);
 };
 
 extern DeckManager deckManager;
