@@ -115,7 +115,7 @@ void Game::MainServerLoop() {
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
 #if defined SERVER_PRO2_SUPPORT || defined SERVER_PRO3_SUPPORT
-	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
+	DataManager::FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
