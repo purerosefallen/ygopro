@@ -1544,13 +1544,9 @@ void ClientField::UpdateDeclarableList() {
 		ancard.push_back(trycode);
 		return;
 	}
-	bool try_cache = false;
-	if(pname[0] == 0) {
-		try_cache = true;
-	}
 	mainGame->lstANCard->clear();
 	ancard.clear();
-	if(try_cache && mainGame->dInfo.announce_cache.size()) {
+	if(pname[0] == 0 && mainGame->dInfo.announce_cache.size()) {
 		for(int i = 0; i < mainGame->dInfo.announce_cache.size(); ++i) {
 			unsigned int cache_code = mainGame->dInfo.announce_cache[i];
 			if(dataManager.GetString(cache_code, &cstr) && dataManager.GetData(cache_code, &cd) && is_declarable(cd, declare_opcodes)) {
@@ -1558,17 +1554,17 @@ void ClientField::UpdateDeclarableList() {
 				ancard.push_back(cache_code);
 			}
 		}
-		if(ancard.size())
-			return;
+		// if(ancard.size())
+		// return;
 	}
 	for(auto cit = dataManager.strings_begin(); cit != dataManager.strings_end(); ++cit) {
-		if(cit->second.name.find(pname) != std::wstring::npos) {
+		if(cit->second.name.find(pname) != std::wstring::npos || mainGame->CheckRegEx(cit->second.name, pname)) {
 			auto cp = dataManager.GetCodePointer(cit->first);
 			if (cp == dataManager.datas_end())
 				continue;
 			//datas.alias can be double card names or alias
 			if(is_declarable(cp->second, declare_opcodes)) {
-				if(pname == cit->second.name || mainGame->CheckRegEx(cit->second.name, pname, true)) { //exact match
+				if(pname == cit->second.name) { //exact match
 					mainGame->lstANCard->insertItem(0, cit->second.name.c_str(), -1);
 					ancard.insert(ancard.begin(), cit->first);
 				} else {

@@ -2,6 +2,11 @@
 set -x
 set -o errexit
 
+if [ -n "$NO_AUDIO" ]; then
+  echo "Skipping opus build because NO_AUDIO is set"
+  exit 0
+fi
+
 cd miniaudio
 
 external_built_dir="$PWD/external-built"
