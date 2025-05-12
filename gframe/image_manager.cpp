@@ -1,7 +1,7 @@
 #include "image_manager.h"
 #include "game.h"
 #include "myfilesystem.h"
-#ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 #include <thread>
 #endif
 #ifdef _OPENMP
