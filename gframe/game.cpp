@@ -114,7 +114,10 @@ void Game::MainServerLoop() {
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
-#if defined SERVER_PRO2_SUPPORT || defined SERVER_PRO3_SUPPORT
+#ifdef SERVER_PRO2_SUPPORT
+	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
+#endif
+#ifdef SERVER_PRO3_SUPPORT
 	DataManager::FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
