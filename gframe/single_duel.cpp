@@ -578,11 +578,11 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteHeader(rh);
 	last_replay.WriteData(players[0]->name, 40, false);
 	last_replay.WriteData(players[1]->name, 40, false);
-	Deck duplicatedDeck[2];
-	deckManager.MutateDecks(pdeck, duplicatedDeck, 2);
+	Deck mutatedDeck[2];
+	deckManager.MutateDecks(pdeck, mutatedDeck, 2);
 	if(!host_info.no_shuffle_deck) {
-		rnd.shuffle_vector(duplicatedDeck[0].main);
-		rnd.shuffle_vector(duplicatedDeck[1].main);
+		rnd.shuffle_vector(mutatedDeck[0].main);
+		rnd.shuffle_vector(mutatedDeck[1].main);
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
@@ -613,23 +613,23 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	std::vector<ygo::code_pointer> extra_cards;
 	auto load_extra = [&](uint8_t p) {
 		extra_cards.clear();
-		for(auto cit : duplicatedDeck[p].extra)
+		for(auto cit : mutatedDeck[p].extra)
 			extra_cards.push_back(cit);
 		if(duel_flags & DUEL_FLAG_SIDEINS)
-			for(auto cit : duplicatedDeck[p].side)
+			for(auto cit : mutatedDeck[p].side)
 				if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 					extra_cards.push_back(cit);
 		return extra_cards;
 	};
-	load(duplicatedDeck[0].main, 0, LOCATION_DECK);
+	load(mutatedDeck[0].main, 0, LOCATION_DECK);
 	load(load_extra(0), 0, LOCATION_EXTRA);
-	load(duplicatedDeck[1].main, 1, LOCATION_DECK);
+	load(mutatedDeck[1].main, 1, LOCATION_DECK);
 	load(load_extra(1), 1, LOCATION_EXTRA);
 #else
-	load(duplicatedDeck[0].main, 0, LOCATION_DECK);
-	load(duplicatedDeck[0].extra, 0, LOCATION_EXTRA);
-	load(duplicatedDeck[1].main, 1, LOCATION_DECK);
-	load(duplicatedDeck[1].extra, 1, LOCATION_EXTRA);
+	load(mutatedDeck[0].main, 0, LOCATION_DECK);
+	load(mutatedDeck[0].extra, 0, LOCATION_EXTRA);
+	load(mutatedDeck[1].main, 1, LOCATION_DECK);
+	load(mutatedDeck[1].extra, 1, LOCATION_EXTRA);
 #endif
 	last_replay.Flush();
 	unsigned char startbuf[32]{};
