@@ -7,19 +7,19 @@
 #include "data_manager.h"
 
 #ifndef YGOPRO_MAX_DECK
-#define YGOPRO_MAX_DECK					60
+#define YGOPRO_MAX_DECK					6
 #endif
 
 #ifndef YGOPRO_MIN_DECK
-#define YGOPRO_MIN_DECK					40
+#define YGOPRO_MIN_DECK					4
 #endif
 
 #ifndef YGOPRO_MAX_EXTRA
-#define YGOPRO_MAX_EXTRA					15
+#define YGOPRO_MAX_EXTRA					3
 #endif
 
 #ifndef YGOPRO_MAX_SIDE
-#define YGOPRO_MAX_SIDE					15
+#define YGOPRO_MAX_SIDE					3
 #endif
 
 namespace ygo {
@@ -79,6 +79,28 @@ public:
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 #endif // YGOPRO_SERVER_MODE
+
+	template <typename T>
+	std::vector<T> MutateVector(std::vector<T> vector, int32_t count) {
+		std::vector<T> result;
+		for(auto it : vector)
+			for(int32_t i = 0; i < count; ++i)
+				result.push_back(it);
+		return result;
+	}
+
+	Deck MutateDeck(Deck deck) {
+		Deck result;
+		result.main = MutateVector(deck.main, 10);
+		result.extra = MutateVector(deck.extra, 5);
+		result.side = MutateVector(deck.side, 5);
+		return result;
+	}
+
+	void MutateDecks(Deck* originalDecks, Deck* result, int32_t count) {
+		for(int32_t i = 0; i < count; ++i)
+			result[i] = MutateDeck(originalDecks[i]);
+	}
 
 	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
 	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);

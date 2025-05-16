@@ -118,7 +118,7 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		int code = cit->second.alias ? cit->second.alias : cit->first;
 		ccount[code]++;
 		int dc = ccount[code];
-		if(dc > 3)
+		if(dc > 1)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
 		if(it != list.end() && dc > it->second)
@@ -133,7 +133,7 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		int code = cit->second.alias ? cit->second.alias : cit->first;
 		ccount[code]++;
 		int dc = ccount[code];
-		if(dc > 3)
+		if(dc > 1)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
 		if(it != list.end() && dc > it->second)
@@ -148,7 +148,7 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		int code = cit->second.alias ? cit->second.alias : cit->first;
 		ccount[code]++;
 		int dc = ccount[code];
-		if(dc > 3)
+		if(dc > 1)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
 		if(it != list.end() && dc > it->second)

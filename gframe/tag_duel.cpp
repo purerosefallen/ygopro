@@ -438,18 +438,18 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 				if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 					++extra_size[i];
 	}
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
-	BufferIO::WriteInt16(pbuf, extra_size[0]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, extra_size[0] * 5);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
-	BufferIO::WriteInt16(pbuf, extra_size[1]);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, extra_size[1] * 5);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
 #else
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size() * 5);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size() * 10);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size() * 5);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
 #endif
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);
@@ -557,11 +557,13 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteData(players[1]->name, 40, false);
 	last_replay.WriteData(players[2]->name, 40, false);
 	last_replay.WriteData(players[3]->name, 40, false);
+	Deck duplicatedDeck[4];
+	deckManager.MutateDecks(pdeck, duplicatedDeck, 4);
 	if(!host_info.no_shuffle_deck) {
-		rnd.shuffle_vector(pdeck[0].main);
-		rnd.shuffle_vector(pdeck[1].main);
-		rnd.shuffle_vector(pdeck[2].main);
-		rnd.shuffle_vector(pdeck[3].main);
+		rnd.shuffle_vector(duplicatedDeck[0].main);
+		rnd.shuffle_vector(duplicatedDeck[1].main);
+		rnd.shuffle_vector(duplicatedDeck[2].main);
+		rnd.shuffle_vector(duplicatedDeck[3].main);
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
@@ -600,31 +602,31 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	std::vector<ygo::code_pointer> extra_cards;
 	auto load_extra = [&](uint8_t p) {
 		extra_cards.clear();
-		for(auto cit : pdeck[p].extra)
+		for(auto cit : duplicatedDeck[p].extra)
 			extra_cards.push_back(cit);
 		if(duel_flags & DUEL_FLAG_SIDEINS)
-			for(auto cit : pdeck[p].side)
+			for(auto cit : duplicatedDeck[p].side)
 				if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 					extra_cards.push_back(cit);
 		return extra_cards;
 	};
-	load_single(pdeck[0].main, 0, LOCATION_DECK);
+	load_single(duplicatedDeck[0].main, 0, LOCATION_DECK);
 	load_single(load_extra(0), 0, LOCATION_EXTRA);
-	load_tag(pdeck[1].main, 0, LOCATION_DECK);
+	load_tag(duplicatedDeck[1].main, 0, LOCATION_DECK);
 	load_tag(load_extra(1), 0, LOCATION_EXTRA);
-	load_single(pdeck[3].main, 1, LOCATION_DECK);
+	load_single(duplicatedDeck[3].main, 1, LOCATION_DECK);
 	load_single(load_extra(3), 1, LOCATION_EXTRA);
-	load_tag(pdeck[2].main, 1, LOCATION_DECK);
+	load_tag(duplicatedDeck[2].main, 1, LOCATION_DECK);
 	load_tag(load_extra(2), 1, LOCATION_EXTRA);
 #else
-	load_single(pdeck[0].main, 0, LOCATION_DECK);
-	load_single(pdeck[0].extra, 0, LOCATION_EXTRA);
-	load_tag(pdeck[1].main, 0, LOCATION_DECK);
-	load_tag(pdeck[1].extra, 0, LOCATION_EXTRA);
-	load_single(pdeck[3].main, 1, LOCATION_DECK);
-	load_single(pdeck[3].extra, 1, LOCATION_EXTRA);
-	load_tag(pdeck[2].main, 1, LOCATION_DECK);
-	load_tag(pdeck[2].extra, 1, LOCATION_EXTRA);
+	load_single(duplicatedDeck[0].main, 0, LOCATION_DECK);
+	load_single(duplicatedDeck[0].extra, 0, LOCATION_EXTRA);
+	load_tag(duplicatedDeck[1].main, 0, LOCATION_DECK);
+	load_tag(duplicatedDeck[1].extra, 0, LOCATION_EXTRA);
+	load_single(duplicatedDeck[3].main, 1, LOCATION_DECK);
+	load_single(duplicatedDeck[3].extra, 1, LOCATION_EXTRA);
+	load_tag(duplicatedDeck[2].main, 1, LOCATION_DECK);
+	load_tag(duplicatedDeck[2].extra, 1, LOCATION_EXTRA);
 #endif
 	last_replay.Flush();
 	unsigned char startbuf[32]{};

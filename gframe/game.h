@@ -931,5 +931,25 @@ extern unsigned int duel_flags;
 #define AVAIL_SC					0x8
 #define AVAIL_OCGTCG				(AVAIL_OCG|AVAIL_TCG)
 
+#ifndef YGOPRO_DEFAULT_DUEL_RULE
+#define YGOPRO_DEFAULT_DUEL_RULE			5
+#endif
+
+#ifndef YGOPRO_MAX_DECK
+#define YGOPRO_MAX_DECK					6
+#endif
+
+#ifndef YGOPRO_MIN_DECK
+#define YGOPRO_MIN_DECK					4
+#endif
+
+#ifndef YGOPRO_MAX_EXTRA
+#define YGOPRO_MAX_EXTRA					3
+#endif
+
+#ifndef YGOPRO_MAX_SIDE
+#define YGOPRO_MAX_SIDE					3
+#endif
+
 #define MAX_LAYER_COUNT	6
 #endif // GAME_H
