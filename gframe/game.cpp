@@ -114,8 +114,11 @@ void Game::MainServerLoop() {
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
-#if defined SERVER_PRO2_SUPPORT || defined SERVER_PRO3_SUPPORT
+#ifdef SERVER_PRO2_SUPPORT
 	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
+#endif
+#ifdef SERVER_PRO3_SUPPORT
+	DataManager::FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
@@ -194,10 +197,14 @@ bool Game::Initialize() {
 		return false;
 	}
 	LoadExpansions();
+	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	if(!numFont) {
 		const wchar_t* numFontPaths[] = {
+			L"./fonts/numFont.ttf",
+			L"./fonts/numFont.ttc",
+			L"./fonts/numFont.otf",
 			L"C:/Windows/Fonts/arialbd.ttf",
 			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
 			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
@@ -205,9 +212,6 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
 			L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
 			L"/System/Library/Fonts/SFNS.ttf",
-			L"./fonts/numFont.ttf",
-			L"./fonts/numFont.ttc",
-			L"./fonts/numFont.otf"
 		};
 		for(const wchar_t* path : numFontPaths) {
 			BufferIO::CopyWideString(path, gameConf.numfont);
@@ -219,6 +223,9 @@ bool Game::Initialize() {
 	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 	if(!textFont) {
 		const wchar_t* textFontPaths[] = {
+			L"./fonts/textFont.ttf",
+			L"./fonts/textFont.ttc",
+			L"./fonts/textFont.otf",
 			L"C:/Windows/Fonts/msyh.ttc",
 			L"C:/Windows/Fonts/msyh.ttf",
 			L"C:/Windows/Fonts/simsun.ttc",
@@ -230,9 +237,7 @@ bool Game::Initialize() {
 			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
 			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
 			L"/System/Library/Fonts/PingFang.ttc",
-			L"./fonts/textFont.ttf",
-			L"./fonts/textFont.ttc",
-			L"./fonts/textFont.otf"
+			L"/System/Library/Fonts/STHeiti Medium.ttc",
 		};
 		for(const wchar_t* path : textFontPaths) {
 			BufferIO::CopyWideString(path, gameConf.textfont);
@@ -250,7 +255,7 @@ bool Game::Initialize() {
 			}
 		});
 		if(fpath[0] == 0) {
-			ErrorLog("Failed to load font(s)!");
+			ErrorLog("No fonts found! Please place appropriate font file in the fonts directory, or edit system.conf manually.");
 			return false;
 		}
 		if(!numFont) {
@@ -261,6 +266,10 @@ bool Game::Initialize() {
 			BufferIO::CopyWideString(fpath, gameConf.textfont);
 			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 		}
+	}
+	if(!numFont || !textFont) {
+		ErrorLog("Failed to load font(s)!");
+		return false;
 	}
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48);
@@ -1424,7 +1433,7 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBo
 		return;
 	}
 	wchar_t catepath[256];
-	deckManager.GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
+	DeckManager::GetCategoryPath(catepath, cbCategory->getSelected(), cbCategory->getText());
 	cbDeck->clear();
 	RefreshDeck(catepath, [cbDeck](const wchar_t* item) { cbDeck->addItem(item); });
 }
@@ -1479,9 +1488,9 @@ void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
 		return;
 	botInfo.clear();
-	FILE* fp = std::fopen(GetLocaleDir("bot.conf"), "r");
+	FILE* fp = myfopen(GetLocaleDir("bot.conf"), "r");
 	if(!fp)
-		fp = std::fopen("bot.conf", "r");
+		fp = myfopen("bot.conf", "r");
 	char linebuf[256]{};
 	char strbuf[256]{};
 	if(fp) {
@@ -1542,7 +1551,7 @@ void Game::RefreshBot() {
 	}
 }
 bool Game::LoadConfigFromFile(const char* file) {
-	FILE* fp = std::fopen(file, "r");
+	FILE* fp = myfopen(file, "r");
 	if(!fp){
 		return false;
 	}
@@ -1563,14 +1572,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!std::strcmp(strbuf, "errorlog")) {
 			unsigned int val = std::strtol(valbuf, nullptr, 10);
 			enable_log = val & 0xff;
-		} else if(!std::strcmp(strbuf, "textfont")) {
-			int textfontsize = 0;
-			if (std::sscanf(linebuf, "%63s = %959s %d", strbuf, valbuf, &textfontsize) != 3)
-				continue;
-			gameConf.textfontsize = textfontsize;
-			BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
-		} else if(!std::strcmp(strbuf, "numfont")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.numfont);
 		} else if(!std::strcmp(strbuf, "serverport")) {
 			gameConf.serverport = std::strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "lasthost")) {
@@ -1673,7 +1674,18 @@ bool Game::LoadConfigFromFile(const char* file) {
 			// options allowing multiple words
 			if (std::sscanf(linebuf, "%63s = %959[^\n]", strbuf, valbuf) != 2)
 				continue;
-			if (!std::strcmp(strbuf, "nickname")) {
+			if (!std::strcmp(strbuf, "textfont")) {
+				char* last_space = std::strrchr(valbuf, ' ');
+				if (last_space == nullptr)
+					continue;
+				int fontsize = std::strtol(last_space + 1, nullptr, 10);
+				if (fontsize > 0)
+					gameConf.textfontsize = fontsize;
+				*last_space = 0;
+				BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
+			} else if (!std::strcmp(strbuf, "numfont")) {
+				BufferIO::DecodeUTF8(valbuf, gameConf.numfont);
+			} else if (!std::strcmp(strbuf, "nickname")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.nickname);
 			} else if (!std::strcmp(strbuf, "gamename")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.gamename);
@@ -1815,9 +1827,9 @@ void Game::LoadConfig() {
 }
 void Game::SaveConfig() {
 #ifdef YGOPRO_COMPAT_MYCARD
-	FILE* fp = std::fopen("system.conf", "w");
+	FILE* fp = myfopen("system.conf", "w");
 #else
-	FILE* fp = std::fopen("system_user.conf", "w");
+	FILE* fp = myfopen("system_user.conf", "w");
 #endif //YGOPRO_COMPAT_MYCARD
 	std::fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
 	char linebuf[CONFIG_LINE_SIZE];
@@ -2072,6 +2084,17 @@ void Game::ClearChatMsg() {
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::AddDebugMsg(const char* msg) {
+#ifdef YGOPRO_LOG_IN_CHAT
+	wchar_t msgbuf_w[1024];
+	wchar_t msgbuf_w2[1024];
+	uint16_t msgbuf_u16[LEN_CHAT_MSG];
+	BufferIO::DecodeUTF8(msg, msgbuf_w);
+	myswprintf(msgbuf_w2, L"[Script Error]: %ls", msgbuf_w); // prefix for debug messages
+	auto len = BufferIO::CopyCharArray(msgbuf_w2, msgbuf_u16);
+	DuelPlayer tmp_dp;
+	tmp_dp.type = 11;
+	NetServer::duel_mode->Chat(&tmp_dp, (unsigned char*)msgbuf_u16, (len + 1) * sizeof(uint16_t)); // send to chat log
+#endif
 #ifdef YGOPRO_SERVER_MODE
 	fprintf(stderr, "%s\n", msg);
 #else
@@ -2089,7 +2112,12 @@ void Game::AddDebugMsg(const char* msg) {
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::ErrorLog(const char* msg) {
-	FILE* fp = std::fopen("error.log", "a");
+#ifdef _WIN32
+	OutputDebugStringA(msg);
+#else
+	std::fprintf(stderr, "%s\n", msg);
+#endif
+	FILE* fp = myfopen("error.log", "a");
 	if(!fp)
 		return;
 	time_t nowtime = std::time(nullptr);

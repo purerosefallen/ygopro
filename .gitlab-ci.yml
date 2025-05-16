@@ -14,14 +14,16 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
     - mv lua-5.4.4 lua
     # sqlite3
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
     - mv sqlite-autoconf-3390300 sqlite3
     # freetype
-    #- wget -O - https://cdn01.moecube.com/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
+    #- wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
     #- mv freetype-2.11.1 freetype
+    # irrlicht
+    - ./.ci/prepare-irrlicht.sh
     # miniaudio
     #- ./.ci/prepare-miniaudio.sh
     # premake
@@ -31,6 +33,7 @@ mat_common:
       - lua
       #- freetype
       - sqlite3
+      - irrlicht
       #- miniaudio
 
 mat_submodules:
@@ -47,31 +50,29 @@ mat_submodules:
       - ocgcore
       - script
 
-mat_linux:
-  stage: prepare
-  tags:
-    - linux
-  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
-  script:
-    - apt update; apt -y install git wget tar
-    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
-  artifacts:
-    paths:
-      - irrlicht
+#mat_linux:
+#  stage: prepare
+#  tags:
+#    - linux
+#  image: git-registry.mycard.moe/mycard/docker-runner-base:debian11
+#  script:
+#    - apt update; apt -y install git wget tar
+#    - ./.ci/prepare-irrlicht.sh
+#  artifacts:
+#    paths:
+#      - irrlicht
 
 mat_macos:
   stage: prepare
   tags:
     - linux
   script:
-    - apt update; apt -y install wget tar git
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - apt update; apt -y install wget tar
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
     - chmod +x premake5
-    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5
-      - irrlicht
 
 mat_windows:
   stage: prepare
@@ -80,18 +81,15 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn01.moecube.com/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
+    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
     - 7z x -y premake-5.0.0-beta5-windows.zip
     # event
-    - wget -O - https://cdn01.moecube.com/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
     - mv libevent-2.0.22-stable event
-    # irrlicht
-    - git clone --depth=1 https://code.mycard.moe/mycard/irrlicht-new irrlicht
   artifacts:
     paths:
       - premake5.exe
       - event
-      - irrlicht
 
 ._exec_build:
   stage: build
@@ -129,7 +127,7 @@ exec_windows:
 exec_windows_pro3:
   extends: .exec_windows
   script:
-    - '.\premake5.exe vs2019 --server-pro3-support'
+    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
     - mkdir dist
     - mkdir dist\windows
@@ -163,7 +161,7 @@ exec_windows_pro3:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
   dependencies:
     - mat_common
-    - mat_linux
+    #- mat_linux
     - mat_submodules
 
 .exec_linux:
@@ -184,6 +182,7 @@ exec_windows_pro3:
     - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
 
 .use_arm:
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   tags:
     - arm
 
@@ -191,11 +190,13 @@ exec_windows_pro3:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   variables:
     SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.so
 
 .use_pro3_macos:
   variables:
     SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.dylib
     LIBEVENT_PREBUILD_FLAGS: '-fPIC'
 

@@ -404,7 +404,7 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		NetServer::SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
 		return;
 	}
-	deck_error[dp->type] = deckManager.LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
+	deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
 }
 void TagDuel::StartDuel(DuelPlayer* dp) {
 	if(dp != host_player)
@@ -558,7 +558,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteData(players[2]->name, 40, false);
 	last_replay.WriteData(players[3]->name, 40, false);
 	Deck duplicatedDeck[4];
-	deckManager.DuplicateDecks(pdeck, duplicatedDeck, 4);
+	deckManager.MutateDecks(pdeck, duplicatedDeck, 4);
 	if(!host_info.no_shuffle_deck) {
 		rnd.shuffle_vector(duplicatedDeck[0].main);
 		rnd.shuffle_vector(duplicatedDeck[1].main);

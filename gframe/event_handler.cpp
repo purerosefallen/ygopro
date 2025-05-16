@@ -1933,7 +1933,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_AUDIO
 			case CHECKBOX_ENABLE_MUSIC: {
 				if(!mainGame->chkEnableMusic->isChecked())
 					soundManager.StopBGM();
@@ -1946,7 +1945,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#endif
 			case CHECKBOX_DISABLE_CHAT: {
 				bool show = (mainGame->is_building && !mainGame->is_siding) ? false : true;
 				mainGame->wChat->setVisible(show);
@@ -2052,7 +2050,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#ifdef YGOPRO_USE_AUDIO
 			case SCROLL_VOLUME: {
 				mainGame->gameConf.sound_volume = (double)mainGame->scrSoundVolume->getPos() / 100;
 				mainGame->gameConf.music_volume = (double)mainGame->scrMusicVolume->getPos() / 100;
@@ -2061,7 +2058,6 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
-#endif
 			case SCROLL_TAB_HELPER: {
 				irr::core::rect<irr::s32> pos = mainGame->tabHelper->getRelativePosition();
 				mainGame->tabHelper->setRelativePosition(irr::core::recti(0, mainGame->scrTabHelper->getPos() * -1, pos.LowerRightCorner.X, pos.LowerRightCorner.Y));

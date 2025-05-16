@@ -51,6 +51,12 @@ struct Deck {
 	}
 };
 
+struct ReplayDeck {
+	std::vector<uint32_t> main;
+	std::vector<uint32_t> extra;
+	std::vector<uint32_t> side;
+};
+
 class DeckManager {
 public:
 	Deck current_deck;
@@ -65,30 +71,17 @@ public:
 	const wchar_t* GetLFListName(unsigned int lfhash);
 	const LFList* GetLFList(unsigned int lfhash);
 	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
-	int LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_packlist = false);
-	bool LoadSide(Deck& deck, int* dbuf, int mainc, int sidec);
 #ifndef YGOPRO_SERVER_MODE
-	int LoadDeck(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
-	void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
-	void GetDeckFile(wchar_t* ret, int category_index, const wchar_t* category_name, const wchar_t* deckname);
-	FILE* OpenDeckFile(const wchar_t* file, const char* mode);
-	irr::io::IReadFile* OpenDeckReader(const wchar_t* file);
 	bool LoadCurrentDeck(const wchar_t* file, bool is_packlist = false);
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
-	bool SaveDeck(Deck& deck, const wchar_t* file);
-	bool DeleteDeck(const wchar_t* file);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
-	bool CreateCategory(const wchar_t* name);
-	bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
-	bool DeleteCategory(const wchar_t* name);
-	bool SaveDeckBuffer(const int deckbuf[], const wchar_t* name);
-#endif //YGOPRO_SERVER_MODE
+#endif // YGOPRO_SERVER_MODE
 
 	template <typename T>
-	std::vector<T> DuplicateVector(std::vector<T> vector, int32_t count) {
+	std::vector<T> MutateVector(std::vector<T> vector, int32_t count) {
 		std::vector<T> result;
 		for(auto it : vector)
 			for(int32_t i = 0; i < count; ++i)
@@ -96,18 +89,34 @@ public:
 		return result;
 	}
 
-	Deck DuplicateDeck(Deck deck) {
+	Deck MutateDeck(Deck deck) {
 		Deck result;
-		result.main = DuplicateVector(deck.main, 10);
-		result.extra = DuplicateVector(deck.extra, 5);
-		result.side = DuplicateVector(deck.side, 5);
+		result.main = MutateVector(deck.main, 10);
+		result.extra = MutateVector(deck.extra, 5);
+		result.side = MutateVector(deck.side, 5);
 		return result;
 	}
 
-	void DuplicateDecks(Deck* originalDecks, Deck* result, int32_t count) {
+	void MutateDecks(Deck* originalDecks, Deck* result, int32_t count) {
 		for(int32_t i = 0; i < count; ++i)
-			result[i] = DuplicateDeck(originalDecks[i]);
+			result[i] = MutateDeck(originalDecks[i]);
 	}
+
+	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
+	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);
+#ifndef YGOPRO_SERVER_MODE
+	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
+	static void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
+	static void GetDeckFile(wchar_t* ret, int category_index, const wchar_t* category_name, const wchar_t* deckname);
+	static FILE* OpenDeckFile(const wchar_t* file, const char* mode);
+	static irr::io::IReadFile* OpenDeckReader(const wchar_t* file);
+	static bool SaveDeck(const Deck& deck, const wchar_t* file);
+	static bool DeleteDeck(const wchar_t* file);
+	static bool CreateCategory(const wchar_t* name);
+	static bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
+	static bool DeleteCategory(const wchar_t* name);
+	static bool SaveReplayDeck(const ReplayDeck& deck, const wchar_t* name);
+#endif // YGOPRO_SERVER_MODE
 };
 
 extern DeckManager deckManager;

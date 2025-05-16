@@ -6,12 +6,13 @@ LUA_LIB_NAME = "lua"
 BUILD_EVENT = os.istarget("windows")
 BUILD_FREETYPE = os.istarget("windows")
 BUILD_SQLITE = os.istarget("windows")
-BUILD_IRRLICHT = not os.istarget("macosx")
+BUILD_IRRLICHT = true
 
 USE_AUDIO = true
 AUDIO_LIB = "miniaudio"
 MINIAUDIO_SUPPORT_OPUS_VORBIS = true
 MINIAUDIO_BUILD_OPUS_VORBIS = os.istarget("windows")
+IRRKLANG_PRO = false
 IRRKLANG_PRO_BUILD_IKPMP3 = false
 
 SERVER_MODE = true
@@ -49,26 +50,6 @@ newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", descript
 newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-newoption { trigger = "no-audio", category = "YGOPro", description = "" }
-newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "miniaudio, irrklang", default = AUDIO_LIB }
-
-newoption { trigger = "miniaudio-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "miniaudio-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
-newoption { trigger = "no-miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
-newoption { trigger = "build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
-newoption { trigger = "no-build-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
-newoption { trigger = "opus-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "opus-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "vorbis-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
-
-newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use audio-lib=irrklang" }
-newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use no-audio" }
-newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
-newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
 
 newoption { trigger = "no-audio", category = "YGOPro", description = "" }
 newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "miniaudio, irrklang", default = AUDIO_LIB }
@@ -111,7 +92,9 @@ boolOptions = {
     "no-lua-safe",
     "message-debug",
     "no-side-check",
-    "enable-debug-func"
+    "enable-debug-func",
+    "log-lua-memory-size",
+    "log-in-chat",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -124,6 +107,7 @@ numberOptions = {
     "min-deck",
     "max-extra",
     "max-side",
+    "lua-memory-size",
 }
 
 for _, numberOption in ipairs(numberOptions) do
@@ -282,10 +266,20 @@ end
 if GetParam("winxp-support") and os.istarget("windows") then
     WINXP_SUPPORT = true
 end
-if os.istarget("macosx") then
-    MAC_ARM = false
-    if GetParam("mac-arm") then
-        MAC_ARM = true
+
+IS_ARM=false
+
+function spawn(cmd)
+    local handle = io.popen(cmd)
+    if not handle then
+        return nil
+    end
+    local result = handle:read("*a")
+    handle:close()
+    if result and #result > 0 then
+        return result
+    else
+        return nil
     end
 end
 if GetParam("server-mode") then
@@ -320,6 +314,53 @@ if SERVER_MODE then
     end
 end
 
+function isRunningUnderRosetta()
+    local rosetta_result=spawn("sysctl -n sysctl.proc_translated 2>/dev/null")
+    return tonumber(rosetta_result) == 1
+end
+
+function IsRunningUnderARM()
+    -- os.hostarch() is over premake5 beta3,
+    if os.hostarch then
+        local host_arch = os.hostarch()
+        local possible_archs = { "ARM", "ARM64", "loongarch64", "armv5", "armv7", "aarch64" }
+        for _, arch in ipairs(possible_archs) do
+            if host_arch:lower():match(arch:lower()) then
+                return true
+            end
+        end
+    else
+        -- use command 'arch' to detect the architecture on macOS or Linux
+        local arch_result = spawn("arch 2>/dev/null")
+        if arch_result then
+            arch_result = arch_result:lower():gsub("%s+", "")
+            if arch_result == "arm64" or arch_result == "aarch64" then
+                return true
+            elseif arch_result == "arm" or arch_result == "armv7" or arch_result == "armv5" then
+                return true -- for ARMv5, ARMv7, etc.
+            elseif arch_result == "loongarch64" then
+                return true -- for loongarch64
+            end
+        end
+    end
+    return false
+end
+
+function isARM()
+    if IsRunningUnderARM() then
+        return true
+    end
+    if os.istarget("macosx") and isRunningUnderRosetta() then
+        -- macOS under rosetta will report x86_64, but it is running on ARM
+        print("Detected running under Rosetta on macOS, treating as ARM")
+        return true
+    end
+    return false
+end
+
+IS_ARM=isARM() or GetParam("mac-arm") -- detect if the current system is ARM
+MAC_ARM=os.istarget("macosx") and IS_ARM
+
 workspace "YGOPro"
     location "build"
     language "C++"
@@ -336,7 +377,6 @@ workspace "YGOPro"
     end
 
     filter "system:windows"
-        defines { "WIN32", "_WIN32" }
 if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
 end
@@ -354,7 +394,6 @@ end
 
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
-        buildoptions { "-stdlib=libc++" }
         if MAC_ARM then
             buildoptions { "--target=arm64-apple-macos12" }
         end
@@ -386,8 +425,16 @@ end
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
         defines "NDEBUG"
-        if not MAC_ARM then
+        if not IS_ARM then
             buildoptions "-march=native"
+        end
+        if IS_ARM and not MAC_ARM then
+            buildoptions {
+                "-march=armv8-a",
+                "-mtune=cortex-a72",
+                "-Wno-psabi"
+            }
+            pic "On"
         end
 
     filter { "configurations:Debug", "action:vs*" }
