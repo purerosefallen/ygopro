@@ -106,6 +106,4 @@ extern bool open_file;
 extern wchar_t open_file_name[256];
 extern bool bot_mode;
 
-#define IMATATOR_CODE 4392470
-
 #endif

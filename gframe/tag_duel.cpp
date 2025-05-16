@@ -438,18 +438,18 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 				if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 					++extra_size[i];
 	}
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size() * 10);
-	BufferIO::WriteInt16(pbuf, extra_size[0] * 5);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[0]);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size() * 10);
-	BufferIO::WriteInt16(pbuf, extra_size[1] * 5);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
+	BufferIO::WriteInt16(pbuf, extra_size[1]);
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
 #else
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size() * 10);
-	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size() * 5);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].main.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[0].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[0].side.size());
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size() * 10);
-	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size() * 5);
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].main.size());
+	BufferIO::WriteInt16(pbuf, (short)pdeck[2].extra.size());
 	BufferIO::WriteInt16(pbuf, (short)pdeck[2].side.size());
 #endif
 	NetServer::SendBufferToPlayer(players[0], STOC_DECK_COUNT, deckbuff, 12);

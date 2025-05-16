@@ -7,20 +7,22 @@
 #include "data_manager.h"
 
 #ifndef YGOPRO_MAX_DECK
-#define YGOPRO_MAX_DECK					6
+#define YGOPRO_MAX_DECK					60
 #endif
 
 #ifndef YGOPRO_MIN_DECK
-#define YGOPRO_MIN_DECK					4
+#define YGOPRO_MIN_DECK					40
 #endif
 
 #ifndef YGOPRO_MAX_EXTRA
-#define YGOPRO_MAX_EXTRA					3
+#define YGOPRO_MAX_EXTRA					15
 #endif
 
 #ifndef YGOPRO_MAX_SIDE
-#define YGOPRO_MAX_SIDE					3
+#define YGOPRO_MAX_SIDE					15
 #endif
+
+#define IMITATOR_CODE 4392470
 
 namespace ygo {
 	constexpr int DECK_MAX_SIZE = YGOPRO_MAX_DECK;
@@ -80,20 +82,22 @@ public:
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 #endif // YGOPRO_SERVER_MODE
 
-	template <typename T>
-	std::vector<T> MutateVector(std::vector<T> vector, int32_t count) {
-		std::vector<T> result;
-		for(auto it : vector)
-			for(int32_t i = 0; i < count; ++i)
-				result.push_back(it);
-		return result;
-	}
 
 	Deck MutateDeck(Deck deck) {
 		Deck result;
-		result.main = MutateVector(deck.main, 10);
-		result.extra = MutateVector(deck.extra, 5);
-		result.side = MutateVector(deck.side, 5);
+		uint32_t imitating_code = 0;
+		for(auto card : deck.main) {
+			auto use_card = card;
+			auto code = card->first;
+			if(code == IMITATOR_CODE) {
+				if(imitating_code)
+					use_card = dataManager.GetCodePointer(imitating_code);
+			} else
+				imitating_code = code;
+			result.main.push_back(use_card);
+		}
+		result.extra = deck.extra;
+		result.side = deck.side;
 		return result;
 	}
 
