@@ -132,6 +132,8 @@ exec_windows:
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
     OPUS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
     OPUS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
+    OPUSFILE_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
+    OPUSFILE_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
     VORBIS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
     VORBIS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
     OGG_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
