@@ -27,6 +27,7 @@ install:
 
 before_build:
   - xcopy /E premake\* .
+  - xcopy /E resource\* .
   - premake5 vs2022
   
 configuration: Release
@@ -49,6 +50,7 @@ for:
     - move irrlicht-1.8.5 irrlicht
 
     - xcopy /E premake\* .
+    - xcopy /E resource\* .
 
     - cd irrlicht
     - patch -p1 < irrlicht.patch

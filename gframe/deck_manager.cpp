@@ -12,7 +12,7 @@ DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
 	auto cur = _lfList.rend();
-	FILE* fp = std::fopen(path, "r");
+	FILE* fp = myfopen(path, "r");
 	char linebuf[256]{};
 	wchar_t strBuffer[256]{};
 	char str1[16]{};
@@ -321,7 +321,7 @@ bool DeckManager::LoadCurrentDeck(int category_index, const wchar_t* category_na
 		mainGame->deckBuilder.RefreshPackListScroll();
 	return res;
 }
-bool DeckManager::SaveDeck(Deck& deck, const wchar_t* file) {
+bool DeckManager::SaveDeck(const Deck& deck, const wchar_t* file) {
 	if(!FileSystem::IsDirExists(L"./deck") && !FileSystem::MakeDir(L"./deck"))
 		return false;
 	FILE* fp = OpenDeckFile(file, "w");
@@ -329,26 +329,18 @@ bool DeckManager::SaveDeck(Deck& deck, const wchar_t* file) {
 		return false;
 	std::fprintf(fp, "#created by ...\n#main\n");
 	for(size_t i = 0; i < deck.main.size(); ++i)
-		std::fprintf(fp, "%d\n", deck.main[i]->first);
+		std::fprintf(fp, "%u\n", deck.main[i]->first);
 	std::fprintf(fp, "#extra\n");
 	for(size_t i = 0; i < deck.extra.size(); ++i)
-		std::fprintf(fp, "%d\n", deck.extra[i]->first);
+		std::fprintf(fp, "%u\n", deck.extra[i]->first);
 	std::fprintf(fp, "!side\n");
 	for(size_t i = 0; i < deck.side.size(); ++i)
-		std::fprintf(fp, "%d\n", deck.side[i]->first);
+		std::fprintf(fp, "%u\n", deck.side[i]->first);
 	std::fclose(fp);
 	return true;
 }
 bool DeckManager::DeleteDeck(const wchar_t* file) {
-#ifdef _WIN32
-	BOOL result = DeleteFileW(file);
-	return !!result;
-#else
-	char filefn[256];
-	BufferIO::EncodeUTF8(file, filefn);
-	int result = unlink(filefn);
-	return result == 0;
-#endif
+	return FileSystem::RemoveFile(file);
 }
 bool DeckManager::CreateCategory(const wchar_t* name) {
 	if(!FileSystem::IsDirExists(L"./deck") && !FileSystem::MakeDir(L"./deck"))
@@ -377,34 +369,21 @@ bool DeckManager::DeleteCategory(const wchar_t* name) {
 		return false;
 	return FileSystem::DeleteDir(localname);
 }
-bool DeckManager::SaveDeckBuffer(const int deckbuf[], const wchar_t* name) {
+bool DeckManager::SaveDeckArray(const DeckArray& deck, const wchar_t* name) {
 	if (!FileSystem::IsDirExists(L"./deck") && !FileSystem::MakeDir(L"./deck"))
 		return false;
 	FILE* fp = OpenDeckFile(name, "w");
 	if (!fp)
 		return false;
-	int it = 0;
-	const int mainc = deckbuf[it];
-	++it;
 	std::fprintf(fp, "#created by ...\n#main\n");
-	for (int i = 0; i < mainc; ++i) {
-		std::fprintf(fp, "%d\n", deckbuf[it]);
-		++it;
-	}
-	const int extrac = deckbuf[it];
-	++it;
+	for (const auto& code : deck.main)
+		std::fprintf(fp, "%u\n", code);
 	std::fprintf(fp, "#extra\n");
-	for (int i = 0; i < extrac; ++i) {
-		std::fprintf(fp, "%d\n", deckbuf[it]);
-		++it;
-	}
-	const int sidec = deckbuf[it];
-	++it;
+	for (const auto& code : deck.extra)
+		std::fprintf(fp, "%u\n", code);
 	std::fprintf(fp, "!side\n");
-	for (int i = 0; i < sidec; ++i) {
-		std::fprintf(fp, "%d\n", deckbuf[it]);
-		++it;
-	}
+	for (const auto& code : deck.side)
+		std::fprintf(fp, "%u\n", code);
 	std::fclose(fp);
 	return true;
 }
