@@ -233,7 +233,7 @@ assets:
     - wget -O - https://code.moenext.com/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
     - mv ygopro-sounds-master/sound/* sound
     # fonts
-    - git cone --depth=1 https://code.moenext.com/mycard/ygopro-fonts
+    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-fonts
     - mv ygopro-fonts/fonts .
     # pack
     - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
