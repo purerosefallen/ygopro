@@ -15,11 +15,16 @@ private:
 #endif
 	static event* broadcast_ev;
 	static evconnlistener* listener;
+#ifndef YGOPRO_LOG_IN_CHAT
 	static DuelMode* duel_mode;
+#endif
 	static unsigned char net_server_write[SIZE_NETWORK_BUFFER];
 	static size_t last_sent;
 
 public:
+#ifdef YGOPRO_LOG_IN_CHAT
+	static DuelMode* duel_mode;
+#endif
 #ifdef YGOPRO_SERVER_MODE
 	static event_base* net_evbase;
 	static void InitDuel();
