@@ -531,11 +531,11 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 		int deckc = BufferIO::ReadInt16(pdata);
 		int extrac = BufferIO::ReadInt16(pdata);
 		int sidec = BufferIO::ReadInt16(pdata);
-		mainGame->dField.Initial(0, deckc, extrac);
+		mainGame->dField.Initial(0, deckc, extrac, sidec);
 		deckc = BufferIO::ReadInt16(pdata);
 		extrac = BufferIO::ReadInt16(pdata);
 		sidec = BufferIO::ReadInt16(pdata);
-		mainGame->dField.Initial(1, deckc, extrac);
+		mainGame->dField.Initial(1, deckc, extrac, sidec);
 		mainGame->gMutex.unlock();
 		break;
 	}
@@ -1313,10 +1313,8 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		//playing custom bgm
 		case 21: { //HINT_MUSIC
 			if (data) {
-				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.mp3", dataManager.GetDesc(data));			
-				BufferIO::EncodeUTF8(textBuffer, textBufferU);
-				soundManager.PlayCustomBGM(textBufferU);
+				soundManager.PlayCustomBGM(textBuffer);
 			} else {
 				soundManager.StopBGM();
 			}
@@ -1325,10 +1323,8 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		//playing custom sound effect
 		case 22: { //HINT_SOUND
 			if (data) {
-				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/custom/%ls.wav", dataManager.GetDesc(data));
-				BufferIO::EncodeUTF8(textBuffer, textBufferU);
-				soundManager.PlayCustomSound(textBufferU);
+				soundManager.PlayCustomSound(textBuffer);
 			} else {
 				soundManager.StopSound();
 			}
@@ -1337,10 +1333,8 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		//playing custom bgm in ogg format
 		case 23: { //HINT_MUSIC_OGG
 			if (data) {
-				char textBufferU[1024];
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.ogg", dataManager.GetDesc(data));			
-				BufferIO::EncodeUTF8(textBuffer, textBufferU);
-				soundManager.PlayCustomBGM(textBufferU);
+				soundManager.PlayCustomBGM(textBuffer);
 			} else {
 				soundManager.StopBGM();
 			}
@@ -4133,7 +4127,9 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		break;
 	}
 	case MSG_RELOAD_FIELD: {
-		mainGame->gMutex.lock();
+		if(!mainGame->dInfo.isReplay || !mainGame->dInfo.isReplaySkiping) {
+			mainGame->gMutex.lock();
+		}
 		mainGame->dField.Clear();
 		mainGame->dInfo.duel_rule = BufferIO::ReadUInt8(pbuf);
 		int val = 0;
@@ -4239,7 +4235,9 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 			myswprintf(event_string, dataManager.GetSysString(1609), dataManager.GetName(mainGame->dField.current_chain.code));
 			mainGame->dField.last_chain = true;
 		}
-		mainGame->gMutex.unlock();
+		if(!mainGame->dInfo.isReplay || !mainGame->dInfo.isReplaySkiping) {
+			mainGame->gMutex.unlock();
+		}
 		break;
 	}
 	}
