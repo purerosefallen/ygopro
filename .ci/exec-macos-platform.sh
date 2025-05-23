@@ -14,6 +14,8 @@ export VORBIS_INCLUDE_DIR=$PWD/miniaudio/external-built/include
 export VORBIS_LIB_DIR=$PWD/miniaudio/external-built/lib
 export OGG_INCLUDE_DIR=$PWD/miniaudio/external-built/include
 export OGG_LIB_DIR=$PWD/miniaudio/external-built/lib
+export ACLOCAL=aclocal
+export AUTOMAKE=automake
 
 ./.ci/libevent-prebuild.sh
 ./.ci/build-opus.sh
@@ -21,7 +23,7 @@ export OGG_LIB_DIR=$PWD/miniaudio/external-built/lib
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build
-make config=release -j$(nproc)
+make config=release -j$(sysctl -n hw.ncpu)
 cd ..
 
 mkdir ygopro-platforms
