@@ -5,6 +5,7 @@ project "YGOPro"
     kind "WindowedApp"
     cppdialect "C++14"
     rtti "Off"
+    openmp "On"
 
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
@@ -49,7 +50,7 @@ project "YGOPro"
                 includedirs { "../miniaudio/extras/decoders/libopus", "../miniaudio/extras/decoders/libvorbis" }
                 if not MINIAUDIO_BUILD_OPUS_VORBIS then
                     links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
-                    libdirs { OPUS_LIB_DIR, VORBIS_LIB_DIR, OGG_LIBDIR }
+                    libdirs { OPUS_LIB_DIR, OPUSFILE_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
                 end
             end
         end
@@ -68,7 +69,6 @@ project "YGOPro"
     filter "system:windows"
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
-        libdirs { "$(DXSDK_DIR)Lib/x86" }
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
@@ -84,6 +84,7 @@ project "YGOPro"
     filter "not system:windows"
         links { "event_pthreads", "dl", "pthread", "resolv" }
     filter "system:macosx"
+        openmp "Off"
         links { "z" }
         defines { "GL_SILENCE_DEPRECATION" }
         if MAC_ARM then
@@ -96,6 +97,7 @@ project "YGOPro"
     filter "system:linux"
         linkoptions { "-static-libstdc++", "-static-libgcc" }
         links { "GL", "X11", "Xxf86vm" }
+        linkoptions { "-fopenmp" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
