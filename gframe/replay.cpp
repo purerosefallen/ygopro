@@ -272,7 +272,11 @@ void Replay::Reset() {
 	script_name.clear();
 }
 void Replay::SkipInfo(){
-	data_position += info_offset;
+	if (data_position == 0)
+		data_position += info_offset;
+}
+bool Replay::IsReplaying() const {
+	return is_replaying;
 }
 bool Replay::ReadInfo() {
 	int player_count = (pheader.flag & REPLAY_TAG) ? 4 : 2;
@@ -304,7 +308,7 @@ bool Replay::ReadInfo() {
 	}
 	else {
 		for (int p = 0; p < player_count; ++p) {
-			ReplayDeck deck;
+			DeckArray deck;
 			uint32_t main = Read<uint32_t>();
 			if (main > MAINC_MAX)
 				return false;
