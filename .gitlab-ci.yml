@@ -179,7 +179,7 @@ exec_windows_pro3:
     LUA_DEB: '1'
     RELEASE_DIR: debian-x64
   before_script:
-    - apt update; apt -y install git build-essential liblua5.3-dev libsqlite3-dev libevent-dev
+    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev
 
 .use_arm:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
