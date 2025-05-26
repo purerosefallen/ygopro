@@ -192,6 +192,12 @@ exec_windows_pro3:
     LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.so
 
+.use_pro3_macos:
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
+    TARGET_FILE: libygoserver.dylib
+
 exec_linux:
   extends: .exec_linux
   tags:
@@ -261,7 +267,7 @@ exec_macos_arm64:
 exec_macos_x64_pro3:
   extends:
     - .exec_macos_platform
-    - .use_pro3
+    - .use_pro3_macos
   tags:
     - macos
   variables:
@@ -270,7 +276,7 @@ exec_macos_x64_pro3:
 exec_macos_arm64_pro3:
   extends:
     - .exec_macos_platform
-    - .use_pro3
+    - .use_pro3_macos
   tags:
     - macos-m1
   variables:
