@@ -7,7 +7,7 @@ TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
 
 ./.ci/configure-libevent.sh
 
-rm -rf sqlite3/VERSION
+rm -rf sqlite3/VERSION sqlite3/version
 
 ./premake5 gmake --cc=clang
 
