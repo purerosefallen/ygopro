@@ -186,16 +186,19 @@ exec_windows_pro3:
     - arm
 
 .use_pro3:
-  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   variables:
     SERVER_PRO3_SUPPORT: '1'
     LOG_IN_CHAT: '1'
+
+.use_pro3_linux:
+  extends: .use_pro3
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
+  variables:
     TARGET_FILE: libygoserver.so
 
 .use_pro3_macos:
+  extends: .use_pro3
   variables:
-    SERVER_PRO3_SUPPORT: '1'
-    LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.dylib
 
 exec_linux:
@@ -206,7 +209,7 @@ exec_linux:
 exec_linux_pro3:
   extends:
     - .exec_linux
-    - .use_pro3
+    - .use_pro3_linux
   tags:
     - avx2
 
@@ -224,7 +227,7 @@ exec_linuxarm_pro3:
   extends:
     - .exec_linux
     - .use_arm
-    - .use_pro3
+    - .use_pro3_linux
   variables:
     RELEASE_DIR: linux-arm64
 
