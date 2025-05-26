@@ -1,12 +1,16 @@
 #include "data_manager.h"
 #include "game.h"
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 #include "spmemvfs/spmemvfs.h"
+#endif
 
 namespace ygo {
 
 const wchar_t* DataManager::unknown_string = L"???";
 unsigned char DataManager::scriptBuffer[0x100000] = {};
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 irr::io::IFileSystem* DataManager::FileSystem = nullptr;
+#endif
 DataManager dataManager;
 
 DataManager::DataManager() : _datas(32768), _strings(32768) {
@@ -14,10 +18,16 @@ DataManager::DataManager() : _datas(32768), _strings(32768) {
 }
 bool DataManager::ReadDB(sqlite3* pDB) {
 	sqlite3_stmt* pStmt = nullptr;
+#ifdef YGOPRO_SERVER_MODE
+	const char* sql = "select * from datas";
+#else
 	const char* sql = "select * from datas,texts where datas.id=texts.id";
+#endif
 	if (sqlite3_prepare_v2(pDB, sql, -1, &pStmt, 0) != SQLITE_OK)
 		return Error(pDB, pStmt);
+#ifndef YGOPRO_SERVER_MODE
 	wchar_t strBuffer[4096];
+#endif
 	int step = 0;
 	do {
 		CardDataC cd;
@@ -57,6 +67,7 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 			cd.attribute = static_cast<decltype(cd.attribute)>(sqlite3_column_int64(pStmt, 9));
 			cd.category = static_cast<decltype(cd.category)>(sqlite3_column_int64(pStmt, 10));
 			_datas[cd.code] = cd;
+#ifndef YGOPRO_SERVER_MODE
 			if (const char* text = (const char*)sqlite3_column_text(pStmt, 12)) {
 				BufferIO::DecodeUTF8(text, strBuffer);
 				cs.name = strBuffer;
@@ -73,6 +84,7 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 				}
 			}
 			_strings[cd.code] = cs;
+#endif //YGOPRO_SERVER_MODE
 		}
 		else if (step != SQLITE_DONE)
 			return Error(pDB, pStmt);
@@ -83,6 +95,15 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 bool DataManager::LoadDB(const wchar_t* wfile) {
 	char file[256];
 	BufferIO::EncodeUTF8(wfile, file);
+#if defined(YGOPRO_SERVER_MODE) && !defined(SERVER_ZIP_SUPPORT)
+	bool ret{};
+	sqlite3* pDB{};
+	if (sqlite3_open_v2(file, &pDB, SQLITE_OPEN_READONLY, 0) != SQLITE_OK)
+		ret = Error(pDB);
+	else
+		ret = ReadDB(pDB);
+	sqlite3_close(pDB);
+#else
 #ifdef _WIN32
 	auto reader = FileSystem->createAndOpenFile(wfile);
 #else
@@ -105,8 +126,10 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 		ret = ReadDB(db.handle);
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
+#endif //YGOPRO_SERVER_MODE
 	return ret;
 }
+#ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(const char* file) {
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
@@ -164,6 +187,7 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 		_setnameStrings[value] = strBuffer;
 	}
 }
+#endif //YGOPRO_SERVER_MODE
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	errmsg[0] = '\0';
 	std::strncat(errmsg, sqlite3_errmsg(pDB), sizeof errmsg - 1);
@@ -174,6 +198,7 @@ bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 code_pointer DataManager::GetCodePointer(unsigned int code) const {
 	return _datas.find(code);
 }
+#ifndef YGOPRO_SERVER_MODE
 string_pointer DataManager::GetStringPointer(unsigned int code) const {
 	return _strings.find(code);
 }
@@ -189,6 +214,7 @@ string_pointer DataManager::strings_begin() const {
 string_pointer DataManager::strings_end() const {
 	return _strings.cend();
 }
+#endif //YGOPRO_SERVER_MODE
 bool DataManager::GetData(unsigned int code, CardData* pData) const {
 	auto cdit = _datas.find(code);
 	if(cdit == _datas.end())
@@ -198,6 +224,7 @@ bool DataManager::GetData(unsigned int code, CardData* pData) const {
 	}
 	return true;
 }
+#ifndef YGOPRO_SERVER_MODE
 bool DataManager::GetString(unsigned int code, CardString* pStr) const {
 	auto csit = _strings.find(code);
 	if(csit == _strings.end()) {
@@ -266,10 +293,12 @@ std::vector<unsigned int> DataManager::GetSetCodes(std::wstring setname) const {
 	std::vector<unsigned int> matchingCodes;
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
 		auto xpos = csit->second.find_first_of(L'|');//setname|another setname or extra info
+#ifndef YGOPRO_SERVER_MODE
 		if (mainGame->CheckRegEx(csit->second, setname, true)) {
 			matchingCodes.push_back(csit->first);
-		}
-		else if(setname.size() < 2) {
+		} else
+#endif
+		if(setname.size() < 2) {
 			if(csit->second.compare(0, xpos, setname) == 0
 				|| csit->second.compare(xpos + 1, csit->second.length(), setname) == 0)
 				matchingCodes.push_back(csit->first);
@@ -386,6 +415,7 @@ std::wstring DataManager::FormatLinkMarker(unsigned int link_marker) const {
 		buffer.append(L"[\u2198]");
 	return buffer;
 }
+#endif //YGOPRO_SERVER_MODE
 uint32_t DataManager::CardReader(uint32_t code, card_data* pData) {
 	if (!dataManager.GetData(code, pData))
 		pData->clear();
@@ -395,30 +425,42 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	if (std::strncmp(script_name, "./script", 8) != 0)
 		return ReadScriptFromFile(script_name, slen);
 	unsigned char* buffer;
+#ifndef YGOPRO_SERVER_MODE
 	if(!mainGame->gameConf.prefer_expansion_script) {
 		buffer = ScriptReaderExSingle("", script_name, slen);
 		if(buffer)
 			return buffer;
 	}
+#endif //YGOPRO_SERVER_MODE
 	buffer = ScriptReaderExSingle("specials/", script_name, slen, 9);
 	if(buffer)
 		return buffer;
 	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
 	if(buffer)
 		return buffer;
+#if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32)
+	buffer = ScriptReaderExSingle("Expansions/", script_name, slen);
+	if(buffer)
+		return buffer;
+#endif
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
 	if(buffer)
 		return buffer;
+#endif
 	return ScriptReaderExSingle("", script_name, slen);
 }
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
 	char sname[256];
 	std::snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	if (use_irr) {
 		return ReadScriptFromIrrFS(sname, slen);
 	}
+#endif
 	return ReadScriptFromFile(sname, slen);
 }
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* slen) {
 #ifdef _WIN32
 	wchar_t fname[256]{};
@@ -436,6 +478,7 @@ unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* sl
 	*slen = size;
 	return scriptBuffer;
 }
+#endif
 unsigned char* DataManager::ReadScriptFromFile(const char* script_name, int* slen) {
 	FILE* fp = myfopen(script_name, "rb");
 	if (!fp)
@@ -447,6 +490,7 @@ unsigned char* DataManager::ReadScriptFromFile(const char* script_name, int* sle
 	*slen = (int)len;
 	return scriptBuffer;
 }
+#ifndef YGOPRO_SERVER_MODE
 bool DataManager::deck_sort_lv(code_pointer p1, code_pointer p2) {
 	if ((p1->second.type & 0x7) != (p2->second.type & 0x7))
 		return (p1->second.type & 0x7) < (p2->second.type & 0x7);
@@ -515,5 +559,6 @@ bool DataManager::deck_sort_name(code_pointer p1, code_pointer p2) {
 		return res < 0;
 	return p1->first < p2->first;
 }
+#endif //YGOPRO_SERVER_MODE
 
 }

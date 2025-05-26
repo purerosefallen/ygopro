@@ -62,23 +62,28 @@ public:
 	Deck current_deck;
 	std::vector<LFList> _lfList;
 
+#ifndef YGOPRO_SERVER_MODE
 	static char deckBuffer[0x10000];
+#endif
 
 	void LoadLFListSingle(const char* path);
 	void LoadLFList();
 	const wchar_t* GetLFListName(unsigned int lfhash);
 	const LFList* GetLFList(unsigned int lfhash);
 	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
+#ifndef YGOPRO_SERVER_MODE
 	bool LoadCurrentDeck(const wchar_t* file, bool is_packlist = false);
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
+#endif // YGOPRO_SERVER_MODE
 
 	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
-	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
 	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);
+#ifndef YGOPRO_SERVER_MODE
+	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
 	static void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
 	static void GetDeckFile(wchar_t* ret, int category_index, const wchar_t* category_name, const wchar_t* deckname);
 	static FILE* OpenDeckFile(const wchar_t* file, const char* mode);
@@ -89,10 +94,31 @@ public:
 	static bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	static bool DeleteCategory(const wchar_t* name);
 	static bool SaveDeckArray(const DeckArray& deck, const wchar_t* name);
+#endif // YGOPRO_SERVER_MODE
 };
 
 extern DeckManager deckManager;
 
 }
+
+#ifdef YGOPRO_SERVER_MODE
+
+#ifndef DECKCOUNT_MAIN_MIN
+#define DECKCOUNT_MAIN_MIN 40
+#endif
+
+#ifndef DECKCOUNT_MAIN_MAX
+#define DECKCOUNT_MAIN_MAX 60
+#endif
+
+#ifndef DECKCOUNT_SIDE
+#define DECKCOUNT_SIDE 15
+#endif
+
+#ifndef DECKCOUNT_EXTRA
+#define DECKCOUNT_EXTRA 15
+#endif
+
+#endif //YGOPRO_SERVER_MODE
 
 #endif //DECKMANAGER_H

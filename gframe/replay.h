@@ -17,6 +17,15 @@ namespace ygo {
 constexpr int MAX_REPLAY_SIZE = 0x80000;
 constexpr int MAX_COMP_SIZE = UINT16_MAX + 1;
 
+#ifdef YGOPRO_SERVER_MODE
+#define REPLAY_MODE_SAVE_IN_SERVER		0x1
+#define REPLAY_MODE_WATCHER_NO_SEND		0x2
+#define REPLAY_MODE_INCLUDE_CHAT		0x4
+
+#define DUEL_FLAG_SIDEINS 0x10
+#define DUEL_FLAG_BO5 0x20
+#endif // YGOPRO_SERVER_MODE
+
 struct ReplayHeader {
 	uint32_t id{};
 	uint32_t version{};

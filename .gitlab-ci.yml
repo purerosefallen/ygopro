@@ -20,21 +20,21 @@ mat_common:
     - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3490100.tar.gz | tar zfx -
     - mv sqlite-autoconf-3490100 sqlite3
     # freetype
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
-    - mv freetype-2.13.3 freetype
+    #- wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
+    #- mv freetype-2.13.3 freetype
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
-    - ./.ci/prepare-miniaudio.sh
+    #- ./.ci/prepare-miniaudio.sh
     # premake
     - cp -rf premake/* .;
   artifacts:
     paths:
       - lua
-      - freetype
+      #- freetype
       - sqlite3
       - irrlicht
-      - miniaudio
+      #- miniaudio
 
 mat_submodules:
   stage: prepare
@@ -93,15 +93,15 @@ mat_windows:
 
 ._exec_build:
   stage: build
-  variables:
-    NO_LUA_SAFE: '1' # on client no lua safe
+  #variables:
+  #  NO_LUA_SAFE: '1' # on client no lua safe
   cache:
     key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - bin/
       - obj/
 
-exec_windows:
+.exec_windows:
   extends: ._exec_build
   tags:
     - vs
@@ -109,17 +109,53 @@ exec_windows:
     - mat_common
     - mat_windows
     - mat_submodules
-  script:
+  before_script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
-    - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
-    - copy bin\release\x64\ygopro.exe .
   artifacts:
     paths:
-      - ygopro.exe
+      - dist
 
-.exec_linux:
+exec_windows:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-zip-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\x64\ygopro.exe dist\windows\ygopro.exe
+
+exec_windows_pro3:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver.dll
+
+.exec_unix_common:
   extends: ._exec_build
+  variables:
+    RELEASE_DIR: ''
+    TARGET_FILE: ygopro
+    PREMAKE5_BIN: premake5
+  script:
+    - $PREMAKE5_BIN gmake
+    - cd build
+    - make config=release -j$(nproc)
+    - cd ..
+    - mkdir -p dist/$RELEASE_DIR
+    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
+    - |
+      if [ "$TARGET_FILE" = "ygopro" ]; then
+        strip dist/$RELEASE_DIR/$TARGET_FILE
+      fi
+  artifacts:
+    paths:
+      - dist
+
+.exec_linux_common:
+  extends: .exec_unix_common
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
@@ -127,562 +163,168 @@ exec_windows:
     - mat_common
     #- mat_linux
     - mat_submodules
+
+.exec_linux:
+  extends: .exec_linux_common
   variables:
+    BUILD_SQLITE: '1'
+    SERVER_ZIP_SUPPORT: '1'
     EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
-    OPUS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
-    OPUS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    OPUSFILE_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
-    OPUSFILE_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    VORBIS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
-    VORBIS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    OGG_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
-    OGG_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-  script:
-    - ./.ci/build-opus.sh
-    - premake5 gmake --build-freetype --build-sqlite
-    - cd build
-    - make config=release -j$(nproc)
-    - cd ..
-    - mv bin/release/YGOPro ./ygopro
-    - strip ygopro
-  artifacts:
-    paths:
-      - ygopro
+    RELEASE_DIR: linux-x64
+
+.exec_debian:
+  extends: .exec_linux_common
+  variables:
+    LUA_DEB: '1'
+    RELEASE_DIR: debian-x64
+  before_script:
+    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev
+
+.use_arm:
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
+  tags:
+    - arm
+
+.use_pro3:
+  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
+    TARGET_FILE: libygoserver.so
+
+.use_pro3_macos:
+  variables:
+    SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
+    TARGET_FILE: libygoserver.dylib
+    LIBEVENT_PREBUILD_FLAGS: '-fPIC'
 
 exec_linux:
   extends: .exec_linux
 
+exec_linux_pro3:
+  extends:
+    - .exec_linux
+    - .use_pro3
+
+exec_debian:
+  extends: .exec_debian
+
 exec_linuxarm:
-  extends: .exec_linux
-  tags:
-    - arm
+  extends:
+    - .exec_linux
+    - .use_arm
   variables:
-    OPUS_FLAGS: '-fPIC' # force position independent code for arm
-    NO_AUDIO: '1'
-  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic # use a special docker image for arm build, which has fPIC enabled by default
+    RELEASE_DIR: linux-arm64
 
-._exec_macos_platform:
-  extends: ._exec_build
+exec_linuxarm_pro3:
+  extends:
+    - .exec_linux
+    - .use_arm
+    - .use_pro3
+  variables:
+    RELEASE_DIR: linux-arm64
+
+exec_debianarm:
+  extends:
+    - .exec_debian
+    - .use_arm
+  variables:
+    RELEASE_DIR: debian-arm
+
+
+.exec_macos_platform:
+  extends: .exec_unix_common
   dependencies:
-    - mat_macos
     - mat_common
+    - mat_macos
     - mat_submodules
-  script:
-    - ./.ci/exec-macos-platform.sh
-  artifacts:
-    paths:
-      - ygopro-platforms
+  before_script:
+    - env CFLAGS=$LIBEVENT_PREBUILD_FLAGS CXXFLAGS=$LIBEVENT_PREBUILD_FLAGS ./.ci/libevent-prebuild.sh
+  variables:
+    PREMAKE5_BIN: ./premake5
+    BUILD_SQLITE: '1'
+    SERVER_ZIP_SUPPORT: '1'
+    EVENT_INCLUDE_DIR: ../libevent-stable/include
+    EVENT_LIB_DIR: ../libevent-stable/lib
 
-exec_macos_platform_x86:
-  extends: ._exec_macos_platform
+exec_macos_x64:
+  extends: .exec_macos_platform
   tags:
     - macos
+  variables:
+    RELEASE_DIR: macos-x64
 
-      
-exec_macos_platform_m1:
-  extends: ._exec_macos_platform
+exec_macos_arm64:
+  extends: .exec_macos_platform
   tags:
     - macos-m1
-  #variables:
-  #  MAC_ARM: 1
+  variables:
+    RELEASE_DIR: macos-arm64
+
+exec_macos_x64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos
+  variables:
+    RELEASE_DIR: macos-x64
+
+exec_macos_arm64_pro3:
+  extends:
+    - .exec_macos_platform
+    - .use_pro3_macos
+  tags:
+    - macos-m1
+  variables:
+    RELEASE_DIR: macos-arm64
 
 exec_macos:
   stage: combine
   tags:
     - macos
   dependencies:
-    - exec_macos_platform_x86
-    - exec_macos_platform_m1
+    - exec_macos_x64
+    - exec_macos_arm64
+    - exec_macos_x64_pro3
+    - exec_macos_arm64_pro3
   script:
-    - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
-    - lipo -create -output ygopro.app/Contents/MacOS/ygopro $(ls -1 ygopro-platforms/ygopro-platform-*);
-    - mkdir ygopro.app/Contents/Resources;
-    - mv resource/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
-    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
-    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
-
-  artifacts:
-    paths:
-      - ygopro.app
-
-#exec_macos_sign:
-#  stage: sign
-#  tags:
-#    - macos
-#  dependencies:
-#    - exec_macos
-#  script: ./.ci/sign-macos.sh
-#  artifacts:
-#    paths:
-#      - ygopro.app
-#  only:
-#    - tags
-#    - master
-
-assets:
-  stage: prepare
-  tags:
-    - linux
-  script:
-    - apt update; apt -y install tar wget git
-    # starter pack
-    - wget -O - https://code.moenext.com/mycard/ygopro-starter-pack/-/archive/master/ygopro-starter-pack-master.tar.gz | tar zfx -
-    - mv ygopro-starter-pack-master/* .
-    # sound
-    - wget -O - https://code.moenext.com/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
-    - mv ygopro-sounds-master/sound/* sound
-    # fonts
-    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-fonts
-    - mv ygopro-fonts/fonts .
-    # pack
-    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
-    - mv ygopro-card-list/pack .
-    # locales
-    - git clone --depth=1 https://code.moenext.com/nanahira/ygopro-database
-    - mv ygopro-database/locales .
-  artifacts:
-    paths:
-      - deck
-      - single
-      - sound
-      - fonts
-      - pack
-      - locales
-  only:
-    - tags
-    - master
-
-assets_nonwindows:
-  stage: prepare
-  tags:
-    - linux
-  script:
-    - apt update; apt -y install tar wget
-    - wget -O - https://cdn02.moecube.com:444/windbot/windbot.tar.gz | tar zfx -
-  artifacts:
-    paths:
-      - bot.conf
-      - windbot
-      - bot
-  only:
-    - tags
-    - master
-
-assets_windows:
-  stage: prepare
-  tags:
-    - linux
-  script:
-    - wget https://cdn02.moecube.com:444/windbot/WindBot.7z
-    - 7z x -y WindBot.7z
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync s3://mycard/koishipro/contents/update-koishipro/ ./update-koishipro
-    - rm -rf update-koishipro/.git || true
-  artifacts:
-    paths:
-      - bot.conf
-      - WindBot
-      - Bot.exe
-      - update-koishipro
-  only:
-    - tags
-    - master
-
-._locale_zh-CN:
-  variables:
-    TARGET_LOCALE: zh-CN
-
-._locale_en-US:
-  variables:
-    TARGET_LOCALE: en-US
-
-._assets_locale:
-  stage: build
-  tags:
-    - linux
-  script: ./.ci/assets-locale.sh
-  artifacts:
-    paths:
-      - pics
-      - cards.cdb
-      - strings.conf
-      - bot.conf
-  only:
-    - tags
-    - master
-
-assets_zh-CN:
-  extends: 
-    - ._assets_locale
-    - ._locale_zh-CN
-
-assets_en-US:
-  extends: 
-    - ._assets_locale
-    - ._locale_en-US
-
-._pack:
-  stage: pack
-  tags:
-    - linux
+    - mkdir -p dist/macos
+    - lipo -create -output dist/macos/ygopro dist/macos-x64/ygopro dist/macos-arm64/ygopro
+    - lipo -create -output dist/macos/libygoserver.dylib dist/macos-x64/libygoserver.dylib dist/macos-arm64/libygoserver.dylib
+    - rm -rf dist/macos-x64 dist/macos-arm64
   artifacts:
     paths:
       - dist
-  only:
-    - tags
-    - master
 
-
-._pack_format_gz:
-  extends: ._pack
-  variables:
-    ARCHIVE_SUFFIX: gz
-
-._pack_format_zst:
-  extends: ._pack
-  variables:
-    ARCHIVE_SUFFIX: zst
-
-._pack_dlc:
-  extends: ._pack_format_zst
-  only:
-    - tags
-
-._pack_script_windows_non7z:
-  extends: ._pack
-  script: ./.ci/pack-windows.sh
-
-._pack_script_windows_7z:
-  extends: ._pack
-  script: ./.ci/pack-windows-7z.sh
-
-._pack_script_linux:
-  extends: ._pack
-  script: ./.ci/pack-linux.sh
-
-._pack_script_macos:
-  extends: ._pack
-  script: ./.ci/pack-macos.sh
-
-._pack_script_windows_dlc:
-  extends: ._pack_dlc
-  script: ./.ci/pack-windows-dlc.sh
-
-._pack_script_linux_dlc:
-  extends: ._pack_dlc
-  script: ./.ci/pack-linux-dlc.sh
-
-._pack_script_macos_dlc:
-  extends: ._pack_dlc
-  script: ./.ci/pack-macos-dlc.sh
-
-._pack_assets_windows_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_windows
-    - exec_windows
-    - assets_zh-CN
-    - mat_submodules
-
-._pack_assets_linux_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_linux
-    - assets_zh-CN
-    - mat_submodules
-
-._pack_assets_linuxarm_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_linuxarm
-    - assets_zh-CN
-    - mat_submodules
-
-._pack_assets_macos_zh-CN:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_macos
-    - assets_zh-CN
-    - mat_submodules
-
-._pack_assets_windows_en-US:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_windows
-    - exec_windows
-    - assets_en-US
-    - mat_submodules
-
-._pack_assets_linux_en-US:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_linux
-    - assets_en-US
-    - mat_submodules
-
-._pack_assets_linuxarm_en-US:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_linuxarm
-    - assets_en-US
-    - mat_submodules
-
-._pack_assets_macos_en-US:
-  extends: ._pack
-  dependencies:
-    - assets
-    - assets_nonwindows
-    - exec_macos
-    - assets_en-US
-    - mat_submodules
-
-._pack_assets_windows_dlc:
-  extends: ._pack
-  dependencies:
-    - assets
-    - exec_windows
-    - mat_submodules
-
-._pack_assets_linux_dlc:
-  extends: ._pack
-  dependencies:
-    - assets
-    - exec_linux
-    - mat_submodules
-
-._pack_assets_macos_dlc:
-  extends: ._pack
-  dependencies:
-    - assets
-    - exec_macos
-    - mat_submodules
-
-pack_windows_dlc_zh-CN:
-  extends:
-    - ._pack_assets_windows_dlc
-    - ._pack_script_windows_dlc
-    - ._locale_zh-CN
-
-pack_linux_dlc_zh-CN:
-  extends:
-    - ._pack_assets_linux_dlc
-    - ._pack_script_linux_dlc
-    - ._locale_zh-CN
-
-pack_macos_dlc_zh-CN:
-  extends:
-    - ._pack_assets_macos_dlc
-    - ._pack_script_macos_dlc
-    - ._locale_zh-CN
-
-pack_windows_dlc_en-US:
-  extends:
-    - ._pack_assets_windows_dlc
-    - ._pack_script_windows_dlc
-    - ._locale_en-US
-
-pack_linux_dlc_en-US:
-  extends:
-    - ._pack_assets_linux_dlc
-    - ._pack_script_linux_dlc
-    - ._locale_en-US
-
-pack_macos_dlc_en-US:
-  extends:
-    - ._pack_assets_macos_dlc
-    - ._pack_script_macos_dlc
-    - ._locale_en-US
-
-pack_windows_zh-CN_7z:
-  extends:
-    - ._pack_assets_windows_zh-CN
-    - ._pack_script_windows_7z
-    - ._locale_zh-CN
-
-#pack_windows_zh-CN_gz:
-#  extends:
-#    - ._pack_assets_windows_zh-CN
-#    - ._pack_script_windows_non7z
-#    - ._pack_format_gz
-#    - ._locale_zh-CN
-
-#pack_windows_zh-CN_zst:
-#  extends:
-#    - ._pack_assets_windows_zh-CN
-#    - ._pack_script_windows_non7z
-#    - ._pack_format_zst
-#    - ._locale_zh-CN
-
-pack_linux_zh-CN_gz:
-  extends:
-    - ._pack_assets_linux_zh-CN
-    - ._pack_script_linux
-    - ._pack_format_gz
-    - ._locale_zh-CN
-
-pack_linuxarm_zh-CN_gz:
-  extends:
-    - ._pack_assets_linuxarm_zh-CN
-    - ._pack_script_linux
-    - ._pack_format_gz
-    - ._locale_zh-CN
-  variables:
-    TARGET_PLATFORM: linuxarm
-
-#pack_linux_zh-CN_zst:
-#  extends:
-#    - ._pack_assets_linux_zh-CN
-#    - ._pack_script_linux
-#    - ._pack_format_zst
-#    - ._locale_zh-CN
-
-
-pack_macos_zh-CN_gz:
-  extends:
-    - ._pack_assets_macos_zh-CN
-    - ._pack_script_macos
-    - ._pack_format_gz
-    - ._locale_zh-CN
-
-#pack_macos_zh-CN_zst:
-#  extends:
-#    - ._pack_assets_macos_zh-CN
-#    - ._pack_script_macos
-#    - ._pack_format_zst
-#    - ._locale_zh-CN
-
-pack_windows_en-US_7z:
-  extends:
-    - ._pack_assets_windows_en-US
-    - ._pack_script_windows_7z
-    - ._locale_en-US
-
-#pack_windows_en-US_gz:
-#  extends:
-#    - ._pack_assets_windows_en-US
-#    - ._pack_script_windows_non7z
-#    - ._pack_format_gz
-#    - ._locale_en-US
-
-#pack_windows_en-US_zst:
-#  extends:
-#    - ._pack_assets_windows_en-US
-#    - ._pack_script_windows_non7z
-#    - ._pack_format_zst
-#    - ._locale_en-US
-
-pack_linux_en-US_gz:
-  extends:
-    - ._pack_assets_linux_en-US
-    - ._pack_script_linux
-    - ._pack_format_gz
-    - ._locale_en-US
-
-pack_linuxarm_en-US_gz:
-  extends:
-    - ._pack_assets_linuxarm_en-US
-    - ._pack_script_linux
-    - ._pack_format_gz
-    - ._locale_en-US
-  variables:
-    TARGET_PLATFORM: linuxarm
-
-#pack_linux_en-US_zst:
-#  extends:
-#    - ._pack_assets_linux_en-US
-#    - ._pack_script_linux
-#    - ._pack_format_zst
-#    - ._locale_en-US
-
-pack_macos_en-US_gz:
-  extends:
-    - ._pack_assets_macos_en-US
-    - ._pack_script_macos
-    - ._pack_format_gz
-    - ._locale_en-US
-
-#pack_macos_en-US_zst:
-#  extends:
-#    - ._pack_assets_macos_en-US
-#    - ._pack_script_macos
-#    - ._pack_format_zst
-#    - ._locale_en-US
-
-upload_contents:
-  stage: deploy
-  dependencies:
-    - pack_windows_zh-CN_7z
-  tags: 
-    - linux
-  script:
-    - 7z x -y -ocontents dist/KoishiPro-$CI_COMMIT_REF_NAME-win32-zh-CN.7z
-    - cd contents/update-koishipro
-    - chmod +x *.sh
-    - mono update.exe -ci
-    - sed -i "/git/d" filelist.txt
-    - cd ../..
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete contents/ s3://mycard/koishipro/contents/
-  only:
-    - master
+#win_server_pack:
+#  stage: pack
+#  dependencies:
+#    - exec_windows
+#  tags:
+#    - linux
+#  script:
+#    - apt update; apt -y install p7zip-full wget
+#    - wget https://nodejs.org/dist/v14.17.0/node-v14.17.0-win-x64.7z
 
 upload_to_minio:
   stage: deploy
   dependencies:
-    - pack_windows_zh-CN_7z
-    #- pack_windows_zh-CN_gz
-    #- pack_windows_zh-CN_zst
-    - pack_linux_zh-CN_gz
-    - pack_linuxarm_zh-CN_gz
-    #- pack_linux_zh-CN_zst
-    - pack_macos_zh-CN_gz
-    #- pack_macos_zh-CN_zst
-    - pack_windows_en-US_7z
-    #- pack_windows_en-US_gz
-    #- pack_windows_en-US_zst
-    - pack_linux_en-US_gz
-    - pack_linuxarm_en-US_gz
-    #- pack_linux_en-US_zst
-    - pack_macos_en-US_gz
-    #- pack_macos_en-US_zst
-    - pack_windows_dlc_zh-CN
-    - pack_linux_dlc_zh-CN
-    - pack_macos_dlc_zh-CN
-    - pack_windows_dlc_en-US
-    - pack_linux_dlc_en-US
-    - pack_macos_dlc_en-US
+    - exec_windows
+    - exec_linux
+    - exec_linuxarm
+    - exec_windows_pro3
+    - exec_linux_pro3
+    - exec_linuxarm_pro3
+    - exec_debian
+    - exec_debianarm
+    - exec_macos
   tags: 
     - linux
   script:
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync dist/ s3://mycard/koishipro/archive
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/koishipro/server
   only:
-    - tags
-    - master
-
-upload_mycard:
-  stage: deploy
-  dependencies:
-    - pack_windows_dlc_zh-CN
-    - pack_linux_dlc_zh-CN
-    - pack_macos_dlc_zh-CN
-    - pack_windows_dlc_en-US
-    - pack_linux_dlc_en-US
-    - pack_macos_dlc_en-US
-  tags: 
-    - linux
-  variables:
-    appVersion: $CI_COMMIT_TAG
-  script: ./.ci/upload-packager.sh
-  only:
+    - server
     - tags

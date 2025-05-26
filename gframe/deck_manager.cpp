@@ -6,7 +6,9 @@
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 char DeckManager::deckBuffer[0x10000]{};
+#endif
 DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
@@ -46,6 +48,15 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	}
 }
 void DeckManager::LoadLFList() {
+#ifdef SERVER_PRO2_SUPPORT
+	LoadLFListSingle("config/lflist.conf");
+#endif
+#ifdef SERVER_PRO3_SUPPORT
+	LoadLFListSingle("Data/lflist.conf");
+#ifndef _WIN32
+	LoadLFListSingle("Expansions/lflist.conf");
+#endif
+#endif
 	LoadLFListSingle("expansions/lflist.conf");
 	LoadLFListSingle("specials/lflist.conf");
 	LoadLFListSingle("lflist.conf");
@@ -187,6 +198,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec
 	}
 	return errorcode;
 }
+#ifndef YGOPRO_SERVER_MODE
 uint32_t DeckManager::LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist) {
 	int ct = 0;
 	int mainc = 0, sidec = 0;
@@ -211,6 +223,7 @@ uint32_t DeckManager::LoadDeckFromStream(Deck& deck, std::istringstream& deckStr
 	}
 	return LoadDeck(deck, cardlist, mainc, sidec, is_packlist);
 }
+#endif // YGOPRO_SERVER_MODE
 bool DeckManager::LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec) {
 	std::unordered_map<uint32_t, int> pcount;
 	std::unordered_map<uint32_t, int> ncount;
@@ -240,6 +253,7 @@ bool DeckManager::LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec) {
 	deck = ndeck;
 	return true;
 }
+#ifndef YGOPRO_SERVER_MODE
 void DeckManager::GetCategoryPath(wchar_t* ret, int index, const wchar_t* text) {
 	wchar_t catepath[256];
 	switch(index) {
@@ -419,4 +433,5 @@ bool DeckManager::SaveDeckArray(const DeckArray& deck, const wchar_t* name) {
 	std::fclose(fp);
 	return true;
 }
+#endif //YGOPRO_SERVER_MODE
 }

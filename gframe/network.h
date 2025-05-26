@@ -233,7 +233,13 @@ public:
 	virtual void Surrender(DuelPlayer* dp) = 0;
 	virtual void GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) = 0;
 	virtual void TimeConfirm(DuelPlayer* dp) = 0;
+#ifdef YGOPRO_SERVER_MODE
+	virtual void RequestField(DuelPlayer* dp) = 0;
+#endif
 	virtual void EndDuel() = 0;
+#ifdef YGOPRO_SERVER_MODE
+	virtual void TestCard(int code) = 0;
+#endif
 
 public:
 	event* etimer { nullptr };

@@ -94,7 +94,9 @@ inline FILE* myfopen(const char* filename, const char* mode) {
 }
 #endif
 
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 #include <irrlicht.h>
+#endif
 
 extern unsigned short PRO_VERSION;
 extern unsigned int enable_log;
