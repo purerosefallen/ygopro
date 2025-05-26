@@ -7,13 +7,13 @@ if [ -d "libevent-stable" ]; then
   rm -rf libevent-stable
 fi
 
-if [ ! -d "libevent-2.0.22-stable" ]; then
-  wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
+if [ ! -d "libevent-2.1.12-stable" ]; then
+  wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
 fi
 
 install_path="$PWD/libevent-stable"
 
-cd libevent-2.0.22-stable
+cd libevent-2.1.12-stable
 ./configure "--prefix=$install_path" --disable-openssl --enable-static=yes --enable-shared=no "$@"
 make -j$(nproc)
 make install
