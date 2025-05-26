@@ -117,7 +117,7 @@ project "miniaudio"
                 "HAVE_LRINTF",
                 "OP_HAVE_LRINTF",
             }
-            if not TARGET_MAC_ARM then
+            if not TARGET_MAC_ARM and not IS_ARM then
                 files {
                     "external/opus/celt/x86/pitch_avx.c",
                     "external/opus/celt/x86/pitch_sse.c",
@@ -138,3 +138,4 @@ project "miniaudio"
 
     filter "system:linux"
         links { "dl", "pthread", "m" }
+        buildoptions { "-mavx2", "-mfma" }
