@@ -22,6 +22,9 @@ mat_common:
     # freetype
     #- wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
     #- mv freetype-2.13.3 freetype
+    # event
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
+    - mv libevent-2.1.12-stable event
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -33,6 +36,7 @@ mat_common:
       - lua
       #- freetype
       - sqlite3
+      - event
       - irrlicht
       #- miniaudio
 
@@ -83,13 +87,9 @@ mat_windows:
     # premake5.exe
     - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
     - 7z x -y premake-5.0.0-beta6-windows.zip
-    # event
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
-    - mv libevent-2.1.12-stable event
   artifacts:
     paths:
       - premake5.exe
-      - event
 
 ._exec_build:
   stage: build
@@ -169,8 +169,6 @@ exec_windows_pro3:
   variables:
     BUILD_SQLITE: '1'
     SERVER_ZIP_SUPPORT: '1'
-    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
-    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
     RELEASE_DIR: linux-x64
 
 .exec_debian:
@@ -240,14 +238,11 @@ exec_debianarm:
     - mat_common
     - mat_macos
     - mat_submodules
-  before_script:
-    - env CFLAGS=$LIBEVENT_PREBUILD_FLAGS CXXFLAGS=$LIBEVENT_PREBUILD_FLAGS ./.ci/libevent-prebuild.sh
   variables:
     PREMAKE5_BIN: ./premake5
     BUILD_SQLITE: '1'
+    BUILD_EVENT: '1'
     SERVER_ZIP_SUPPORT: '1'
-    EVENT_INCLUDE_DIR: ../libevent-stable/include
-    EVENT_LIB_DIR: ../libevent-stable/lib
 
 exec_macos_x64:
   extends: .exec_macos_platform

@@ -59,6 +59,7 @@ end
     else
         includedirs { EVENT_INCLUDE_DIR }
         libdirs { EVENT_LIB_DIR }
+        links { "event_pthreads" }
     end
 
     if BUILD_IRRLICHT then
@@ -133,7 +134,7 @@ end
             end
         end
     filter "not system:windows"
-        links { "event_pthreads", "dl", "pthread", "resolv" }
+        links { "dl", "pthread", "resolv" }
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
@@ -141,8 +142,10 @@ if not SERVER_MODE then
         defines { "GL_SILENCE_DEPRECATION" }
 end
         if MAC_ARM then
-            buildoptions { "--target=arm64-apple-macos12" }
             linkoptions { "-arch arm64" }
+        end
+        if MAC_INTEL then
+            linkoptions { "-arch x86_64" }
         end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrklang" }
