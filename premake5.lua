@@ -212,6 +212,7 @@ if USE_DXSDK and os.istarget("windows") then
     end
 end
 
+USE_AUDIO = not SERVER_MODE and not GetParam("no-audio")
 if GetParam("no-audio") then
     USE_AUDIO = false
 elseif GetParam("no-use-miniaudio") then
