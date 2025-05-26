@@ -20,7 +20,7 @@ export AUTOMAKE=automake
 ./.ci/libevent-prebuild.sh
 ./.ci/build-opus.sh
 
-rm -rf sqlite3/VERSION
+rm -rf sqlite3/VERSION sqlite3/version
 
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
