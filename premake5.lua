@@ -157,9 +157,22 @@ end
 
 if GetParam("lua-deb") then
     BUILD_LUA = false
-    LUA_LIB_DIR = "/usr/lib/x86_64-linux-gnu"
-    LUA_LIB_NAME = "lua5.3-c++"
-    LUA_INCLUDE_DIR = "/usr/include/lua5.3"
+    local lua_versions = { "5.4", "5.3" }
+    local lua_version = nil
+    for _, version in ipairs(lua_versions) do
+        local lua_lib_dir = os.findlib("lua" .. version .. "-c++")
+        if lua_lib_dir then
+            print("Found lua " .. version .. " at " .. lua_lib_dir)
+            lua_version = version
+            LUA_LIB_DIR = lua_lib_dir
+            break
+        end
+    end
+    if not lua_version then
+        error("Lua library not found. Please install lua by command 'sudo apt -y install liblua5.4-dev'")
+    end
+    LUA_LIB_NAME = "lua" .. lua_version .. "-c++"
+    LUA_INCLUDE_DIR = path.join("/usr/include", "lua" .. lua_version)
 end
 
 if GetParam("build-event") then

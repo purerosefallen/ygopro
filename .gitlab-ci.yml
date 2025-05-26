@@ -124,15 +124,6 @@ exec_windows:
     - mkdir dist\windows
     - copy bin\release\x64\ygopro.exe dist\windows\ygopro.exe
 
-exec_windows_pro3:
-  extends: .exec_windows
-  script:
-    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
-    - mkdir dist
-    - mkdir dist\windows
-    - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver.dll
-
 .exec_unix_common:
   extends: ._exec_build
   variables:
