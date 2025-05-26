@@ -14,14 +14,17 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
-    - mv lua-5.4.4 lua
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.7.tar.gz | tar zfx -
+    - mv lua-5.4.7 lua
     # sqlite3
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3390300 sqlite3
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3490100.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3490100 sqlite3
     # freetype
-    #- wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
-    #- mv freetype-2.11.1 freetype
+    #- wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
+    #- mv freetype-2.13.3 freetype
+    # event
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
+    - mv libevent-2.1.12-stable event
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -33,6 +36,7 @@ mat_common:
       - lua
       #- freetype
       - sqlite3
+      - event
       - irrlicht
       #- miniaudio
 
@@ -68,7 +72,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -81,25 +85,21 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
-    - 7z x -y premake-5.0.0-beta5-windows.zip
-    # event
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - mv libevent-2.0.22-stable event
+    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
+    - 7z x -y premake-5.0.0-beta6-windows.zip
   artifacts:
     paths:
       - premake5.exe
-      - event
 
 ._exec_build:
   stage: build
   #variables:
   #  NO_LUA_SAFE: '1' # on client no lua safe
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
+  #cache:
+  #  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+  #  paths:
+  #    - bin/
+  #    - obj/
 
 .exec_windows:
   extends: ._exec_build
@@ -119,19 +119,19 @@ exec_windows:
   extends: .exec_windows
   script:
     - '.\premake5.exe vs2019 --server-zip-support'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
-    - copy bin\release\ygopro.exe dist\windows\ygopro.exe
+    - copy bin\release\x64\ygopro.exe dist\windows\ygopro.exe
 
 exec_windows_pro3:
   extends: .exec_windows
   script:
     - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
-    - copy bin\release\ygoserver.dll dist\windows\ygoserver.dll
+    - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver.dll
 
 .exec_unix_common:
   extends: ._exec_build
@@ -140,6 +140,7 @@ exec_windows_pro3:
     TARGET_FILE: ygopro
     PREMAKE5_BIN: premake5
   script:
+    - ./.ci/configure-libevent.sh
     - $PREMAKE5_BIN gmake
     - cd build
     - make config=release -j$(nproc)
@@ -169,8 +170,6 @@ exec_windows_pro3:
   variables:
     BUILD_SQLITE: '1'
     SERVER_ZIP_SUPPORT: '1'
-    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
-    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
     RELEASE_DIR: linux-x64
 
 .exec_debian:
@@ -202,11 +201,15 @@ exec_windows_pro3:
 
 exec_linux:
   extends: .exec_linux
+  tags:
+    - noavx2
 
 exec_linux_pro3:
   extends:
     - .exec_linux
     - .use_pro3
+  tags:
+    - avx2
 
 exec_debian:
   extends: .exec_debian
@@ -240,14 +243,13 @@ exec_debianarm:
     - mat_common
     - mat_macos
     - mat_submodules
-  before_script:
-    - env CFLAGS=$LIBEVENT_PREBUILD_FLAGS CXXFLAGS=$LIBEVENT_PREBUILD_FLAGS ./.ci/libevent-prebuild.sh
   variables:
     PREMAKE5_BIN: ./premake5
     BUILD_SQLITE: '1'
+    BUILD_EVENT: '1'
     SERVER_ZIP_SUPPORT: '1'
-    EVENT_INCLUDE_DIR: ../libevent-stable/include
-    EVENT_LIB_DIR: ../libevent-stable/lib
+  before_script:
+    - rm -rf sqlite3/VERSION sqlite3/version
 
 exec_macos_x64:
   extends: .exec_macos_platform

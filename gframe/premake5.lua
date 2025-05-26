@@ -59,6 +59,7 @@ end
     else
         includedirs { EVENT_INCLUDE_DIR }
         libdirs { EVENT_LIB_DIR }
+        links { "event_pthreads" }
     end
 
     if BUILD_IRRLICHT then
@@ -110,15 +111,16 @@ end
     end
 
     filter "system:windows"
+        entrypoint "mainCRTStartup"
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
 if SERVER_MODE then
-        links { "ws2_32" }
+        links { "ws2_32", "iphlpapi" }
 else
-        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
+        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi", "iphlpapi" }
 end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
@@ -132,7 +134,7 @@ end
             end
         end
     filter "not system:windows"
-        links { "event_pthreads", "dl", "pthread", "resolv" }
+        links { "dl", "pthread", "resolv" }
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
@@ -140,8 +142,10 @@ if not SERVER_MODE then
         defines { "GL_SILENCE_DEPRECATION" }
 end
         if MAC_ARM then
-            buildoptions { "--target=arm64-apple-macos12" }
             linkoptions { "-arch arm64" }
+        end
+        if MAC_INTEL then
+            linkoptions { "-arch x86_64" }
         end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrklang" }
