@@ -118,7 +118,7 @@ if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
 if SERVER_MODE then
-        links { "ws2_32" }
+        links { "ws2_32", "iphlpapi" }
 else
         links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi", "iphlpapi" }
 end
