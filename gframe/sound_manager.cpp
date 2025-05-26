@@ -254,8 +254,10 @@ void SoundManager::PlaySoundEffect(int sound) {
 	default:
 		break;
 	}
+	wchar_t soundNameW[32];
+	BufferIO::DecodeUTF8(soundName, soundNameW);
 	wchar_t soundPathW[40];
-	myswprintf(soundPathW, L"./sound/%s.wav", soundName);
+	myswprintf(soundPathW, L"./sound/%ls.wav", soundNameW);
 	PlaySound(soundPathW);
 #endif // YGOPRO_USE_AUDIO
 }
