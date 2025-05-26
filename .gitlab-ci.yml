@@ -70,7 +70,7 @@ mat_macos:
   tags:
     - linux
   script:
-    # premake5
+    - apt update; apt -y install wget tar
     - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
@@ -82,6 +82,7 @@ mat_windows:
   tags:
     - linux
   script:
+    - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
     - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
     - 7z x -y premake-5.0.0-beta6-windows.zip
@@ -128,6 +129,8 @@ exec_windows:
     AUDIO_LIB: 'miniaudio'
     MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
     MINIAUDIO_BUILD_OPUS_VORBIS: '1'
+  before_script:
+    - ./.ci/configure-libevent.sh
 
 .exec_linux:
   extends: .exec_unix
@@ -139,7 +142,6 @@ exec_windows:
     #- mat_linux
     - mat_submodules
   script:
-    - ./.ci/configure-libevent.sh
     - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
