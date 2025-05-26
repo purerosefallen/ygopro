@@ -14,14 +14,17 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
-    - mv lua-5.4.4 lua
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.7.tar.gz | tar zfx -
+    - mv lua-5.4.7 lua
     # sqlite3
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3390300 sqlite3
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3490100.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3490100 sqlite3
     # freetype
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
-    - mv freetype-2.11.1 freetype
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
+    - mv freetype-2.13.3 freetype
+    # event
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
+    - mv libevent-2.1.12-stable event
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -33,6 +36,7 @@ mat_common:
       - lua
       - freetype
       - sqlite3
+      - event
       - irrlicht
       - miniaudio
 
@@ -68,7 +72,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -81,25 +85,21 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
-    - 7z x -y premake-5.0.0-beta5-windows.zip
-    # event
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - mv libevent-2.0.22-stable event
+    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
+    - 7z x -y premake-5.0.0-beta6-windows.zip
   artifacts:
     paths:
       - premake5.exe
-      - event
 
 ._exec_build:
   stage: build
   variables:
     NO_LUA_SAFE: '1' # on client no lua safe
-  cache:
-    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - bin/
-      - obj/
+  #cache:
+  #  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+  #  paths:
+  #    - bin/
+  #    - obj/
 
 exec_windows:
   extends: ._exec_build
@@ -112,14 +112,28 @@ exec_windows:
   script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
     - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release'
-    - copy bin\release\ygopro.exe .
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - copy bin\release\x64\ygopro.exe .
   artifacts:
     paths:
       - ygopro.exe
 
-.exec_linux:
+.exec_unix:
   extends: ._exec_build
+  variables:
+    BUILD_FREETYPE: '1'
+    BUILD_SQLITE: '1'
+    BUILD_IRRLICHT: '1'
+    BUILD_EVENT: '1'
+    BUILD_OPUS_VORBIS: '1'
+    AUDIO_LIB: 'miniaudio'
+    MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
+    BUILD_OPUS_VORBIS: '1'
+  before_script:
+    - ./.ci/configure-libevent.sh
+
+.exec_linux:
+  extends: .exec_unix
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
@@ -127,20 +141,9 @@ exec_windows:
     - mat_common
     #- mat_linux
     - mat_submodules
-  variables:
-    EVENT_INCLUDE_DIR: /usr/share/libevent-stable/include
-    EVENT_LIB_DIR: /usr/share/libevent-stable/lib
-    OPUS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
-    OPUS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    OPUSFILE_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
-    OPUSFILE_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    VORBIS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
-    VORBIS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
-    OGG_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
-    OGG_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
   script:
-    - ./.ci/build-opus.sh
-    - premake5 gmake --build-freetype --build-sqlite
+    - ./.ci/configure-audio.sh
+    - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -152,6 +155,8 @@ exec_windows:
 
 exec_linux:
   extends: .exec_linux
+  tags:
+    - avx2
 
 exec_linuxarm:
   extends: .exec_linux
@@ -163,7 +168,7 @@ exec_linuxarm:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic # use a special docker image for arm build, which has fPIC enabled by default
 
 ._exec_macos_platform:
-  extends: ._exec_build
+  extends: .exec_unix
   dependencies:
     - mat_macos
     - mat_common
