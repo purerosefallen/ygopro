@@ -128,7 +128,7 @@ exec_windows:
     BUILD_OPUS_VORBIS: '1'
     AUDIO_LIB: 'miniaudio'
     MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
-    MINIAUDIO_BUILD_OPUS_VORBIS: '1'
+    BUILD_OPUS_VORBIS: '1'
   before_script:
     - ./.ci/configure-libevent.sh
 
