@@ -140,6 +140,7 @@ exec_windows_pro3:
     TARGET_FILE: ygopro
     PREMAKE5_BIN: premake5
   script:
+    - ./.ci/configure-libevent.sh
     - $PREMAKE5_BIN gmake
     - cd build
     - make config=release -j$(nproc)
