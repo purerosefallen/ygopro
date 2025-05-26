@@ -201,6 +201,8 @@ exec_windows_pro3:
 
 exec_linux:
   extends: .exec_linux
+  tags:
+    - avx2
 
 exec_linux_pro3:
   extends:
