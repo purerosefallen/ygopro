@@ -28,12 +28,13 @@ before_build:
   - xcopy /E premake\* .
   - xcopy /E resource\* .
   - premake5 vs2022
-  
+
+configuration: Release
+platform: x64
+
 build: 
   project: build/YGOPro.sln
   parallel: true
-  configuration: Release
-  platform: x64
 
 after_build:
   - ps: move bin\release\x64\ygopro.exe .
