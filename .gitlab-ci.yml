@@ -197,7 +197,6 @@ exec_windows_pro3:
     SERVER_PRO3_SUPPORT: '1'
     LOG_IN_CHAT: '1'
     TARGET_FILE: libygoserver.dylib
-    LIBEVENT_PREBUILD_FLAGS: '-fPIC'
 
 exec_linux:
   extends: .exec_linux
