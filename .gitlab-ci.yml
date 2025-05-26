@@ -36,6 +36,7 @@ mat_common:
       - lua
       - freetype
       - sqlite3
+      - event
       - irrlicht
       - miniaudio
 
@@ -89,7 +90,6 @@ mat_windows:
   artifacts:
     paths:
       - premake5.exe
-      - event
 
 ._exec_build:
   stage: build
