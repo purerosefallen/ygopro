@@ -244,6 +244,8 @@ exec_debianarm:
     BUILD_SQLITE: '1'
     BUILD_EVENT: '1'
     SERVER_ZIP_SUPPORT: '1'
+  before_script:
+    - rm -rf sqlite3/VERSION sqlite3/version
 
 exec_macos_x64:
   extends: .exec_macos_platform
