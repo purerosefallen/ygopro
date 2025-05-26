@@ -138,4 +138,3 @@ project "miniaudio"
 
     filter "system:linux"
         links { "dl", "pthread", "m" }
-        buildoptions { "-mavx2", "-mfma" }

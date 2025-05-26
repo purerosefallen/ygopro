@@ -155,6 +155,8 @@ exec_windows:
 
 exec_linux:
   extends: .exec_linux
+  tags:
+    - avx2
 
 exec_linuxarm:
   extends: .exec_linux
