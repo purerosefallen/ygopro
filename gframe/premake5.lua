@@ -106,6 +106,7 @@ end
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
+        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "iphlpapi" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
             if IRRKLANG_PRO then
