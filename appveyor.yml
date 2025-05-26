@@ -31,11 +31,12 @@ before_build:
   - xcopy /E resource\* .
   - premake5 vs2022
   
+configuration: Release
+platform: x64
+
 build: 
   project: build/YGOPro.sln
   parallel: true
-  configuration: Release
-  platform: x64
 
 test: off
 
