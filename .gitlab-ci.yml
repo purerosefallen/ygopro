@@ -142,6 +142,7 @@ exec_windows:
     #- mat_linux
     - mat_submodules
   script:
+    - ./.ci/configure-audio.sh
     - premake5 gmake
     - cd build
     - make config=release -j$(nproc)

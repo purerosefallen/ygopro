@@ -6,6 +6,7 @@ TARGET_PLATFORM=$(arch)
 TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
 
 ./.ci/configure-libevent.sh
+./.ci/configure-audio.sh
 
 rm -rf sqlite3/VERSION sqlite3/version
 
