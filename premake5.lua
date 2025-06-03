@@ -10,7 +10,9 @@ BUILD_LUA = true
 LUA_LIB_NAME = "lua" -- change this if you don't build Lua
 
 BUILD_EVENT = os.istarget("windows")
+
 BUILD_FREETYPE = os.istarget("windows")
+
 BUILD_SQLITE = os.istarget("windows")
 BUILD_IRRLICHT = true -- modified Irrlicht is required, can't use the official one
 USE_DXSDK = true
@@ -378,6 +380,30 @@ if os.istarget("macosx") then
     end
 end
 
+function getGlibcVersion()
+    local output = os.outputof("getconf GNU_LIBC_VERSION")
+    local major, minor, patch = output:match("glibc (%d+)%.(%d+)%.?(%d*)")
+
+    if major and minor then
+        major = tonumber(major)
+        minor = tonumber(minor)
+        patch = tonumber(patch) or 0
+        return (major << 16) | (minor << 8) | patch
+    end
+
+    return nil
+end
+
+GLIBC_VERSION=0
+if os.ishost("linux") then
+    GLIBC_VERSION = getGlibcVersion()
+    if GLIBC_VERSION>0 then
+        print("Detected glibc version: " .. string.format("%d.%d.%d", GLIBC_VERSION >> 16, (GLIBC_VERSION >> 8) & 0xFF, GLIBC_VERSION & 0xFF))
+    else
+        print("Could not detect glibc version, assuming it is sufficient.")
+    end
+end
+
 workspace "YGOPro"
     location "build"
     language "C++"
@@ -423,7 +449,6 @@ workspace "YGOPro"
         if MAC_ARM and MAC_INTEL then
             architecture "universal"
         end
-        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
     filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
@@ -459,7 +484,6 @@ workspace "YGOPro"
         disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
     filter { "configurations:Release", "not action:vs*" }
-        symbols "On"
         defines "NDEBUG"
 
     filter { "configurations:Debug", "action:vs*" }
