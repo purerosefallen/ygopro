@@ -54,6 +54,10 @@ project "ygopro"
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end
 
+    if not BUILD_LUA then
+        libdirs { LUA_LIB_DIR }
+    end
+
     if BUILD_EVENT then
         includedirs { "../event/include" }
     else
@@ -120,7 +124,7 @@ end
 if SERVER_MODE then
         links { "ws2_32", "iphlpapi" }
 else
-        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi", "iphlpapi" }
+        links { "ws2_32", "Dnsapi", "iphlpapi" }
 end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
@@ -134,11 +138,11 @@ end
             end
         end
     filter "not system:windows"
-        links { "dl", "pthread", "resolv" }
+        links { "resolv" }
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
-        links { "z" }
+        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
 end
         if MAC_ARM then
@@ -150,6 +154,7 @@ end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrklang" }
         end
+
     filter "system:linux"
         linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
@@ -159,4 +164,7 @@ end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
+        end
+        if GLIBC_VERSION < ((2 << 16) | (34 << 8)) then -- glibc less than 2.34
+            links { "dl", "pthread" }
         end
