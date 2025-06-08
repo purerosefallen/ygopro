@@ -2630,6 +2630,7 @@ bool DuelClient::ClientAnalyze(unsigned char* msg, int len) {
 		ClientCard* pcard = mainGame->dField.GetCard(player, LOCATION_DECK, mainGame->dField.deck[player].size() - 1 - seq);
 		pcard->SetCode(code & 0x7fffffff);
 		bool rev = (code & 0x80000000) != 0;
+		printf("Deck top card: %d, is_reversed: %d\n", code & 0x7fffffff, rev ? 1 : 0);
 		if(pcard->is_reversed != rev) {
 			pcard->is_reversed = rev;
 			mainGame->dField.MoveCard(pcard, 5);
