@@ -2071,20 +2071,33 @@ void TagDuel::RequestField(DuelPlayer* dp) {
 	RefreshRemoved(1 - player, 0xefffff, 0, dp);
 	RefreshRemoved(player, 0xefffff, 0, dp);
 
-	// send MSG_REVERSE_DECK if deck is reversed
-	if(deck_reversed) {
-		WriteMsg([&](uint8_t*& pbuf) {
-			BufferIO::WriteInt8(pbuf, MSG_REVERSE_DECK);
-		});
-
-		for(uint8_t i = 0; i < 2; ++i) {
+	uint8_t query_buffer[SIZE_QUERY_BUFFER];
+	for(uint8_t i = 0; i < 2; ++i) {
+		// get decktop card
+		auto qlen = query_field_card(pduel, i, LOCATION_DECK, QUERY_CODE | QUERY_POSITION, query_buffer, 0);
+		if(!qlen)
+			continue; // no cards in deck
+		uint8_t* qbuf = query_buffer;
+		uint32_t code = 0;
+		uint32_t position = 0;
+		while(qbuf < query_buffer + qlen) {
+			auto clen = BufferIO::ReadInt32(qbuf);
+			if(qbuf + clen == query_buffer + qlen) {
+				// last card
+				code = *(uint32_t*)(qbuf + 4);
+				position = GetPosition(qbuf, 8);
+			}
+			qbuf += clen - 4;
+		}
+		if(position & POS_FACEUP)
+			code |= 0x80000000; // mark as reversed
+		if(deck_reversed || position & POS_FACEUP)
 			WriteMsg([&](uint8_t*& pbuf) {
 				BufferIO::WriteInt8(pbuf, MSG_DECK_TOP);
 				BufferIO::WriteInt8(pbuf, i);
 				BufferIO::WriteInt8(pbuf, 0);
 				BufferIO::WriteInt32(pbuf, deck_top[i]);
 			});
-		}
 	}
 
 	/*
