@@ -104,12 +104,9 @@ project "YGOPro"
         end
 
     filter "system:linux"
-        links { "GL", "X11", "Xxf86vm" }
+        links { "GL", "X11", "Xxf86vm", "dl", "pthread" }
         linkoptions { "-fopenmp", "-static-libstdc++", "-static-libgcc" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
-        end
-        if GLIBC_VERSION < ((2 << 16) | (34 << 8)) then -- glibc less than 2.34
-            links { "dl", "pthread" }
         end

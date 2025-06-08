@@ -394,16 +394,6 @@ function getGlibcVersion()
     return 0
 end
 
-GLIBC_VERSION=0
-if os.ishost("linux") then
-    GLIBC_VERSION = getGlibcVersion()
-    if GLIBC_VERSION>0 then
-        print("Detected glibc version: " .. string.format("%d.%d.%d", GLIBC_VERSION >> 16, (GLIBC_VERSION >> 8) & 0xFF, GLIBC_VERSION & 0xFF))
-    else
-        print("Could not detect glibc version, assuming it is insufficient.")
-    end
-end
-
 workspace "YGOPro"
     location "build"
     language "C++"
