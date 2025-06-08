@@ -17,10 +17,10 @@
 #include "deck_con.h"
 #include "menu_handler.h"
 #include "CGUISkinSystem/CGUISkinSystem.h"
+#include <ctime>
 #else
 #include "netserver.h"
 #endif //YGOPRO_SERVER_MODE
-#include <ctime>
 #include <unordered_map>
 #include <vector>
 #include <list>

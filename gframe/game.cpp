@@ -121,7 +121,6 @@ void Game::MainTestLoop(int code) {
 	NetServer::InitTestCard(code);
 }
 #else //YGOPRO_SERVER_MODE
-
 bool Game::Initialize() {
 	initUtils();
 	LoadConfig();
@@ -889,6 +888,7 @@ bool Game::Initialize() {
 	ebStar = env->addEditBox(L"", irr::core::rect<irr::s32>(60, 60 + 100 / 6, 100, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	editbox_list.push_back(ebStar);
 	ebStar->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	editbox_list.push_back(ebStar);
 	stScale = env->addStaticText(dataManager.GetSysString(1336), irr::core::rect<irr::s32>(101, 62 + 100 / 6, 150, 82 + 100 / 6), false, false, wFilter);
 	ebScale = env->addEditBox(L"", irr::core::rect<irr::s32>(150, 60 + 100 / 6, 195, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -1292,9 +1292,11 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 void Game::LoadExpansions() {
 #ifdef SERVER_PRO2_SUPPORT
 	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+		if (isdir)
+			return;
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./cdb/%ls", name);
-		if(!isdir && IsExtension(name, L".cdb")) {
+		if(IsExtension(name, L".cdb")) {
 			dataManager.LoadDB(fpath);
 		}
 	});
@@ -2086,7 +2088,7 @@ void Game::AddDebugMsg(const char* msg) {
 	NetServer::duel_mode->Chat(&tmp_dp, (unsigned char*)msgbuf_u16, (len + 1) * sizeof(uint16_t)); // send to chat log
 #endif
 #ifdef YGOPRO_SERVER_MODE
-	fprintf(stderr, "%s\n", msg);
+	std::fprintf(stderr, "%s\n", msg);
 #else
 	if (enable_log & 0x1) {
 		wchar_t wbuf[1024];

@@ -40,7 +40,7 @@ newoption { trigger = "no-build-lua", category = "YGOPro - lua", description = "
 newoption { trigger = "lua-include-dir", category = "YGOPro - lua", description = "", value = "PATH" }
 newoption { trigger = "lua-lib-dir", category = "YGOPro - lua", description = "", value = "PATH" }
 newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME", default = LUA_LIB_NAME }
-newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "" }
+newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "Use Debian lua package" }
 
 newoption { trigger = "build-event", category = "YGOPro - event", description = "" }
 newoption { trigger = "no-build-event", category = "YGOPro - event", description = "" }
@@ -131,6 +131,14 @@ function GetParam(param)
     return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
 end
 
+function FindHeaderWithSubDir(header, subdir)
+    local result = os.findheader(header)
+    if result and subdir then
+        result = path.join(result, subdir)
+    end
+    return result
+end
+
 function ApplyBoolean(param)
     if GetParam(param) then
         defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
@@ -146,12 +154,24 @@ function ApplyNumber(param)
     end
 end
 
-function FindHeaderWithSubDir(header, subdir)
-    local result = os.findheader(header)
-    if result and subdir then
-        result = path.join(result, subdir)
-    end
-    return result
+if GetParam("server-mode") then
+    SERVER_MODE = true
+end
+if GetParam("server-zip-support") then
+    SERVER_ZIP_SUPPORT = true
+end
+if GetParam("server-pro2-support") then
+    SERVER_PRO2_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-pro3-support") then
+    SERVER_PRO3_SUPPORT = true
+    SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-tag-surrender-confirm") then
+    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 
 if GetParam("build-lua") then
@@ -237,7 +257,6 @@ if USE_DXSDK and os.istarget("windows") then
     end
 end
 
-USE_AUDIO = not SERVER_MODE and not GetParam("no-audio")
 if GetParam("no-audio") then
     USE_AUDIO = false
 elseif GetParam("no-use-miniaudio") then
@@ -256,7 +275,7 @@ elseif GetParam("use-irrklang") then
     AUDIO_LIB = "irrklang"
 end
 
-if USE_AUDIO then
+if USE_AUDIO and not SERVER_MODE then
     AUDIO_LIB = GetParam("audio-lib") or AUDIO_LIB
     if AUDIO_LIB == "miniaudio" then
         if GetParam("miniaudio-support-opus-vorbis") then
@@ -327,25 +346,6 @@ function spawn(cmd)
     else
         return nil
     end
-end
-if GetParam("server-mode") then
-    SERVER_MODE = true
-end
-if GetParam("server-zip-support") then
-    SERVER_ZIP_SUPPORT = true
-end
-if GetParam("server-pro2-support") then
-    SERVER_PRO2_SUPPORT = true
-    SERVER_ZIP_SUPPORT = true
-    SERVER_TAG_SURRENDER_CONFIRM = true
-end
-if GetParam("server-pro3-support") then
-    SERVER_PRO3_SUPPORT = true
-    SERVER_ZIP_SUPPORT = true
-    SERVER_TAG_SURRENDER_CONFIRM = true
-end
-if GetParam("server-tag-surrender-confirm") then
-    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 
 if SERVER_MODE then
@@ -582,7 +582,7 @@ end
     if BUILD_SQLITE then
         include "sqlite3"
     end
-    if USE_AUDIO then
+    if USE_AUDIO and not SERVER_MODE then
         if AUDIO_LIB=="miniaudio" then
             include "miniaudio"
         end

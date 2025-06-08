@@ -78,7 +78,7 @@ public:
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
-#endif // YGOPRO_SERVER_MODE
+#endif //YGOPRO_SERVER_MODE
 
 	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
 	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);
@@ -94,7 +94,7 @@ public:
 	static bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
 	static bool DeleteCategory(const wchar_t* name);
 	static bool SaveDeckArray(const DeckArray& deck, const wchar_t* name);
-#endif // YGOPRO_SERVER_MODE
+#endif //YGOPRO_SERVER_MODE
 };
 
 extern DeckManager deckManager;

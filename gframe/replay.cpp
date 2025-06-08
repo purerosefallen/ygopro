@@ -48,7 +48,7 @@ void Replay::BeginRecord() {
 	char tmppath[40];
 	strftime(tmppath, 40, "./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
 	char path[40];
-	std::sprintf(path, tmppath, server_port);
+	sprintf(path, tmppath, server_port);
 	fp = myfopen(path, "wb");
 #else
 	fp = myfopen("./replay/_LastReplay.yrp", "wb");
