@@ -612,7 +612,6 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	turn_player = 0;
 	phase = 1;
 	deck_reversed = false;
-	std::memset(deck_top, 0, sizeof(deck_top));
 #endif
 	RefreshExtra(0);
 	RefreshExtra(1);
@@ -1102,14 +1101,7 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			break;
 		}
 		case MSG_DECK_TOP: {
-#ifdef YGOPRO_SERVER_MODE
-			auto player = BufferIO::ReadUInt8(pbuf);
-			auto seq = BufferIO::ReadUInt8(pbuf);
-			auto code = BufferIO::ReadInt32(pbuf);
-			deck_top[player] = code;
-#else
 			pbuf += 6;
-#endif
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 			NetServer::ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1910,7 +1902,7 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 		uint32_t position = 0;
 		while(qbuf < query_buffer + qlen) {
 			auto clen = BufferIO::ReadInt32(qbuf);
-			if(qbuf + clen == query_buffer + qlen) {
+			if(qbuf + clen - 4 == query_buffer + qlen) {
 				// last card
 				code = *(uint32_t*)(qbuf + 4);
 				position = GetPosition(qbuf, 8);
@@ -1924,7 +1916,7 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 				BufferIO::WriteInt8(pbuf, MSG_DECK_TOP);
 				BufferIO::WriteInt8(pbuf, i);
 				BufferIO::WriteInt8(pbuf, 0);
-				BufferIO::WriteInt32(pbuf, deck_top[i]);
+				BufferIO::WriteInt32(pbuf, code);
 			});
 	}
 
