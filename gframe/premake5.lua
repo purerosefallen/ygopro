@@ -158,6 +158,7 @@ end
         end
 
     filter "system:linux"
+        links { "dl", "pthread" }
         linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
@@ -166,7 +167,4 @@ end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
-        end
-        if GLIBC_VERSION < ((2 << 16) | (34 << 8)) then -- glibc less than 2.34
-            links { "dl", "pthread" }
         end
