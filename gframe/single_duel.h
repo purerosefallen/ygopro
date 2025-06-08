@@ -70,10 +70,12 @@ protected:
 	unsigned char last_response{ 0 };
 	std::set<DuelPlayer*> observers;
 #ifdef YGOPRO_SERVER_MODE
-	DuelPlayer* cache_recorder;
-	DuelPlayer* replay_recorder;
-	unsigned char turn_player;
-	unsigned short phase;
+	DuelPlayer* cache_recorder{};
+	DuelPlayer* replay_recorder{};
+	unsigned char turn_player{ 0 };
+	unsigned short phase{ 0 };
+	bool deck_reversed{ false };
+	uint32_t deck_top[2]{};
 #endif
 	Replay last_replay;
 	bool match_mode{ false };
@@ -88,9 +90,9 @@ protected:
 	short time_limit[2]{};
 	short time_elapsed{ 0 };
 #ifdef YGOPRO_SERVER_MODE
-	short time_compensator[2];
-	short time_backed[2];
-	unsigned char last_game_msg;
+	short time_compensator[2]{};
+	short time_backed[2]{};
+	unsigned char last_game_msg{ 0 };
 #endif
 };
 
