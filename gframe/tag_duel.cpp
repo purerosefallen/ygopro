@@ -1068,8 +1068,7 @@ int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			auto player = BufferIO::ReadUInt8(pbuf);
 			auto seq = BufferIO::ReadUInt8(pbuf);
 			auto code = BufferIO::ReadInt32(pbuf);
-			if(seq == 0)
-				deck_top[player] = code;
+			deck_top[player] = code;
 #else
 			pbuf += 6;
 #endif
