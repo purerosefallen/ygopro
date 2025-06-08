@@ -652,7 +652,6 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	turn_player = 0;
 	phase = 1;
 	deck_reversed = false;
-	std::memset(deck_top, 0, sizeof(deck_top));
 #endif
 	RefreshExtra(0);
 	RefreshExtra(1);
@@ -1142,14 +1141,7 @@ int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			break;
 		}
 		case MSG_DECK_TOP: {
-#ifdef YGOPRO_SERVER_MODE
-			auto player = BufferIO::ReadUInt8(pbuf);
-			auto seq = BufferIO::ReadUInt8(pbuf);
-			auto code = BufferIO::ReadInt32(pbuf);
-			deck_top[player] = code;
-#else
 			pbuf += 6;
-#endif
 			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
 			NetServer::ReSendToPlayer(players[1]);
 			NetServer::ReSendToPlayer(players[2]);
@@ -2072,17 +2064,17 @@ void TagDuel::RequestField(DuelPlayer* dp) {
 	RefreshRemoved(player, 0xefffff, 0, dp);
 
 	uint8_t query_buffer[SIZE_QUERY_BUFFER];
-	for(uint8_t i = 0; i < 2; ++i) {
+		for(uint8_t i = 0; i < 2; ++i) {
 		// get decktop card
 		auto qlen = query_field_card(pduel, i, LOCATION_DECK, QUERY_CODE | QUERY_POSITION, query_buffer, 0);
 		if(!qlen)
 			continue; // no cards in deck
-		uint8_t* qbuf = query_buffer;
+		uint8_t *qbuf = query_buffer;
 		uint32_t code = 0;
 		uint32_t position = 0;
 		while(qbuf < query_buffer + qlen) {
 			auto clen = BufferIO::ReadInt32(qbuf);
-			if(qbuf + clen == query_buffer + qlen) {
+			if(qbuf + clen - 4 == query_buffer + qlen) {
 				// last card
 				code = *(uint32_t*)(qbuf + 4);
 				position = GetPosition(qbuf, 8);
@@ -2096,7 +2088,7 @@ void TagDuel::RequestField(DuelPlayer* dp) {
 				BufferIO::WriteInt8(pbuf, MSG_DECK_TOP);
 				BufferIO::WriteInt8(pbuf, i);
 				BufferIO::WriteInt8(pbuf, 0);
-				BufferIO::WriteInt32(pbuf, deck_top[i]);
+				BufferIO::WriteInt32(pbuf, code);
 			});
 	}
 
