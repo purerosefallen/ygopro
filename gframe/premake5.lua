@@ -44,6 +44,10 @@ else
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end
 
+    if not BUILD_LUA then
+        libdirs { LUA_LIB_DIR }
+    end
+
     if BUILD_EVENT then
         includedirs { "../event/include" }
     else
@@ -73,7 +77,7 @@ end
         libdirs { SQLITE_LIB_DIR }
     end
 
-    if USE_AUDIO then
+    if USE_AUDIO and not SERVER_MODE then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
@@ -107,7 +111,7 @@ end
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
-        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "iphlpapi" }
+        links { "ws2_32", "iphlpapi" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
             if IRRKLANG_PRO then
@@ -129,7 +133,7 @@ end
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
-        links { "z" }
+        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
 end
         if MAC_ARM then
@@ -141,10 +145,14 @@ end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrklang" }
         end
+
     filter "system:linux"
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
         linkoptions { "-fopenmp" }
+end
+if SERVER_MODE then -- support old gcc
+        links { "pthread", "dl" }
 end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
