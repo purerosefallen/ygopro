@@ -1325,16 +1325,16 @@ void Game::LoadExpansions() {
 			dataManager.LoadDB(fpath);
 			return;
 		}
+		if (IsExtension(name, L".conf")) {
+			if(!std::wcscmp(name, L"lflist.conf"))
+				deckManager.LoadLFListSingle(fpath, true);
+			else {
 #ifndef YGOPRO_SERVER_MODE
-		if (IsExtension(name, L".conf") && std::wcscmp(name, L"lflist.conf")) {
-			char upath[1024];
-			BufferIO::EncodeUTF8(fpath, upath);
-			dataManager.LoadStrings(upath);
-			return;
-		}
-#endif // YGOPRO_SERVER_MODE
-		if (!std::wcscmp(name, L"lflist.conf")) {
-			deckManager.LoadLFListSingle(fpath, true);
+				char upath[1024];
+				BufferIO::EncodeUTF8(fpath, upath);
+				dataManager.LoadStrings(upath);
+#endif
+			}
 			return;
 		}
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
