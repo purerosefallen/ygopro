@@ -9,44 +9,41 @@ namespace ygo {
 char DeckManager::deckBuffer[0x10000]{};
 DeckManager deckManager;
 
-void DeckManager::LoadLFListSingle(const char* path) {
-	auto cur = _lfList.rend();
+void DeckManager::LoadLFListSingle(const char* path, bool insert) {
 	FILE* fp = myfopen(path, "r");
-	char linebuf[256]{};
-	wchar_t strBuffer[256]{};
-	char str1[16]{};
-	if(fp) {
-		while(std::fgets(linebuf, sizeof linebuf, fp)) {
-			if(linebuf[0] == '#')
-				continue;
-			if(linebuf[0] == '!') {
-				auto len = std::strcspn(linebuf, "\r\n");
-				linebuf[len] = 0;
-				BufferIO::DecodeUTF8(&linebuf[1], strBuffer);
-				LFList newlist;
-				newlist.listName = strBuffer;
-				newlist.hash = 0x7dfcee6a;
-				_lfList.push_back(newlist);
-				cur = _lfList.rbegin();
-				continue;
+	if (!fp) return;
+	_LoadLFListFromLineProvider([&](char* buf, size_t sz) {
+		return std::fgets(buf, sz, fp) != nullptr;
+	}, insert);
+	std::fclose(fp);
+}
+void DeckManager::LoadLFListSingle(const wchar_t* path, bool insert) {
+	FILE* fp = mywfopen(path, "r");
+	if (!fp) return;
+	_LoadLFListFromLineProvider([&](char* buf, size_t sz) {
+		return std::fgets(buf, sz, fp) != nullptr;
+	}, insert);
+	std::fclose(fp);
+}
+void DeckManager::LoadLFListSingle(irr::io::IReadFile* reader, bool insert) {
+	std::string linebuf;
+	char ch{};
+	_LoadLFListFromLineProvider([&](char* buf, size_t sz) {
+		while (reader->read(&ch, 1)) {
+			if (ch == '\0') break;
+			linebuf.push_back(ch);
+			if (ch == '\n' || linebuf.size() >= sz - 1) {
+				std::strncpy(buf, linebuf.c_str(), sz - 1);
+				buf[sz - 1] = '\0';
+				linebuf.clear();
+				return true;
 			}
-			if (cur == _lfList.rend())
-				continue;
-			unsigned int code = 0;
-			int count = -1;
-			if (std::sscanf(linebuf, "%10s%*[ ]%1d", str1, &count) != 2)
-				continue;
-			if (count < 0 || count > 2)
-				continue;
-			code = std::strtoul(str1, nullptr, 10);
-			cur->content[code] = count;
-			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
 		}
-		std::fclose(fp);
-	}
+		return false;
+	}, insert);
+	reader->drop();
 }
 void DeckManager::LoadLFList() {
-	LoadLFListSingle("expansions/lflist.conf");
 	LoadLFListSingle("specials/lflist.conf");
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;

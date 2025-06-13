@@ -1239,10 +1239,14 @@ void Game::LoadExpansions() {
 			dataManager.LoadDB(fpath);
 			return;
 		}
-		if (IsExtension(name, L".conf")) {
+		if (IsExtension(name, L".conf") && std::wcscmp(name, L"lflist.conf")) {
 			char upath[1024];
 			BufferIO::EncodeUTF8(fpath, upath);
 			dataManager.LoadStrings(upath);
+			return;
+		}
+		if (!std::wcscmp(name, L"lflist.conf")) {
+			deckManager.LoadLFListSingle(fpath, true);
 			return;
 		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
@@ -1276,7 +1280,10 @@ void Game::LoadExpansions() {
 #else
 				auto reader = DataManager::FileSystem->createAndOpenFile(uname);
 #endif
-				dataManager.LoadStrings(reader);
+				if(!std::wcscmp(fname, L"lflist.conf"))
+					deckManager.LoadLFListSingle(reader, true);
+				else
+					dataManager.LoadStrings(reader);
 				continue;
 			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
