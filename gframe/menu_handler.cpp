@@ -64,15 +64,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_JOIN_HOST: {
 				bot_mode = false;
 				mainGame->TrimText(mainGame->ebJoinHost);
-				mainGame->TrimText(mainGame->ebJoinPort);
 				char hostname_tag[100];
 				wchar_t pstr[100];
-				wchar_t portstr[10];
 				BufferIO::CopyWideString(mainGame->ebJoinHost->getText(), pstr);
-				BufferIO::CopyWideString(mainGame->ebJoinPort->getText(), portstr);
 				BufferIO::EncodeUTF8(pstr, hostname_tag);
-				auto port = std::wcstol(portstr, nullptr, 10);
-				HostResult remote = DuelClient::ParseHost(hostname_tag, port);
+				HostResult remote = DuelClient::ParseHost(hostname_tag);
 				if(!remote.isValid()) {
 					mainGame->gMutex.lock();
 					soundManager.PlaySoundEffect(SOUND_INFO);
@@ -85,7 +81,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				BufferIO::CopyWideString(pstr, mainGame->gameConf.lasthost);
-				BufferIO::CopyWideString(portstr, mainGame->gameConf.lastport);
 				BufferIO::CopyWideString(mainGame->ebJoinPass->getText(), mainGame->gameConf.roompass);
 				if(DuelClient::StartClient(remote.host, remote.port, false)) {
 					mainGame->btnCreateHost->setEnabled(false);
@@ -505,10 +500,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				int addr = DuelClient::hosts[sel].ipaddr;
 				int port = DuelClient::hosts[sel].port;
 				wchar_t buf[20];
-				myswprintf(buf, L"%d.%d.%d.%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff);
+				myswprintf(buf, L"%d.%d.%d.%d:%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff, port);
 				mainGame->ebJoinHost->setText(buf);
-				myswprintf(buf, L"%d", port);
-				mainGame->ebJoinPort->setText(buf);
 				break;
 			}
 			case LISTBOX_REPLAY_LIST: {

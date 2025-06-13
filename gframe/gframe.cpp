@@ -87,7 +87,6 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
-	bool portSpecified = false;
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
 			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
@@ -126,21 +125,17 @@ int main(int argc, char* argv[]) {
 			++i;
 			if(i < wargc) {
 				ygo::mainGame->ebJoinHost->setText(wargv[i]);
-				if(!portSpecified)
-					ygo::mainGame->ebJoinPort->setText(L"");
 			}
 			continue;
 		} else if(!std::wcscmp(wargv[i], L"-p")) { // host Port
 			++i;
 			if(i < wargc) {
-				portSpecified = true;
 				auto port = _wtoi(wargv[i]);
-				if(port) {
-					wchar_t portStr[6];
-					myswprintf(portStr, L"%d", port);
-					ygo::mainGame->ebJoinPort->setText(portStr);
-				} else {
-					ygo::mainGame->ebJoinPort->setText(L"");
+				auto hostText = ygo::mainGame->ebJoinHost->getText();
+				if(port && hostText) {
+					wchar_t newHostStr[100];
+					myswprintf(newHostStr, L"%ls:%d", hostText, port);
+					ygo::mainGame->ebJoinHost->setText(newHostStr);
 				}
 			}
 			continue;

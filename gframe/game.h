@@ -56,7 +56,7 @@ struct Config {
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
 	wchar_t lasthost[100]{};
-	wchar_t lastport[10]{};
+	// wchar_t lastport[10]{};
 	wchar_t nickname[20]{};
 	wchar_t gamename[20]{};
 	wchar_t roompass[20]{};
@@ -411,7 +411,6 @@ public:
 	irr::gui::IGUIListBox* lstHostList;
 	irr::gui::IGUIButton* btnLanRefresh;
 	irr::gui::IGUIEditBox* ebJoinHost;
-	irr::gui::IGUIEditBox* ebJoinPort;
 	irr::gui::IGUIEditBox* ebJoinPass;
 	irr::gui::IGUIButton* btnJoinHost;
 	irr::gui::IGUIButton* btnJoinCancel;
