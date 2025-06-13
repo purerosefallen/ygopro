@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "data_manager.h"
+#include "bufferio.h"
 
 #ifndef YGOPRO_MAX_DECK
 #define YGOPRO_MAX_DECK					60
@@ -66,7 +67,11 @@ public:
 	static char deckBuffer[0x10000];
 #endif
 
-	void LoadLFListSingle(const char* path);
+	void LoadLFListSingle(const char* path, bool insert = false);
+	void LoadLFListSingle(const wchar_t* path, bool insert = false);
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+	void LoadLFListSingle(irr::io::IReadFile* reader, bool insert = false);
+#endif
 	void LoadLFList();
 	const wchar_t* GetLFListName(unsigned int lfhash);
 	const LFList* GetLFList(unsigned int lfhash);
@@ -95,6 +100,49 @@ public:
 	static bool DeleteCategory(const wchar_t* name);
 	static bool SaveDeckArray(const DeckArray& deck, const wchar_t* name);
 #endif //YGOPRO_SERVER_MODE
+
+private:
+	template<typename LineProvider>
+	void _LoadLFListFromLineProvider(LineProvider getLine, bool insert = false) {
+		std::vector<LFList> loadedLists;
+		auto cur = loadedLists.rend(); // 注意：在临时 list 上操作
+		char line[256]{};
+		wchar_t strBuffer[256]{};
+		char str1[16]{};
+
+		while (getLine(line, sizeof(line))) {
+			if (line[0] == '#')
+				continue;
+			if (line[0] == '!') {
+				auto len = std::strcspn(line, "\r\n");
+				line[len] = 0;
+				BufferIO::DecodeUTF8(&line[1], strBuffer);
+				LFList newlist;
+				newlist.listName = strBuffer;
+				newlist.hash = 0x7dfcee6a;
+				loadedLists.push_back(newlist);
+				cur = loadedLists.rbegin();
+				continue;
+			}
+			if (cur == loadedLists.rend())
+				continue;
+			unsigned int code = 0;
+			int count = -1;
+			if (std::sscanf(line, "%10s%*[ ]%1d", str1, &count) != 2)
+				continue;
+			if (count < 0 || count > 2)
+				continue;
+			code = std::strtoul(str1, nullptr, 10);
+			cur->content[code] = count;
+			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
+		}
+
+		if (insert) {
+			_lfList.insert(_lfList.begin(), loadedLists.begin(), loadedLists.end());
+		} else {
+			_lfList.insert(_lfList.end(), loadedLists.begin(), loadedLists.end());
+		}
+	}
 };
 
 extern DeckManager deckManager;

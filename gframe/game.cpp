@@ -293,12 +293,9 @@ bool Game::Initialize() {
 	lstHostList->setItemHeight(18);
 	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
 	env->addStaticText(dataManager.GetSysString(1221), irr::core::rect<irr::s32>(10, 360, 220, 380), false, false, wLanWindow);
-	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 350, 380), true, wLanWindow);
+	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebJoinHost);
-	ebJoinPort = env->addEditBox(gameConf.lastport, irr::core::rect<irr::s32>(360, 355, 420, 380), true, wLanWindow);
-	ebJoinPort->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	editbox_list.push_back(ebJoinPort);
 	env->addStaticText(dataManager.GetSysString(1222), irr::core::rect<irr::s32>(10, 390, 220, 410), false, false, wLanWindow);
 	ebJoinPass = env->addEditBox(gameConf.roompass, irr::core::rect<irr::s32>(110, 385, 420, 410), true, wLanWindow);
 	ebJoinPass->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -1329,13 +1326,17 @@ void Game::LoadExpansions() {
 			return;
 		}
 #ifndef YGOPRO_SERVER_MODE
-		if (IsExtension(name, L".conf")) {
+		if (IsExtension(name, L".conf") && std::wcscmp(name, L"lflist.conf")) {
 			char upath[1024];
 			BufferIO::EncodeUTF8(fpath, upath);
 			dataManager.LoadStrings(upath);
 			return;
 		}
 #endif // YGOPRO_SERVER_MODE
+		if (!std::wcscmp(name, L"lflist.conf")) {
+			deckManager.LoadLFListSingle(fpath, true);
+			return;
+		}
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
@@ -1364,16 +1365,23 @@ void Game::LoadExpansions() {
 				dataManager.LoadDB(fname);
 				continue;
 			}
-#ifndef YGOPRO_SERVER_MODE
 			if (IsExtension(fname, L".conf")) {
 #ifdef _WIN32
 				auto reader = DataManager::FileSystem->createAndOpenFile(fname);
 #else
 				auto reader = DataManager::FileSystem->createAndOpenFile(uname);
 #endif
-				dataManager.LoadStrings(reader);
+				if(!std::wcscmp(fname, L"lflist.conf"))
+					deckManager.LoadLFListSingle(reader, true);
+				else
+#ifdef YGOPRO_SERVER_MODE
+					{}
+#else
+					dataManager.LoadStrings(reader);
+#endif
 				continue;
 			}
+#ifndef YGOPRO_SERVER_MODE
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
@@ -1565,7 +1573,11 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!std::strcmp(strbuf, "lasthost")) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lasthost);
 		} else if(!std::strcmp(strbuf, "lastport")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.lastport);
+			// for migration
+			auto old_lastport = std::strtol(valbuf, nullptr, 10);
+			wchar_t old_host[100];
+			memcpy(old_host, gameConf.lasthost, sizeof(wchar_t) * 100);
+			myswprintf(gameConf.lasthost, L"%ls:%d", old_host, old_lastport);
 		} else if(!std::strcmp(strbuf, "automonsterpos")) {
 			gameConf.chkMAutoPos = std::strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "autospellpos")) {
@@ -1706,7 +1718,6 @@ void Game::LoadConfig() {
 	gameConf.numfont[0] = 0;
 	gameConf.textfont[0] = 0;
 	gameConf.lasthost[0] = 0;
-	gameConf.lastport[0] = 0;
 	gameConf.roompass[0] = 0;
 	//settings
 	gameConf.chkMAutoPos = 0;
@@ -1842,8 +1853,6 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	std::fprintf(fp, "lasthost = %s\n", linebuf);
-	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
-	std::fprintf(fp, "lastport = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.roompass, linebuf);
 	std::fprintf(fp, "roompass = %s\n", linebuf);
 	//settings
@@ -2229,6 +2238,7 @@ void Game::CloseDuelWindow() {
 	logParam.clear();
 	lstHostList->clear();
 	DuelClient::hosts.clear();
+	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
 	ResizeChatInputWindow();
 	closeDoneSignal.Set();

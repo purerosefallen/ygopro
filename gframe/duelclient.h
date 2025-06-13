@@ -93,7 +93,7 @@ public:
 	static unsigned int LookupHost(char *host);
 	static bool LookupSRV(char *hostname, HostResult* result);
 	static bool CheckHostnameSplitter(char *hostname, HostResult *result);
-	static HostResult ParseHost(char *hostname, unsigned short port);
+	static HostResult ParseHost(char *hostname);
 	static void SendPacketToServer(unsigned char proto) {
 		auto p = duel_client_write;
 		buffer_write<uint16_t>(p, 1);
@@ -128,7 +128,7 @@ public:
 		bufferevent_write(client_bev, duel_client_write, len + 3);
 	}
 
-	static std::vector<HostPacket> hosts;
+	static std::vector<std::wstring> hosts;
 	static std::vector<std::wstring> hosts_srvpro;
 	static bool is_srvpro;
 	static void BeginRefreshHost();

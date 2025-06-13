@@ -37,7 +37,7 @@ std::uniform_real_distribution<float> DuelClient::real_dist;
 
 bool DuelClient::is_refreshing = false;
 int DuelClient::match_kill = 0;
-std::vector<HostPacket> DuelClient::hosts;
+std::vector<std::wstring> DuelClient::hosts;
 std::vector<std::wstring> DuelClient::hosts_srvpro;
 std::set<std::pair<unsigned int, unsigned short>> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
@@ -4395,7 +4395,14 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 			mainGame->gMutex.lock();
 			remotes.insert(remote);
 			pHP->ipaddr = ipaddr;
-			hosts.push_back(*pHP);
+			wchar_t host_fulladdr[100];
+			myswprintf(host_fulladdr, L"%d.%d.%d.%d:%d",
+				ipaddr & 0xff,
+				(ipaddr >> 8) & 0xff,
+				(ipaddr >> 16) & 0xff,
+				(ipaddr >> 24) & 0xff,
+				pHP->port);
+			hosts.push_back(std::wstring(host_fulladdr));			
 			std::wstring hoststr;
 			hoststr.append(L"[");
 			hoststr.append(deckManager.GetLFListName(pHP->host.lflist));
@@ -4470,7 +4477,9 @@ bool DuelClient::LookupSRV(char *hostname, HostResult* result) {
 		auto record = RetrivedSRVRecord(nsMsg, i);
 		if(!record.valid || record.priority > minPriority)
 			continue;
-		for (int j = 0; j < record.weight; ++j) {
+		if(!record.weight)
+			record.weight = 1;
+		for(int j = 0; j < record.weight; ++j) {
 			if(record.priority < minPriority) {
 				records.clear();
 				minPriority = record.priority;
@@ -4503,17 +4512,8 @@ bool DuelClient::CheckHostnameSplitter(char* hostname, HostResult* result) {
 	return true;
 }
 
-HostResult DuelClient::ParseHost(char *hostname, unsigned short port) {
+HostResult DuelClient::ParseHost(char *hostname) {
 	HostResult result;
-	// if port found, use port directly
-	if(port) {
-		// if hostname contains splitter, use port after splitter in priority
-		if(!CheckHostnameSplitter(hostname, &result)) {
-			result.host = LookupHost(hostname);
-			result.port = port;
-		}
-		return result;
-	}
 	
 	// if hostname is an IP, use it directly and use default port
 	unsigned int tryAddress = htonl(inet_addr(hostname));
