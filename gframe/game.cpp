@@ -1239,14 +1239,14 @@ void Game::LoadExpansions() {
 			dataManager.LoadDB(fpath);
 			return;
 		}
-		if (IsExtension(name, L".conf") && std::wcscmp(name, L"lflist.conf")) {
-			char upath[1024];
-			BufferIO::EncodeUTF8(fpath, upath);
-			dataManager.LoadStrings(upath);
-			return;
-		}
-		if (!std::wcscmp(name, L"lflist.conf")) {
-			deckManager.LoadLFListSingle(fpath, true);
+		if (IsExtension(name, L".conf")) {
+			if(!std::wcscmp(name, L"lflist.conf"))
+				deckManager.LoadLFListSingle(fpath, true);
+			else {
+				char upath[1024];
+				BufferIO::EncodeUTF8(fpath, upath);
+				dataManager.LoadStrings(upath);
+			}
 			return;
 		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
