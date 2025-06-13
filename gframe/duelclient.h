@@ -128,7 +128,7 @@ public:
 		bufferevent_write(client_bev, duel_client_write, len + 3);
 	}
 
-	static std::vector<HostPacket> hosts;
+	static std::vector<std::wstring> hosts;
 	static std::vector<std::wstring> hosts_srvpro;
 	static bool is_srvpro;
 	static void BeginRefreshHost();

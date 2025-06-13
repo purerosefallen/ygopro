@@ -37,7 +37,7 @@ std::uniform_real_distribution<float> DuelClient::real_dist;
 
 bool DuelClient::is_refreshing = false;
 int DuelClient::match_kill = 0;
-std::vector<HostPacket> DuelClient::hosts;
+std::vector<std::wstring> DuelClient::hosts;
 std::vector<std::wstring> DuelClient::hosts_srvpro;
 std::set<std::pair<unsigned int, unsigned short>> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
@@ -4395,7 +4395,14 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 			mainGame->gMutex.lock();
 			remotes.insert(remote);
 			pHP->ipaddr = ipaddr;
-			hosts.push_back(*pHP);
+			wchar_t host_fulladdr[100];
+			myswprintf(host_fulladdr, L"%d.%d.%d.%d:%d",
+				ipaddr & 0xff,
+				(ipaddr >> 8) & 0xff,
+				(ipaddr >> 16) & 0xff,
+				(ipaddr >> 24) & 0xff,
+				pHP->port);
+			hosts.push_back(std::wstring(host_fulladdr));			
 			std::wstring hoststr;
 			hoststr.append(L"[");
 			hoststr.append(deckManager.GetLFListName(pHP->host.lflist));
