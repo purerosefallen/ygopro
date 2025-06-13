@@ -2108,6 +2108,7 @@ void Game::CloseDuelWindow() {
 	logParam.clear();
 	lstHostList->clear();
 	DuelClient::hosts.clear();
+	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
 	ResizeChatInputWindow();
 	closeDoneSignal.Set();

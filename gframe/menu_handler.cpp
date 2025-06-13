@@ -499,7 +499,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				int addr = DuelClient::hosts[sel].ipaddr;
 				int port = DuelClient::hosts[sel].port;
-				wchar_t buf[20];
+				wchar_t buf[22];
 				myswprintf(buf, L"%d.%d.%d.%d:%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff, port);
 				mainGame->ebJoinHost->setText(buf);
 				break;
