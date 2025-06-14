@@ -343,15 +343,7 @@ function IsRunningUnderARM()
 end
 
 function isARM()
-    if IsRunningUnderARM() then
-        return true
-    end
-    if os.istarget("macosx") and isRunningUnderRosetta() then
-        -- macOS under rosetta will report x86_64, but it is running on ARM
-        print("Detected running under Rosetta on macOS, treating as ARM")
-        return true
-    end
-    return false
+    return IsRunningUnderARM()
 end
 
 IS_ARM=isARM()
