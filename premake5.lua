@@ -360,12 +360,6 @@ if SERVER_MODE then
     end
 end
 
-function isRunningUnderRosetta()
-    local uname = os.outputof("uname -m")
-    local proctranslated = os.outputof("sysctl sysctl.proc_translated")
-    return uname:find("arm") or proctranslated
-end
-
 function IsRunningUnderARM()
     -- os.hostarch() is over premake5 beta3,
     if os.hostarch then
@@ -414,14 +408,9 @@ if os.istarget("macosx") then
     if GetParam("mac-intel") then
         MAC_INTEL = true
     end
-    
-    if MAC_ARM then
+    if MAC_ARM or (not MAC_INTEL and os.hostarch() == "ARM64") then
+        -- building on ARM CPU will target ARM automatically
         TARGET_MAC_ARM = true
-    elseif not MAC_INTEL then
-        -- automatic target arm64, need extra detect
-        if isRunningUnderRosetta() then
-            TARGET_MAC_ARM = true
-        end
     end
 end
 
@@ -508,11 +497,7 @@ workspace "YGOPro"
         targetdir "bin/debug/x64"
 
     filter { "configurations:Release", "action:vs*" }
-        if linktimeoptimization then
-            linktimeoptimization "On"
-        else
-            flags { "LinkTimeOptimization" }
-        end
+        linktimeoptimization "On"
         staticruntime "On"
         disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
