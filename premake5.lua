@@ -388,15 +388,7 @@ function IsRunningUnderARM()
 end
 
 function isARM()
-    if IsRunningUnderARM() then
-        return true
-    end
-    if os.istarget("macosx") and isRunningUnderRosetta() then
-        -- macOS under rosetta will report x86_64, but it is running on ARM
-        print("Detected running under Rosetta on macOS, treating as ARM")
-        return true
-    end
-    return false
+    return IsRunningUnderARM()
 end
 
 IS_ARM=isARM()
@@ -497,7 +489,11 @@ workspace "YGOPro"
         targetdir "bin/debug/x64"
 
     filter { "configurations:Release", "action:vs*" }
-        linktimeoptimization "On"
+        if linktimeoptimization then
+            linktimeoptimization "On"
+        else
+            flags { "LinkTimeOptimization" }
+        end
         staticruntime "On"
         disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
