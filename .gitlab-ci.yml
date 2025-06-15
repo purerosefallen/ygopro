@@ -181,7 +181,6 @@ exec_windows_pro3:
     - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev
 
 .use_arm:
-  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   tags:
     - arm
 
@@ -192,7 +191,6 @@ exec_windows_pro3:
 
 .use_pro3_linux:
   extends: .use_pro3
-  image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
   variables:
     TARGET_FILE: libygoserver.so
 
