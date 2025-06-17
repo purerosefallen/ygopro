@@ -434,19 +434,14 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	buffer = ScriptReaderExSingle("specials/", script_name, slen, 9);
 	if(buffer)
 		return buffer;
-	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
-	if(buffer)
-		return buffer;
-#if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32)
-	buffer = ScriptReaderExSingle("Expansions/", script_name, slen);
-	if(buffer)
-		return buffer;
-#endif
-#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
+	for(auto ex : mainGame->GetExpansionsListU("/")) {
+		buffer = ScriptReaderExSingle(ex.c_str(), script_name, slen);
+		if(buffer)
+			return buffer;
+	}
 	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
 	if(buffer)
 		return buffer;
-#endif
 	return ScriptReaderExSingle("", script_name, slen);
 }
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {

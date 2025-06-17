@@ -97,7 +97,7 @@ void Game::MainServerLoop() {
 	initUtils();
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
-	LoadExpansions();
+	LoadExpansionsAll();
 #ifdef SERVER_PRO2_SUPPORT
 	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
@@ -115,7 +115,7 @@ void Game::MainServerLoop() {
 	}
 }
 void Game::MainTestLoop(int code) {
-	LoadExpansions();
+	LoadExpansionsAll();
 	dataManager.LoadDB(L"cards.cdb");
 	fflush(stdout);
 	NetServer::InitTestCard(code);
@@ -179,7 +179,6 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	LoadExpansions();
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -1100,6 +1099,7 @@ bool Game::Initialize() {
 	return true;
 }
 void Game::MainLoop() {
+	LoadExpansionsAll();
 	wchar_t cap[256];
 	camera = smgr->addCameraSceneNode(0);
 	irr::core::matrix4 mProjection;
@@ -1286,41 +1286,12 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 	return ret;
 }
 #endif //YGOPRO_SERVER_MODE
-void Game::LoadExpansions() {
-#ifdef SERVER_PRO2_SUPPORT
-	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+void Game::LoadExpansions(const wchar_t* expansions_path) {
+	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
 		if (isdir)
 			return;
 		wchar_t fpath[1024];
-		myswprintf(fpath, L"./cdb/%ls", name);
-		if(IsExtension(name, L".cdb")) {
-			dataManager.LoadDB(fpath);
-		}
-	});
-#endif // SERVER_PRO2_SUPPORT
-#ifdef SERVER_PRO3_SUPPORT
-	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
-		if(!isdir && IsExtension(name, L".cdb")) {
-			dataManager.LoadDB(fpath);
-		}
-	});
-#ifndef _WIN32
-	FileSystem::TraversalDir(L"./Expansions", [](const wchar_t* name, bool isdir) {
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./Expansions/%ls", name);
-		if(!isdir && IsExtension(name, L".cdb")) {
-			dataManager.LoadDB(fpath);
-		}
-	});
-#endif
-#endif // SERVER_PRO3_SUPPORT
-	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
-		if (isdir)
-			return;
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./expansions/%ls", name);
+		myswprintf(fpath, L"%ls/%ls", expansions_path, name);
 		if (IsExtension(name, L".cdb")) {
 			dataManager.LoadDB(fpath);
 			return;
@@ -1390,6 +1361,59 @@ void Game::LoadExpansions() {
 		}
 	}
 #endif //SERVER_ZIP_SUPPORT
+}
+void Game::LoadExpansionsAll() {
+#ifdef SERVER_PRO2_SUPPORT
+	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+		if (isdir)
+			return;
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./cdb/%ls", name);
+		if(IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif // SERVER_PRO2_SUPPORT
+#ifdef SERVER_PRO3_SUPPORT
+	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
+		if(!isdir && IsExtension(name, L".cdb")) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif // SERVER_PRO3_SUPPORT
+	auto list = GetExpansionsList();
+	for (const auto& exp : list) {
+		LoadExpansions(exp.c_str());
+	}
+}
+std::vector<std::wstring> Game::GetExpansionsList(const wchar_t* suffix) {
+	if(!suffix)
+		return expansions_list;
+	std::vector<std::wstring> list;
+	wchar_t buf[1024];
+	for(const auto& exp : expansions_list) {
+		myswprintf(buf, L"%ls%ls", exp.c_str(), suffix);
+		list.push_back(buf);
+	}
+	return list;
+}
+std::vector<std::string> Game::GetExpansionsListU(const char* suffix) {
+	auto list = GetExpansionsList(nullptr);
+	std::vector<std::string> expansions_list_u;
+	char exp_u[1024];
+	char exp_u2[1024];
+	for (const auto& exp : list) {
+		BufferIO::EncodeUTF8(exp.c_str(), exp_u);
+		if(!suffix)
+			expansions_list_u.push_back(exp_u);
+		else {
+			std::snprintf(exp_u2, sizeof exp_u2, "%s%s", exp_u, suffix);
+			expansions_list_u.push_back(exp_u2);
+		}
+	}
+	return expansions_list_u;
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {

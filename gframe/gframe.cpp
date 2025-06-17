@@ -9,7 +9,13 @@
 #import <CoreFoundation/CoreFoundation.h>
 #endif
 
+#ifdef YGOPRO_SERVER_MODE
+#include <sstream>
+#endif
+
 unsigned int enable_log = 0x3;
+bool expansions_specified = false;
+std::vector<std::wstring> expansions_list;
 #ifndef YGOPRO_SERVER_MODE
 bool exit_on_return = false;
 bool auto_watch_mode = false;
@@ -72,6 +78,36 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE
 	enable_log = 1;
+	bool expansions_specified = false;
+
+	wchar_t* expansions_env_val = nullptr;
+
+#ifdef _WIN32
+	expansions_env_val = _wgetenv(L"YGOPRO_EXPANSIONS");
+#else
+	const char* env_utf8 = std::getenv("YGOPRO_EXPANSIONS");
+	if(env_utf8) {
+		expansions_env_val = (wchar_t*)malloc(1024 * sizeof(wchar_t));
+		BufferIO::DecodeUTF8String(env_utf8, expansions_env_val, 1024);
+	}
+#endif
+
+	if (expansions_env_val && expansions_env_val[0] != L'\0') {
+		expansions_specified = true;
+		std::wstringstream ss(expansions_env_val);
+		std::wstring item;
+		while (std::getline(ss, item, L',')) {
+			if (!item.empty()) {
+				expansions_list.push_back(item);
+			}
+		}
+	} else {
+		expansions_specified = false;
+		expansions_list.push_back(L"./expansions");
+#if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32) && !defined(__APPLE__)
+		expansions_list.push_back(L"./Expansions");
+#endif
+	}
 	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
 	ygo::duel_flags = 0;
@@ -157,6 +193,7 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
+	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
 			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
@@ -281,6 +318,16 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
+		} else if(!std::wcscmp(wargv[i], L"--expansions")) { // specify expansions
+			++i;
+			if(i < wargc) {
+				if(!expansions_specified) {
+					expansions_list.clear();
+					expansions_specified = true;
+				}
+				expansions_list.push_back(wargv[i]);
+			}
+			continue;
 		}
 	}
 	ygo::mainGame->MainLoop();
