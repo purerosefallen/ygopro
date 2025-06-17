@@ -2547,11 +2547,11 @@ void Game::SetCursor(irr::gui::ECURSOR_ICON icon) {
 }
 void Game::InjectEnvToRegistry(intptr_t pduel) {
 #ifdef _WIN32
-	LPTCH env_strings = GetEnvironmentStringsA();
+	auto env_strings = GetEnvironmentStringsA();
 	if (!env_strings) return;
 
 	const std::string prefix = "YGOPRO_ENV_";
-	for (char* var = env_strings; *var; var += strlen(var) + 1) {
+	for (auto* var = env_strings; *var; var += strlen(var) + 1) {
 		std::string entry(var);
 		if (entry.compare(0, prefix.size(), prefix) == 0) {
 			auto eq_pos = entry.find('=');
