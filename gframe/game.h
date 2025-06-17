@@ -196,6 +196,7 @@ public:
 	void LoadExpansions();
 	void AddDebugMsg(const char* msgbuf);
 	void initUtils();
+	void InjectEnvToRegistry(intptr_t pduel);
 #else
 	void MainLoop();
 	void RefreshTimeDisplay();
