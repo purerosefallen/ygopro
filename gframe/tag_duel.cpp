@@ -565,6 +565,25 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(TagDuel::MessageHandler);
 	pduel = create_duel(duel_seed);
+	if(!registry_dump.empty()) {
+		load_registry(pduel, registry_dump.data(), (int32_t)registry_dump.size());
+	}
+	mainGame->InjectEnvToRegistry(pduel);
+	set_registry_value(pduel, "duel_mode", "tag");
+	set_registry_value(pduel, "start_lp", std::to_string(host_info.start_lp).c_str());
+	set_registry_value(pduel, "start_hand", std::to_string(host_info.start_hand).c_str());
+	set_registry_value(pduel, "draw_count", std::to_string(host_info.draw_count).c_str());
+	wchar_t player_name_buf[40];
+	char player_name_buf_u[40];
+	char player_key_buf[15];
+	for(int i = 0; i < 2; ++i) {
+		BufferIO::CopyCharArray(players[i]->name, player_name_buf);
+		BufferIO::EncodeUTF8(player_name_buf, player_name_buf_u);
+		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_name_%d", i);
+		set_registry_value(pduel, player_key_buf, player_name_buf_u);
+		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_type_%d", i);
+		set_registry_value(pduel, player_key_buf, std::to_string(players[i]->type).c_str());
+	}
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	preload_script(pduel, "./script/special.lua");
@@ -1981,6 +2000,9 @@ void TagDuel::EndDuel() {
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 		NetServer::ReSendToPlayer(*oit);
 #endif
+	registry_dump.resize(0x2000);
+	int len = dump_registry(pduel, registry_dump.data());
+	registry_dump.resize(len);
 	end_duel(pduel);
 	event_del(etimer);
 	pduel = 0;

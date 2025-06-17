@@ -42,6 +42,7 @@ int SingleMode::SinglePlayThread() {
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(SingleMode::MessageHandler);
 	pduel = create_duel(rnd.rand());
+	mainGame->InjectEnvToRegistry(pduel);
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
 	preload_script(pduel, "./script/special.lua");

@@ -284,6 +284,7 @@ public:
 	void FlashWindow();
 	void takeScreenshot();
 	void SetCursor(irr::gui::ECURSOR_ICON icon);
+	void InjectEnvToRegistry(intptr_t pduel);
 	template<typename T>
 	static void DrawShadowText(irr::gui::CGUITTFont* font, const T& text, const irr::core::rect<irr::s32>& position, const irr::core::rect<irr::s32>& padding,
 		irr::video::SColor color = 0xffffffff, irr::video::SColor shadowcolor = 0xff000000, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = nullptr);
