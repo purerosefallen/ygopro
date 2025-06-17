@@ -52,6 +52,17 @@ inline int _wtoi(const wchar_t * str){
 }
 #endif
 
+// load env things
+#ifdef _WIN32
+#include <windows.h>
+#include <string>
+#else
+#include <unistd.h>
+#include <stdlib.h>
+
+extern char** environ;
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
