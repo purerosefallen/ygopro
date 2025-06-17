@@ -232,6 +232,7 @@ public:
 	intptr_t pduel{};
 	wchar_t name[20]{};
 	wchar_t pass[20]{};
+	std::vector<byte> registry_dump;
 };
 
 }
