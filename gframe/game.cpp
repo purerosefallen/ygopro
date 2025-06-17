@@ -2671,25 +2671,35 @@ void Game::SetCursor(irr::gui::ECURSOR_ICON icon) {
 #endif //YGOPRO_SERVER_MODE
 void Game::InjectEnvToRegistry(intptr_t pduel) {
 #ifdef _WIN32
-	auto env_strings = GetEnvironmentStringsA();
-	if (!env_strings) return;
+	LPWCH env_block = GetEnvironmentStringsW();
+	if (!env_block) return;
 
-	const std::string prefix = "YGOPRO_ENV_";
-	for (auto* var = env_strings; *var; var += strlen(var) + 1) {
-		std::string entry(var);
-		if (entry.compare(0, prefix.size(), prefix) == 0) {
-			auto eq_pos = entry.find('=');
-			if (eq_pos == std::string::npos) continue;
+	const wchar_t* prefix = L"YGOPRO_ENV_";
+	const size_t prefix_len = wcslen(prefix);
 
-			std::string name = entry.substr(0, eq_pos);
-			std::string value = entry.substr(eq_pos + 1);
+	for (LPWCH var = env_block; *var != L'\0'; ) {
+		// 是 YGOPRO_ENV_ 开头
+		if (wcsncmp(var, prefix, prefix_len) == 0) {
+			const wchar_t* equal_pos = wcschr(var, L'=');
+			if (equal_pos && equal_pos > var + prefix_len) {
+				// 拆 key 和 value（UTF-16）
+				std::wstring key_w(var + prefix_len, equal_pos);        // foo
+				std::wstring value_w(equal_pos + 1);                    // bar
 
-			std::string key = "env_" + name.substr(prefix.size());
-			set_registry_value(pduel, key.c_str(), value.c_str());
+				char key_utf8[256]{};
+				char value_utf8[1024]{};
+
+				// 转成 UTF-8：key = env_foo
+				BufferIO::EncodeUTF8((L"env_" + key_w).c_str(), key_utf8);
+				BufferIO::EncodeUTF8(value_w.c_str(), value_utf8);
+
+				set_registry_value(pduel, key_utf8, value_utf8);
+			}
 		}
+		var += wcslen(var) + 1;
 	}
 
-	FreeEnvironmentStringsA(env_strings);
+	FreeEnvironmentStringsW(env_block);
 #else
 	const std::string prefix = "YGOPRO_ENV_";
 	for (char** env = environ; *env != nullptr; ++env) {
