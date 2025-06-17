@@ -2559,7 +2559,7 @@ void Game::InjectEnvToRegistry(intptr_t pduel) {
 			const wchar_t* equal_pos = wcschr(var, L'=');
 			if (equal_pos && equal_pos > var + prefix_len) {
 				// 拆 key 和 value（UTF-16）
-				std::wstring key_w(var + prefix_len, equal_pos);        // foo
+				std::wstring key_w(var + prefix_len, equal_pos - (var + prefix_len));        // foo
 				std::wstring value_w(equal_pos + 1);                    // bar
 
 				char key_utf8[256]{};
