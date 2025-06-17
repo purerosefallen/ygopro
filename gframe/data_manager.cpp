@@ -402,9 +402,11 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	buffer = ScriptReaderExSingle("specials/", script_name, slen, 9);
 	if(buffer)
 		return buffer;
-	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
-	if(buffer)
-		return buffer;
+	for(auto ex : mainGame->GetExpansionsListU("/")) {
+		buffer = ScriptReaderExSingle(ex.c_str(), script_name, slen);
+		if(buffer)
+			return buffer;
+	}
 	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
 	if(buffer)
 		return buffer;
