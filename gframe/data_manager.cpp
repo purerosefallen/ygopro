@@ -103,12 +103,16 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	else
 		ret = ReadDB(pDB);
 	sqlite3_close(pDB);
+	return ret;
 #else
 #ifdef _WIN32
 	auto reader = FileSystem->createAndOpenFile(wfile);
 #else
 	auto reader = FileSystem->createAndOpenFile(file);
 #endif
+	return LoadDB(reader);
+}
+bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	if(reader == nullptr)
 		return false;
 	spmemvfs_db_t db;
@@ -120,14 +124,14 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	reader->drop();
 	(mem->data)[mem->total] = '\0';
 	bool ret{};
-	if (spmemvfs_open_db(&db, file, mem) != SQLITE_OK)
+	if (spmemvfs_open_db(&db, "temp.db", mem) != SQLITE_OK)
 		ret = Error(db.handle);
 	else
 		ret = ReadDB(db.handle);
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
-#endif //YGOPRO_SERVER_MODE
 	return ret;
+#endif //SERVER_ZIP_SUPPORT
 }
 #ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(const char* file) {

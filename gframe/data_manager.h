@@ -45,6 +45,9 @@ public:
 	DataManager();
 	bool ReadDB(sqlite3* pDB);
 	bool LoadDB(const wchar_t* wfile);
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+	bool LoadDB(irr::io::IReadFile* reader);
+#endif
 #ifndef YGOPRO_SERVER_MODE
 	bool LoadStrings(const char* file);
 	bool LoadStrings(irr::io::IReadFile* reader);
