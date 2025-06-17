@@ -1286,8 +1286,9 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
-				} else
+				} else {
 					dataManager.LoadStrings(reader);
+				}
 				continue;
 			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
