@@ -416,6 +416,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	if(!registry_dump.empty()) {
 		load_registry(pduel, registry_dump.data(), (int32_t)registry_dump.size());
 	}
+	mainGame->InjectEnvToRegistry(pduel);
 	set_registry_value(pduel, "duel_mode", "tag");
 	set_registry_value(pduel, "start_lp", std::to_string(host_info.start_lp).c_str());
 	set_registry_value(pduel, "start_hand", std::to_string(host_info.start_hand).c_str());

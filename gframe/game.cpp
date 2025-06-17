@@ -2545,5 +2545,43 @@ void Game::SetCursor(irr::gui::ECURSOR_ICON icon) {
 		cursor->setActiveIcon(icon);
 	}
 }
+void Game::InjectEnvToRegistry(intptr_t pduel) {
+#ifdef _WIN32
+	LPTCH env_strings = GetEnvironmentStringsA();
+	if (!env_strings) return;
+
+	const std::string prefix = "YGOPRO_ENV_";
+	for (char* var = env_strings; *var; var += strlen(var) + 1) {
+		std::string entry(var);
+		if (entry.compare(0, prefix.size(), prefix) == 0) {
+			auto eq_pos = entry.find('=');
+			if (eq_pos == std::string::npos) continue;
+
+			std::string name = entry.substr(0, eq_pos);
+			std::string value = entry.substr(eq_pos + 1);
+
+			std::string key = "env_" + name.substr(prefix.size());
+			set_registry_value(pduel, key.c_str(), value.c_str());
+		}
+	}
+
+	FreeEnvironmentStringsA(env_strings);
+#else
+	const std::string prefix = "YGOPRO_ENV_";
+	for (char** env = environ; *env != nullptr; ++env) {
+		std::string entry(*env);
+		if (entry.compare(0, prefix.size(), prefix) == 0) {  // 以 prefix 开头
+			auto eq_pos = entry.find('=');
+			if (eq_pos == std::string::npos) continue;
+
+			std::string name = entry.substr(0, eq_pos);   // YGOPRO_ENV_foo
+			std::string value = entry.substr(eq_pos + 1); // bar
+
+			std::string key = "env_" + name.substr(prefix.size()); // env_foo
+			set_registry_value(pduel, key.c_str(), value.c_str());
+		}
+	}
+#endif
+}
 
 }

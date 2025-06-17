@@ -169,6 +169,7 @@ bool ReplayMode::StartDuel() {
 		BufferIO::CopyWideString(cur_replay.players[1].c_str(), mainGame->dInfo.clientname);
 	}
 	pduel = create_duel(rnd());
+	mainGame->InjectEnvToRegistry(pduel);
 	mainGame->dInfo.duel_rule = cur_replay.params.duel_flag >> 16;
 	set_player_info(pduel, 0, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
 	set_player_info(pduel, 1, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);

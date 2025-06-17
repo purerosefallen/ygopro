@@ -439,6 +439,7 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	if(!registry_dump.empty()) {
 		load_registry(pduel, registry_dump.data(), (int32_t)registry_dump.size());
 	}
+	mainGame->InjectEnvToRegistry(pduel);
 	set_registry_value(pduel, "duel_mode", match_mode ? "match" : "single");
 	if(match_mode) {
 		set_registry_value(pduel, "duel_count", std::to_string(duel_count).c_str());
