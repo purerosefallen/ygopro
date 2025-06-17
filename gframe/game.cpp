@@ -1270,16 +1270,19 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			const char* uname = archive->getFullFileName(j).c_str();
 			BufferIO::DecodeUTF8(uname, fname);
 #endif
+			auto createReader = [&]() {
+#ifdef _WIN32
+				return archiveObj->createAndOpenFile(fname);
+#else
+				return archiveObj->createAndOpenFile(uname);
+#endif
+			};
 			if (IsExtension(fname, L".cdb")) {
-				dataManager.LoadDB(fname);
+				dataManager.LoadDB(createReader());
 				continue;
 			}
 			if (IsExtension(fname, L".conf")) {
-#ifdef _WIN32
-				auto reader = archiveObj->createAndOpenFile(fname);
-#else
-				auto reader = archiveObj->createAndOpenFile(uname);
-#endif
+				auto reader = createReader();
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;

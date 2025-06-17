@@ -88,6 +88,9 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 #else
 	auto reader = FileSystem->createAndOpenFile(file);
 #endif
+	return LoadDB(reader);
+}
+bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	if(reader == nullptr)
 		return false;
 	spmemvfs_db_t db;
@@ -99,7 +102,7 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	reader->drop();
 	(mem->data)[mem->total] = '\0';
 	bool ret{};
-	if (spmemvfs_open_db(&db, file, mem) != SQLITE_OK)
+	if (spmemvfs_open_db(&db, "temp.db", mem) != SQLITE_OK)
 		ret = Error(db.handle);
 	else
 		ret = ReadDB(db.handle);

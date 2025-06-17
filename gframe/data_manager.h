@@ -45,6 +45,7 @@ public:
 	DataManager();
 	bool ReadDB(sqlite3* pDB);
 	bool LoadDB(const wchar_t* wfile);
+	bool LoadDB(irr::io::IReadFile* reader);
 	bool LoadStrings(const char* file);
 	bool LoadStrings(irr::io::IReadFile* reader);
 	void ReadStringConfLine(const char* linebuf);
