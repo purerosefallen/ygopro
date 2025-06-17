@@ -198,6 +198,7 @@ public:
 	void RefreshSingleplay();
 	void RefreshBot();
 	void RefreshLocales();
+	void RefreshLFList();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();

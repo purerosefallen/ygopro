@@ -496,10 +496,7 @@ bool Game::Initialize() {
 	chkLFlist->setChecked(gameConf.use_lflist);
 	cbLFlist = env->addComboBox(irr::core::rect<irr::s32>(posX + 115, posY, posX + 250, posY + 25), tabSystem, COMBOBOX_LFLIST);
 	cbLFlist->setMaxSelectionRows(6);
-	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
-	cbLFlist->setEnabled(gameConf.use_lflist);
-	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
+	RefreshLFList();
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
@@ -1230,6 +1227,7 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 	return ret;
 }
 void Game::LoadExpansions(const wchar_t* expansions_path) {
+	bool lflist_changed = false;
 	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
 		if (isdir)
 			return;
@@ -1240,9 +1238,10 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			return;
 		}
 		if (IsExtension(name, L".conf")) {
-			if(!std::wcscmp(name, L"lflist.conf"))
+			if(!std::wcscmp(name, L"lflist.conf")) {
 				deckManager.LoadLFListSingle(fpath, true);
-			else {
+				lflist_changed = true;
+			} else {
 				char upath[1024];
 				BufferIO::EncodeUTF8(fpath, upath);
 				dataManager.LoadStrings(upath);
@@ -1261,7 +1260,8 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 		}
 	});
 	for(irr::u32 i = 0; i < DataManager::FileSystem->getFileArchiveCount(); ++i) {
-		auto archive = DataManager::FileSystem->getFileArchive(i)->getFileList();
+		auto archiveObj = DataManager::FileSystem->getFileArchive(i);
+		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 #ifdef _WIN32
 			const wchar_t* fname = archive->getFullFileName(j).c_str();
@@ -1276,13 +1276,14 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			}
 			if (IsExtension(fname, L".conf")) {
 #ifdef _WIN32
-				auto reader = DataManager::FileSystem->createAndOpenFile(fname);
+				auto reader = archiveObj->createAndOpenFile(fname);
 #else
-				auto reader = DataManager::FileSystem->createAndOpenFile(uname);
+				auto reader = archiveObj->createAndOpenFile(uname);
 #endif
-				if(!std::wcscmp(fname, L"lflist.conf"))
+				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
-				else
+					lflist_changed = true;
+				} else
 					dataManager.LoadStrings(reader);
 				continue;
 			}
@@ -1292,6 +1293,8 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			}
 		}
 	}
+	if(lflist_changed)
+		RefreshLFList();
 }
 void Game::LoadExpansionsAll() {
 	auto list = GetExpansionsList();
@@ -1413,6 +1416,13 @@ void Game::RefreshLocales() {
 			break;
 		}
 	}
+}
+void Game::RefreshLFList() {
+	cbLFlist->clear();
+	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
+		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
+	cbLFlist->setEnabled(gameConf.use_lflist);
+	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
