@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.no_shuffle_deck = false;
 	ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 5; ++i)
 		ygo::pre_seed[i] = (unsigned int)0;
 	if (argc == 2) {
 		int code = atoi(argv[1]);
