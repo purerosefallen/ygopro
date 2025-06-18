@@ -449,7 +449,7 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_registry_value(pduel, "draw_count", std::to_string(host_info.draw_count).c_str());
 	wchar_t player_name_buf[40];
 	char player_name_buf_u[40];
-	char player_key_buf[15];
+	char player_key_buf[23];
 	for(int i = 0; i < 2; ++i) {
 		BufferIO::CopyCharArray(players[i]->name, player_name_buf);
 		BufferIO::EncodeUTF8(player_name_buf, player_name_buf_u);
