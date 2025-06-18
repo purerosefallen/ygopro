@@ -170,6 +170,19 @@ bool ReplayMode::StartDuel() {
 	}
 	pduel = create_duel(rnd());
 	mainGame->InjectEnvToRegistry(pduel);
+	set_registry_value(pduel, "duel_mode", rh.flag & REPLAY_TAG ? "tag" : "single");
+	set_registry_value(pduel, "start_lp", std::to_string(cur_replay.params.start_lp).c_str());
+	set_registry_value(pduel, "start_hand", std::to_string(cur_replay.params.start_hand).c_str());
+	set_registry_value(pduel, "draw_count", std::to_string(cur_replay.params.draw_count).c_str());
+	char player_name_buf_u[40];
+	char player_key_buf[15];
+	for(int i = 0; i < (rh.flag & REPLAY_TAG) ? 4 : 2; ++i) {
+		BufferIO::EncodeUTF8(cur_replay.players[i].c_str(), player_name_buf_u);
+		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_name_%d", i);
+		set_registry_value(pduel, player_key_buf, player_name_buf_u);
+		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_type_%d", i);
+		set_registry_value(pduel, player_key_buf, std::to_string(i).c_str());
+	}
 	mainGame->dInfo.duel_rule = cur_replay.params.duel_flag >> 16;
 	set_player_info(pduel, 0, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
 	set_player_info(pduel, 1, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
