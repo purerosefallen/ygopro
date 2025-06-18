@@ -130,8 +130,18 @@ int main(int argc, char* argv[]) {
 				reinterpret_cast<unsigned char*>(ygo::pre_seed[i - 13]),
 				SEED_COUNT * sizeof(uint32_t)
 			);
-			if(ok)
-				ygo::pre_seed_specified[i - 13] = 1;
+			if(ok) {
+				// check if it isn't all zero
+				bool all_zero = true;
+				for (int j = 0; j < SEED_COUNT; ++j) {
+					if (ygo::pre_seed[i - 13][j] != 0) {
+						all_zero = false;
+						break;
+					}
+				}
+				if (!all_zero)
+					ygo::pre_seed_specified[i - 13] = 1;
+			}
 			else
 				std::fprintf(stderr, "Failed to decode seed %d: %s\n", i - 13, argv[i]);
 		}
