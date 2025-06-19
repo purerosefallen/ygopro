@@ -179,7 +179,7 @@ bool ReplayMode::StartDuel() {
 	set_registry_value(pduel, "draw_count", std::to_string(cur_replay.params.draw_count).c_str());
 	char player_name_buf_u[40];
 	char player_key_buf[23];
-	for(int i = 0; i < (rh.flag & REPLAY_TAG) ? 4 : 2; ++i) {
+	for(int i = 0; i < ((rh.flag & REPLAY_TAG) ? 4 : 2); ++i) {
 		BufferIO::EncodeUTF8(cur_replay.players[i].c_str(), player_name_buf_u);
 		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_name_%d", i);
 		set_registry_value(pduel, player_key_buf, player_name_buf_u);
