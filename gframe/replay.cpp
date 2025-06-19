@@ -145,6 +145,7 @@ void Replay::SaveReplay(const wchar_t* name) {
 	std::fwrite(comp_data, comp_size, 1, rfp);
 	std::fclose(rfp);
 }
+#ifndef YGOPRO_SERVER_MODE
 bool Replay::OpenReplay(const wchar_t* name) {
 	FILE* rfp = mywfopen(name, "rb");
 	if(!rfp) {
@@ -169,7 +170,7 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		std::fclose(rfp);
 		return false;
 	}
-	if (pheader.base.id == REPLAY_ID_YRP2 && std::fread(&pheader.seed_sequence, sizeof pheader.seed_sequence, 1, rfp) < 1) {
+	if (pheader.base.id == REPLAY_ID_YRP2 && std::fread(reinterpret_cast<unsigned char*>(&pheader) + sizeof pheader.base, sizeof pheader - sizeof pheader.base, 1, rfp) < 1) {
 		std::fclose(rfp);
 		return false;
 	}
@@ -260,6 +261,7 @@ void Replay::Rewind() {
 	data_position = 0;
 	can_read = true;
 }
+#endif // YGOPRO_SERVER_MODE
 void Replay::Reset() {
 	is_recording = false;
 	is_replaying = false;
@@ -273,6 +275,7 @@ void Replay::Reset() {
 	decks.clear();
 	script_name.clear();
 }
+#ifndef YGOPRO_SERVER_MODE
 void Replay::SkipInfo(){
 	if (data_position == 0)
 		data_position += info_offset;
@@ -330,5 +333,6 @@ bool Replay::ReadInfo() {
 	}
 	return true;
 }
+#endif // YGOPRO_SERVER_MODE
 
 }
