@@ -561,6 +561,11 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	rh.base.version = PRO_VERSION;
 	rh.base.flag = REPLAY_UNIFORM;
 	rh.base.start_time = (uint32_t)std::time(nullptr);
+#ifdef YGOPRO_SERVER_MODE
+		if(pre_seed_specified[duel_count])
+			memcpy(rh.seed_sequence, pre_seed[duel_count], SEED_COUNT * sizeof(uint32_t));
+		else
+#endif
 	for (auto& x : rh.seed_sequence)
 		x = rd();
 	mtrandom rnd(rh.seed_sequence, SEED_COUNT);
@@ -2352,14 +2357,13 @@ void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 #ifdef YGOPRO_SERVER_MODE
 void SingleDuel::TestCard(int code) {
 	std::random_device rd;
-	unsigned int seed = rd();
-	mt19937 rnd(seed);
-	unsigned int duel_seed = rnd.rand();
+	uint32_t seed[SEED_COUNT];
+	for(int i = 0; i < SEED_COUNT; ++i)
+		seed[i] = rd();
 	set_script_reader((script_reader)DataManager::ScriptReaderEx);
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)SingleDuel::MessageHandler);
-	rnd.reset(seed);
-	unsigned long tduel = create_duel(duel_seed);
+	unsigned long tduel = create_duel_v2(seed);
 	preload_script(tduel, "./script/special.lua");
 	preload_script(tduel, "./script/init.lua");
 	set_player_info(tduel, 0, 8000, 5, 1);

@@ -86,8 +86,9 @@ void DuelInfo::Clear() {
 #ifdef YGOPRO_SERVER_MODE
 unsigned short server_port;
 unsigned short replay_mode;
-unsigned int pre_seed[5];
-unsigned int duel_flags;
+uint32_t pre_seed[MAX_MATCH_COUNT][SEED_COUNT];
+uint8_t pre_seed_specified[MAX_MATCH_COUNT];
+uint32_t duel_flags;
 HostInfo game_info;
 
 void Game::MainServerLoop() {
