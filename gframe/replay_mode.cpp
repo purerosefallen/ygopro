@@ -57,7 +57,7 @@ bool ReplayMode::ReadReplayResponse() {
 	return result;
 }
 int ReplayMode::ReplayThread() {
-	const ReplayHeader& rh = cur_replay.pheader;
+	const auto& rh = cur_replay.pheader.base;
 	mainGame->dInfo.Clear();
 	mainGame->dInfo.isFirst = true;
 	mainGame->dInfo.isTag = !!(rh.flag & REPLAY_TAG);
@@ -155,9 +155,7 @@ int ReplayMode::ReplayThread() {
 	return 0;
 }
 bool ReplayMode::StartDuel() {
-	const ReplayHeader& rh = cur_replay.pheader;
-	unsigned int seed = rh.seed;
-	std::mt19937 rnd(seed);
+	const auto& rh = cur_replay.pheader.base;
 	cur_replay.SkipInfo();
 	if(rh.flag & REPLAY_TAG) {
 		BufferIO::CopyWideString(cur_replay.players[0].c_str(), mainGame->dInfo.hostname);
@@ -168,7 +166,12 @@ bool ReplayMode::StartDuel() {
 		BufferIO::CopyWideString(cur_replay.players[0].c_str(), mainGame->dInfo.hostname);
 		BufferIO::CopyWideString(cur_replay.players[1].c_str(), mainGame->dInfo.clientname);
 	}
-	pduel = create_duel(rnd());
+	if(rh.id == REPLAY_ID_YRP1) {
+		std::mt19937 rnd(rh.seed);
+		pduel = create_duel(rnd());
+	} else {
+		pduel = create_duel_v2(cur_replay.pheader.seed_sequence);
+	}
 	mainGame->InjectEnvToRegistry(pduel);
 	set_registry_value(pduel, "duel_mode", rh.flag & REPLAY_TAG ? "tag" : "single");
 	set_registry_value(pduel, "start_lp", std::to_string(cur_replay.params.start_lp).c_str());
@@ -230,8 +233,6 @@ bool ReplayMode::StartDuel() {
 			return false;
 		}
 	}
-	if (!(rh.flag & REPLAY_UNIFORM))
-		cur_replay.params.duel_flag |= DUEL_OLD_REPLAY;
 	start_duel(pduel, cur_replay.params.duel_flag);
 	return true;
 }

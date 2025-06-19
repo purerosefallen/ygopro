@@ -74,6 +74,7 @@ public:
 	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
 	bool LoadCurrentDeck(const wchar_t* file, bool is_packlist = false);
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
+	bool LoadCurrentDeck(std::istringstream& deckStream, bool is_packlist = false);
 	wchar_t DeckFormatBuffer[128];
 	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
@@ -87,6 +88,7 @@ public:
 	static FILE* OpenDeckFile(const wchar_t* file, const char* mode);
 	static irr::io::IReadFile* OpenDeckReader(const wchar_t* file);
 	static bool SaveDeck(const Deck& deck, const wchar_t* file);
+	static void SaveDeck(const Deck& deck, std::stringstream& deckStream);
 	static bool DeleteDeck(const wchar_t* file);
 	static bool CreateCategory(const wchar_t* name);
 	static bool RenameCategory(const wchar_t* oldname, const wchar_t* newname);
