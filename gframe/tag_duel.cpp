@@ -533,20 +533,14 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	cur_player[1] = players[3];
 	dp->state = CTOS_RESPONSE;
 	std::random_device rd;
-	unsigned int seed = rd();
-#ifdef YGOPRO_SERVER_MODE
-	if(pre_seed[0] > 0) {
-		seed = pre_seed[0];
-	}
-#endif
-	mt19937 rnd((uint_fast32_t)seed);
-	auto duel_seed = rnd.rand();
-	ReplayHeader rh;
-	rh.id = 0x31707279;
-	rh.version = PRO_VERSION;
-	rh.flag = REPLAY_UNIFORM | REPLAY_TAG;
-	rh.seed = seed;
-	rh.start_time = (unsigned int)std::time(nullptr);
+	ExtendedReplayHeader rh;
+	rh.base.id = REPLAY_ID_YRP2;
+	rh.base.version = PRO_VERSION;
+	rh.base.flag = REPLAY_UNIFORM | REPLAY_TAG;
+	rh.base.start_time = (uint32_t)std::time(nullptr);
+	for (auto& x : rh.seed_sequence)
+		x = rd();
+	mtrandom rnd(rh.seed_sequence, SEED_COUNT);
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
 	last_replay.WriteData(players[0]->name, 40, false);
@@ -564,7 +558,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_script_reader(DataManager::ScriptReaderEx);
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(TagDuel::MessageHandler);
-	pduel = create_duel(duel_seed);
+	pduel = create_duel_v2(rh.seed_sequence);
 	if(!registry_dump.empty()) {
 		load_registry(pduel, registry_dump.data(), (int32_t)registry_dump.size());
 	}
@@ -575,7 +569,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	set_registry_value(pduel, "draw_count", std::to_string(host_info.draw_count).c_str());
 	wchar_t player_name_buf[40];
 	char player_name_buf_u[40];
-	char player_key_buf[15];
+	char player_key_buf[23];
 	for(int i = 0; i < 2; ++i) {
 		BufferIO::CopyCharArray(players[i]->name, player_name_buf);
 		BufferIO::EncodeUTF8(player_name_buf, player_name_buf_u);
@@ -1983,10 +1977,10 @@ void TagDuel::EndDuel() {
 		return;
 	last_replay.EndRecord();
 	char replaybuf[0x2000], *pbuf = replaybuf;
-	std::memcpy(pbuf, &last_replay.pheader, sizeof(ReplayHeader));
-	pbuf += sizeof(ReplayHeader);
+	std::memcpy(pbuf, &last_replay.pheader, sizeof last_replay.pheader);
+	pbuf += sizeof last_replay.pheader;
 	std::memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
-	NetServer::SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof(ReplayHeader) + last_replay.comp_size);
+	NetServer::SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof last_replay.pheader + last_replay.comp_size);
 	NetServer::ReSendToPlayer(players[1]);
 	NetServer::ReSendToPlayer(players[2]);
 	NetServer::ReSendToPlayer(players[3]);
