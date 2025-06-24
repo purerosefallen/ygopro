@@ -58,6 +58,7 @@ struct Config {
 #else
 	bool use_image_load_background_thread{ true };
 #endif
+	bool freever{ true };
 	unsigned short antialias{ 0 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
