@@ -179,6 +179,7 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 	}
 }
 bool DataManager::LoadServerList(const char* file) {
+		_serverStrings.emplace_back(L"清空", L"");
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
 		return false;
@@ -190,6 +191,8 @@ bool DataManager::LoadServerList(const char* file) {
 	return true;
 }
 bool DataManager::LoadServerList(const wchar_t* file) {
+	if (_serverStrings.empty())
+		_serverStrings.emplace_back(L"清空", L"");
 	FILE* fp = mywfopen(file, "r");
 	if(!fp)
 		return false;
@@ -201,6 +204,8 @@ bool DataManager::LoadServerList(const wchar_t* file) {
 	return true;
 }
 bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
+	if (_serverStrings.empty())
+		_serverStrings.emplace_back(L"清空", L"");
 	char ch{};
 	std::string linebuf;
 	while (reader->read(&ch, 1)) {
@@ -218,8 +223,6 @@ bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
 void DataManager::ReadServerConfLine(const char* linebuf) {
 	if(strchr(linebuf, '|') == nullptr)
 		return;
-	if (_serverStrings.empty())
-		_serverStrings.emplace_back(L"清空", L"");
 	char* buffer = const_cast<char*>(linebuf);
 	buffer[strcspn(buffer, "\n")] = '\0';
 	char *separator = strchr(buffer, '|');
@@ -240,6 +243,7 @@ void DataManager::ReadServerConfLine(const char* linebuf) {
 				it->second = ip;
 			else
 				_serverStrings.emplace_back(name, ip);
+
 		}
 	}
 }
@@ -252,6 +256,7 @@ bool DataManager::LoadINI(const char* file) {
 		ReadINI(linebuf);
 	}
 	std::fclose(fp);
+	InsertServerList();
 	return true;
 }
 bool DataManager::LoadINI(const wchar_t* file) {
@@ -263,6 +268,7 @@ bool DataManager::LoadINI(const wchar_t* file) {
 		ReadINI(linebuf);
 	}
 	std::fclose(fp);
+	InsertServerList();
 	return true;
 }
 bool DataManager::LoadINI(irr::io::IReadFile* reader) {
@@ -278,32 +284,60 @@ bool DataManager::LoadINI(irr::io::IReadFile* reader) {
 		}
 	}
 	reader->drop();
+	InsertServerList();
 	return true;
 }
 void DataManager::ReadINI(const char* linebuf) {
-	iniPort = GetINIValue(linebuf, "ServerPort = ");
-	iniHost = GetINIValue(linebuf, "ServerHost = ");
-	iniName = GetINIValue(linebuf, "ServerName = ");
-	if (iniName != "" && iniHost != "") {
-		std::string combined = std::string(iniName) + '|' + iniHost ;
-		if (iniPort != "")
-			combined += ':' + iniPort;
-		const char* result = combined.c_str();
-		ReadServerConfLine(result);
-	}
+	const wchar_t* name = GetINIValue(linebuf, "ServerName = ");
+	const wchar_t* host = GetINIValue(linebuf, "ServerHost = ");
+	const wchar_t* port = GetINIValue(linebuf, "ServerPort = ");
+	if (name != L"")
+		iniName = name;
+	if (host != L"")
+		iniHost = host;
+	if (port != L"")
+		iniPort = port;
 }
-const char* GetINIValue(const char* line, const char* key) {
-	if (!line || !key) return "";
+const wchar_t* DataManager::GetINIValue(const char* line, const char* key) {
+	if (!line || !key) return L"";
 	const char* keyPos = strstr(line, key);
-	if (!keyPos) return "";
+	if (!keyPos) return L"";
 	const char* valStart = keyPos + strlen(key);
-	while (*valStart == ' ')
-		valStart++;
+	while (*valStart == ' ') valStart++;
 	const char* valEnd = valStart;
-	while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
+	while (*valEnd && *valEnd != '\n' && *valEnd != '\r') {
 		valEnd++;
-
-	return std::string(valStart, valEnd).c_str();
+	}
+	wchar_t value[256];
+	if (mbstowcs(value, std::string(valStart, valEnd).c_str(), 256) != (size_t)-1) {
+		wchar_t* result = new wchar_t[256];
+		wcscpy(result, value);
+		return result;
+	}
+	return L"";
+}
+void DataManager::InsertServerList() {
+	if (iniName != L"" && iniHost != L"") {
+		const wchar_t* ip = iniHost;
+		const wchar_t* name = iniName;
+		size_t len = wcslen(iniHost) + wcslen(iniPort) + 2;
+		wchar_t* buffer = new wchar_t[len];
+		if (iniPort != L"") {
+			std::swprintf(buffer, len, L"%s:%s", iniHost, iniPort);
+			ip = buffer;
+		}
+		auto it = std::find_if(_serverStrings.begin(), _serverStrings.end(),
+			[name](const auto& pair) { return wcscmp(pair.first, name) == 0; }
+		);
+		if (it != _serverStrings.end())
+			it->second = ip;
+		else
+			_serverStrings.emplace_back(name, ip);
+		delete[] buffer;
+	}
+	iniName == L"";
+	iniHost == L"";
+	iniPort == L"";
 }
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	std::snprintf(errmsg, sizeof errmsg, "%s", sqlite3_errmsg(pDB));

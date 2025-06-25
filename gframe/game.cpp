@@ -1266,6 +1266,10 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			}
 			return;
 		}
+		if (IsExtension(name, L".ini")) {
+				dataManager.LoadINI(fpath);
+				server_list_changed = true;
+		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
 			DataManager::FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
@@ -1304,13 +1308,17 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
-				}} else if(!std::wcscmp(fname, L"server.conf")) {
+				} else if(!std::wcscmp(fname, L"server.conf")) {
 					dataManager.LoadServerList(reader);
 					server_list_changed = true;
 				} else {
 					dataManager.LoadStrings(reader);
 				}
 				continue;
+			}
+			if (IsExtension(name, L".ini")) {
+					dataManager.LoadINI(createReader());
+					server_list_changed = true;
 			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
 				deckBuilder.expansionPacks.push_back(fname);

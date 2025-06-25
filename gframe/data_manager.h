@@ -58,7 +58,8 @@ public:
 	bool LoadINI(const wchar_t* file);
 	bool LoadINI(irr::io::IReadFile* reader);
 	void ReadINI(const char* linebuf);
-	const char* GetINIValue(const char* line, const char* key);
+	const wchar_t* GetINIValue(const char* line, const char* key);
+	void InsertServerList();
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);
 
 	code_pointer GetCodePointer(unsigned int code) const;
@@ -114,9 +115,9 @@ private:
 	std::unordered_map<unsigned int, CardDataC> _datas;
 	std::unordered_map<unsigned int, CardString> _strings;
 	std::unordered_map<unsigned int, std::vector<uint16_t>> extra_setcode;
-	const char* iniName;
-	const char* iniHost;
-	const char* iniPort;
+	const wchar_t* iniName;
+	const wchar_t* iniHost;
+	const wchar_t* iniPort;
 };
 
 extern DataManager dataManager;
