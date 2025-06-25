@@ -274,6 +274,7 @@ public:
 	void takeScreenshot();
 	void SetCursor(irr::gui::ECURSOR_ICON icon);
 	void InjectEnvToRegistry(intptr_t pduel);
+	void AddServerList(irr::gui::IGUIListBox* i);
 	template<typename T>
 	static void DrawShadowText(irr::gui::CGUITTFont* font, const T& text, const irr::core::rect<irr::s32>& position, const irr::core::rect<irr::s32>& padding,
 		irr::video::SColor color = 0xffffffff, irr::video::SColor shadowcolor = 0xff000000, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = nullptr);
@@ -692,6 +693,13 @@ public:
 	irr::gui::IGUIButton* btnBigCardZoomIn;
 	irr::gui::IGUIButton* btnBigCardZoomOut;
 	irr::gui::IGUIButton* btnBigCardClose;
+	//server list
+	irr::gui::IGUIButton* btnServerList;
+	irr::gui::IGUIWindow* wServerList;
+	irr::gui::IGUIListBox* lstServerList;
+	irr::gui::IGUIButton* btnServerSelected;
+	irr::gui::IGUIButton* btnServerCancel;
+	std::vector<const wchar_t*> serverIP;
 };
 
 extern Game* mainGame;
@@ -918,6 +926,11 @@ extern Game* mainGame;
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
 #define BUTTON_DECK_CODE_CANCEL		391
+
+#define BUTTON_SERVER_LIST			392
+#define LISTBOX_SERVER_LIST			393
+#define BUTTON_SERVER_SELECTED		394
+#define BUTTON_SERVER_CANCEL		395
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1

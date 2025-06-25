@@ -484,6 +484,24 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				prev_sel = -1;
 				break;
 			}
+			case BUTTON_SERVER_LIST: {
+				mainGame->ShowElement(mainGame->wServerList);
+				mainGame->PopupElement(mainGame->wServerList);
+				break;
+			}
+			case BUTTON_SERVER_SELECTED: {
+				int sel = mainGame->lstServerList->getSelected();
+				wcscpy(mainGame->gameConf.lasthost, mainGame->serverIP[sel]);
+				wchar_t buf[256];
+				myswprintf(buf, L"%s", mainGame->gameConf.lasthost);
+				mainGame->ebJoinHost->setText(buf);
+				mainGame->HideElement(mainGame->wServerList);
+				break;
+			}
+			case BUTTON_SERVER_CANCEL: {
+				mainGame->HideElement(mainGame->wServerList);
+				break;
+			}
 			}
 			break;
 		}

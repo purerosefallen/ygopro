@@ -235,7 +235,8 @@ bool Game::Initialize() {
 	editbox_list.push_back(ebNickName);
 	lstHostList = env->addListBox(irr::core::rect<irr::s32>(10, 60, 570, 320), wLanWindow, LISTBOX_LAN_HOST, true);
 	lstHostList->setItemHeight(18);
-	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(170, 325, 270, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnServerList = env->addButton(irr::core::rect<irr::s32>(310, 325, 410, 350), wLanWindow, BUTTON_SERVER_LIST, dataManager.GetSysString(1239));
 	env->addStaticText(dataManager.GetSysString(1221), irr::core::rect<irr::s32>(10, 360, 220, 380), false, false, wLanWindow);
 	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -359,6 +360,16 @@ bool Game::Initialize() {
 	btnHostPrepNotReady->setVisible(false);
 	btnHostPrepStart = env->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
 	btnHostPrepCancel = env->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
+	//server list
+	wServerList = env->addWindow(irr::core::rect<irr::s32>(10, 80, 380, 400), false, dataManager.GetSysString(1428));
+	wServerList->getCloseButton()->setVisible(false);
+	wServerList->setVisible(false);
+	wServerList->setDraggable(false);
+	lstServerList = env->addListBox(irr::core::rect<irr::s32>(0, 20, 370, 270), wServerList, LISTBOX_SERVER_LIST, true);
+	lstServerList->setItemHeight(18);
+	AddServerList(lstServerList);
+	btnServerSelected = env->addButton(irr::core::rect<irr::s32>(10, 280, 100, 310), wServerList, BUTTON_SERVER_SELECTED, dataManager.GetSysString(1211));
+	btnServerCancel = env->addButton(irr::core::rect<irr::s32>(280, 280, 370, 310), wServerList, BUTTON_SERVER_CANCEL, dataManager.GetSysString(1212));
 	//img
 	wCardImg = env->addStaticText(L"", irr::core::rect<irr::s32>(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0xc0c0c0c0);
@@ -2171,6 +2182,7 @@ void Game::CloseDuelWindow() {
 	lstLog->clear();
 	logParam.clear();
 	lstHostList->clear();
+	lstServerList->clear();
 	DuelClient::hosts.clear();
 	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
@@ -2643,6 +2655,34 @@ void Game::InjectEnvToRegistry(intptr_t pduel) {
 		}
 	}
 #endif
+}
+void Game::AddServerList(irr::gui::IGUIListBox* i) {
+	i->addItem(L"清空");
+	serverIP.push_back(L"");
+	FILE* fp = myfopen("server.conf", "r");
+	if(!fp){
+		return ;
+	}
+	char buffer[256];
+	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+		buffer[strcspn(buffer, "\n")] = '\0';
+
+		char *separator = strchr(buffer, '|');
+		if (separator != NULL) {
+			*separator = '\0';
+
+			wchar_t wname[256];
+			wchar_t wip[256];
+
+			if (mbstowcs(wname, buffer, 256) != (size_t)-1 && mbstowcs(wip, separator + 1, 256) != (size_t)-1) {
+				i->addItem(wname);
+				wchar_t* ip = new wchar_t[256];
+				wcscpy(ip, wip);
+				serverIP.push_back(ip);
+			}
+		}
+	}
+	fclose(fp);
 }
 
 }
