@@ -334,7 +334,6 @@ void DataManager::InsertServerList() {
 			it->second = ip;
 		else
 			_serverStrings.emplace_back(name, ip);
-		delete[] buffer;
 	}
 	iniName == L"";
 	iniHost == L"";

@@ -1316,7 +1316,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				}
 				continue;
 			}
-			if (IsExtension(name, L".ini")) {
+			if (IsExtension(fname, L".ini")) {
 					dataManager.LoadINI(createReader());
 					server_list_changed = true;
 			}
