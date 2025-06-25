@@ -361,7 +361,7 @@ bool Game::Initialize() {
 	btnHostPrepStart = env->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
 	btnHostPrepCancel = env->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
 	//server list
-	wServerList = env->addWindow(irr::core::rect<irr::s32>(10, 80, 380, 400), false, dataManager.GetSysString(1428));
+	wServerList = env->addWindow(irr::core::rect<irr::s32>(10, 80, 380, 400), false, dataManager.GetSysString(1239));
 	wServerList->getCloseButton()->setVisible(false);
 	wServerList->setVisible(false);
 	wServerList->setDraggable(false);
