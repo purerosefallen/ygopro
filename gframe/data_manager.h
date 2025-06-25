@@ -47,6 +47,7 @@ public:
 	bool LoadDB(const wchar_t* wfile);
 	bool LoadDB(irr::io::IReadFile* reader);
 	bool LoadStrings(const char* file);
+	bool LoadStrings(const wchar_t* file);
 	bool LoadStrings(irr::io::IReadFile* reader);
 	void ReadStringConfLine(const char* linebuf);
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);

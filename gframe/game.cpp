@@ -1246,9 +1246,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
 			} else {
-				char upath[1024];
-				BufferIO::EncodeUTF8(fpath, upath);
-				dataManager.LoadStrings(upath);
+				dataManager.LoadStrings(fpath);
 			}
 			return;
 		}

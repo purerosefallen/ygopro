@@ -121,6 +121,17 @@ bool DataManager::LoadStrings(const char* file) {
 	std::fclose(fp);
 	return true;
 }
+bool DataManager::LoadStrings(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadStringConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
 bool DataManager::LoadStrings(irr::io::IReadFile* reader) {
 	char ch{};
 	std::string linebuf;
