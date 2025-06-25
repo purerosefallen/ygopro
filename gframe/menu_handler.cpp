@@ -90,6 +90,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_JOIN_CANCEL: {
+				mainGame->HideElement(mainGame->wServerList);
 				mainGame->HideElement(mainGame->wLanWindow);
 				mainGame->ShowElement(mainGame->wMainMenu);
 				if(exit_on_return)
@@ -491,10 +492,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_SERVER_SELECTED: {
 				int sel = mainGame->lstServerList->getSelected();
-				wcscpy(mainGame->gameConf.lasthost, mainGame->serverIP[sel]);
-				wchar_t buf[256];
-				myswprintf(buf, L"%s", mainGame->gameConf.lasthost);
-				mainGame->ebJoinHost->setText(buf);
+				if (selectedIndex != -1) {
+					wcscpy(mainGame->gameConf.lasthost, mainGame->serverIP[sel]);
+					wchar_t buf[256];
+					myswprintf(buf, L"%s", mainGame->gameConf.lasthost);
+					mainGame->ebJoinHost->setText(buf);
+				}
 				mainGame->HideElement(mainGame->wServerList);
 				break;
 			}

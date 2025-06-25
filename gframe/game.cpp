@@ -361,15 +361,15 @@ bool Game::Initialize() {
 	btnHostPrepStart = env->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
 	btnHostPrepCancel = env->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
 	//server list
-	wServerList = env->addWindow(irr::core::rect<irr::s32>(10, 80, 380, 400), false, dataManager.GetSysString(1239));
+	wServerList = env->addWindow(irr::core::rect<irr::s32>(25, 80, 325, 400), false, dataManager.GetSysString(1239));
 	wServerList->getCloseButton()->setVisible(false);
 	wServerList->setVisible(false);
-	wServerList->setDraggable(false);
-	lstServerList = env->addListBox(irr::core::rect<irr::s32>(0, 20, 370, 270), wServerList, LISTBOX_SERVER_LIST, true);
+	wServerList->setDraggable(true);
+	lstServerList = env->addListBox(irr::core::rect<irr::s32>(10, 20, 290, 270), wServerList, LISTBOX_SERVER_LIST, true);
 	lstServerList->setItemHeight(18);
 	AddServerList(lstServerList);
-	btnServerSelected = env->addButton(irr::core::rect<irr::s32>(10, 280, 100, 310), wServerList, BUTTON_SERVER_SELECTED, dataManager.GetSysString(1211));
-	btnServerCancel = env->addButton(irr::core::rect<irr::s32>(280, 280, 370, 310), wServerList, BUTTON_SERVER_CANCEL, dataManager.GetSysString(1212));
+	btnServerSelected = env->addButton(irr::core::rect<irr::s32>(30, 280, 130, 310), wServerList, BUTTON_SERVER_SELECTED, dataManager.GetSysString(1211));
+	btnServerCancel = env->addButton(irr::core::rect<irr::s32>(170, 280, 270, 310), wServerList, BUTTON_SERVER_CANCEL, dataManager.GetSysString(1212));
 	//img
 	wCardImg = env->addStaticText(L"", irr::core::rect<irr::s32>(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0xc0c0c0c0);
