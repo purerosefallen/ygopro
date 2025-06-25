@@ -1259,9 +1259,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
 			} else if(!std::wcscmp(name, L"server.conf")) {
-				char upath[1024];
-				BufferIO::EncodeUTF8(fpath, upath);
-				dataManager.LoadServerList(upath);
+				dataManager.LoadServerList(fpath);
 				server_list_changed = true;
 			} else {
 				char upath[1024];
