@@ -179,6 +179,7 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 	}
 }
 bool DataManager::LoadServerList(const char* file) {
+	if (_serverStrings.empty())
 		_serverStrings.emplace_back(L"清空", L"");
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
