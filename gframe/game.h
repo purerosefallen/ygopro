@@ -199,6 +199,7 @@ public:
 	void RefreshBot();
 	void RefreshLocales();
 	void RefreshLFList();
+	void RefreshServerList();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
@@ -274,7 +275,6 @@ public:
 	void takeScreenshot();
 	void SetCursor(irr::gui::ECURSOR_ICON icon);
 	void InjectEnvToRegistry(intptr_t pduel);
-	void AddServerList(irr::gui::IGUIListBox* i);
 	template<typename T>
 	static void DrawShadowText(irr::gui::CGUITTFont* font, const T& text, const irr::core::rect<irr::s32>& position, const irr::core::rect<irr::s32>& padding,
 		irr::video::SColor color = 0xffffffff, irr::video::SColor shadowcolor = 0xff000000, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = nullptr);
@@ -699,7 +699,6 @@ public:
 	irr::gui::IGUIListBox* lstServerList;
 	irr::gui::IGUIButton* btnServerSelected;
 	irr::gui::IGUIButton* btnServerCancel;
-	std::vector<const wchar_t*> serverIP;
 };
 
 extern Game* mainGame;

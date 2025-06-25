@@ -124,6 +124,7 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
+	dataManager.LoadServerList(GetLocaleDir("server.conf"));
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -367,7 +368,7 @@ bool Game::Initialize() {
 	wServerList->setDraggable(true);
 	lstServerList = env->addListBox(irr::core::rect<irr::s32>(10, 20, 290, 270), wServerList, LISTBOX_SERVER_LIST, true);
 	lstServerList->setItemHeight(18);
-	AddServerList(lstServerList);
+	RefreshServerList();
 	btnServerSelected = env->addButton(irr::core::rect<irr::s32>(30, 280, 130, 310), wServerList, BUTTON_SERVER_SELECTED, dataManager.GetSysString(1211));
 	btnServerCancel = env->addButton(irr::core::rect<irr::s32>(170, 280, 270, 310), wServerList, BUTTON_SERVER_CANCEL, dataManager.GetSysString(1212));
 	//img
@@ -1243,6 +1244,7 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 }
 void Game::LoadExpansions(const wchar_t* expansions_path) {
 	bool lflist_changed = false;
+	bool server_list_changed = false;
 	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
 		if (isdir)
 			return;
@@ -1256,6 +1258,11 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			if(!std::wcscmp(name, L"lflist.conf")) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
+			} else if(!std::wcscmp(name, L"server.conf")) {
+				char upath[1024];
+				BufferIO::EncodeUTF8(fpath, upath);
+				dataManager.LoadServerList(upath);
+				server_list_changed = true;
 			} else {
 				char upath[1024];
 				BufferIO::EncodeUTF8(fpath, upath);
@@ -1301,6 +1308,9 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
+				}} else if(!std::wcscmp(fname, L"server.conf")) {
+					dataManager.LoadServerList(reader);
+					server_list_changed = true;
 				} else {
 					dataManager.LoadStrings(reader);
 				}
@@ -1314,6 +1324,8 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 	}
 	if(lflist_changed)
 		RefreshLFList();
+	if(server_list_changed)
+		RefreshServerList();
 }
 void Game::LoadExpansionsAll() {
 	auto list = GetExpansionsList();
@@ -1507,6 +1519,13 @@ void Game::RefreshBot() {
 	}
 	else {
 		RefreshCategoryDeck(cbBotDeckCategory, cbBotDeck);
+	}
+}
+void Game::RefreshServerList() {
+	lstServerList->clear();
+	for (const auto& pair : dataManager._serverStrings) {
+		const wchar_t* key = pair.first;
+		lstServerList->addItem(key);
 	}
 }
 bool Game::LoadConfigFromFile(const char* file) {
@@ -2655,34 +2674,6 @@ void Game::InjectEnvToRegistry(intptr_t pduel) {
 		}
 	}
 #endif
-}
-void Game::AddServerList(irr::gui::IGUIListBox* i) {
-	i->addItem(L"清空");
-	serverIP.push_back(L"");
-	FILE* fp = myfopen("server.conf", "r");
-	if(!fp){
-		return ;
-	}
-	char buffer[256];
-	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-		buffer[strcspn(buffer, "\n")] = '\0';
-
-		char *separator = strchr(buffer, '|');
-		if (separator != NULL) {
-			*separator = '\0';
-
-			wchar_t wname[256];
-			wchar_t wip[256];
-
-			if (mbstowcs(wname, buffer, 256) != (size_t)-1 && mbstowcs(wip, separator + 1, 256) != (size_t)-1) {
-				i->addItem(wname);
-				wchar_t* ip = new wchar_t[256];
-				wcscpy(ip, wip);
-				serverIP.push_back(ip);
-			}
-		}
-	}
-	fclose(fp);
 }
 
 }

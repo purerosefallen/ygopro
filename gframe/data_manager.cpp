@@ -167,6 +167,71 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 		_setnameStrings[value] = strBuffer;
 	}
 }
+bool DataManager::LoadServerList(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadServerConfLine(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	return true;
+}
+void DataManager::ReadServerConfLine(const char* linebuf) {
+	if(strchr(linebuf, '|') == nullptr)
+		return;
+	if (_serverStrings.empty())
+		_serverStrings.emplace_back(L"清空", L"");
+	char* buffer = const_cast<char*>(linebuf);
+	buffer[strcspn(buffer, "\n")] = '\0';
+	char *separator = strchr(buffer, '|');
+	if (separator != NULL) {
+		*separator = '\0';
+		wchar_t wname[256];
+		wchar_t wip[256];
+		if (mbstowcs(wname, buffer, 256) != (size_t)-1 && mbstowcs(wip, separator + 1, 256) != (size_t)-1) {
+			wchar_t* name = new wchar_t[256];
+			wchar_t* ip = new wchar_t[256];
+			wcscpy(name, wname);
+			wcscpy(ip, wip);
+			auto it = std::find_if(_serverStrings.begin(), _serverStrings.end(),
+				[name](const auto& pair) { return wcscmp(pair.first, name) == 0; }
+			);
+
+			if (it != _serverStrings.end())
+				it->second = ip;
+			else
+				_serverStrings.emplace_back(name, ip);
+		}
+	}
+}
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	std::snprintf(errmsg, sizeof errmsg, "%s", sqlite3_errmsg(pDB));
 	if(pStmt)
@@ -519,5 +584,4 @@ bool DataManager::deck_sort_name(code_pointer p1, code_pointer p2) {
 		return res < 0;
 	return p1->first < p2->first;
 }
-
 }

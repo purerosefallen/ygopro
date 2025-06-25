@@ -49,6 +49,10 @@ public:
 	bool LoadStrings(const char* file);
 	bool LoadStrings(irr::io::IReadFile* reader);
 	void ReadStringConfLine(const char* linebuf);
+	bool LoadServerList(const char* file);
+	bool LoadServerList(const wchar_t* file);
+	bool LoadServerList(irr::io::IReadFile* reader);
+	void ReadServerConfLine(const char* linebuf);
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);
 
 	code_pointer GetCodePointer(unsigned int code) const;
@@ -79,6 +83,7 @@ public:
 	std::unordered_map<unsigned int, std::wstring> _victoryStrings;
 	std::unordered_map<unsigned int, std::wstring> _setnameStrings;
 	std::unordered_map<unsigned int, std::wstring> _sysStrings;
+	std::vector<std::pair<const wchar_t*, const wchar_t*>> _serverStrings;
 	char errmsg[512]{};
 
 	static unsigned char scriptBuffer[0x100000];
