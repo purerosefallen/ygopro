@@ -1262,9 +1262,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				dataManager.LoadServerList(fpath);
 				server_list_changed = true;
 			} else {
-				char upath[1024];
-				BufferIO::EncodeUTF8(fpath, upath);
-				dataManager.LoadStrings(upath);
+				dataManager.LoadStrings(fpath);
 			}
 			return;
 		}
@@ -1543,12 +1541,14 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.use_d3d = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "use_image_scale")) {
 			gameConf.use_image_scale = std::strtol(valbuf, nullptr, 10) > 0;
-		} else if(!std::strcmp(strbuf, "pro_version")) {
-			PRO_VERSION = std::strtol(valbuf, nullptr, 10);
 		} else if (!std::strcmp(strbuf, "use_image_scale_multi_thread")) {
 			gameConf.use_image_scale_multi_thread = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if (!std::strcmp(strbuf, "use_image_load_background_thread")) {
 			gameConf.use_image_load_background_thread = std::strtol(valbuf, nullptr, 10) > 0;
+		} else if(!std::strcmp(strbuf, "pro_version")) {
+			PRO_VERSION = std::strtol(valbuf, nullptr, 10);
+		} else if(!std::strcmp(strbuf, "freever")) {
+			gameConf.freever = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "errorlog")) {
 			unsigned int val = std::strtol(valbuf, nullptr, 10);
 			enable_log = val & 0xff;
@@ -1821,6 +1821,7 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "use_image_scale_multi_thread = %d\n", gameConf.use_image_scale_multi_thread ? 1 : 0);
 	std::fprintf(fp, "use_image_load_background_thread = %d\n", gameConf.use_image_load_background_thread ? 1 : 0);
 	std::fprintf(fp, "pro_version = %d\n", PRO_VERSION);
+	std::fprintf(fp, "freever = %d\n", gameConf.freever ? 1 : 0);
 	std::fprintf(fp, "antialias = %d\n", gameConf.antialias);
 	std::fprintf(fp, "errorlog = %u\n", enable_log);
 	BufferIO::CopyWideString(ebNickName->getText(), gameConf.nickname);

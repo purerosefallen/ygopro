@@ -386,7 +386,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 			break;
 		}
 		case ERRMSG_VERERROR: {
-			if (temp_ver) {
+			if (temp_ver || !mainGame->gameConf.freever) {
 				temp_ver = 0;
 				mainGame->btnCreateHost->setEnabled(true);
 				mainGame->btnJoinHost->setEnabled(true);
