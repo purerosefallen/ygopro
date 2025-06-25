@@ -243,6 +243,68 @@ void DataManager::ReadServerConfLine(const char* linebuf) {
 		}
 	}
 }
+bool DataManager::LoadINI(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadINI(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadINI(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadINI(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadINI(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadINI(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	return true;
+}
+void DataManager::ReadINI(const char* linebuf) {
+	iniPort = GetINIValue(linebuf, "ServerPort = ");
+	iniHost = GetINIValue(linebuf, "ServerHost = ");
+	iniName = GetINIValue(linebuf, "ServerName = ");
+	if (iniName != "" && iniHost != "") {
+		std::string combined = std::string(iniName) + '|' + iniHost ;
+		if (iniPort != "")
+			combined += ':' + iniPort;
+		const char* result = combined.c_str();
+		ReadServerConfLine(result);
+	}
+}
+const char* GetINIValue(const char* line, const char* key) {
+	if (!line || !key) return "";
+	const char* keyPos = strstr(line, key);
+	if (!keyPos) return "";
+	const char* valStart = keyPos + strlen(key);
+	while (*valStart == ' ')
+		valStart++;
+	const char* valEnd = valStart;
+	while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
+		valEnd++;
+
+	return std::string(valStart, valEnd).c_str();
+}
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	std::snprintf(errmsg, sizeof errmsg, "%s", sqlite3_errmsg(pDB));
 	if(pStmt)
