@@ -327,6 +327,8 @@ void DataManager::InsertServerList() {
 		std::wstring ip = iniHost;
 		std::wstring name = iniName;
 		if (iniPort != L"") {
+			ip += L":";
+			ip += iniPort;
 		}
 		auto it = std::find_if(_serverStrings.begin(), _serverStrings.end(),
 			[name](const auto& pair) { return pair.first == name; }
