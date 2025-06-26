@@ -1528,7 +1528,7 @@ void Game::RefreshBot() {
 void Game::RefreshServerList() {
 	lstServerList->clear();
 	for (const auto& pair : dataManager._serverStrings) {
-		const wchar_t* key = pair.first;
+		const wchar_t* key = pair.first.c_str();
 		lstServerList->addItem(key);
 	}
 }

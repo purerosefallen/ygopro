@@ -492,16 +492,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_SERVER_SELECTED: {
 				int sel = mainGame->lstServerList->getSelected();
-				if (sel == -1)
-					wcscpy(mainGame->gameConf.lasthost, L"");
-				else {
-					const wchar_t* key = mainGame->lstServerList->getListItem(sel);
-					auto it = std::find_if(dataManager._serverStrings.begin(),
-						dataManager._serverStrings.end(),
-						[key](const auto& pair) { return wcscmp(pair.first, key) == 0; }
-					);
-					wcscpy(mainGame->gameConf.lasthost, it == dataManager._serverStrings.end() ? L"" : it->second);
-				}
+				wcscpy(mainGame->gameConf.lasthost, sel == -1 ? L"" : dataManager._serverStrings[sel].second.c_str());
 				wchar_t buf[256];
 				myswprintf(buf, L"%s", mainGame->gameConf.lasthost);
 				mainGame->ebJoinHost->setText(buf);

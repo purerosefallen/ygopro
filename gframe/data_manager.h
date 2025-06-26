@@ -58,7 +58,7 @@ public:
 	bool LoadINI(const wchar_t* file);
 	bool LoadINI(irr::io::IReadFile* reader);
 	void ReadINI(const char* linebuf);
-	const wchar_t* GetINIValue(const char* line, const char* key);
+	std::wstring GetINIValue(const char* line, const char* key);
 	void InsertServerList();
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);
 
@@ -90,7 +90,7 @@ public:
 	std::unordered_map<unsigned int, std::wstring> _victoryStrings;
 	std::unordered_map<unsigned int, std::wstring> _setnameStrings;
 	std::unordered_map<unsigned int, std::wstring> _sysStrings;
-	std::vector<std::pair<const wchar_t*, const wchar_t*>> _serverStrings;
+	std::vector<std::pair<std::wstring, std::wstring>> _serverStrings;
 	char errmsg[512]{};
 
 	static unsigned char scriptBuffer[0x100000];
@@ -115,9 +115,9 @@ private:
 	std::unordered_map<unsigned int, CardDataC> _datas;
 	std::unordered_map<unsigned int, CardString> _strings;
 	std::unordered_map<unsigned int, std::vector<uint16_t>> extra_setcode;
-	const wchar_t* iniName;
-	const wchar_t* iniHost;
-	const wchar_t* iniPort;
+	std::wstring iniName;
+	std::wstring iniHost;
+	std::wstring iniPort;
 };
 
 extern DataManager dataManager;
