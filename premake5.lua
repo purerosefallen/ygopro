@@ -29,12 +29,8 @@ IRRKLANG_PRO_BUILD_IKPMP3 = false
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
-<<<<<<< HEAD
 SERVER_PRO3_SUPPORT = false
-SERVER_TAG_SURRENDER_CONFIRM = false
 USE_IRRKLANG = false
-=======
->>>>>>> 398bb2bd44567c62089ea2ebba9b1effce34da3b
 
 -- Read settings from command line or environment variables
 
@@ -100,26 +96,18 @@ newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile f
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
-<<<<<<< HEAD
 newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
-newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
-=======
->>>>>>> 398bb2bd44567c62089ea2ebba9b1effce34da3b
 
 boolOptions = {
     "compat-mycard",
     "no-lua-safe",
-<<<<<<< HEAD
     "message-debug",
     "no-side-check",
     "enable-debug-func",
     "log-lua-memory-size",
     "log-in-chat",
-=======
-    "no-side-check",
     "server-tag-surrender-confirm",
     "server-receive-ready",
->>>>>>> 398bb2bd44567c62089ea2ebba9b1effce34da3b
 }
 
 for _, boolOption in ipairs(boolOptions) do
