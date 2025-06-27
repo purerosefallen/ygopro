@@ -609,7 +609,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case LISTBOX_SERVER_LIST: {
 				int sel = mainGame->lstServerList->getSelected();
 				auto target = sel == -1 ? L"" : dataManager._serverStrings[sel].second.c_str();
-				wcscpy(mainGame->gameConf.lasthost, target);
+				BufferIO::CopyWideString(target, mainGame->gameConf.lasthost);
 				mainGame->ebJoinHost->setText(target);
 				break;
 			}
