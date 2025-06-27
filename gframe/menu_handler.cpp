@@ -91,6 +91,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_JOIN_CANCEL: {
 				mainGame->HideElement(mainGame->wLanWindow);
+				mainGame->HideElement(mainGame->wServerList);
 				mainGame->ShowElement(mainGame->wMainMenu);
 				if(exit_on_return)
 					mainGame->device->closeDevice();
@@ -104,6 +105,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnHostConfirm->setEnabled(true);
 				mainGame->btnHostCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wLanWindow);
+				mainGame->HideElement(mainGame->wServerList);
 				mainGame->ShowElement(mainGame->wCreateHost);
 				break;
 			}
@@ -484,6 +486,15 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				prev_sel = -1;
 				break;
 			}
+			case BUTTON_SERVER_LIST: {
+				mainGame->ShowElement(mainGame->wServerList);
+				mainGame->PopupElement(mainGame->wServerList);
+				break;
+			}
+			case BUTTON_SERVER_RETURN: {
+				mainGame->HideElement(mainGame->wServerList);
+				break;
+			}
 			}
 			break;
 		}
@@ -593,6 +604,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->SetStaticText(mainGame->stBotInfo, 200, mainGame->guiFont, mainGame->botInfo[sel].desc);
 				mainGame->cbBotDeckCategory->setVisible(mainGame->botInfo[sel].select_deckfile);
 				mainGame->cbBotDeck->setVisible(mainGame->botInfo[sel].select_deckfile);
+				break;
+			}
+			case LISTBOX_SERVER_LIST: {
+				int sel = mainGame->lstServerList->getSelected();
+				auto target = sel == -1 ? L"" : dataManager._serverStrings[sel].second.c_str();
+				BufferIO::CopyWideString(target, mainGame->gameConf.lasthost);
+				mainGame->ebJoinHost->setText(target);
 				break;
 			}
 			}

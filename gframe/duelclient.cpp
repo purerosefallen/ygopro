@@ -386,7 +386,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 			break;
 		}
 		case ERRMSG_VERERROR: {
-			if (temp_ver) {
+			if (temp_ver || !mainGame->gameConf.freever) {
 				temp_ver = 0;
 				mainGame->btnCreateHost->setEnabled(true);
 				mainGame->btnJoinHost->setEnabled(true);
@@ -622,6 +622,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 		mainGame->cbDeckSelect->setEnabled(true);
 		mainGame->HideElement(mainGame->wCreateHost);
 		mainGame->HideElement(mainGame->wLanWindow);
+		mainGame->HideElement(mainGame->wServerList);
 		mainGame->HideElement(mainGame->wSinglePlay);
 		mainGame->ShowElement(mainGame->wHostPrepare);
 		mainGame->ResizeChatInputWindow();

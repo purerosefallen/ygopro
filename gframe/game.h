@@ -65,6 +65,7 @@ struct Config {
 #else
 	bool use_image_load_background_thread{ true };
 #endif
+	bool freever{ true };
 	unsigned short antialias{ 0 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
@@ -218,6 +219,7 @@ public:
 	void RefreshBot();
 	void RefreshLocales();
 	void RefreshLFList();
+	void RefreshServerList();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
@@ -711,6 +713,11 @@ public:
 	irr::gui::IGUIButton* btnBigCardZoomIn;
 	irr::gui::IGUIButton* btnBigCardZoomOut;
 	irr::gui::IGUIButton* btnBigCardClose;
+	//server list
+	irr::gui::IGUIButton* btnServerList;
+	irr::gui::IGUIWindow* wServerList;
+	irr::gui::IGUIListBox* lstServerList;
+	irr::gui::IGUIButton* btnServerReturn;
 #endif //YGOPRO_SERVER_MODE
 };
 
@@ -952,6 +959,10 @@ extern uint32_t duel_flags;
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
 #define BUTTON_DECK_CODE_CANCEL		391
+
+#define BUTTON_SERVER_LIST			392
+#define LISTBOX_SERVER_LIST			393
+#define BUTTON_SERVER_RETURN		394
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1

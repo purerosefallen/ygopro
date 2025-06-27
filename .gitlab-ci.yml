@@ -293,10 +293,137 @@ exec_macos:
     - exec_macos_x64_pro3
     - exec_macos_arm64_pro3
   script:
-    - mkdir -p dist/macos
-    - lipo -create -output dist/macos/ygopro dist/macos-x64/ygopro dist/macos-arm64/ygopro
-    - lipo -create -output dist/macos/libygoserver.dylib dist/macos-x64/libygoserver.dylib dist/macos-arm64/libygoserver.dylib
-    - rm -rf dist/macos-x64 dist/macos-arm64
+    - mkdir -p ygopro.app/Contents/MacOS ygopro.app/Contents/Frameworks;
+    - lipo -create -output ygopro.app/Contents/MacOS/ygopro $(ls -1 ygopro-platforms/ygopro-platform-*);
+    - mkdir ygopro.app/Contents/Resources;
+    - mv resource/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
+    - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
+
+  artifacts:
+    paths:
+      - ygopro.app
+
+#exec_macos_sign:
+#  stage: sign
+#  tags:
+#    - macos
+#  dependencies:
+#    - exec_macos
+#  script: ./.ci/sign-macos.sh
+#  artifacts:
+#    paths:
+#      - ygopro.app
+#  only:
+#    - tags
+#    - master
+
+assets:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install tar wget git
+    # starter pack
+    - wget -O - https://code.moenext.com/mycard/ygopro-starter-pack/-/archive/master/ygopro-starter-pack-master.tar.gz | tar zfx -
+    - mv ygopro-starter-pack-master/* .
+    # sound
+    - wget -O - https://code.moenext.com/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
+    - mv ygopro-sounds-master/sound/* sound
+    # fonts
+    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-fonts
+    - mv ygopro-fonts/fonts .
+    # pack
+    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
+    - mv ygopro-card-list/pack .
+    # locales
+    - git clone --depth=1 https://code.moenext.com/nanahira/ygopro-database
+    - mv ygopro-database/locales .
+  artifacts:
+    paths:
+      - deck
+      - single
+      - sound
+      - fonts
+      - pack
+      - locales
+  only:
+    - tags
+    - master
+
+assets_nonwindows:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - apt update; apt -y install tar wget
+    - wget -O - https://cdn02.moecube.com:444/windbot/windbot.tar.gz | tar zfx -
+  artifacts:
+    paths:
+      - bot.conf
+      - windbot
+      - bot
+  only:
+    - tags
+    - master
+
+assets_windows:
+  stage: prepare
+  tags:
+    - linux
+  script:
+    - wget https://cdn02.moecube.com:444/windbot/WindBot.7z
+    - 7z x -y WindBot.7z
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync s3://mycard/koishipro/contents/update-koishipro/ ./update-koishipro
+    - rm -rf update-koishipro/.git || true
+  artifacts:
+    paths:
+      - bot.conf
+      - WindBot
+      - Bot.exe
+      - update-koishipro
+  only:
+    - tags
+    - master
+
+._locale_zh-CN:
+  variables:
+    TARGET_LOCALE: zh-CN
+
+._locale_en-US:
+  variables:
+    TARGET_LOCALE: en-US
+
+._assets_locale:
+  stage: build
+  tags:
+    - linux
+  script: ./.ci/assets-locale.sh
+  artifacts:
+    paths:
+      - pics
+      - cards.cdb
+      - strings.conf
+      - bot.conf
+      - servers.conf
+  only:
+    - tags
+    - master
+
+assets_zh-CN:
+  extends: 
+    - ._assets_locale
+    - ._locale_zh-CN
+
+assets_en-US:
+  extends: 
+    - ._assets_locale
+    - ._locale_en-US
+
+._pack:
+  stage: pack
+  tags:
+    - linux
   artifacts:
     paths:
       - dist

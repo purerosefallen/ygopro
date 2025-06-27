@@ -180,6 +180,8 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
+	if(dataManager.LoadServerList(GetLocaleDir("servers.conf"))) {} else
+	dataManager.LoadServerList("servers.conf");
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -291,7 +293,8 @@ bool Game::Initialize() {
 	editbox_list.push_back(ebNickName);
 	lstHostList = env->addListBox(irr::core::rect<irr::s32>(10, 60, 570, 320), wLanWindow, LISTBOX_LAN_HOST, true);
 	lstHostList->setItemHeight(18);
-	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(150, 325, 250, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnServerList = env->addButton(irr::core::rect<irr::s32>(280, 325, 380, 350), wLanWindow, BUTTON_SERVER_LIST, dataManager.GetSysString(1239));
 	env->addStaticText(dataManager.GetSysString(1221), irr::core::rect<irr::s32>(10, 360, 220, 380), false, false, wLanWindow);
 	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -415,6 +418,15 @@ bool Game::Initialize() {
 	btnHostPrepNotReady->setVisible(false);
 	btnHostPrepStart = env->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
 	btnHostPrepCancel = env->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
+	//server list
+	wServerList = env->addWindow(irr::core::rect<irr::s32>(25, 80, 325, 400), false, dataManager.GetSysString(1239));
+	wServerList->getCloseButton()->setVisible(false);
+	wServerList->setVisible(false);
+	wServerList->setDraggable(true);
+	lstServerList = env->addListBox(irr::core::rect<irr::s32>(10, 20, 290, 270), wServerList, LISTBOX_SERVER_LIST, true);
+	lstServerList->setItemHeight(18);
+	RefreshServerList();
+	btnServerReturn = env->addButton(irr::core::rect<irr::s32>(100, 280, 200, 310), wServerList, BUTTON_SERVER_RETURN, dataManager.GetSysString(1210));
 	//img
 	wCardImg = env->addStaticText(L"", irr::core::rect<irr::s32>(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0xc0c0c0c0);
@@ -1290,6 +1302,7 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansions(const wchar_t* expansions_path) {
 	bool lflist_changed = false;
+	bool server_list_changed = false;
 	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
 		if (isdir)
 			return;
@@ -1303,15 +1316,25 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			if(!std::wcscmp(name, L"lflist.conf")) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
+			} else if(!std::wcscmp(name, L"servers.conf")) {
+#ifndef YGOPRO_SERVER_MODE
+				dataManager.LoadServerList(fpath);
+				server_list_changed = true;
+#endif
 			} else {
 #ifndef YGOPRO_SERVER_MODE
-				char upath[1024];
-				BufferIO::EncodeUTF8(fpath, upath);
-				dataManager.LoadStrings(upath);
+				dataManager.LoadStrings(fpath);
 #endif
 			}
 			return;
 		}
+#ifndef YGOPRO_SERVER_MODE
+		if (!std::wcscmp(name, L"corres_srv.ini")) {
+			dataManager.LoadCorresSrvIni(fpath);
+			server_list_changed = true;
+			return;
+		}
+#endif
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
@@ -1353,6 +1376,11 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
+				} else if(!std::wcscmp(fname, L"servers.conf")) {
+#ifndef YGOPRO_SERVER_MODE
+					dataManager.LoadServerList(reader);
+					server_list_changed = true;
+#endif
 				} else {
 #ifndef YGOPRO_SERVER_MODE
 					dataManager.LoadStrings(reader);
@@ -1361,6 +1389,10 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				continue;
 			}
 #ifndef YGOPRO_SERVER_MODE
+			if (!std::wcscmp(fname, L"corres_srv.ini")) {
+					dataManager.LoadCorresSrvIni(createReader());
+					server_list_changed = true;
+			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
@@ -1372,6 +1404,8 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 #ifndef YGOPRO_SERVER_MODE
 	if(lflist_changed)
 		RefreshLFList();
+	if(server_list_changed)
+		RefreshServerList();
 #endif
 }
 void Game::LoadExpansionsAll() {
@@ -1589,6 +1623,13 @@ void Game::RefreshBot() {
 		RefreshCategoryDeck(cbBotDeckCategory, cbBotDeck);
 	}
 }
+void Game::RefreshServerList() {
+	lstServerList->clear();
+	for (const auto& pair : dataManager._serverStrings) {
+		const wchar_t* key = pair.first.c_str();
+		lstServerList->addItem(key);
+	}
+}
 bool Game::LoadConfigFromFile(const char* file) {
 	FILE* fp = myfopen(file, "r");
 	if(!fp){
@@ -1606,12 +1647,14 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.use_d3d = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "use_image_scale")) {
 			gameConf.use_image_scale = std::strtol(valbuf, nullptr, 10) > 0;
-		} else if(!std::strcmp(strbuf, "pro_version")) {
-			PRO_VERSION = std::strtol(valbuf, nullptr, 10);
 		} else if (!std::strcmp(strbuf, "use_image_scale_multi_thread")) {
 			gameConf.use_image_scale_multi_thread = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if (!std::strcmp(strbuf, "use_image_load_background_thread")) {
 			gameConf.use_image_load_background_thread = std::strtol(valbuf, nullptr, 10) > 0;
+		} else if(!std::strcmp(strbuf, "pro_version")) {
+			PRO_VERSION = std::strtol(valbuf, nullptr, 10);
+		} else if(!std::strcmp(strbuf, "freever")) {
+			gameConf.freever = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "errorlog")) {
 			unsigned int val = std::strtol(valbuf, nullptr, 10);
 			enable_log = val & 0xff;
@@ -1884,6 +1927,7 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "use_image_scale_multi_thread = %d\n", gameConf.use_image_scale_multi_thread ? 1 : 0);
 	std::fprintf(fp, "use_image_load_background_thread = %d\n", gameConf.use_image_load_background_thread ? 1 : 0);
 	std::fprintf(fp, "pro_version = %d\n", PRO_VERSION);
+	std::fprintf(fp, "freever = %d\n", gameConf.freever ? 1 : 0);
 	std::fprintf(fp, "antialias = %d\n", gameConf.antialias);
 	std::fprintf(fp, "errorlog = %u\n", enable_log);
 	BufferIO::CopyWideString(ebNickName->getText(), gameConf.nickname);
@@ -2286,6 +2330,7 @@ void Game::CloseDuelWindow() {
 	lstLog->clear();
 	logParam.clear();
 	lstHostList->clear();
+	lstServerList->clear();
 	DuelClient::hosts.clear();
 	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
