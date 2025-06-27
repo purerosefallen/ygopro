@@ -124,7 +124,8 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	dataManager.LoadServerList(GetLocaleDir("servers.conf"));
+	if(dataManager.LoadServerList(GetLocaleDir("servers.conf"))) {} else
+	dataManager.LoadServerList("servers.conf");
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
