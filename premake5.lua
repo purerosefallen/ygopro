@@ -29,6 +29,7 @@ IRRKLANG_PRO_BUILD_IKPMP3 = false
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
+SERVER_TAG_SURRENDER_CONFIRM = false
 SERVER_PRO3_SUPPORT = false
 USE_IRRKLANG = false
 
@@ -97,6 +98,7 @@ newoption { trigger = "server-mode", category = "YGOPro - server", description =
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
     "compat-mycard",
@@ -106,8 +108,6 @@ boolOptions = {
     "enable-debug-func",
     "log-lua-memory-size",
     "log-in-chat",
-    "server-tag-surrender-confirm",
-    "server-receive-ready",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -168,6 +168,9 @@ end
 if GetParam("server-pro3-support") then
     SERVER_PRO3_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
+if GetParam("server-tag-surrender-confirm") then
     SERVER_TAG_SURRENDER_CONFIRM = true
 end
 
