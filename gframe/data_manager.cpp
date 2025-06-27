@@ -180,7 +180,7 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 }
 bool DataManager::LoadServerList(const char* file) {
 	if (_serverStrings.empty())
-		_serverStrings.emplace_back(L"清空", L"");
+		_serverStrings.emplace_back(GetSysString(1304), L"");
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
 		return false;
@@ -193,7 +193,7 @@ bool DataManager::LoadServerList(const char* file) {
 }
 bool DataManager::LoadServerList(const wchar_t* file) {
 	if (_serverStrings.empty())
-		_serverStrings.emplace_back(L"清空", L"");
+		_serverStrings.emplace_back(GetSysString(1304), L"");
 	FILE* fp = mywfopen(file, "r");
 	if(!fp)
 		return false;
@@ -206,7 +206,7 @@ bool DataManager::LoadServerList(const wchar_t* file) {
 }
 bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
 	if (_serverStrings.empty())
-		_serverStrings.emplace_back(L"清空", L"");
+		_serverStrings.emplace_back(GetSysString(1304), L"");
 	char ch{};
 	std::string linebuf;
 	while (reader->read(&ch, 1)) {
