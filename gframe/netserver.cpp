@@ -424,7 +424,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		duel_mode->ToObserver(dp);
 		break;
 	}
-#ifdef YGOPRO_SERVER_MODE
+#if defined(YGOPRO_SERVER_MODE) && !defined(YGOPRO_SERVER_RECEIVE_READY)
 	case CTOS_HS_NOTREADY: {
 		if (!duel_mode || duel_mode->pduel)
 			return;

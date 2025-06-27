@@ -404,7 +404,7 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	else if (len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
 		valid = false;
 	if (!valid) {
-#ifdef YGOPRO_SERVER_MODE
+#if defined(YGOPRO_SERVER_MODE) && !defined(YGOPRO_SERVER_RECEIVE_READY)
 		if(duel_count == 0) {
 			STOC_HS_PlayerChange scpc;
 			scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
@@ -419,7 +419,7 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 	}
 	if(duel_count == 0) {
 		deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
-#ifdef YGOPRO_SERVER_MODE
+#if defined(YGOPRO_SERVER_MODE) && !defined(YGOPRO_SERVER_RECEIVE_READY)
 		PlayerReady(dp, true);
 #endif
 	} else {
