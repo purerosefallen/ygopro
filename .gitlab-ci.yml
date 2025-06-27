@@ -313,6 +313,7 @@ assets_windows:
       - cards.cdb
       - strings.conf
       - bot.conf
+      - servers.conf
   only:
     - tags
     - master
