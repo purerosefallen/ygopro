@@ -668,7 +668,7 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
 		return;
 	uint32_t player = dp->type;
-#if !defined(YGOPRO_SERVER_MODE) || defined(YGOPRO_SERVER_TAG_SURRENDER_CONFIRM)
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_TAG_SURRENDER_CONFIRM)
 	if(surrender[player])
 		return;
 	static const uint32_t teammatemap[] = { 1, 0, 3, 2 };
