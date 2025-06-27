@@ -437,10 +437,11 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		duel_mode->ToObserver(dp);
 		break;
 	}
+	case CTOS_HS_READY:
 	case CTOS_HS_NOTREADY: {
 		if (!duel_mode || duel_mode->pduel)
 			return;
-		duel_mode->PlayerReady(dp, false);
+		duel_mode->PlayerReady(dp, (CTOS_HS_NOTREADY - pktType) != 0);
 		break;
 	}
 	case CTOS_HS_KICK: {

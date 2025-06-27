@@ -394,9 +394,6 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 #endif
 		valid = false;
 	if (!valid) {
-		STOC_HS_PlayerChange scpc;
-		scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
-		NetServer::SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 		STOC_ErrorMsg scem;
 		scem.msg = ERRMSG_DECKERROR;
 		scem.code = 0;
@@ -404,7 +401,6 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		return;
 	}
 	deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
-	PlayerReady(dp, true);
 }
 void TagDuel::StartDuel(DuelPlayer* dp) {
 	if(dp != host_player)
