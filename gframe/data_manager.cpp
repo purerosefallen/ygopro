@@ -179,8 +179,6 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 	}
 }
 bool DataManager::LoadServerList(const char* file) {
-	if (_serverStrings.empty())
-		_serverStrings.emplace_back(GetSysString(1304), L"");
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
 		return false;
@@ -192,8 +190,6 @@ bool DataManager::LoadServerList(const char* file) {
 	return true;
 }
 bool DataManager::LoadServerList(const wchar_t* file) {
-	if (_serverStrings.empty())
-		_serverStrings.emplace_back(GetSysString(1304), L"");
 	FILE* fp = mywfopen(file, "r");
 	if(!fp)
 		return false;
@@ -205,8 +201,6 @@ bool DataManager::LoadServerList(const wchar_t* file) {
 	return true;
 }
 bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
-	if (_serverStrings.empty())
-		_serverStrings.emplace_back(GetSysString(1304), L"");
 	char ch{};
 	std::string linebuf;
 	while (reader->read(&ch, 1)) {
@@ -222,52 +216,59 @@ bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
 	return true;
 }
 void DataManager::ReadServerConfLine(const char* linebuf) {
-	char* buffer = const_cast<char*>(linebuf);
-	buffer[strcspn(buffer, "\n")] = '\0';
-	char* separator = strchr(buffer, '|');
-	if (separator != nullptr) {
-		*separator = '\0';
-		std::wstring name, ip;
-		wchar_t wname[256], wip[256];
-		if (mbstowcs(wname, buffer, 256) != (size_t)-1 && mbstowcs(wip, separator + 1, 256) != (size_t)-1) {
-			ip = wip;
-			name = wname;
-		}
-		auto it = std::find_if(_serverStrings.begin(), _serverStrings.end(),
-			[name](const auto& pair) { return pair.first == name; }
-		);
+	char buffer[1024];
+	std::strncpy(buffer, linebuf, sizeof(buffer) - 1);
+	buffer[sizeof(buffer) - 1] = '\0';
 
-		if (it != _serverStrings.end())
-			it->second = ip;
-		else
-			_serverStrings.emplace_back(name, ip);
+	buffer[strcspn(buffer, "\n")] = '\0';
+
+	char* sep1 = std::strchr(buffer, '|');
+	if (sep1 != nullptr) {
+		*sep1 = '\0';
+		char* addrPart = sep1 + 1;
+
+
+		wchar_t wname[256], wip[512];
+
+		// read the server name
+		BufferIO::DecodeUTF8(buffer, wname);
+	
+		// replace the first '|' with ':'
+		char* sep2 = std::strchr(addrPart, '|');
+		if (sep2) {
+			*sep2 = ':';
+		}
+
+		BufferIO::DecodeUTF8(addrPart, wip);
+
+		_serverStrings.emplace_back(wname, wip);
 	}
 }
-bool DataManager::LoadINI(const char* file) {
+bool DataManager::LoadCorresSrvIni(const char* file) {
 	FILE* fp = myfopen(file, "r");
 	if(!fp)
 		return false;
 	char linebuf[TEXT_LINE_SIZE]{};
 	while(std::fgets(linebuf, sizeof linebuf, fp)) {
-		ReadINI(linebuf);
+		ReadCorresSrvIniLine(linebuf);
 	}
 	std::fclose(fp);
 	InsertServerList();
 	return true;
 }
-bool DataManager::LoadINI(const wchar_t* file) {
+bool DataManager::LoadCorresSrvIni(const wchar_t* file) {
 	FILE* fp = mywfopen(file, "r");
 	if(!fp)
 		return false;
 	char linebuf[TEXT_LINE_SIZE]{};
 	while(std::fgets(linebuf, sizeof linebuf, fp)) {
-		ReadINI(linebuf);
+		ReadCorresSrvIniLine(linebuf);
 	}
 	std::fclose(fp);
 	InsertServerList();
 	return true;
 }
-bool DataManager::LoadINI(irr::io::IReadFile* reader) {
+bool DataManager::LoadCorresSrvIni(irr::io::IReadFile* reader) {
 	char ch{};
 	std::string linebuf;
 	while (reader->read(&ch, 1)) {
@@ -275,7 +276,7 @@ bool DataManager::LoadINI(irr::io::IReadFile* reader) {
 			break;
 		linebuf.push_back(ch);
 		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
-			ReadINI(linebuf.data());
+			ReadCorresSrvIniLine(linebuf.data());
 			linebuf.clear();
 		}
 	}
@@ -283,7 +284,7 @@ bool DataManager::LoadINI(irr::io::IReadFile* reader) {
 	InsertServerList();
 	return true;
 }
-void DataManager::ReadINI(const char* linebuf) {
+void DataManager::ReadCorresSrvIniLine(const char* linebuf) {
 	std::wstring name = GetINIValue(linebuf, "ServerName = ");
 	std::wstring host = GetINIValue(linebuf, "ServerHost = ");
 	std::wstring port = GetINIValue(linebuf, "ServerPort = ");
@@ -295,48 +296,36 @@ void DataManager::ReadINI(const char* linebuf) {
 		iniPort = port;
 }
 std::wstring DataManager::GetINIValue(const char* line, const char* key) {
-    if (!line || !key) {
-        return L"";
-    }
-    const char* keyPos = strstr(line, key);
-    if (!keyPos) {
-        return L"";
-    }
-    const char* valStart = keyPos + strlen(key);
-    while (*valStart == ' ')
-        valStart++;
-    const char* valEnd = valStart;
-    while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
-        valEnd++;
-    if (valStart == valEnd)
-        return L"";
-    std::string narrowStr(valStart, valEnd);
-    if (narrowStr.empty())
-        return L"";
-    size_t requiredSize = mbstowcs(nullptr, narrowStr.c_str(), 0);
-    if (requiredSize == (size_t)-1)
-        return L"";
-
-    std::wstring wideStr(requiredSize + 1, L'\0');
-    mbstowcs(&wideStr[0], narrowStr.c_str(), requiredSize + 1);
-    wideStr.resize(requiredSize);
-    return wideStr;
+	if (!line || !key) {
+		return L"";
+	}
+	const char* keyPos = strstr(line, key);
+	if (!keyPos) {
+		return L"";
+	}
+	const char* valStart = keyPos + strlen(key);
+	while (*valStart == ' ')
+		valStart++;
+	const char* valEnd = valStart;
+	while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
+		valEnd++;
+	if (valStart == valEnd)
+		return L"";
+	std::string narrowStr(valStart, valEnd);
+	if (narrowStr.empty())
+		return L"";
+	wchar_t wbuf[1024];
+	BufferIO::DecodeUTF8(narrowStr.c_str(), wbuf);
+	return wbuf;
 }
 void DataManager::InsertServerList() {
 	if (iniName != L"" && iniHost != L"") {
 		std::wstring ip = iniHost;
-		std::wstring name = iniName;
 		if (iniPort != L"") {
 			ip += L":";
 			ip += iniPort;
 		}
-		auto it = std::find_if(_serverStrings.begin(), _serverStrings.end(),
-			[name](const auto& pair) { return pair.first == name; }
-		);
-		if (it != _serverStrings.end())
-			it->second = ip;
-		else
-			_serverStrings.emplace_back(name, ip);
+		_serverStrings.emplace_back(iniName, ip);
 	}
 	iniName.clear();
 	iniHost.clear();

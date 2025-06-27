@@ -124,7 +124,7 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	dataManager.LoadServerList(GetLocaleDir("server.conf"));
+	dataManager.LoadServerList(GetLocaleDir("servers.conf"));
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -236,8 +236,8 @@ bool Game::Initialize() {
 	editbox_list.push_back(ebNickName);
 	lstHostList = env->addListBox(irr::core::rect<irr::s32>(10, 60, 570, 320), wLanWindow, LISTBOX_LAN_HOST, true);
 	lstHostList->setItemHeight(18);
-	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(170, 325, 270, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
-	btnServerList = env->addButton(irr::core::rect<irr::s32>(310, 325, 410, 350), wLanWindow, BUTTON_SERVER_LIST, dataManager.GetSysString(1239));
+	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(150, 325, 250, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnServerList = env->addButton(irr::core::rect<irr::s32>(280, 325, 380, 350), wLanWindow, BUTTON_SERVER_LIST, dataManager.GetSysString(1239));
 	env->addStaticText(dataManager.GetSysString(1221), irr::core::rect<irr::s32>(10, 360, 220, 380), false, false, wLanWindow);
 	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -369,8 +369,7 @@ bool Game::Initialize() {
 	lstServerList = env->addListBox(irr::core::rect<irr::s32>(10, 20, 290, 270), wServerList, LISTBOX_SERVER_LIST, true);
 	lstServerList->setItemHeight(18);
 	RefreshServerList();
-	btnServerSelected = env->addButton(irr::core::rect<irr::s32>(30, 280, 130, 310), wServerList, BUTTON_SERVER_SELECTED, dataManager.GetSysString(1211));
-	btnServerCancel = env->addButton(irr::core::rect<irr::s32>(170, 280, 270, 310), wServerList, BUTTON_SERVER_CANCEL, dataManager.GetSysString(1212));
+	btnServerReturn = env->addButton(irr::core::rect<irr::s32>(100, 280, 200, 310), wServerList, BUTTON_SERVER_RETURN, dataManager.GetSysString(1210));
 	//img
 	wCardImg = env->addStaticText(L"", irr::core::rect<irr::s32>(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0xc0c0c0c0);
@@ -1258,7 +1257,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			if(!std::wcscmp(name, L"lflist.conf")) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
-			} else if(!std::wcscmp(name, L"server.conf")) {
+			} else if(!std::wcscmp(name, L"servers.conf")) {
 				dataManager.LoadServerList(fpath);
 				server_list_changed = true;
 			} else {
@@ -1266,9 +1265,10 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			}
 			return;
 		}
-		if (IsExtension(name, L".ini")) {
-				dataManager.LoadINI(fpath);
-				server_list_changed = true;
+		if (!std::wcscmp(name, L"corres_srv.ini")) {
+			dataManager.LoadCorresSrvIni(fpath);
+			server_list_changed = true;
+			return;
 		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
@@ -1308,7 +1308,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				if(!std::wcscmp(fname, L"lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
-				} else if(!std::wcscmp(fname, L"server.conf")) {
+				} else if(!std::wcscmp(fname, L"servers.conf")) {
 					dataManager.LoadServerList(reader);
 					server_list_changed = true;
 				} else {
@@ -1316,8 +1316,8 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				}
 				continue;
 			}
-			if (IsExtension(fname, L".ini")) {
-					dataManager.LoadINI(createReader());
+			if (!std::wcscmp(fname, L"corres_srv.ini")) {
+					dataManager.LoadCorresSrvIni(createReader());
 					server_list_changed = true;
 			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {

@@ -698,8 +698,7 @@ public:
 	irr::gui::IGUIButton* btnServerList;
 	irr::gui::IGUIWindow* wServerList;
 	irr::gui::IGUIListBox* lstServerList;
-	irr::gui::IGUIButton* btnServerSelected;
-	irr::gui::IGUIButton* btnServerCancel;
+	irr::gui::IGUIButton* btnServerReturn;
 };
 
 extern Game* mainGame;
@@ -929,8 +928,7 @@ extern Game* mainGame;
 
 #define BUTTON_SERVER_LIST			392
 #define LISTBOX_SERVER_LIST			393
-#define BUTTON_SERVER_SELECTED		394
-#define BUTTON_SERVER_CANCEL		395
+#define BUTTON_SERVER_RETURN		394
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1

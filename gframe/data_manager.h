@@ -54,10 +54,10 @@ public:
 	bool LoadServerList(const wchar_t* file);
 	bool LoadServerList(irr::io::IReadFile* reader);
 	void ReadServerConfLine(const char* linebuf);
-	bool LoadINI(const char* file);
-	bool LoadINI(const wchar_t* file);
-	bool LoadINI(irr::io::IReadFile* reader);
-	void ReadINI(const char* linebuf);
+	bool LoadCorresSrvIni(const char* file);
+	bool LoadCorresSrvIni(const wchar_t* file);
+	bool LoadCorresSrvIni(irr::io::IReadFile* reader);
+	void ReadCorresSrvIniLine(const char* linebuf);
 	std::wstring GetINIValue(const char* line, const char* key);
 	void InsertServerList();
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);

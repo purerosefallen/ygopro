@@ -622,6 +622,7 @@ void DuelClient::HandleSTOCPacketLan(unsigned char* data, int len) {
 		mainGame->cbDeckSelect->setEnabled(true);
 		mainGame->HideElement(mainGame->wCreateHost);
 		mainGame->HideElement(mainGame->wLanWindow);
+		mainGame->HideElement(mainGame->wServerList);
 		mainGame->HideElement(mainGame->wSinglePlay);
 		mainGame->ShowElement(mainGame->wHostPrepare);
 		mainGame->ResizeChatInputWindow();
