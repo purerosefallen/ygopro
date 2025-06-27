@@ -30,7 +30,6 @@ IRRKLANG_PRO_BUILD_IKPMP3 = false
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
-SERVER_TAG_SURRENDER_CONFIRM = false
 
 -- Read settings from command line or environment variables
 
@@ -96,11 +95,12 @@ newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile f
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
-newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
 
 boolOptions = {
     "no-lua-safe",
-    "no-side-check"
+    "no-side-check",
+    "server-tag-surrender-confirm",
+    "server-receive-ready",
 }
 
 for _, boolOption in ipairs(boolOptions) do
@@ -154,9 +154,6 @@ end
 if GetParam("server-pro2-support") then
     SERVER_PRO2_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
-end
-if GetParam("server-tag-surrender-confirm") then
-    SERVER_TAG_SURRENDER_CONFIRM = true
 end
 
 if GetParam("build-lua") then
