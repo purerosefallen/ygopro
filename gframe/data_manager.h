@@ -50,6 +50,16 @@ public:
 	bool LoadStrings(const wchar_t* file);
 	bool LoadStrings(irr::io::IReadFile* reader);
 	void ReadStringConfLine(const char* linebuf);
+	bool LoadServerList(const char* file);
+	bool LoadServerList(const wchar_t* file);
+	bool LoadServerList(irr::io::IReadFile* reader);
+	void ReadServerConfLine(const char* linebuf);
+	bool LoadCorresSrvIni(const char* file);
+	bool LoadCorresSrvIni(const wchar_t* file);
+	bool LoadCorresSrvIni(irr::io::IReadFile* reader);
+	void ReadCorresSrvIniLine(const char* linebuf);
+	std::wstring GetINIValue(const char* line, const char* key);
+	void InsertServerList();
 	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);
 
 	code_pointer GetCodePointer(unsigned int code) const;
@@ -80,6 +90,7 @@ public:
 	std::unordered_map<unsigned int, std::wstring> _victoryStrings;
 	std::unordered_map<unsigned int, std::wstring> _setnameStrings;
 	std::unordered_map<unsigned int, std::wstring> _sysStrings;
+	std::vector<std::pair<std::wstring, std::wstring>> _serverStrings;
 	char errmsg[512]{};
 
 	static unsigned char scriptBuffer[0x100000];
@@ -104,6 +115,9 @@ private:
 	std::unordered_map<unsigned int, CardDataC> _datas;
 	std::unordered_map<unsigned int, CardString> _strings;
 	std::unordered_map<unsigned int, std::vector<uint16_t>> extra_setcode;
+	std::wstring iniName;
+	std::wstring iniHost;
+	std::wstring iniPort;
 };
 
 extern DataManager dataManager;

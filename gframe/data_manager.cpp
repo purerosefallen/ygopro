@@ -178,6 +178,159 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 		_setnameStrings[value] = strBuffer;
 	}
 }
+bool DataManager::LoadServerList(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadServerConfLine(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	return true;
+}
+void DataManager::ReadServerConfLine(const char* linebuf) {
+	char buffer[1024];
+	std::strncpy(buffer, linebuf, sizeof(buffer) - 1);
+	buffer[sizeof(buffer) - 1] = '\0';
+
+	buffer[strcspn(buffer, "\n")] = '\0';
+
+	char* sep1 = std::strchr(buffer, '|');
+	if (sep1 != nullptr) {
+		*sep1 = '\0';
+		char* addrPart = sep1 + 1;
+
+
+		wchar_t wname[256], wip[512];
+
+		// read the server name
+		BufferIO::DecodeUTF8(buffer, wname);
+	
+		// replace the first '|' with ':'
+		char* sep2 = std::strchr(addrPart, '|');
+		if (sep2) {
+			*sep2 = ':';
+		}
+
+		BufferIO::DecodeUTF8(addrPart, wip);
+
+		_serverStrings.emplace_back(wname, wip);
+	}
+}
+bool DataManager::LoadCorresSrvIni(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadCorresSrvIniLine(linebuf);
+	}
+	std::fclose(fp);
+	InsertServerList();
+	return true;
+}
+bool DataManager::LoadCorresSrvIni(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadCorresSrvIniLine(linebuf);
+	}
+	std::fclose(fp);
+	InsertServerList();
+	return true;
+}
+bool DataManager::LoadCorresSrvIni(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadCorresSrvIniLine(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	InsertServerList();
+	return true;
+}
+void DataManager::ReadCorresSrvIniLine(const char* linebuf) {
+	std::wstring name = GetINIValue(linebuf, "ServerName = ");
+	std::wstring host = GetINIValue(linebuf, "ServerHost = ");
+	std::wstring port = GetINIValue(linebuf, "ServerPort = ");
+	if (name != L"")
+		iniName = name;
+	if (host != L"")
+		iniHost = host;
+	if (port != L"")
+		iniPort = port;
+}
+std::wstring DataManager::GetINIValue(const char* line, const char* key) {
+	if (!line || !key) {
+		return L"";
+	}
+	const char* keyPos = strstr(line, key);
+	if (!keyPos) {
+		return L"";
+	}
+	const char* valStart = keyPos + strlen(key);
+	while (*valStart == ' ')
+		valStart++;
+	const char* valEnd = valStart;
+	while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
+		valEnd++;
+	if (valStart == valEnd)
+		return L"";
+	std::string narrowStr(valStart, valEnd);
+	if (narrowStr.empty())
+		return L"";
+	wchar_t wbuf[1024];
+	BufferIO::DecodeUTF8(narrowStr.c_str(), wbuf);
+	return wbuf;
+}
+void DataManager::InsertServerList() {
+	if (iniName != L"" && iniHost != L"") {
+		std::wstring ip = iniHost;
+		if (iniPort != L"") {
+			ip += L":";
+			ip += iniPort;
+		}
+		_serverStrings.emplace_back(iniName, ip);
+	}
+	iniName.clear();
+	iniHost.clear();
+	iniPort.clear();
+}
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	std::snprintf(errmsg, sizeof errmsg, "%s", sqlite3_errmsg(pDB));
 	if(pStmt)
@@ -530,5 +683,4 @@ bool DataManager::deck_sort_name(code_pointer p1, code_pointer p2) {
 		return res < 0;
 	return p1->first < p2->first;
 }
-
 }
