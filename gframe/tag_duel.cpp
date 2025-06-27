@@ -394,6 +394,11 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 #endif
 		valid = false;
 	if (!valid) {
+#if defined(YGOPRO_SERVER_MODE) && !defined(YGOPRO_SERVER_RECEIVE_READY)
+		STOC_HS_PlayerChange scpc;
+		scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
+		NetServer::SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+#endif
 		STOC_ErrorMsg scem;
 		scem.msg = ERRMSG_DECKERROR;
 		scem.code = 0;
@@ -401,6 +406,9 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		return;
 	}
 	deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
+#if defined(YGOPRO_SERVER_MODE) && !defined(YGOPRO_SERVER_RECEIVE_READY)
+	PlayerReady(dp, true);
+#endif
 }
 void TagDuel::StartDuel(DuelPlayer* dp) {
 	if(dp != host_player)
@@ -728,7 +736,7 @@ void TagDuel::Surrender(DuelPlayer* dp) {
 	if(dp->type > 3 || !pduel)
 		return;
 	uint32_t player = dp->type;
-#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_TAG_SURRENDER_CONFIRM)
+#if !defined(YGOPRO_SERVER_MODE) || defined(YGOPRO_SERVER_TAG_SURRENDER_CONFIRM)
 	if(surrender[player])
 		return;
 	static const uint32_t teammatemap[] = { 1, 0, 3, 2 };
