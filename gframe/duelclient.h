@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <set>
+#include <random>
 #include "network.h"
-#include "../ocgcore/mtrandom.h"
 
 namespace ygo {
 
@@ -65,7 +65,8 @@ private:
 	static unsigned char last_successful_msg[SIZE_NETWORK_BUFFER];
 	static size_t last_successful_msg_length;
 	static wchar_t event_string[256];
-	static mt19937 rnd;
+	static std::mt19937 rnd;
+	static std::uniform_real_distribution<float> real_dist;
 	static bool is_refreshing;
 	static int match_kill;
 	static event* resp_event;
@@ -92,7 +93,7 @@ public:
 	static unsigned int LookupHost(char *host);
 	static bool LookupSRV(char *hostname, HostResult* result);
 	static bool CheckHostnameSplitter(char *hostname, HostResult *result);
-	static HostResult ParseHost(char *hostname, unsigned short port);
+	static HostResult ParseHost(char *hostname);
 	static void SendPacketToServer(unsigned char proto) {
 		auto p = duel_client_write;
 		buffer_write<uint16_t>(p, 1);
@@ -105,8 +106,7 @@ public:
 	template<typename ST>
 	static void SendPacketToServer(unsigned char proto, const ST& st) {
 		auto p = duel_client_write;
-		if (sizeof(ST) > MAX_DATA_SIZE)
-			return;
+		static_assert(sizeof(ST) <= MAX_DATA_SIZE, "Packet size is too large.");
 		buffer_write<uint16_t>(p, (uint16_t)(1 + sizeof(ST)));
 		buffer_write<uint8_t>(p, proto);
 		std::memcpy(p, &st, sizeof(ST));
@@ -128,7 +128,7 @@ public:
 		bufferevent_write(client_bev, duel_client_write, len + 3);
 	}
 
-	static std::vector<HostPacket> hosts;
+	static std::vector<std::wstring> hosts;
 	static std::vector<std::wstring> hosts_srvpro;
 	static bool is_srvpro;
 	static void BeginRefreshHost();

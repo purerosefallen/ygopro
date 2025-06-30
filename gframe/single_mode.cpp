@@ -2,7 +2,7 @@
 #include "duelclient.h"
 #include "game.h"
 #include "data_manager.h"
-#include "../ocgcore/mtrandom.h"
+#include <random>
 #include <thread>
 
 namespace ygo {
@@ -36,12 +36,23 @@ int SingleMode::SinglePlayThread() {
 	mainGame->dInfo.Clear();
 	int opt = 0;
 	std::random_device rd;
-	unsigned int seed = rd();
-	mt19937 rnd((uint_fast32_t)seed);
+	ExtendedReplayHeader rh;
+	rh.base.id = REPLAY_ID_YRP2;
+	rh.base.version = PRO_VERSION;
+	rh.base.flag = REPLAY_UNIFORM | REPLAY_SINGLE_MODE;
+	rh.base.start_time = (uint32_t)std::time(nullptr);
+	for (auto& x : rh.seed_sequence)
+		x = rd();
+	std::seed_seq seed(rh.seed_sequence, rh.seed_sequence + SEED_COUNT);
+	std::mt19937 rnd(seed);
+	uint32_t duel_seed[SEED_COUNT]{};
+	for (auto& x : duel_seed)
+		x = rnd();
 	set_script_reader(DataManager::ScriptReaderEx);
 	set_card_reader(DataManager::CardReader);
 	set_message_handler(SingleMode::MessageHandler);
-	pduel = create_duel(rnd.rand());
+	pduel = create_duel_v2(duel_seed);
+	mainGame->InjectEnvToRegistry(pduel);
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
 	preload_script(pduel, "./script/special.lua");
@@ -82,12 +93,6 @@ int SingleMode::SinglePlayThread() {
 		end_duel(pduel);
 		return 0;
 	}
-	ReplayHeader rh;
-	rh.id = 0x31707279;
-	rh.version = PRO_VERSION;
-	rh.flag = REPLAY_UNIFORM | REPLAY_SINGLE_MODE;
-	rh.seed = seed;
-	rh.start_time = (unsigned int)std::time(nullptr);
 	mainGame->gMutex.lock();
 	mainGame->HideElement(mainGame->wSinglePlay);
 	mainGame->ClearCardInfo();
@@ -311,7 +316,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 		case MSG_SELECT_CHAIN: {
 			player = BufferIO::ReadUInt8(pbuf);
 			count = BufferIO::ReadUInt8(pbuf);
-			pbuf += 10 + count * 13;
+			pbuf += 9 + count * 14;
 			if(!DuelClient::ClientAnalyze(offset, pbuf - offset)) {
 				mainGame->singleSignal.Reset();
 				mainGame->singleSignal.Wait();
@@ -388,6 +393,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 		}
 		case MSG_CONFIRM_CARDS: {
 			player = BufferIO::ReadUInt8(pbuf);
+			pbuf += 1;
 			count = BufferIO::ReadUInt8(pbuf);
 			pbuf += count * 7;
 			DuelClient::ClientAnalyze(offset, pbuf - offset);
@@ -761,7 +767,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_AI_NAME: {
-			char namebuf[128]{};
+			char namebuf[SIZE_AI_NAME]{};
 			wchar_t wname[20]{};
 			int name_len = buffer_read<uint16_t>(pbuf);
 			if (name_len + 1 <= (int)sizeof namebuf) {
@@ -774,8 +780,8 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 			break;
 		}
 		case MSG_SHOW_HINT: {
-			char msgbuf[1024]{};
-			wchar_t msg[1024]{};
+			char msgbuf[SIZE_HINT_MSG]{};
+			wchar_t msg[SIZE_HINT_MSG]{};
 			int msg_len = buffer_read<uint16_t>(pbuf);
 			if (msg_len + 1 <= (int)sizeof msgbuf) {
 				std::memcpy(msgbuf, pbuf, msg_len);
