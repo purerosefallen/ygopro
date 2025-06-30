@@ -2,7 +2,7 @@
 #define SOUNDMANAGER_H
 
 #include "game.h"
-#include "../ocgcore/mtrandom.h"
+#include <random>
 #ifdef YGOPRO_USE_MINIAUDIO
 #include <miniaudio.h>
 #endif
@@ -15,10 +15,10 @@ namespace ygo {
 class SoundManager {
 private:
 	std::vector<std::wstring> BGMList[9];
-	int bgm_scene{};
-	int previous_bgm_scene{};
-	bool bgm_process;
-	mt19937 rnd;
+	int bgm_scene{ -1 };
+	int previous_bgm_scene{ -1 };
+	bool bgm_process { false };
+	std::mt19937 rnd;
 #ifdef YGOPRO_USE_MINIAUDIO
 	ma_engine_config engineConfig;
 #ifdef YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS
