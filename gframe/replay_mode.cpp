@@ -183,9 +183,9 @@ bool ReplayMode::StartDuel() {
 		BufferIO::EncodeUTF8(cur_replay.players[i].c_str(), player_name_buf_u);
 		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_name_%d", i);
 		set_registry_value(pduel, player_key_buf, player_name_buf_u);
-		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_type_%d", i);
-		set_registry_value(pduel, player_key_buf, std::to_string(i).c_str());
 	}
+	set_registry_value(pduel, "player_type_0", "0");
+	set_registry_value(pduel, "player_type_1", "1");
 	mainGame->dInfo.duel_rule = cur_replay.params.duel_flag >> 16;
 	set_player_info(pduel, 0, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
 	set_player_info(pduel, 1, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
