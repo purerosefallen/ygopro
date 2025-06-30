@@ -612,9 +612,9 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 		BufferIO::EncodeUTF8(player_name_buf, player_name_buf_u);
 		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_name_%d", i);
 		set_registry_value(pduel, player_key_buf, player_name_buf_u);
-		std::snprintf(player_key_buf, sizeof(player_key_buf), "player_type_%d", i);
-		set_registry_value(pduel, player_key_buf, std::to_string(players[i]->type).c_str());
 	}
+	set_registry_value(pduel, "player_type_0", swapped ? "1" : "0");
+	set_registry_value(pduel, "player_type_1", swapped ? "0" : "1");
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	preload_script(pduel, "./script/special.lua");

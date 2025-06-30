@@ -53,6 +53,12 @@ int SingleMode::SinglePlayThread() {
 	set_message_handler(SingleMode::MessageHandler);
 	pduel = create_duel_v2(duel_seed);
 	mainGame->InjectEnvToRegistry(pduel);
+	set_registry_value(pduel, "duel_mode", "puzzle");
+	set_registry_value(pduel, "start_lp", std::to_string(start_lp).c_str());
+	set_registry_value(pduel, "start_hand", std::to_string(start_hand).c_str());
+	set_registry_value(pduel, "draw_count", std::to_string(draw_count).c_str());
+	set_registry_value(pduel, "player_type_0", swapped ? "1" : "0");
+	set_registry_value(pduel, "player_type_1", swapped ? "0" : "1");
 	set_player_info(pduel, 0, start_lp, start_hand, draw_count);
 	set_player_info(pduel, 1, start_lp, start_hand, draw_count);
 	preload_script(pduel, "./script/special.lua");
