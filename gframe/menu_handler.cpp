@@ -64,15 +64,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_JOIN_HOST: {
 				bot_mode = false;
 				mainGame->TrimText(mainGame->ebJoinHost);
-				mainGame->TrimText(mainGame->ebJoinPort);
 				char hostname_tag[100];
 				wchar_t pstr[100];
-				wchar_t portstr[10];
 				BufferIO::CopyWideString(mainGame->ebJoinHost->getText(), pstr);
-				BufferIO::CopyWideString(mainGame->ebJoinPort->getText(), portstr);
 				BufferIO::EncodeUTF8(pstr, hostname_tag);
-				auto port = std::wcstol(portstr, nullptr, 10);
-				HostResult remote = DuelClient::ParseHost(hostname_tag, port);
+				HostResult remote = DuelClient::ParseHost(hostname_tag);
 				if(!remote.isValid()) {
 					mainGame->gMutex.lock();
 					soundManager.PlaySoundEffect(SOUND_INFO);
@@ -85,7 +81,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				BufferIO::CopyWideString(pstr, mainGame->gameConf.lasthost);
-				BufferIO::CopyWideString(portstr, mainGame->gameConf.lastport);
 				BufferIO::CopyWideString(mainGame->ebJoinPass->getText(), mainGame->gameConf.roompass);
 				if(DuelClient::StartClient(remote.host, remote.port, false)) {
 					mainGame->btnCreateHost->setEnabled(false);
@@ -96,6 +91,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_JOIN_CANCEL: {
 				mainGame->HideElement(mainGame->wLanWindow);
+				mainGame->HideElement(mainGame->wServerList);
 				mainGame->ShowElement(mainGame->wMainMenu);
 				if(exit_on_return)
 					mainGame->device->closeDevice();
@@ -109,6 +105,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnHostConfirm->setEnabled(true);
 				mainGame->btnHostCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wLanWindow);
+				mainGame->HideElement(mainGame->wServerList);
 				mainGame->ShowElement(mainGame->wCreateHost);
 				break;
 			}
@@ -220,8 +217,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_LOAD_REPLAY: {
 				int start_turn = 1;
 				if(open_file) {
-					ReplayMode::cur_replay.OpenReplay(open_file_name);
 					open_file = false;
+					if (!ReplayMode::cur_replay.OpenReplay(open_file_name)) {
+						if (exit_on_return)
+							mainGame->device->closeDevice();
+						break;
+					}
 				} else {
 					auto selected = mainGame->lstReplayList->getSelected();
 					if(selected == -1)
@@ -295,7 +296,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				myswprintf(replay_path, L"./replay/%ls", replay_filename);
 				if (!replay.OpenReplay(replay_path))
 					break;
-				if (replay.pheader.flag & REPLAY_SINGLE_MODE)
+				if (replay.pheader.base.flag & REPLAY_SINGLE_MODE)
 					break;
 				for (size_t i = 0; i < replay.decks.size(); ++i) {
 					BufferIO::CopyWideString(replay.players[Replay::GetDeckPlayer(i)].c_str(), namebuf[i]);
@@ -489,6 +490,15 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				prev_sel = -1;
 				break;
 			}
+			case BUTTON_SERVER_LIST: {
+				mainGame->ShowElement(mainGame->wServerList);
+				mainGame->PopupElement(mainGame->wServerList);
+				break;
+			}
+			case BUTTON_SERVER_RETURN: {
+				mainGame->HideElement(mainGame->wServerList);
+				break;
+			}
 			}
 			break;
 		}
@@ -502,21 +512,18 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->ebJoinPass->setText(DuelClient::hosts_srvpro[sel].c_str());
 					break;
 				}
-				int addr = DuelClient::hosts[sel].ipaddr;
-				int port = DuelClient::hosts[sel].port;
-				wchar_t buf[20];
-				myswprintf(buf, L"%d.%d.%d.%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff);
-				mainGame->ebJoinHost->setText(buf);
-				myswprintf(buf, L"%d", port);
-				mainGame->ebJoinPort->setText(buf);
+				mainGame->ebJoinHost->setText(DuelClient::hosts[sel].c_str());
 				break;
 			}
 			case LISTBOX_REPLAY_LIST: {
 				int sel = mainGame->lstReplayList->getSelected();
-				if(sel == -1)
+				if(sel < 0)
+					break;
+				auto filename = mainGame->lstReplayList->getListItem(sel);
+				if (!filename)
 					break;
 				wchar_t replay_path[256]{};
-				myswprintf(replay_path, L"./replay/%ls", mainGame->lstReplayList->getListItem(sel));
+				myswprintf(replay_path, L"./replay/%ls", filename);
 				if (!temp_replay.OpenReplay(replay_path)) {
 					mainGame->stReplayInfo->setText(L"Error");
 					break;
@@ -524,20 +531,25 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				wchar_t infobuf[256]{};
 				std::wstring repinfo;
 				time_t curtime;
-				if(temp_replay.pheader.flag & REPLAY_UNIFORM)
-					curtime = temp_replay.pheader.start_time;
-				else
-					curtime = temp_replay.pheader.seed;
+				const auto& rh = temp_replay.pheader.base;
+				if(temp_replay.pheader.base.flag & REPLAY_UNIFORM)
+					curtime = rh.start_time;
+				else{
+					curtime = rh.seed;
+					wchar_t version_info[256]{};
+					myswprintf(version_info, L"version 0x%X\n", rh.version);
+					repinfo.append(version_info);
+				}
 				std::wcsftime(infobuf, sizeof infobuf / sizeof infobuf[0], L"%Y/%m/%d %H:%M:%S\n", std::localtime(&curtime));
 				repinfo.append(infobuf);
-				if (temp_replay.pheader.flag & REPLAY_SINGLE_MODE) {
+				if (rh.flag & REPLAY_SINGLE_MODE) {
 					wchar_t path[256]{};
 					BufferIO::DecodeUTF8(temp_replay.script_name.c_str(), path);
 					repinfo.append(path);
 					repinfo.append(L"\n");
 				}
 				const auto& player_names = temp_replay.players;
-				if(temp_replay.pheader.flag & REPLAY_TAG)
+				if(rh.flag & REPLAY_TAG)
 					myswprintf(infobuf, L"%ls\n%ls\n===VS===\n%ls\n%ls\n", player_names[0].c_str(), player_names[1].c_str(), player_names[2].c_str(), player_names[3].c_str());
 				else
 					myswprintf(infobuf, L"%ls\n===VS===\n%ls\n", player_names[0].c_str(), player_names[1].c_str());
@@ -596,6 +608,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->SetStaticText(mainGame->stBotInfo, 200, mainGame->guiFont, mainGame->botInfo[sel].desc);
 				mainGame->cbBotDeckCategory->setVisible(mainGame->botInfo[sel].select_deckfile);
 				mainGame->cbBotDeck->setVisible(mainGame->botInfo[sel].select_deckfile);
+				break;
+			}
+			case LISTBOX_SERVER_LIST: {
+				int sel = mainGame->lstServerList->getSelected();
+				auto target = sel == -1 ? L"" : dataManager._serverStrings[sel].second.c_str();
+				BufferIO::CopyWideString(target, mainGame->gameConf.lasthost);
+				mainGame->ebJoinHost->setText(target);
 				break;
 			}
 			}

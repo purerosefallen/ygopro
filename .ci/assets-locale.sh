@@ -6,6 +6,7 @@ source .ci/asset-branch
 apt update && apt -y install wget git libarchive-tools sqlite3
 git clone --depth=1 -b "$ASSET_BRANCH_NAME" https://code.moenext.com/mycard/ygopro-database
 cp -rf ./ygopro-database/locales/$TARGET_LOCALE/strings.conf .
+cp -rf ./ygopro-database/locales/$TARGET_LOCALE/servers.conf .
 rm -f cards.cdb
 sqlite3 ./ygopro-database/locales/$TARGET_LOCALE/cards.cdb .dump | sqlite3 cards.cdb
 # ygopro-images
