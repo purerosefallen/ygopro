@@ -45,7 +45,6 @@ end
 else
 project "ygopro"
     kind "WindowedApp"
-    cppdialect "C++14"
     rtti "Off"
     openmp "On"
 
@@ -54,11 +53,16 @@ project "ygopro"
     links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
 end
 
+    if not BUILD_LUA then
+        libdirs { LUA_LIB_DIR }
+    end
+
     if BUILD_EVENT then
         includedirs { "../event/include" }
     else
         includedirs { EVENT_INCLUDE_DIR }
         libdirs { EVENT_LIB_DIR }
+        links { "event_pthreads" }
     end
 
     if BUILD_IRRLICHT then
@@ -82,7 +86,7 @@ end
         libdirs { SQLITE_LIB_DIR }
     end
 
-    if USE_AUDIO then
+    if USE_AUDIO and not SERVER_MODE then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
@@ -110,43 +114,53 @@ end
     end
 
     filter "system:windows"
+        entrypoint "mainCRTStartup"
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
 if SERVER_MODE then
-        links { "ws2_32" }
+        links { "ws2_32", "iphlpapi" }
 else
-        links { "opengl32", "ws2_32", "winmm", "gdi32", "kernel32", "user32", "imm32", "Dnsapi" }
+        links { "ws2_32", "Dnsapi", "iphlpapi" }
 end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
             if IRRKLANG_PRO then
                 defines { "IRRKLANG_STATIC" }
-                filter { "not configurations:Debug" }
+                filter { "system:windows", "not configurations:Debug" }
                     libdirs { IRRKLANG_PRO_RELEASE_LIB_DIR }
-                filter { "configurations:Debug" }
+                filter { "system:windows", "configurations:Debug" }
                     libdirs { IRRKLANG_PRO_DEBUG_LIB_DIR }
                 filter {}
             end
         end
+if not SERVER_MODE then
     filter "not system:windows"
-        links { "event_pthreads", "dl", "pthread", "resolv" }
+        links { "resolv" }
+end
+    filter "not action:vs*"
+        cppdialect "C++14"
+
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
-        links { "z" }
+        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
 end
         if MAC_ARM then
-            buildoptions { "--target=arm64-apple-macos12" }
             linkoptions { "-arch arm64" }
+        end
+        if MAC_INTEL then
+            linkoptions { "-arch x86_64" }
         end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrklang" }
         end
+
     filter "system:linux"
+        links { "dl", "pthread" }
         linkoptions { "-static-libstdc++", "-static-libgcc" }
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }

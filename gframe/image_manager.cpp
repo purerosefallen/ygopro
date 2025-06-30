@@ -1,9 +1,7 @@
 #include "image_manager.h"
 #include "game.h"
 #include "myfilesystem.h"
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 #include <thread>
-#endif
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -29,10 +27,8 @@ bool ImageManager::Initial() {
 	tUnknownFit = nullptr;
 	tUnknownThumb = nullptr;
 	tBigPicture = nullptr;
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 	tLoading = nullptr;
 	tThumbLoadingThreadRunning = false;
-#endif
 	tAct = GetRandomImage(TEXTURE_ACTIVATE);
 	tAttack = GetRandomImage(TEXTURE_ATTACK);
 	if(!tAct)
@@ -141,11 +137,7 @@ void ImageManager::ClearTexture() {
 			driver->removeTexture(tit->second);
 	}
 	for(auto tit = tThumb.begin(); tit != tThumb.end(); ++tit) {
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 		if(tit->second && tit->second != tLoading)
-#else
-		if(tit->second)
-#endif
 			driver->removeTexture(tit->second);
 	}
 	if(tBigPicture != nullptr) {
@@ -155,14 +147,12 @@ void ImageManager::ClearTexture() {
 	tMap[0].clear();
 	tMap[1].clear();
 	tThumb.clear();
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 	tThumbLoadingMutex.lock();
 	tThumbLoading.clear();
 	while(!tThumbLoadingCodes.empty())
 		tThumbLoadingCodes.pop();
 	tThumbLoadingThreadRunning = false;
 	tThumbLoadingMutex.unlock();
-#endif
 	tFields.clear();
 }
 void ImageManager::RemoveTexture(int code) {
@@ -204,10 +194,8 @@ void ImageManager::ResizeTexture() {
 	driver->removeTexture(tUnknown);
 	driver->removeTexture(tUnknownFit);
 	driver->removeTexture(tUnknownThumb);
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 	driver->removeTexture(tLoading);
 	tLoading = GetTextureFromFile("textures/cover.jpg", imgWidthThumb, imgHeightThumb);
-#endif
 	tUnknown = GetTextureFromFile("textures/unknown.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
 	tUnknownFit = GetTextureFromFile("textures/unknown.jpg", imgWidthFit, imgHeightFit);
 	tUnknownThumb = GetTextureFromFile("textures/unknown.jpg", imgWidthThumb, imgHeightThumb);
@@ -236,22 +224,22 @@ void ImageManager::ResizeTexture() {
 }
 // function by Warr1024, from https://github.com/minetest/minetest/issues/2419 , modified
 void imageScaleNNAA(irr::video::IImage *src, irr::video::IImage *dest) {
-	const irr::core::dimension2d<irr::u32> srcDim = src->getDimension();
-	const irr::core::dimension2d<irr::u32> destDim = dest->getDimension();
+	const auto& srcDim = src->getDimension();
+	const auto& destDim = dest->getDimension();
 
 	// Cache scale ratios.
 	const double rx = (double)srcDim.Width / destDim.Width;
 	const double ry = (double)srcDim.Height / destDim.Height;
 
-#pragma omp parallel
+#pragma omp parallel if(mainGame->gameConf.use_image_scale_multi_thread)
 {
 	double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa;
 	irr::video::SColor pxl, npxl;
 
 	// Walk each destination image pixel.
 #pragma omp for schedule(dynamic)
-	for(irr::s32 dy = 0; dy < destDim.Height; dy++) {
-		for(irr::s32 dx = 0; dx < destDim.Width; dx++) {
+	for(irr::s32 dy = 0; dy < (irr::s32)destDim.Height; dy++) {
+		for(irr::s32 dx = 0; dx < (irr::s32)destDim.Width; dx++) {
 			// Calculate floating-point source rectangle bounds.
 			minsx = dx * rx;
 			maxsx = minsx + rx;
@@ -342,11 +330,16 @@ irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
 	auto tit = tMap[fit ? 1 : 0].find(code);
 	if(tit == tMap[fit ? 1 : 0].end()) {
 		char file[256];
-		std::snprintf(file, sizeof file, "expansions/pics/%d.png", code);
-		irr::video::ITexture* img = GetTextureFromFile(file, width, height);
-		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
-			img = GetTextureFromFile(file, width, height);
+		irr::video::ITexture *img = nullptr;
+		for(auto ex : mainGame->GetExpansionsListU()) {
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/%d.png", ex.c_str(), code);
+				img = GetTextureFromFile(file, width, height);
+			}
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+				img = GetTextureFromFile(file, width, height);
+			}
 		}
 		if(img == nullptr) {
 			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.png"), code);
@@ -385,8 +378,12 @@ irr::video::ITexture* ImageManager::GetBigPicture(int code, float zoom) {
 	}
 	irr::video::ITexture* texture;
 	char file[256];
-	std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
-	irr::video::IImage* srcimg = driver->createImageFromFile(file);
+	irr::video::IImage *srcimg = nullptr;
+	for(auto ex : mainGame->GetExpansionsListU())
+		if(srcimg == nullptr) {
+			std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+			srcimg = driver->createImageFromFile(file);
+		}
 	if(srcimg == nullptr) {
 		std::snprintf(file, sizeof file, "pics/%d.jpg", code);
 		srcimg = driver->createImageFromFile(file);
@@ -407,7 +404,6 @@ irr::video::ITexture* ImageManager::GetBigPicture(int code, float zoom) {
 	tBigPicture = texture;
 	return texture;
 }
-#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
 int ImageManager::LoadThumbThread() {
 	while(true) {
 		imageManager.tThumbLoadingMutex.lock();
@@ -415,11 +411,16 @@ int ImageManager::LoadThumbThread() {
 		imageManager.tThumbLoadingCodes.pop();
 		imageManager.tThumbLoadingMutex.unlock();
 		char file[256];
-		std::snprintf(file, sizeof file, "expansions/pics/thumbnail/%d.png", code);
-		irr::video::IImage* img = imageManager.driver->createImageFromFile(file);
-		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "expansions/pics/thumbnail/%d.jpg", code);
-			img = imageManager.driver->createImageFromFile(file);
+		irr::video::IImage *img = nullptr;
+		for(auto ex : mainGame->GetExpansionsListU()) {
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.png", ex.c_str(), code);
+				img = imageManager.driver->createImageFromFile(file);
+			}
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
+				img = imageManager.driver->createImageFromFile(file);
+			}
 		}
 		if(img == nullptr) {
 			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/thumbnail/%d.png"), code);
@@ -438,11 +439,15 @@ int ImageManager::LoadThumbThread() {
 			img = imageManager.driver->createImageFromFile(file);
 		}
 		if(img == nullptr && mainGame->gameConf.use_image_scale) {
-			std::snprintf(file, sizeof file, "expansions/pics/%d.png", code);
-			img = imageManager.driver->createImageFromFile(file);
-			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
-				img = imageManager.driver->createImageFromFile(file);
+			for(auto ex : mainGame->GetExpansionsListU()) {
+				if(img == nullptr) {
+					std::snprintf(file, sizeof file, "%s/pics/%d.png", ex.c_str(), code);
+					img = imageManager.driver->createImageFromFile(file);
+				}
+				if(img == nullptr) {
+					std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+					img = imageManager.driver->createImageFromFile(file);
+				}
 			}
 			if(img == nullptr) {
 				std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.png"), code);
@@ -495,50 +500,56 @@ int ImageManager::LoadThumbThread() {
 	imageManager.tThumbLoadingMutex.unlock();
 	return 0;
 }
-#endif // YGOPRO_USE_THUMB_LOAD_THREAD
 irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 	if(code == 0)
 		return tUnknownThumb;
-#ifndef YGOPRO_USE_THUMB_LOAD_THREAD
 	auto tit = tThumb.find(code);
-	if(tit == tThumb.end()) {
+	if(tit == tThumb.end() && !mainGame->gameConf.use_image_load_background_thread) {
 		char file[256];
-		std::snprintf(file, sizeof file, "expansions/pics/thumbnail/%d.jpg", code);
 		int width = CARD_THUMB_WIDTH * mainGame->xScale;
 		int height = CARD_THUMB_HEIGHT * mainGame->yScale;
-		irr::video::ITexture* img = GetTextureFromFile(file, width, height);
-		if(img == NULL) {
+		irr::video::ITexture *img = nullptr;
+		for(auto ex : mainGame->GetExpansionsListU())
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
+				img = GetTextureFromFile(file, width, height);
+			}
+		if(img == nullptr) {
 			std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
 			img = GetTextureFromFile(file, width, height);
 		}
-		if(img == NULL && mainGame->gameConf.use_image_scale) {
-			std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
-			img = GetTextureFromFile(file, width, height);
-			if(img == NULL) {
+		if(img == nullptr && mainGame->gameConf.use_image_scale) {
+			for(auto ex : mainGame->GetExpansionsListU())
+				if(img == nullptr) {
+					std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+					img = GetTextureFromFile(file, width, height);
+				}
+			if(img == nullptr) {
 				std::snprintf(file, sizeof file, "pics/%d.jpg", code);
 				img = GetTextureFromFile(file, width, height);
 			}
 		}
 		tThumb[code] = img;
-		return (img == NULL) ? tUnknownThumb : img;
+		return (img == nullptr) ? tUnknownThumb : img;
 	}
-#else // YGOPRO_USE_THUMB_LOAD_THREAD
-	imageManager.tThumbLoadingMutex.lock();
-	auto lit = tThumbLoading.find(code);
-	if(lit != tThumbLoading.end()) {
-		if(lit->second != nullptr) {
-			char file[256];
-			std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
-			irr::video::ITexture* texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due to OpenGL
-			lit->second->drop();
-			tThumb[code] = texture;
-		} else {
-			tThumb[code] = nullptr;
+	if(tit == tThumb.end() || tit->second == tLoading) {
+		imageManager.tThumbLoadingMutex.lock();
+		auto lit = tThumbLoading.find(code);
+		if(lit != tThumbLoading.end()) {
+			if(lit->second != nullptr) {
+				char file[256];
+				std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
+				irr::video::ITexture* texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due to OpenGL
+				lit->second->drop();
+				tThumb[code] = texture;
+			} else {
+				tThumb[code] = nullptr;
+			}
+			tThumbLoading.erase(lit);
 		}
-		tThumbLoading.erase(lit);
+		imageManager.tThumbLoadingMutex.unlock();
+		tit = tThumb.find(code);
 	}
-	imageManager.tThumbLoadingMutex.unlock();
-	auto tit = tThumb.find(code);
 	if(tit == tThumb.end()) {
 		tThumb[code] = tLoading;
 		imageManager.tThumbLoadingMutex.lock();
@@ -550,7 +561,6 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		imageManager.tThumbLoadingMutex.unlock();
 		return tLoading;
 	}
-#endif // YGOPRO_USE_THUMB_LOAD_THREAD
 	if(tit->second)
 		return tit->second;
 	else
@@ -559,11 +569,16 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 	auto tit = tFields.find(code);
 	if(tit == tFields.end()) {
 		char file[256];
-		std::snprintf(file, sizeof file, "expansions/pics/field/%d.png", code);
-		irr::video::ITexture* img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
-		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "expansions/pics/field/%d.jpg", code);
-			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+		irr::video::ITexture* img = nullptr;
+		for(auto ex : mainGame->GetExpansionsListU()) {
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/field/%d.png", ex.c_str(), code);
+				irr::video::ITexture* img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+			}
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/field/%d.jpg", ex.c_str(), code);
+				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+			}
 		}
 		if(img == nullptr) {
 			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
@@ -603,11 +618,16 @@ irr::video::ITexture* ImageManager::GetTextureField(int code) {
 	auto tit = tFields.find(code);
 	if(tit == tFields.end()) {
 		char file[256];
-		std::snprintf(file, sizeof file, "expansions/pics/field/%d.png", code);
-		irr::video::ITexture* img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
-		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "expansions/pics/field/%d.jpg", code);
-			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+		irr::video::ITexture *img = nullptr;
+		for(auto ex : mainGame->GetExpansionsListU()) {
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/field/%d.png", ex.c_str(), code);
+				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+			}
+			if(img == nullptr) {
+				std::snprintf(file, sizeof file, "%s/pics/field/%d.jpg", ex.c_str(), code);
+				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
+			}
 		}
 		if(img == nullptr) {
 			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.png"), code);

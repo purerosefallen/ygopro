@@ -2,7 +2,7 @@
 set -x
 set -o errexit
 
-ARCHIVE_FILES=(ygopro.app cards.cdb locales fonts sound textures strings.conf system.conf pack)
+ARCHIVE_FILES=(ygopro.app cards.cdb locales fonts sound textures strings.conf system.conf servers.conf pack)
 
 if [[ -z "$TARGET_PLATFORM" ]]; then
     TARGET_PLATFORM=darwin
