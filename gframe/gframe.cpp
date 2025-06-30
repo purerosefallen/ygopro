@@ -15,6 +15,8 @@ bool auto_watch_mode = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
+bool expansions_specified = false;
+std::vector<std::wstring> expansions_list;
 
 void ClickButton(irr::gui::IGUIElement* btn) {
 	irr::SEvent event;
@@ -87,7 +89,7 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
-	bool portSpecified = false;
+	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
 			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
@@ -126,21 +128,17 @@ int main(int argc, char* argv[]) {
 			++i;
 			if(i < wargc) {
 				ygo::mainGame->ebJoinHost->setText(wargv[i]);
-				if(!portSpecified)
-					ygo::mainGame->ebJoinPort->setText(L"");
 			}
 			continue;
 		} else if(!std::wcscmp(wargv[i], L"-p")) { // host Port
 			++i;
 			if(i < wargc) {
-				portSpecified = true;
 				auto port = _wtoi(wargv[i]);
-				if(port) {
-					wchar_t portStr[6];
-					myswprintf(portStr, L"%d", port);
-					ygo::mainGame->ebJoinPort->setText(portStr);
-				} else {
-					ygo::mainGame->ebJoinPort->setText(L"");
+				auto hostText = ygo::mainGame->ebJoinHost->getText();
+				if(port && hostText) {
+					wchar_t newHostStr[100];
+					myswprintf(newHostStr, L"%ls:%d", hostText, port);
+					ygo::mainGame->ebJoinHost->setText(newHostStr);
 				}
 			}
 			continue;
@@ -216,6 +214,16 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
+		} else if(!std::wcscmp(wargv[i], L"--expansions")) { // specify expansions
+			++i;
+			if(i < wargc) {
+				if(!expansions_specified) {
+					expansions_list.clear();
+					expansions_specified = true;
+				}
+				expansions_list.push_back(wargv[i]);
+			}
+			continue;
 		}
 	}
 	ygo::mainGame->MainLoop();

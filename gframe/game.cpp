@@ -14,7 +14,7 @@
 #include <regex>
 #include <thread>
 
-unsigned short PRO_VERSION = 0x1361;
+unsigned short PRO_VERSION = 0x1362;
 
 namespace ygo {
 
@@ -64,22 +64,6 @@ void DuelInfo::Clear() {
 	total_attack_color[0] = 0;
 	total_attack_color[1] = 0;
 	announce_cache.clear();
-}
-
-bool IsExtension(const wchar_t* filename, const wchar_t* extension) {
-	auto flen = std::wcslen(filename);
-	auto elen = std::wcslen(extension);
-	if (!elen || flen < elen)
-		return false;
-	return !mywcsncasecmp(filename + (flen - elen), extension, elen);
-}
-
-bool IsExtension(const char* filename, const char* extension) {
-	auto flen = std::strlen(filename);
-	auto elen = std::strlen(extension);
-	if (!elen || flen < elen)
-		return false;
-	return !mystrncasecmp(filename + (flen - elen), extension, elen);
 }
 
 bool Game::Initialize() {
@@ -140,7 +124,8 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load strings!");
 		return false;
 	}
-	LoadExpansions();
+	if(dataManager.LoadServerList(GetLocaleDir("servers.conf"))) {} else
+	dataManager.LoadServerList("servers.conf");
 	dataManager.LoadDB(L"specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
@@ -233,7 +218,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Collapse", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Manjushage", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -252,14 +237,12 @@ bool Game::Initialize() {
 	editbox_list.push_back(ebNickName);
 	lstHostList = env->addListBox(irr::core::rect<irr::s32>(10, 60, 570, 320), wLanWindow, LISTBOX_LAN_HOST, true);
 	lstHostList->setItemHeight(18);
-	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(240, 325, 340, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnLanRefresh = env->addButton(irr::core::rect<irr::s32>(150, 325, 250, 350), wLanWindow, BUTTON_LAN_REFRESH, dataManager.GetSysString(1217));
+	btnServerList = env->addButton(irr::core::rect<irr::s32>(280, 325, 380, 350), wLanWindow, BUTTON_SERVER_LIST, dataManager.GetSysString(1239));
 	env->addStaticText(dataManager.GetSysString(1221), irr::core::rect<irr::s32>(10, 360, 220, 380), false, false, wLanWindow);
-	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 350, 380), true, wLanWindow);
+	ebJoinHost = env->addEditBox(gameConf.lasthost, irr::core::rect<irr::s32>(110, 355, 420, 380), true, wLanWindow);
 	ebJoinHost->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebJoinHost);
-	ebJoinPort = env->addEditBox(gameConf.lastport, irr::core::rect<irr::s32>(360, 355, 420, 380), true, wLanWindow);
-	ebJoinPort->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	editbox_list.push_back(ebJoinPort);
 	env->addStaticText(dataManager.GetSysString(1222), irr::core::rect<irr::s32>(10, 390, 220, 410), false, false, wLanWindow);
 	ebJoinPass = env->addEditBox(gameConf.roompass, irr::core::rect<irr::s32>(110, 385, 420, 410), true, wLanWindow);
 	ebJoinPass->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -379,6 +362,15 @@ bool Game::Initialize() {
 	btnHostPrepNotReady->setVisible(false);
 	btnHostPrepStart = env->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
 	btnHostPrepCancel = env->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
+	//server list
+	wServerList = env->addWindow(irr::core::rect<irr::s32>(25, 80, 325, 400), false, dataManager.GetSysString(1239));
+	wServerList->getCloseButton()->setVisible(false);
+	wServerList->setVisible(false);
+	wServerList->setDraggable(true);
+	lstServerList = env->addListBox(irr::core::rect<irr::s32>(10, 20, 290, 270), wServerList, LISTBOX_SERVER_LIST, true);
+	lstServerList->setItemHeight(18);
+	RefreshServerList();
+	btnServerReturn = env->addButton(irr::core::rect<irr::s32>(100, 280, 200, 310), wServerList, BUTTON_SERVER_RETURN, dataManager.GetSysString(1210));
 	//img
 	wCardImg = env->addStaticText(L"", irr::core::rect<irr::s32>(1, 1, 1 + CARD_IMG_WIDTH + 20, 1 + CARD_IMG_HEIGHT + 18), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0xc0c0c0c0);
@@ -516,10 +508,7 @@ bool Game::Initialize() {
 	chkLFlist->setChecked(gameConf.use_lflist);
 	cbLFlist = env->addComboBox(irr::core::rect<irr::s32>(posX + 115, posY, posX + 250, posY + 25), tabSystem, COMBOBOX_LFLIST);
 	cbLFlist->setMaxSelectionRows(6);
-	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
-	cbLFlist->setEnabled(gameConf.use_lflist);
-	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
+	RefreshLFList();
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
@@ -714,10 +703,10 @@ bool Game::Initialize() {
 	wDeckEdit->setVisible(false);
 	btnManageDeck = env->addButton(irr::core::rect<irr::s32>(225, 5, 290, 30), wDeckEdit, BUTTON_MANAGE_DECK, dataManager.GetSysString(1328));
 	//deck manage
-	wDeckManage = env->addWindow(irr::core::rect<irr::s32>(310, 135, 800, 465), false, dataManager.GetSysString(1460), 0, WINDOW_DECK_MANAGE);
+	wDeckManage = env->addWindow(irr::core::rect<irr::s32>(310, 135, 800, 515), false, dataManager.GetSysString(1460), 0, WINDOW_DECK_MANAGE);
 	wDeckManage->setVisible(false);
-	lstCategories = env->addListBox(irr::core::rect<irr::s32>(10, 30, 140, 320), wDeckManage, LISTBOX_CATEGORIES, true);
-	lstDecks = env->addListBox(irr::core::rect<irr::s32>(150, 30, 340, 320), wDeckManage, LISTBOX_DECKS, true);
+	lstCategories = env->addListBox(irr::core::rect<irr::s32>(10, 30, 140, 370), wDeckManage, LISTBOX_CATEGORIES, true);
+	lstDecks = env->addListBox(irr::core::rect<irr::s32>(150, 30, 340, 370), wDeckManage, LISTBOX_DECKS, true);
 	posY = 30;
 	btnNewCategory = env->addButton(irr::core::rect<irr::s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_NEW_CATEGORY, dataManager.GetSysString(1461));
 	posY += 35;
@@ -734,6 +723,10 @@ bool Game::Initialize() {
 	btnMoveDeck = env->addButton(irr::core::rect<irr::s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_MOVE_DECK, dataManager.GetSysString(1467));
 	posY += 35;
 	btnCopyDeck = env->addButton(irr::core::rect<irr::s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_COPY_DECK, dataManager.GetSysString(1468));
+	posY += 35;
+	btnImportDeckCode = env->addButton(irr::core::rect<irr::s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_IMPORT_DECK_CODE, dataManager.GetSysString(1478));
+	posY += 35;
+	btnExportDeckCode = env->addButton(irr::core::rect<irr::s32>(350, posY, 480, posY + 25), wDeckManage, BUTTON_EXPORT_DECK_CODE, dataManager.GetSysString(1479));
 	//deck manage query
 	wDMQuery = env->addWindow(irr::core::rect<irr::s32>(400, 200, 710, 320), false, dataManager.GetSysString(1460));
 	wDMQuery->getCloseButton()->setVisible(false);
@@ -829,14 +822,14 @@ bool Game::Initialize() {
 	cbAttribute = env->addComboBox(irr::core::rect<irr::s32>(60, 20 + 50 / 6, 195, 40 + 50 / 6), wFilter, COMBOBOX_ATTRIBUTE);
 	cbAttribute->setMaxSelectionRows(10);
 	cbAttribute->addItem(dataManager.GetSysString(1310), 0);
-	for(int filter = 0x1; filter != 0x80; filter <<= 1)
-		cbAttribute->addItem(dataManager.FormatAttribute(filter).c_str(), filter);
+	for (int filter = 0; filter < ATTRIBUTES_COUNT; ++filter)
+		cbAttribute->addItem(dataManager.FormatAttribute(0x1U << filter).c_str(), 0x1U << filter);
 	stRace = env->addStaticText(dataManager.GetSysString(1321), irr::core::rect<irr::s32>(10, 42 + 75 / 6, 70, 62 + 75 / 6), false, false, wFilter);
 	cbRace = env->addComboBox(irr::core::rect<irr::s32>(60, 40 + 75 / 6, 195, 60 + 75 / 6), wFilter, COMBOBOX_RACE);
 	cbRace->setMaxSelectionRows(10);
 	cbRace->addItem(dataManager.GetSysString(1310), 0);
-	for(int filter = 0x1; filter < (1 << RACES_COUNT); filter <<= 1)
-		cbRace->addItem(dataManager.FormatRace(filter).c_str(), filter);
+	for (int filter = 0; filter < RACES_COUNT; ++filter)
+		cbRace->addItem(dataManager.FormatRace(0x1U << filter).c_str(), 0x1U << filter);
 	stAttack = env->addStaticText(dataManager.GetSysString(1322), irr::core::rect<irr::s32>(205, 22 + 50 / 6, 280, 42 + 50 / 6), false, false, wFilter);
 	ebAttack = env->addEditBox(L"", irr::core::rect<irr::s32>(260, 20 + 50 / 6, 340, 40 + 50 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebAttack->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -1063,6 +1056,7 @@ bool Game::Initialize() {
 	return true;
 }
 void Game::MainLoop() {
+	LoadExpansionsAll();
 	wchar_t cap[256];
 	camera = smgr->addCameraSceneNode(0);
 	irr::core::matrix4 mProjection;
@@ -1248,21 +1242,36 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 	ret.assign(strBuffer);
 	return ret;
 }
-void Game::LoadExpansions() {
-	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
+void Game::LoadExpansions(const wchar_t* expansions_path) {
+	bool lflist_changed = false;
+	bool server_list_changed = false;
+	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
+		if (isdir)
+			return;
 		wchar_t fpath[1024];
-		myswprintf(fpath, L"./expansions/%ls", name);
-		if (!isdir && IsExtension(name, L".cdb")) {
+		myswprintf(fpath, L"%ls/%ls", expansions_path, name);
+		if (IsExtension(name, L".cdb")) {
 			dataManager.LoadDB(fpath);
 			return;
 		}
-		if (!isdir && IsExtension(name, L".conf")) {
-			char upath[1024];
-			BufferIO::EncodeUTF8(fpath, upath);
-			dataManager.LoadStrings(upath);
+		if (IsExtension(name, L".conf")) {
+			if(!std::wcscmp(name, L"lflist.conf")) {
+				deckManager.LoadLFListSingle(fpath, true);
+				lflist_changed = true;
+			} else if(!std::wcscmp(name, L"servers.conf")) {
+				dataManager.LoadServerList(fpath);
+				server_list_changed = true;
+			} else {
+				dataManager.LoadStrings(fpath);
+			}
 			return;
 		}
-		if (!isdir && (IsExtension(name, L".zip") || IsExtension(name, L".ypk"))) {
+		if (!std::wcscmp(name, L"corres_srv.ini")) {
+			dataManager.LoadCorresSrvIni(fpath);
+			server_list_changed = true;
+			return;
+		}
+		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
 			DataManager::FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
 #else
@@ -1274,7 +1283,8 @@ void Game::LoadExpansions() {
 		}
 	});
 	for(irr::u32 i = 0; i < DataManager::FileSystem->getFileArchiveCount(); ++i) {
-		auto archive = DataManager::FileSystem->getFileArchive(i)->getFileList();
+		auto archiveObj = DataManager::FileSystem->getFileArchive(i);
+		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 #ifdef _WIN32
 			const wchar_t* fname = archive->getFullFileName(j).c_str();
@@ -1283,18 +1293,33 @@ void Game::LoadExpansions() {
 			const char* uname = archive->getFullFileName(j).c_str();
 			BufferIO::DecodeUTF8(uname, fname);
 #endif
+			auto createReader = [&]() {
+#ifdef _WIN32
+				return archiveObj->createAndOpenFile(fname);
+#else
+				return archiveObj->createAndOpenFile(uname);
+#endif
+			};
 			if (IsExtension(fname, L".cdb")) {
-				dataManager.LoadDB(fname);
+				dataManager.LoadDB(createReader());
 				continue;
 			}
 			if (IsExtension(fname, L".conf")) {
-#ifdef _WIN32
-				auto reader = DataManager::FileSystem->createAndOpenFile(fname);
-#else
-				auto reader = DataManager::FileSystem->createAndOpenFile(uname);
-#endif
-				dataManager.LoadStrings(reader);
+				auto reader = createReader();
+				if(!std::wcscmp(fname, L"lflist.conf")) {
+					deckManager.LoadLFListSingle(reader, true);
+					lflist_changed = true;
+				} else if(!std::wcscmp(fname, L"servers.conf")) {
+					dataManager.LoadServerList(reader);
+					server_list_changed = true;
+				} else {
+					dataManager.LoadStrings(reader);
+				}
 				continue;
+			}
+			if (!std::wcscmp(fname, L"corres_srv.ini")) {
+					dataManager.LoadCorresSrvIni(createReader());
+					server_list_changed = true;
 			}
 			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
 				deckBuilder.expansionPacks.push_back(fname);
@@ -1302,6 +1327,43 @@ void Game::LoadExpansions() {
 			}
 		}
 	}
+	if(lflist_changed)
+		RefreshLFList();
+	if(server_list_changed)
+		RefreshServerList();
+}
+void Game::LoadExpansionsAll() {
+	auto list = GetExpansionsList();
+	for (const auto& exp : list) {
+		LoadExpansions(exp.c_str());
+	}
+}
+std::vector<std::wstring> Game::GetExpansionsList(const wchar_t* suffix) {
+	if(!suffix)
+		return expansions_list;
+	std::vector<std::wstring> list;
+	wchar_t buf[1024];
+	for(const auto& exp : expansions_list) {
+		myswprintf(buf, L"%ls%ls", exp.c_str(), suffix);
+		list.push_back(buf);
+	}
+	return list;
+}
+std::vector<std::string> Game::GetExpansionsListU(const char* suffix) {
+	auto list = GetExpansionsList(nullptr);
+	std::vector<std::string> expansions_list_u;
+	char exp_u[1024];
+	char exp_u2[1024];
+	for (const auto& exp : list) {
+		BufferIO::EncodeUTF8(exp.c_str(), exp_u);
+		if(!suffix)
+			expansions_list_u.push_back(exp_u);
+		else {
+			std::snprintf(exp_u2, sizeof exp_u2, "%s%s", exp_u, suffix);
+			expansions_list_u.push_back(exp_u2);
+		}
+	}
+	return expansions_list_u;
 }
 void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {
 	cbCategory->clear();
@@ -1365,7 +1427,7 @@ void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const w
 void Game::RefreshReplay() {
 	lstReplayList->clear();
 	FileSystem::TraversalDir(L"./replay", [this](const wchar_t* name, bool isdir) {
-		if (!isdir && IsExtension(name, L".yrp") && Replay::CheckReplay(name))
+		if (!isdir && IsExtension(name, L".yrp"))
 			lstReplayList->addItem(name);
 	});
 }
@@ -1390,6 +1452,13 @@ void Game::RefreshLocales() {
 			break;
 		}
 	}
+}
+void Game::RefreshLFList() {
+	cbLFlist->clear();
+	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
+		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
+	cbLFlist->setEnabled(gameConf.use_lflist);
+	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
@@ -1457,6 +1526,13 @@ void Game::RefreshBot() {
 		RefreshCategoryDeck(cbBotDeckCategory, cbBotDeck);
 	}
 }
+void Game::RefreshServerList() {
+	lstServerList->clear();
+	for (const auto& pair : dataManager._serverStrings) {
+		const wchar_t* key = pair.first.c_str();
+		lstServerList->addItem(key);
+	}
+}
 bool Game::LoadConfigFromFile(const char* file) {
 	FILE* fp = myfopen(file, "r");
 	if(!fp){
@@ -1474,8 +1550,14 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.use_d3d = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "use_image_scale")) {
 			gameConf.use_image_scale = std::strtol(valbuf, nullptr, 10) > 0;
+		} else if (!std::strcmp(strbuf, "use_image_scale_multi_thread")) {
+			gameConf.use_image_scale_multi_thread = std::strtol(valbuf, nullptr, 10) > 0;
+		} else if (!std::strcmp(strbuf, "use_image_load_background_thread")) {
+			gameConf.use_image_load_background_thread = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "pro_version")) {
 			PRO_VERSION = std::strtol(valbuf, nullptr, 10);
+		} else if(!std::strcmp(strbuf, "freever")) {
+			gameConf.freever = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if(!std::strcmp(strbuf, "errorlog")) {
 			unsigned int val = std::strtol(valbuf, nullptr, 10);
 			enable_log = val & 0xff;
@@ -1484,7 +1566,11 @@ bool Game::LoadConfigFromFile(const char* file) {
 		} else if(!std::strcmp(strbuf, "lasthost")) {
 			BufferIO::DecodeUTF8(valbuf, gameConf.lasthost);
 		} else if(!std::strcmp(strbuf, "lastport")) {
-			BufferIO::DecodeUTF8(valbuf, gameConf.lastport);
+			// for migration
+			auto old_lastport = std::strtol(valbuf, nullptr, 10);
+			wchar_t old_host[100];
+			memcpy(old_host, gameConf.lasthost, sizeof(wchar_t) * 100);
+			myswprintf(gameConf.lasthost, L"%ls:%d", old_host, old_lastport);
 		} else if(!std::strcmp(strbuf, "automonsterpos")) {
 			gameConf.chkMAutoPos = std::strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "autospellpos")) {
@@ -1625,7 +1711,6 @@ void Game::LoadConfig() {
 	gameConf.numfont[0] = 0;
 	gameConf.textfont[0] = 0;
 	gameConf.lasthost[0] = 0;
-	gameConf.lastport[0] = 0;
 	gameConf.roompass[0] = 0;
 	//settings
 	gameConf.chkMAutoPos = 0;
@@ -1742,7 +1827,10 @@ void Game::SaveConfig() {
 	char linebuf[CONFIG_LINE_SIZE];
 	std::fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
 	std::fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
+	std::fprintf(fp, "use_image_scale_multi_thread = %d\n", gameConf.use_image_scale_multi_thread ? 1 : 0);
+	std::fprintf(fp, "use_image_load_background_thread = %d\n", gameConf.use_image_load_background_thread ? 1 : 0);
 	std::fprintf(fp, "pro_version = %d\n", PRO_VERSION);
+	std::fprintf(fp, "freever = %d\n", gameConf.freever ? 1 : 0);
 	std::fprintf(fp, "antialias = %d\n", gameConf.antialias);
 	std::fprintf(fp, "errorlog = %u\n", enable_log);
 	BufferIO::CopyWideString(ebNickName->getText(), gameConf.nickname);
@@ -1761,8 +1849,6 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	std::fprintf(fp, "lasthost = %s\n", linebuf);
-	BufferIO::EncodeUTF8(gameConf.lastport, linebuf);
-	std::fprintf(fp, "lastport = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.roompass, linebuf);
 	std::fprintf(fp, "roompass = %s\n", linebuf);
 	//settings
@@ -2123,7 +2209,9 @@ void Game::CloseDuelWindow() {
 	lstLog->clear();
 	logParam.clear();
 	lstHostList->clear();
+	lstServerList->clear();
 	DuelClient::hosts.clear();
+	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
 	ResizeChatInputWindow();
 	closeDoneSignal.Set();
@@ -2208,7 +2296,7 @@ void Game::OnResize() {
 	ebDeckname->setRelativePosition(Resize(80, 65, 220, 90));
 	cbDBCategory->setRelativePosition(Resize(80, 5, 220, 30));
 	btnManageDeck->setRelativePosition(Resize(225, 5, 290, 30));
-	wDeckManage->setRelativePosition(ResizeWin(310, 135, 800, 465));
+	wDeckManage->setRelativePosition(ResizeWin(310, 135, 800, 515));
 	scrPackCards->setRelativePosition(Resize(775, 161, 795, 629));
 
 	wSort->setRelativePosition(Resize(930, 132, 1020, 156));
@@ -2546,6 +2634,54 @@ void Game::SetCursor(irr::gui::ECURSOR_ICON icon) {
 	if(cursor->getActiveIcon() != icon) {
 		cursor->setActiveIcon(icon);
 	}
+}
+void Game::InjectEnvToRegistry(intptr_t pduel) {
+#ifdef _WIN32
+	LPWCH env_block = GetEnvironmentStringsW();
+	if (!env_block) return;
+
+	const wchar_t* prefix = L"YGOPRO_ENV_";
+	const size_t prefix_len = wcslen(prefix);
+
+	for (LPWCH var = env_block; *var != L'\0'; ) {
+		// 是 YGOPRO_ENV_ 开头
+		if (wcsncmp(var, prefix, prefix_len) == 0) {
+			const wchar_t* equal_pos = wcschr(var, L'=');
+			if (equal_pos && equal_pos > var + prefix_len) {
+				// 拆 key 和 value（UTF-16）
+				std::wstring key_w(var + prefix_len, equal_pos - (var + prefix_len));        // foo
+				std::wstring value_w(equal_pos + 1);                    // bar
+
+				char key_utf8[256]{};
+				char value_utf8[1024]{};
+
+				// 转成 UTF-8：key = env_foo
+				BufferIO::EncodeUTF8((L"env_" + key_w).c_str(), key_utf8);
+				BufferIO::EncodeUTF8(value_w.c_str(), value_utf8);
+
+				set_registry_value(pduel, key_utf8, value_utf8);
+			}
+		}
+		var += wcslen(var) + 1;
+	}
+
+	FreeEnvironmentStringsW(env_block);
+#else
+	const std::string prefix = "YGOPRO_ENV_";
+	for (char** env = environ; *env != nullptr; ++env) {
+		std::string entry(*env);
+		if (entry.compare(0, prefix.size(), prefix) == 0) {  // 以 prefix 开头
+			auto eq_pos = entry.find('=');
+			if (eq_pos == std::string::npos) continue;
+
+			std::string name = entry.substr(0, eq_pos);   // YGOPRO_ENV_foo
+			std::string value = entry.substr(eq_pos + 1); // bar
+
+			std::string key = "env_" + name.substr(prefix.size()); // env_foo
+			set_registry_value(pduel, key.c_str(), value.c_str());
+		}
+	}
+#endif
 }
 
 }

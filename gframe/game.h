@@ -31,17 +31,39 @@ constexpr int TEXT_LINE_SIZE = 256;
 
 namespace ygo {
 
-bool IsExtension(const wchar_t* filename, const wchar_t* extension);
-bool IsExtension(const char* filename, const char* extension);
+template<size_t N>
+bool IsExtension(const wchar_t* filename, const wchar_t(&extension)[N]) {
+	auto flen = std::wcslen(filename);
+	constexpr size_t elen = N - 1;
+	if (!elen || flen < elen)
+		return false;
+	return !mywcsncasecmp(filename + (flen - elen), extension, elen);
+}
+
+template<size_t N>
+bool IsExtension(const char* filename, const char(&extension)[N]) {
+	auto flen = std::strlen(filename);
+	constexpr size_t elen = N - 1;
+	if (!elen || flen < elen)
+		return false;
+	return !mystrncasecmp(filename + (flen - elen), extension, elen);
+}
 
 struct Config {
 	bool use_d3d{ false };
 	bool use_image_scale{ true };
+	bool use_image_scale_multi_thread{ true };
+#ifdef _OPENMP
+	bool use_image_load_background_thread{ false };
+#else
+	bool use_image_load_background_thread{ true };
+#endif
+	bool freever{ true };
 	unsigned short antialias{ 0 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
 	wchar_t lasthost[100]{};
-	wchar_t lastport[10]{};
+	// wchar_t lastport[10]{};
 	wchar_t nickname[20]{};
 	wchar_t gamename[20]{};
 	wchar_t roompass[20]{};
@@ -166,14 +188,19 @@ public:
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
-	void LoadExpansions();
-	void RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused = true);
+	void LoadExpansions(const wchar_t* expansions_path);
+	void LoadExpansionsAll();
+	std::vector<std::wstring> GetExpansionsList(const wchar_t * suffix = nullptr);
+	std::vector<std::string> GetExpansionsListU(const char* suffix = nullptr);
+	void RefreshCategoryDeck(irr::gui::IGUIComboBox *cbCategory, irr::gui::IGUIComboBox *cbDeck, bool selectlastused = true);
 	void RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck);
 	void RefreshDeck(const wchar_t* deckpath, const std::function<void(const wchar_t*)>& additem);
 	void RefreshReplay();
 	void RefreshSingleplay();
 	void RefreshBot();
 	void RefreshLocales();
+	void RefreshLFList();
+	void RefreshServerList();
 	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
@@ -248,6 +275,7 @@ public:
 	void FlashWindow();
 	void takeScreenshot();
 	void SetCursor(irr::gui::ECURSOR_ICON icon);
+	void InjectEnvToRegistry(intptr_t pduel);
 	template<typename T>
 	static void DrawShadowText(irr::gui::CGUITTFont* font, const T& text, const irr::core::rect<irr::s32>& position, const irr::core::rect<irr::s32>& padding,
 		irr::video::SColor color = 0xffffffff, irr::video::SColor shadowcolor = 0xff000000, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = nullptr);
@@ -328,7 +356,7 @@ public:
 	irr::gui::CGUITTFont* numFont;
 	irr::gui::CGUITTFont* adFont;
 	irr::gui::CGUITTFont* lpcFont;
-	std::map<irr::gui::CGUIImageButton*, int> imageLoading;
+	std::unordered_map<irr::gui::CGUIImageButton*, int> imageLoading;
 	//card image
 	irr::gui::IGUIStaticText* wCardImg;
 	irr::gui::IGUIImage* imgCard;
@@ -396,7 +424,6 @@ public:
 	irr::gui::IGUIListBox* lstHostList;
 	irr::gui::IGUIButton* btnLanRefresh;
 	irr::gui::IGUIEditBox* ebJoinHost;
-	irr::gui::IGUIEditBox* ebJoinPort;
 	irr::gui::IGUIEditBox* ebJoinPass;
 	irr::gui::IGUIButton* btnJoinHost;
 	irr::gui::IGUIButton* btnJoinCancel;
@@ -601,6 +628,8 @@ public:
 	irr::gui::IGUIButton* btnDMDeleteDeck;
 	irr::gui::IGUIButton* btnMoveDeck;
 	irr::gui::IGUIButton* btnCopyDeck;
+	irr::gui::IGUIButton* btnImportDeckCode;
+	irr::gui::IGUIButton* btnExportDeckCode;
 	irr::gui::IGUIWindow* wDMQuery;
 	irr::gui::IGUIStaticText* stDMMessage;
 	irr::gui::IGUIStaticText* stDMMessage2;
@@ -665,6 +694,11 @@ public:
 	irr::gui::IGUIButton* btnBigCardZoomIn;
 	irr::gui::IGUIButton* btnBigCardZoomOut;
 	irr::gui::IGUIButton* btnBigCardClose;
+	//server list
+	irr::gui::IGUIButton* btnServerList;
+	irr::gui::IGUIWindow* wServerList;
+	irr::gui::IGUIListBox* lstServerList;
+	irr::gui::IGUIButton* btnServerReturn;
 };
 
 extern Game* mainGame;
@@ -855,6 +889,8 @@ extern Game* mainGame;
 #define LISTBOX_DECKS				340
 #define BUTTON_DM_OK				341
 #define BUTTON_DM_CANCEL			342
+#define BUTTON_IMPORT_DECK_CODE		343
+#define BUTTON_EXPORT_DECK_CODE		344
 #define COMBOBOX_LFLIST				349
 
 #define BUTTON_CLEAR_LOG			350
@@ -889,6 +925,10 @@ extern Game* mainGame;
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
 #define BUTTON_DECK_CODE_CANCEL		391
+
+#define BUTTON_SERVER_LIST			392
+#define LISTBOX_SERVER_LIST			393
+#define BUTTON_SERVER_RETURN		394
 
 #define TEXTURE_DUEL				0
 #define TEXTURE_DECK				1
