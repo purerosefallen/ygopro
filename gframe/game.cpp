@@ -14,7 +14,7 @@
 #include <regex>
 #include <thread>
 
-unsigned short PRO_VERSION = 0x1361;
+unsigned short PRO_VERSION = 0x1362;
 
 namespace ygo {
 

@@ -3,7 +3,6 @@ include "spmemvfs/."
 
 project "YGOPro"
     kind "WindowedApp"
-    cppdialect "C++14"
     rtti "Off"
     openmp "On"
 
@@ -89,6 +88,9 @@ project "YGOPro"
         end
     filter "not system:windows"
         links { "resolv" }
+    filter "not action:vs*"
+        cppdialect "C++14"
+
     filter "system:macosx"
         openmp "Off"
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }

@@ -228,12 +228,12 @@ void ClientField::AddCard(ClientCard* pcard, int controler, int location, int se
 	}
 	case LOCATION_GRAVE: {
 		grave[controler].push_back(pcard);
-		ResetSequence(grave[controler], false);
+		pcard->sequence = (unsigned char)(grave[controler].size() - 1);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		remove[controler].push_back(pcard);
-		ResetSequence(remove[controler], false);
+		pcard->sequence = (unsigned char)(remove[controler].size() - 1);
 		break;
 	}
 	case LOCATION_EXTRA: {
@@ -256,8 +256,13 @@ ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	switch (location) {
 	case LOCATION_DECK: {
 		pcard = deck[controler][sequence];
-		deck[controler].erase(deck[controler].begin() + sequence);
-		ResetSequence(deck[controler], true);
+		for (size_t i = sequence; i < deck[controler].size() - 1; ++i) {
+			deck[controler][i] = deck[controler][i + 1];
+			deck[controler][i]->sequence--;
+			deck[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
+			deck[controler][i]->mTransform.setTranslation(deck[controler][i]->curPos);
+		}
+		deck[controler].erase(deck[controler].end() - 1);
 		break;
 	}
 	case LOCATION_HAND: {
@@ -278,20 +283,35 @@ ClientCard* ClientField::RemoveCard(int controler, int location, int sequence) {
 	}
 	case LOCATION_GRAVE: {
 		pcard = grave[controler][sequence];
-		grave[controler].erase(grave[controler].begin() + sequence);
-		ResetSequence(grave[controler], true);
+		for (size_t i = sequence; i < grave[controler].size() - 1; ++i) {
+			grave[controler][i] = grave[controler][i + 1];
+			grave[controler][i]->sequence--;
+			grave[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
+			grave[controler][i]->mTransform.setTranslation(grave[controler][i]->curPos);
+		}
+		grave[controler].erase(grave[controler].end() - 1);
 		break;
 	}
 	case LOCATION_REMOVED: {
 		pcard = remove[controler][sequence];
-		remove[controler].erase(remove[controler].begin() + sequence);
-		ResetSequence(remove[controler], true);
+		for (size_t i = sequence; i < remove[controler].size() - 1; ++i) {
+			remove[controler][i] = remove[controler][i + 1];
+			remove[controler][i]->sequence--;
+			remove[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
+			remove[controler][i]->mTransform.setTranslation(remove[controler][i]->curPos);
+		}
+		remove[controler].erase(remove[controler].end() - 1);
 		break;
 	}
 	case LOCATION_EXTRA: {
 		pcard = extra[controler][sequence];
-		extra[controler].erase(extra[controler].begin() + sequence);
-		ResetSequence(extra[controler], true);
+		for (size_t i = sequence; i < extra[controler].size() - 1; ++i) {
+			extra[controler][i] = extra[controler][i + 1];
+			extra[controler][i]->sequence--;
+			extra[controler][i]->curPos -= irr::core::vector3df(0, 0, 0.01f);
+			extra[controler][i]->mTransform.setTranslation(extra[controler][i]->curPos);
+		}
+		extra[controler].erase(extra[controler].end() - 1);
 		if (pcard->position & POS_FACEUP)
 			extra_p_count[controler]--;
 		break;
@@ -1292,6 +1312,14 @@ bool ClientField::CheckSelectTribute() {
 		selectable_cards.push_back(*sit);
 	}
 	return ret;
+}
+void ClientField::get_sum_params(unsigned int opParam, int& op1, int& op2) {
+	op1 = opParam & 0xffff;
+	op2 = (opParam >> 16) & 0xffff;
+	if (op2 & 0x8000) {
+		op1 = opParam & 0x7fffffff;
+		op2 = 0;
+	}
 }
 bool ClientField::check_min(const std::set<ClientCard*>& left, std::set<ClientCard*>::const_iterator index, int min, int max) {
 	if (index == left.end())
