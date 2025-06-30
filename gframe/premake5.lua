@@ -45,7 +45,6 @@ end
 else
 project "ygopro"
     kind "WindowedApp"
-    cppdialect "C++14"
     rtti "Off"
     openmp "On"
 
@@ -141,6 +140,9 @@ if not SERVER_MODE then
     filter "not system:windows"
         links { "resolv" }
 end
+    filter "not action:vs*"
+        cppdialect "C++14"
+
     filter "system:macosx"
 if not SERVER_MODE then
         openmp "Off"
