@@ -1,5 +1,5 @@
 version: '{build}'
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 skip_tags: true
 
@@ -7,37 +7,37 @@ install:
   - git submodule update --init --recursive
 
   # environment and system dependency
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-beta5/premake-5.0.0-beta5-windows.zip ; exit 0"
-  - 7z x premake-5.0.0-beta5-windows.zip
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-beta6/premake-5.0.0-beta6-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-beta6-windows.zip
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
-  - tar xf libevent-2.0.22-stable.tar.gz
-  - move libevent-2.0.22-stable event
-  - xcopy /E event\WIN32-Code event\include
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz ; exit 0"
+  - tar xf libevent-2.1.12-stable.tar.gz
+  - move libevent-2.1.12-stable event
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.4.4.tar.gz ; exit 0"
-  - tar xf lua-5.4.4.tar.gz
-  - move lua-5.4.4 lua
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.4.7.tar.gz ; exit 0"
+  - tar xf lua-5.4.7.tar.gz
+  - move lua-5.4.7 lua
   
-  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2024/sqlite-amalgamation-3470000.zip  ; exit 0"
-  - 7z x sqlite-amalgamation-3470000.zip
-  - move sqlite-amalgamation-3470000 sqlite3
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip  ; exit 0"
+  - 7z x sqlite-amalgamation-3490100.zip
+  - move sqlite-amalgamation-3490100 sqlite3
 
-  - git clone --depth=1 https://github.com/mercury233/irrlicht irrlicht
+  - git clone --depth=1 https://github.com/mercury233/irrlicht
 
 before_build:
   - xcopy /E premake\* .
   - xcopy /E resource\* .
-  - premake5 vs2019 --server-zip-support
-  
+  - premake5 vs2022
+
 configuration: Release
+platform: x64
 
 build: 
-    project: build/YGOPro.sln
-    parallel: true
+  project: build/YGOPro.sln
+  parallel: true
 
 after_build:
-  - ps: move bin\release\ygopro.exe .
+  - ps: move bin\release\x64\ygopro.exe .
 
   # nodejs
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://nodejs.org/dist/v16.9.1/node-v16.9.1-win-x64.7z ; exit 0"
@@ -90,8 +90,7 @@ deploy:
     branch: server
 
 cache:
-  - premake-5.0.0-beta2-windows.zip
-  - libevent-2.0.22-stable.tar.gz
-  - irrlicht-1.8.5.zip
-  - lua-5.4.4.tar.gz
-  - sqlite-amalgamation-3390300.zip
+  - premake-5.0.0-beta6-windows.zip
+  - libevent-2.1.12-stable.tar.gz
+  - lua-5.4.7.tar.gz
+  - sqlite-amalgamation-3490100.zip

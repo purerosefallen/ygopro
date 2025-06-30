@@ -8,8 +8,17 @@
 #ifdef __APPLE__
 #import <CoreFoundation/CoreFoundation.h>
 #endif
+#ifdef YGOPRO_SERVER_MODE
+#include "base64.h"
+#endif
+
+#ifdef YGOPRO_SERVER_MODE
+#include <sstream>
+#endif
 
 unsigned int enable_log = 0x3;
+bool expansions_specified = false;
+std::vector<std::wstring> expansions_list;
 #ifndef YGOPRO_SERVER_MODE
 bool exit_on_return = false;
 bool auto_watch_mode = false;
@@ -72,6 +81,36 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE
 	enable_log = 1;
+	bool expansions_specified = false;
+
+	wchar_t* expansions_env_val = nullptr;
+
+#ifdef _WIN32
+	expansions_env_val = _wgetenv(L"YGOPRO_EXPANSIONS");
+#else
+	const char* env_utf8 = std::getenv("YGOPRO_EXPANSIONS");
+	if(env_utf8) {
+		expansions_env_val = (wchar_t*)malloc(1024 * sizeof(wchar_t));
+		BufferIO::DecodeUTF8String(env_utf8, expansions_env_val, 1024);
+	}
+#endif
+
+	if (expansions_env_val && expansions_env_val[0] != L'\0') {
+		expansions_specified = true;
+		std::wstringstream ss(expansions_env_val);
+		std::wstring item;
+		while (std::getline(ss, item, L',')) {
+			if (!item.empty()) {
+				expansions_list.push_back(item);
+			}
+		}
+	} else {
+		expansions_specified = false;
+		expansions_list.push_back(L"./expansions");
+#if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32) && !defined(__APPLE__)
+		expansions_list.push_back(L"./Expansions");
+#endif
+	}
 	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
 	ygo::duel_flags = 0;
@@ -85,8 +124,8 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.no_shuffle_deck = false;
 	ygo::game_info.duel_rule = YGOPRO_DEFAULT_DUEL_RULE;
 	ygo::game_info.time_limit = 180;
-	for (int i = 0; i < 3; ++i)
-		ygo::pre_seed[i] = (unsigned int)0;
+	std::memset(ygo::pre_seed, 0, sizeof(ygo::pre_seed));
+	std::memset(ygo::pre_seed_specified, 0, sizeof(ygo::pre_seed_specified));
 	if (argc == 2) {
 		int code = atoi(argv[1]);
 		ygo::mainGame = &_game;
@@ -129,9 +168,28 @@ int main(int argc, char* argv[]) {
 		ygo::game_info.draw_count = atoi(argv[10]);
 		ygo::game_info.time_limit = atoi(argv[11]);
 		ygo::replay_mode = atoi(argv[12]);
-		for (int i = 13; (i < argc && i <= 17) ; ++i)
+		for (int i = 13; (i < argc && i < (13 + MAX_MATCH_COUNT)) ; ++i)
 		{
-			ygo::pre_seed[i - 13] = (unsigned int)atol(argv[i]);
+			auto ok = Base64::Decode(
+				reinterpret_cast<const unsigned char*>(argv[i]),
+				strlen(argv[i]),
+				reinterpret_cast<unsigned char*>(ygo::pre_seed[i - 13]),
+				SEED_COUNT * sizeof(uint32_t)
+			);
+			if(ok) {
+				// check if it isn't all zero
+				bool all_zero = true;
+				for (int j = 0; j < SEED_COUNT; ++j) {
+					if (ygo::pre_seed[i - 13][j] != 0) {
+						all_zero = false;
+						break;
+					}
+				}
+				if (!all_zero)
+					ygo::pre_seed_specified[i - 13] = 1;
+			}
+			else
+				std::fprintf(stderr, "Failed to decode seed %d: %s\n", i - 13, argv[i]);
 		}
 	}
 	ygo::mainGame = &_game;
@@ -157,7 +215,7 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
-	bool portSpecified = false;
+	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
 			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
@@ -196,21 +254,17 @@ int main(int argc, char* argv[]) {
 			++i;
 			if(i < wargc) {
 				ygo::mainGame->ebJoinHost->setText(wargv[i]);
-				if(!portSpecified)
-					ygo::mainGame->ebJoinPort->setText(L"");
 			}
 			continue;
 		} else if(!std::wcscmp(wargv[i], L"-p")) { // host Port
 			++i;
 			if(i < wargc) {
-				portSpecified = true;
 				auto port = _wtoi(wargv[i]);
-				if(port) {
-					wchar_t portStr[6];
-					myswprintf(portStr, L"%d", port);
-					ygo::mainGame->ebJoinPort->setText(portStr);
-				} else {
-					ygo::mainGame->ebJoinPort->setText(L"");
+				auto hostText = ygo::mainGame->ebJoinHost->getText();
+				if(port && hostText) {
+					wchar_t newHostStr[100];
+					myswprintf(newHostStr, L"%ls:%d", hostText, port);
+					ygo::mainGame->ebJoinHost->setText(newHostStr);
 				}
 			}
 			continue;
@@ -286,6 +340,16 @@ int main(int argc, char* argv[]) {
 			if(open_file)
 				ClickButton(ygo::mainGame->btnLoadSinglePlay);
 			break;
+		} else if(!std::wcscmp(wargv[i], L"--expansions")) { // specify expansions
+			++i;
+			if(i < wargc) {
+				if(!expansions_specified) {
+					expansions_list.clear();
+					expansions_specified = true;
+				}
+				expansions_list.push_back(wargv[i]);
+			}
+			continue;
 		}
 	}
 	ygo::mainGame->MainLoop();

@@ -2,7 +2,7 @@
 #define CLIENT_FIELD_H
 
 #include "config.h"
-#include "../ocgcore/mtrandom.h"
+#include <random>
 #include <vector>
 #include <set>
 #include <map>
@@ -92,7 +92,7 @@ public:
 	bool cant_check_grave{ false };
 	bool tag_surrender{ false };
 	bool tag_teammate_surrender{ false };
-	mt19937 rnd;
+	std::mt19937 rnd;
 
 	ClientField();
 	~ClientField();
@@ -121,6 +121,7 @@ public:
 	bool ShowSelectSum(bool panelmode);
 	bool CheckSelectSum();
 	bool CheckSelectTribute();
+	void get_sum_params(unsigned int opParam, int& op1, int& op2);
 	bool check_min(const std::set<ClientCard*>& left, std::set<ClientCard*>::const_iterator index, int min, int max);
 	bool check_sel_sum_s(const std::set<ClientCard*>& left, int index, int acc);
 	void check_sel_sum_t(const std::set<ClientCard*>& left, int acc);
