@@ -48,7 +48,7 @@ void Replay::BeginRecord() {
 	char tmppath[40];
 	strftime(tmppath, 40, "./replay/%Y-%m-%d %H-%M-%S %%u.yrp", localedtime);
 	char path[40];
-	std::sprintf(path, tmppath, server_port);
+	sprintf(path, tmppath, server_port);
 	fp = myfopen(path, "wb");
 #else
 	fp = myfopen("./replay/_LastReplay.yrp", "wb");
@@ -62,7 +62,7 @@ void Replay::BeginRecord() {
 	Reset();
 	is_recording = true;
 }
-void Replay::WriteHeader(ReplayHeader& header) {
+void Replay::WriteHeader(ExtendedReplayHeader& header) {
 	pheader = header;
 #ifdef YGOPRO_SERVER_MODE
 	if(!(replay_mode & REPLAY_MODE_SAVE_IN_SERVER)) return;
@@ -122,11 +122,11 @@ void Replay::EndRecord() {
 #ifdef YGOPRO_SERVER_MODE
 	}
 #endif
-	pheader.datasize = replay_size;
-	pheader.flag |= REPLAY_COMPRESSED;
+	pheader.base.datasize = replay_size;
+	pheader.base.flag |= REPLAY_COMPRESSED;
 	size_t propsize = 5;
 	comp_size = MAX_COMP_SIZE;
-	int ret = LzmaCompress(comp_data, &comp_size, replay_data, replay_size, pheader.props, &propsize, 5, 1 << 24, 3, 0, 2, 32, 1);
+	int ret = LzmaCompress(comp_data, &comp_size, replay_data, replay_size, pheader.base.props, &propsize, 5, 0x1U << 24, 3, 0, 2, 32, 1);
 	if (ret != SZ_OK) {
 		std::memcpy(comp_data, &ret, sizeof ret);
 		comp_size = sizeof ret;
@@ -145,6 +145,7 @@ void Replay::SaveReplay(const wchar_t* name) {
 	std::fwrite(comp_data, comp_size, 1, rfp);
 	std::fclose(rfp);
 }
+#ifndef YGOPRO_SERVER_MODE
 bool Replay::OpenReplay(const wchar_t* name) {
 	FILE* rfp = mywfopen(name, "rb");
 	if(!rfp) {
@@ -156,19 +157,32 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		return false;
 
 	Reset();
-	if(std::fread(&pheader, sizeof pheader, 1, rfp) < 1) {
+	bool correct_header = true;
+	if (std::fread(&pheader, sizeof pheader.base, 1, rfp) < 1)
+		correct_header = false;
+	else if (pheader.base.id != REPLAY_ID_YRP1 && pheader.base.id != REPLAY_ID_YRP2)
+		correct_header = false;
+	else if (pheader.base.version < 0x12d0u)
+		correct_header = false;
+	else if (pheader.base.version >= 0x1353u && !(pheader.base.flag & REPLAY_UNIFORM))
+		correct_header = false;
+	if (!correct_header) {
 		std::fclose(rfp);
 		return false;
 	}
-	if(pheader.flag & REPLAY_COMPRESSED) {
+	if (pheader.base.id == REPLAY_ID_YRP2 && std::fread(reinterpret_cast<unsigned char*>(&pheader) + sizeof pheader.base, sizeof pheader - sizeof pheader.base, 1, rfp) < 1) {
+		std::fclose(rfp);
+		return false;
+	}
+	if(pheader.base.flag & REPLAY_COMPRESSED) {
 		comp_size = std::fread(comp_data, 1, MAX_COMP_SIZE, rfp);
 		std::fclose(rfp);
-		if (pheader.datasize > MAX_REPLAY_SIZE)
+		if (pheader.base.datasize > MAX_REPLAY_SIZE)
 			return false;
-		replay_size = pheader.datasize;
-		if (LzmaUncompress(replay_data, &replay_size, comp_data, &comp_size, pheader.props, 5) != SZ_OK)
+		replay_size = pheader.base.datasize;
+		if (LzmaUncompress(replay_data, &replay_size, comp_data, &comp_size, pheader.base.props, 5) != SZ_OK)
 			return false;
-		if (replay_size != pheader.datasize) {
+		if (replay_size != pheader.base.datasize) {
 			replay_size = 0;
 			return false;
 		}
@@ -186,17 +200,6 @@ bool Replay::OpenReplay(const wchar_t* name) {
 	info_offset = data_position;
 	data_position = 0;
 	return true;
-}
-bool Replay::CheckReplay(const wchar_t* name) {
-	wchar_t fname[256];
-	myswprintf(fname, L"./replay/%ls", name);
-	FILE* rfp = mywfopen(fname, "rb");
-	if(!rfp)
-		return false;
-	ReplayHeader rheader;
-	size_t count = std::fread(&rheader, sizeof rheader, 1, rfp);
-	std::fclose(rfp);
-	return count == 1 && rheader.id == 0x31707279 && rheader.version >= 0x12d0u && (rheader.version < 0x1353u || (rheader.flag & REPLAY_UNIFORM));
 }
 bool Replay::DeleteReplay(const wchar_t* name) {
 	wchar_t fname[256];
@@ -236,7 +239,7 @@ bool Replay::ReadName(wchar_t* data) {
 	BufferIO::CopyWStr(buffer, data, 20);
 	return true;
 }
-void Replay::ReadHeader(ReplayHeader& header) {
+void Replay::ReadHeader(ExtendedReplayHeader& header) {
 	header = pheader;
 }
 bool Replay::ReadData(void* data, size_t length) {
@@ -258,6 +261,7 @@ void Replay::Rewind() {
 	data_position = 0;
 	can_read = true;
 }
+#endif // YGOPRO_SERVER_MODE
 void Replay::Reset() {
 	is_recording = false;
 	is_replaying = false;
@@ -271,6 +275,7 @@ void Replay::Reset() {
 	decks.clear();
 	script_name.clear();
 }
+#ifndef YGOPRO_SERVER_MODE
 void Replay::SkipInfo(){
 	if (data_position == 0)
 		data_position += info_offset;
@@ -279,7 +284,7 @@ bool Replay::IsReplaying() const {
 	return is_replaying;
 }
 bool Replay::ReadInfo() {
-	int player_count = (pheader.flag & REPLAY_TAG) ? 4 : 2;
+	int player_count = (pheader.base.flag & REPLAY_TAG) ? 4 : 2;
 	for (int i = 0; i < player_count; ++i) {
 		wchar_t name[20]{};
 		if (!ReadName(name))
@@ -288,11 +293,11 @@ bool Replay::ReadInfo() {
 	}
 	if (!ReadData(&params, sizeof params))
 		return false;
-	bool is_tag1 = pheader.flag & REPLAY_TAG;
+	bool is_tag1 = pheader.base.flag & REPLAY_TAG;
 	bool is_tag2 = params.duel_flag & DUEL_TAG_MODE;
 	if (is_tag1 != is_tag2)
 		return false;
-	if (pheader.flag & REPLAY_SINGLE_MODE) {
+	if (pheader.base.flag & REPLAY_SINGLE_MODE) {
 		uint16_t slen = Read<uint16_t>();
 		char filename[256]{};
 		if (slen == 0 || slen > sizeof(filename) - 1)
@@ -328,5 +333,6 @@ bool Replay::ReadInfo() {
 	}
 	return true;
 }
+#endif // YGOPRO_SERVER_MODE
 
 }
