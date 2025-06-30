@@ -103,12 +103,16 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	else
 		ret = ReadDB(pDB);
 	sqlite3_close(pDB);
+	return ret;
 #else
 #ifdef _WIN32
 	auto reader = FileSystem->createAndOpenFile(wfile);
 #else
 	auto reader = FileSystem->createAndOpenFile(file);
 #endif
+	return LoadDB(reader);
+}
+bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	if(reader == nullptr)
 		return false;
 	spmemvfs_db_t db;
@@ -120,18 +124,29 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	reader->drop();
 	(mem->data)[mem->total] = '\0';
 	bool ret{};
-	if (spmemvfs_open_db(&db, file, mem) != SQLITE_OK)
+	if (spmemvfs_open_db(&db, "temp.db", mem) != SQLITE_OK)
 		ret = Error(db.handle);
 	else
 		ret = ReadDB(db.handle);
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
-#endif //YGOPRO_SERVER_MODE
 	return ret;
+#endif //SERVER_ZIP_SUPPORT
 }
 #ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(const char* file) {
 	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadStringConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadStrings(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
 	if(!fp)
 		return false;
 	char linebuf[TEXT_LINE_SIZE]{};
@@ -187,10 +202,162 @@ void DataManager::ReadStringConfLine(const char* linebuf) {
 		_setnameStrings[value] = strBuffer;
 	}
 }
+bool DataManager::LoadServerList(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadServerConfLine(linebuf);
+	}
+	std::fclose(fp);
+	return true;
+}
+bool DataManager::LoadServerList(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadServerConfLine(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	return true;
+}
+void DataManager::ReadServerConfLine(const char* linebuf) {
+	char buffer[1024];
+	std::strncpy(buffer, linebuf, sizeof(buffer) - 1);
+	buffer[sizeof(buffer) - 1] = '\0';
+
+	buffer[strcspn(buffer, "\n")] = '\0';
+
+	char* sep1 = std::strchr(buffer, '|');
+	if (sep1 != nullptr) {
+		*sep1 = '\0';
+		char* addrPart = sep1 + 1;
+
+
+		wchar_t wname[256], wip[512];
+
+		// read the server name
+		BufferIO::DecodeUTF8(buffer, wname);
+	
+		// replace the first '|' with ':'
+		char* sep2 = std::strchr(addrPart, '|');
+		if (sep2) {
+			*sep2 = ':';
+		}
+
+		BufferIO::DecodeUTF8(addrPart, wip);
+
+		_serverStrings.emplace_back(wname, wip);
+	}
+}
+bool DataManager::LoadCorresSrvIni(const char* file) {
+	FILE* fp = myfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadCorresSrvIniLine(linebuf);
+	}
+	std::fclose(fp);
+	InsertServerList();
+	return true;
+}
+bool DataManager::LoadCorresSrvIni(const wchar_t* file) {
+	FILE* fp = mywfopen(file, "r");
+	if(!fp)
+		return false;
+	char linebuf[TEXT_LINE_SIZE]{};
+	while(std::fgets(linebuf, sizeof linebuf, fp)) {
+		ReadCorresSrvIniLine(linebuf);
+	}
+	std::fclose(fp);
+	InsertServerList();
+	return true;
+}
+bool DataManager::LoadCorresSrvIni(irr::io::IReadFile* reader) {
+	char ch{};
+	std::string linebuf;
+	while (reader->read(&ch, 1)) {
+		if (ch == '\0')
+			break;
+		linebuf.push_back(ch);
+		if (ch == '\n' || linebuf.size() >= TEXT_LINE_SIZE - 1) {
+			ReadCorresSrvIniLine(linebuf.data());
+			linebuf.clear();
+		}
+	}
+	reader->drop();
+	InsertServerList();
+	return true;
+}
+void DataManager::ReadCorresSrvIniLine(const char* linebuf) {
+	std::wstring name = GetINIValue(linebuf, "ServerName = ");
+	std::wstring host = GetINIValue(linebuf, "ServerHost = ");
+	std::wstring port = GetINIValue(linebuf, "ServerPort = ");
+	if (name != L"")
+		iniName = name;
+	if (host != L"")
+		iniHost = host;
+	if (port != L"")
+		iniPort = port;
+}
+std::wstring DataManager::GetINIValue(const char* line, const char* key) {
+	if (!line || !key) {
+		return L"";
+	}
+	const char* keyPos = strstr(line, key);
+	if (!keyPos) {
+		return L"";
+	}
+	const char* valStart = keyPos + strlen(key);
+	while (*valStart == ' ')
+		valStart++;
+	const char* valEnd = valStart;
+	while (*valEnd && *valEnd != '\n' && *valEnd != '\r')
+		valEnd++;
+	if (valStart == valEnd)
+		return L"";
+	std::string narrowStr(valStart, valEnd);
+	if (narrowStr.empty())
+		return L"";
+	wchar_t wbuf[1024];
+	BufferIO::DecodeUTF8(narrowStr.c_str(), wbuf);
+	return wbuf;
+}
+void DataManager::InsertServerList() {
+	if (iniName != L"" && iniHost != L"") {
+		std::wstring ip = iniHost;
+		if (iniPort != L"") {
+			ip += L":";
+			ip += iniPort;
+		}
+		_serverStrings.emplace_back(iniName, ip);
+	}
+	iniName.clear();
+	iniHost.clear();
+	iniPort.clear();
+}
 #endif //YGOPRO_SERVER_MODE
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
-	errmsg[0] = '\0';
-	std::strncat(errmsg, sqlite3_errmsg(pDB), sizeof errmsg - 1);
+	std::snprintf(errmsg, sizeof errmsg, "%s", sqlite3_errmsg(pDB));
 	if(pStmt)
 		sqlite3_finalize(pStmt);
 	return false;
@@ -435,19 +602,14 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	buffer = ScriptReaderExSingle("specials/", script_name, slen, 9);
 	if(buffer)
 		return buffer;
-	buffer = ScriptReaderExSingle("expansions/", script_name, slen);
-	if(buffer)
-		return buffer;
-#if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32)
-	buffer = ScriptReaderExSingle("Expansions/", script_name, slen);
-	if(buffer)
-		return buffer;
-#endif
-#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
+	for(auto ex : mainGame->GetExpansionsListU("/")) {
+		buffer = ScriptReaderExSingle(ex.c_str(), script_name, slen);
+		if(buffer)
+			return buffer;
+	}
 	buffer = ScriptReaderExSingle("", script_name, slen, 2, TRUE);
 	if(buffer)
 		return buffer;
-#endif
 	return ScriptReaderExSingle("", script_name, slen);
 }
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
