@@ -114,7 +114,9 @@ end
     end
 
     filter "system:windows"
+if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
+end
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
 if SERVER_PRO2_SUPPORT then

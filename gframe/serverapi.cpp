@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace ygo {
-	extern "C" DECL_DLLEXPORT int start_server(const char* args) {
+	YGOSERVER_API int start_server(const char* args) {
 		int argc = 1;
 		char** argv = new char* [13];
 		const char* server_name = "ygoserver";
@@ -44,7 +44,7 @@ namespace ygo {
 
 		return result;
 	}
-	extern "C" DECL_DLLEXPORT void stop_server() {
+	YGOSERVER_API void stop_server() {
 		NetServer::StopServer();
 	}
 }
