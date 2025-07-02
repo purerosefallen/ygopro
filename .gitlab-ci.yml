@@ -139,6 +139,9 @@ exec_windows_pro3:
     RELEASE_DIR: ''
     TARGET_FILE: ygopro
     PREMAKE5_BIN: premake5
+    BUILD_EVENT: '1'
+    BUILD_IRRLICHT: '1'
+    BUILD_SQLITE: '1'
   script:
     - ./.ci/configure-libevent.sh
     - $PREMAKE5_BIN gmake
