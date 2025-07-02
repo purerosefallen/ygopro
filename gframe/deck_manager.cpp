@@ -50,8 +50,7 @@ void DeckManager::LoadLFListSingle(irr::io::IReadFile* reader, bool insert) {
 void DeckManager::LoadLFList() {
 #ifdef SERVER_PRO2_SUPPORT
 	LoadLFListSingle("config/lflist.conf");
-#endif
-#ifdef SERVER_PRO3_SUPPORT
+#elif defined(SERVER_PRO3_SUPPORT)
 	LoadLFListSingle("Data/lflist.conf");
 #endif
 	LoadLFListSingle("specials/lflist.conf");

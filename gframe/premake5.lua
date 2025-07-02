@@ -119,7 +119,7 @@ if not SERVER_PRO3_SUPPORT then
 end
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
-if SERVER_PRO2_SUPPORT then
+if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
         targetname ("AI.Server")
 end
 if SERVER_MODE then
