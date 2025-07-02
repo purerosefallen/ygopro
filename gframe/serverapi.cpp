@@ -1,4 +1,12 @@
 #include "serverapi.h"
+#include "game.h"
+#include "netserver.h"
+#include "network.h"
+#include "config.h"
+#include "data_manager.h"
+#include "gframe.h"
+#include <event2/thread.h>
+#include <memory>
 
 namespace ygo {
 	extern "C" DECL_DLLEXPORT int start_server(const char* args) {
