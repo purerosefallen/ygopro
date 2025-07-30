@@ -97,7 +97,7 @@ public:
 	string_pointer strings_end() const noexcept {
 		return _strings.cend();
 	}
-#endif
+#endif //YGOPRO_SERVER_MODE
 	bool GetData(uint32_t code, CardData* pData) const;
 #ifndef YGOPRO_SERVER_MODE
 	bool GetString(uint32_t code, CardString* pStr) const;

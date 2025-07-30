@@ -71,7 +71,7 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 				cs.desc[i] = strBuffer;
 			}
 		}
-#endif
+#endif //YGOPRO_SERVER_MODE
 	}
 	sqlite3_finalize(pStmt);
 	for (const auto& entry : extra_setcode) {

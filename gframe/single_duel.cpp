@@ -1250,7 +1250,7 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			RefreshHand(0);
 			RefreshHand(1);
 #ifdef YGOPRO_SERVER_MODE
-			turn_player = BufferIO::Read<int8_t>(pbuf) & 0x1;
+			turn_player = BufferIO::Read<uint8_t>(pbuf) & 0x1;
 #else
 			pbuf++;
 #endif
@@ -1273,7 +1273,7 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 		}
 		case MSG_NEW_PHASE: {
 #ifdef YGOPRO_SERVER_MODE
-			phase = BufferIO::Read<int16_t>(pbuf);
+			phase = BufferIO::Read<uint16_t>(pbuf);
 #else
 			pbuf += 2;
 #endif
@@ -1956,28 +1956,28 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 	};
 
 	WriteMsg([&](uint8_t*& pbuf) {
-		BufferIO::Write<int8_t>(pbuf, MSG_START);
-		BufferIO::Write<int8_t>(pbuf, player);
-		BufferIO::Write<int8_t>(pbuf, host_info.duel_rule);
+		BufferIO::Write<uint8_t>(pbuf, MSG_START);
+		BufferIO::Write<uint8_t>(pbuf, player);
+		BufferIO::Write<uint8_t>(pbuf, host_info.duel_rule);
 		BufferIO::Write<int32_t>(pbuf, host_info.start_lp);
 		BufferIO::Write<int32_t>(pbuf, host_info.start_lp);
-		BufferIO::Write<int16_t>(pbuf, 0);
-		BufferIO::Write<int16_t>(pbuf, 0);
-		BufferIO::Write<int16_t>(pbuf, 0);
-		BufferIO::Write<int16_t>(pbuf, 0);
+		BufferIO::Write<uint16_t>(pbuf, 0);
+		BufferIO::Write<uint16_t>(pbuf, 0);
+		BufferIO::Write<uint16_t>(pbuf, 0);
+		BufferIO::Write<uint16_t>(pbuf, 0);
 	});
 
 	uint8_t newturn_count = (turn_player == 1) ? 2 : 1;
 	for (uint8_t i = 0; i < newturn_count; ++i) {
 		WriteMsg([&](uint8_t*& pbuf) {
-			BufferIO::Write<int8_t>(pbuf, MSG_NEW_TURN);
-			BufferIO::Write<int8_t>(pbuf, i);
+			BufferIO::Write<uint8_t>(pbuf, MSG_NEW_TURN);
+			BufferIO::Write<uint8_t>(pbuf, i);
 		});
 	}
 
 	WriteMsg([&](uint8_t*& pbuf) {
-		BufferIO::Write<int8_t>(pbuf, MSG_NEW_PHASE);
-		BufferIO::Write<int16_t>(pbuf, phase);
+		BufferIO::Write<uint8_t>(pbuf, MSG_NEW_PHASE);
+		BufferIO::Write<uint16_t>(pbuf, phase);
 	});
 
 	WriteMsg([&](uint8_t*& pbuf) {
@@ -2001,7 +2001,7 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 	// send MSG_REVERSE_DECK if deck is reversed
 	if(deck_reversed)
 		WriteMsg([&](uint8_t*& pbuf) {
-			BufferIO::Write<int8_t>(pbuf, MSG_REVERSE_DECK);
+			BufferIO::Write<uint8_t>(pbuf, MSG_REVERSE_DECK);
 		});
 
 	uint8_t query_buffer[SIZE_QUERY_BUFFER];
@@ -2026,9 +2026,9 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 			code |= 0x80000000; // mark as reversed
 		if(deck_reversed || position & POS_FACEUP)
 			WriteMsg([&](uint8_t*& pbuf) {
-				BufferIO::Write<int8_t>(pbuf, MSG_DECK_TOP);
-				BufferIO::Write<int8_t>(pbuf, i);
-				BufferIO::Write<int8_t>(pbuf, 0);
+				BufferIO::Write<uint8_t>(pbuf, MSG_DECK_TOP);
+				BufferIO::Write<uint8_t>(pbuf, i);
+				BufferIO::Write<uint8_t>(pbuf, 0);
 				BufferIO::Write<int32_t>(pbuf, code);
 			});
 	}
