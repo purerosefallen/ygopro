@@ -31,6 +31,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <vector>
 
 #define SD_BOTH 2
 #define SOCKET int
