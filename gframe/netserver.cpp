@@ -95,7 +95,7 @@ bool NetServer::StartServer(unsigned short port) {
 	std::memset(&sin, 0, sizeof sin);
 	server_port = port;
 	sin.sin_family = AF_INET;
-#ifdef SERVER_PRO2_SUPPORT
+#if defined(SERVER_PRO2_SUPPORT) && !defined(SERVER_PRO3_SUPPORT)
 	sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 #else
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);

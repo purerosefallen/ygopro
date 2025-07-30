@@ -124,6 +124,15 @@ exec_windows:
     - mkdir dist\windows
     - copy bin\release\x64\ygopro.exe dist\windows\ygopro.exe
 
+exec_windows_pro2:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-pro2-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\x64\AI.Server.exe dist\windows\AI.Server.exe
+
 exec_windows_pro3:
   extends: .exec_windows
   script:
@@ -133,12 +142,24 @@ exec_windows_pro3:
     - mkdir dist\windows
     - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver.dll
 
+exec_windows_mdpro2:
+  extends: .exec_windows
+  script:
+    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat --server-pro2-support'
+    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - mkdir dist
+    - mkdir dist\windows
+    - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver-mdpro2.dll
+
 .exec_unix_common:
   extends: ._exec_build
   variables:
     RELEASE_DIR: ''
     TARGET_FILE: ygopro
     PREMAKE5_BIN: premake5
+    BUILD_EVENT: '1'
+    BUILD_IRRLICHT: '1'
+    BUILD_SQLITE: '1'
   script:
     - ./.ci/configure-libevent.sh
     - $PREMAKE5_BIN gmake
@@ -318,6 +339,8 @@ upload_to_minio:
     - exec_linux
     - exec_linuxarm
     - exec_windows_pro3
+    - exec_windows_pro2
+    - exec_windows_mdpro2
     - exec_linux_pro3
     - exec_linuxarm_pro3
     - exec_debian
