@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <random>
+#include "config.h"
 #include "network.h"
 
 namespace ygo {
@@ -96,8 +97,8 @@ public:
 	static HostResult ParseHost(char *hostname);
 	static void SendPacketToServer(unsigned char proto) {
 		auto p = duel_client_write;
-		buffer_write<uint16_t>(p, 1);
-		buffer_write<uint8_t>(p, proto);
+		BufferIO::Write<uint16_t>(p, 1);
+		BufferIO::Write<uint8_t>(p, proto);
 #ifdef YGOPRO_MESSAGE_DEBUG
 		printf("CTOS: %d\n", proto);
 #endif
@@ -107,8 +108,8 @@ public:
 	static void SendPacketToServer(unsigned char proto, const ST& st) {
 		auto p = duel_client_write;
 		static_assert(sizeof(ST) <= MAX_DATA_SIZE, "Packet size is too large.");
-		buffer_write<uint16_t>(p, (uint16_t)(1 + sizeof(ST)));
-		buffer_write<uint8_t>(p, proto);
+		BufferIO::Write<uint16_t>(p, (uint16_t)(1 + sizeof(ST)));
+		BufferIO::Write<uint8_t>(p, proto);
 		std::memcpy(p, &st, sizeof(ST));
 #ifdef YGOPRO_MESSAGE_DEBUG
 		printf("CTOS: %d Length: %ld\n", proto, sizeof(ST));
@@ -119,8 +120,8 @@ public:
 		auto p = duel_client_write;
 		if (len > MAX_DATA_SIZE)
 			len = MAX_DATA_SIZE;
-		buffer_write<uint16_t>(p, (uint16_t)(1 + len));
-		buffer_write<uint8_t>(p, proto);
+		BufferIO::Write<uint16_t>(p, (uint16_t)(1 + len));
+		BufferIO::Write<uint8_t>(p, proto);
 		std::memcpy(p, buffer, len);
 #ifdef YGOPRO_MESSAGE_DEBUG
 		printf("CTOS: %d Length: %ld\n", proto, len);
