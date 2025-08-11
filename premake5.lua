@@ -83,7 +83,6 @@ newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrkl
 newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
 newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
 
-newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
 
@@ -295,10 +294,6 @@ if USE_AUDIO then
     end
 end
 
-if GetParam("winxp-support") and os.istarget("windows") then
-    WINXP_SUPPORT = true
-end
-
 IS_ARM=false
 
 function spawn(cmd)
@@ -395,12 +390,7 @@ workspace "YGOPro"
     filter "system:windows"
         systemversion "latest"
         startproject "YGOPro"
-        if WINXP_SUPPORT then
-            defines { "WINVER=0x0501" }
-            toolset "v141_xp"
-        else
-            defines { "WINVER=0x0601" } -- WIN7
-        end
+        defines { "WINVER=0x0601" } -- WIN7
         platforms { "Win32", "x64" }
 
     filter { "system:windows", "platforms:Win32" }
@@ -458,9 +448,7 @@ workspace "YGOPro"
 
     filter "action:vs*"
         cdialect "C11"
-        if not WINXP_SUPPORT then
-           conformancemode "On" 
-        end
+        conformancemode "On" 
         vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }

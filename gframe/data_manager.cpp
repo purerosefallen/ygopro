@@ -327,7 +327,7 @@ void DataManager::InsertServerList() {
 }
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	if (const char* msg = sqlite3_errmsg(pDB))
-		std::snprintf(errmsg, sizeof errmsg, "%s", msg);
+		mysnprintf(errmsg, "%s", msg);
 	else
 		errmsg[0] = '\0';
 	sqlite3_finalize(pStmt);
@@ -565,7 +565,7 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 }
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
 	char sname[256];
-	std::snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+	mysnprintf(sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 	if (use_irr) {
 		return ReadScriptFromIrrFS(sname, slen);
 	}
