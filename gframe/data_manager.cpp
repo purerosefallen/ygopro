@@ -14,7 +14,10 @@ irr::io::IFileSystem* DataManager::FileSystem = nullptr;
 DataManager dataManager;
 
 DataManager::DataManager() : _datas(32768), _strings(32768) {
-	extra_setcode = { {8512558u, {0x8f, 0x54, 0x59, 0x82, 0x13a}}, };
+	extra_setcode = { 
+		{8512558u, {0x8f, 0x54, 0x59, 0x82, 0x13a}},
+		{55088578u, {0x8f, 0x54, 0x59, 0x82, 0x13a}},
+	};
 }
 bool DataManager::ReadDB(sqlite3* pDB) {
 	sqlite3_stmt* pStmt = nullptr;
@@ -352,7 +355,7 @@ void DataManager::InsertServerList() {
 #endif //YGOPRO_SERVER_MODE
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	if (const char* msg = sqlite3_errmsg(pDB))
-		std::snprintf(errmsg, sizeof errmsg, "%s", msg);
+		mysnprintf(errmsg, "%s", msg);
 	else
 		errmsg[0] = '\0';
 	sqlite3_finalize(pStmt);
@@ -598,7 +601,7 @@ unsigned char* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 }
 unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len, unsigned int use_irr) {
 	char sname[256];
-	std::snprintf(sname, sizeof sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
+	mysnprintf(sname, "%s%s", path, script_name + pre_len); //default script name: ./script/c%d.lua
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	if (use_irr) {
 		return ReadScriptFromIrrFS(sname, slen);
