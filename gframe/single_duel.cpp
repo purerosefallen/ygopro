@@ -1402,13 +1402,23 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 			break;
 		}
 		case MSG_SPSUMMONING: {
+			pbufw = pbuf;
+			int cc = pbuf[4];
+			/*int cl = pbuf[5];*/
+			/*int cs = pbuf[6];*/
+			int cp = pbuf[7];
 			pbuf += 8;
-			NetServer::SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			NetServer::ReSendToPlayer(players[1]);
+			NetServer::SendBufferToPlayer(players[cc], STOC_GAME_MSG, offset, pbuf - offset);
+#ifdef YGOPRO_SERVER_MODE
+			NetServer::ReSendToPlayer(replay_recorder);
+#endif
+			if (cp & POS_FACEDOWN)
+				BufferIO::Write<int32_t>(pbufw, 0);
+			NetServer::SendBufferToPlayer(players[1 - cc], STOC_GAME_MSG, offset, pbuf - offset);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				NetServer::ReSendToPlayer(*oit);
 #ifdef YGOPRO_SERVER_MODE
-			NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
+			NetServer::ReSendToPlayer(cache_recorder);
 #endif
 			break;
 		}
