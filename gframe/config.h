@@ -5,6 +5,7 @@
 #define IRR_COMPILE_WITH_DX9_DEV_PACK
 
 #include <cerrno>
+#include <vector>
 
 #ifdef _WIN32
 
@@ -31,7 +32,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <vector>
 
 #define SD_BOTH 2
 #define SOCKET int
