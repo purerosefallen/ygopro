@@ -1,23 +1,26 @@
 #ifndef SERVERAPI_H
 #define SERVERAPI_H
 
-#include "game.h"
-#include "netserver.h"
-#include "network.h"
-#include "config.h"
-#include "data_manager.h"
-#include "gframe.h"
-#include <event2/thread.h>
-#include <memory>
-
-#ifdef WIN32
-#define DECL_DLLEXPORT __declspec(dllexport)
+#ifdef __cplusplus
+#define EXTERN_C extern "C"
 #else
-#define DECL_DLLEXPORT
+#define EXTERN_C
 #endif
+
+#ifndef YGOSERVER_API
+#if defined(__EMSCRIPTEN__)
+  #include <emscripten/emscripten.h>
+  #define YGOSERVER_API EXTERN_C EMSCRIPTEN_KEEPALIVE
+#elif defined(_WIN32)
+#define YGOSERVER_API EXTERN_C __declspec(dllexport)
+#else
+#define YGOSERVER_API EXTERN_C __attribute__ ((visibility ("default")))
+#endif
+#endif
+
 namespace ygo {
-	extern "C" DECL_DLLEXPORT int start_server(const char* args);
-	extern "C" DECL_DLLEXPORT void stop_server();
+	YGOSERVER_API int start_server(const char* args);
+	YGOSERVER_API void stop_server();
 }
 
 #endif // !SERVERAPI_H
