@@ -42,7 +42,7 @@ public:
 		Write<int32_t>(p, val);
 	}
 	[[deprecated]]
-	static void Write<uint16_t>(unsigned char*& p, short val) {
+	static void WriteInt16(unsigned char*& p, short val) {
 		Write<int16_t>(p, val);
 	}
 	[[deprecated]]
