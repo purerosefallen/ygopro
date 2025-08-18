@@ -333,28 +333,28 @@ irr::video::ITexture* ImageManager::GetTexture(int code, bool fit) {
 		irr::video::ITexture *img = nullptr;
 		for(auto ex : mainGame->GetExpansionsListU()) {
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/%d.png", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/%d.png", ex.c_str(), code);
 				img = GetTextureFromFile(file, width, height);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/%d.jpg", ex.c_str(), code);
 				img = GetTextureFromFile(file, width, height);
 			}
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.png"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/%d.png"), code);
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/%d.png", code);
+			mysnprintf(file, "pics/%d.png", code);
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/%d.jpg", code);
+			mysnprintf(file, "pics/%d.jpg", code);
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == nullptr && !mainGame->gameConf.use_image_scale) {
@@ -381,11 +381,11 @@ irr::video::ITexture* ImageManager::GetBigPicture(int code, float zoom) {
 	irr::video::IImage *srcimg = nullptr;
 	for(auto ex : mainGame->GetExpansionsListU())
 		if(srcimg == nullptr) {
-			std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+			mysnprintf(file, "%s/pics/%d.jpg", ex.c_str(), code);
 			srcimg = driver->createImageFromFile(file);
 		}
 	if(srcimg == nullptr) {
-		std::snprintf(file, sizeof file, "pics/%d.jpg", code);
+		mysnprintf(file, "pics/%d.jpg", code);
 		srcimg = driver->createImageFromFile(file);
 	}
 	if(srcimg == nullptr) {
@@ -414,55 +414,55 @@ int ImageManager::LoadThumbThread() {
 		irr::video::IImage *img = nullptr;
 		for(auto ex : mainGame->GetExpansionsListU()) {
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.png", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/thumbnail/%d.png", ex.c_str(), code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/thumbnail/%d.png"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/thumbnail/%d.png"), code);
 			img = imageManager.driver->createImageFromFile(file);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/thumbnail/%d.jpg"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/thumbnail/%d.jpg"), code);
 			img = imageManager.driver->createImageFromFile(file);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/thumbnail/%d.png", code);
+			mysnprintf(file, "pics/thumbnail/%d.png", code);
 			img = imageManager.driver->createImageFromFile(file);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
+			mysnprintf(file, "pics/thumbnail/%d.jpg", code);
 			img = imageManager.driver->createImageFromFile(file);
 		}
 		if(img == nullptr && mainGame->gameConf.use_image_scale) {
 			for(auto ex : mainGame->GetExpansionsListU()) {
 				if(img == nullptr) {
-					std::snprintf(file, sizeof file, "%s/pics/%d.png", ex.c_str(), code);
+					mysnprintf(file, "%s/pics/%d.png", ex.c_str(), code);
 					img = imageManager.driver->createImageFromFile(file);
 				}
 				if(img == nullptr) {
-					std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+					mysnprintf(file, "%s/pics/%d.jpg", ex.c_str(), code);
 					img = imageManager.driver->createImageFromFile(file);
 				}
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.png"), code);
+				mysnprintf(file, mainGame->GetLocaleDir("pics/%d.png"), code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
+				mysnprintf(file, mainGame->GetLocaleDir("pics/%d.jpg"), code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "pics/%d.png", code);
+				mysnprintf(file, "pics/%d.png", code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "pics/%d.jpg", code);
+				mysnprintf(file, "pics/%d.jpg", code);
 				img = imageManager.driver->createImageFromFile(file);
 			}
 		}
@@ -511,21 +511,21 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		irr::video::ITexture *img = nullptr;
 		for(auto ex : mainGame->GetExpansionsListU())
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/thumbnail/%d.jpg", ex.c_str(), code);
 				img = GetTextureFromFile(file, width, height);
 			}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
+			mysnprintf(file, "pics/thumbnail/%d.jpg", code);
 			img = GetTextureFromFile(file, width, height);
 		}
 		if(img == nullptr && mainGame->gameConf.use_image_scale) {
 			for(auto ex : mainGame->GetExpansionsListU())
 				if(img == nullptr) {
-					std::snprintf(file, sizeof file, "%s/pics/%d.jpg", ex.c_str(), code);
+					mysnprintf(file, "%s/pics/%d.jpg", ex.c_str(), code);
 					img = GetTextureFromFile(file, width, height);
 				}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "pics/%d.jpg", code);
+				mysnprintf(file, "pics/%d.jpg", code);
 				img = GetTextureFromFile(file, width, height);
 			}
 		}
@@ -538,7 +538,7 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		if(lit != tThumbLoading.end()) {
 			if(lit->second != nullptr) {
 				char file[256];
-				std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
+				mysnprintf(file, "pics/thumbnail/%d.jpg", code);
 				irr::video::ITexture* texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due to OpenGL
 				lit->second->drop();
 				tThumb[code] = texture;
@@ -572,28 +572,28 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		irr::video::ITexture* img = nullptr;
 		for(auto ex : mainGame->GetExpansionsListU()) {
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/field/%d.png", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/field/%d.png", ex.c_str(), code);
 				irr::video::ITexture* img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/field/%d.jpg", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/field/%d.jpg", ex.c_str(), code);
 				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			}
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.jpg"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/field/%d.jpg"), code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/field/%d.png", code);
+			mysnprintf(file, "pics/field/%d.png", code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/field/%d.jpg", code);
+			mysnprintf(file, "pics/field/%d.jpg", code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			if(img == nullptr) {
 				tFields[code] = nullptr;
@@ -621,28 +621,28 @@ irr::video::ITexture* ImageManager::GetTextureField(int code) {
 		irr::video::ITexture *img = nullptr;
 		for(auto ex : mainGame->GetExpansionsListU()) {
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/field/%d.png", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/field/%d.png", ex.c_str(), code);
 				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			}
 			if(img == nullptr) {
-				std::snprintf(file, sizeof file, "%s/pics/field/%d.jpg", ex.c_str(), code);
+				mysnprintf(file, "%s/pics/field/%d.jpg", ex.c_str(), code);
 				img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			}
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/field/%d.png"), code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, mainGame->GetLocaleDir("pics/field/%d.jpg"), code);
+			mysnprintf(file, mainGame->GetLocaleDir("pics/field/%d.jpg"), code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/field/%d.png", code);
+			mysnprintf(file, "pics/field/%d.png", code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 		}
 		if(img == nullptr) {
-			std::snprintf(file, sizeof file, "pics/field/%d.jpg", code);
+			mysnprintf(file, "pics/field/%d.jpg", code);
 			img = GetTextureFromFile(file, 512 * mainGame->xScale, 512 * mainGame->yScale);
 			if(img == nullptr) {
 				tFields[code] = nullptr;
