@@ -73,7 +73,7 @@ end
     end
 
     if BUILD_FREETYPE then
-        includedirs { "../freetype/include" }
+        includedirs { "../freetype/custom", "../freetype/include" }
     else
         includedirs { FREETYPE_INCLUDE_DIR }
         libdirs { FREETYPE_LIB_DIR }
@@ -114,10 +114,12 @@ end
     end
 
     filter "system:windows"
+if not SERVER_PRO3_SUPPORT then
         entrypoint "mainCRTStartup"
+end
         defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
-if SERVER_PRO2_SUPPORT then
+if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
         targetname ("AI.Server")
 end
 if SERVER_MODE then

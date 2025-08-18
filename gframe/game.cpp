@@ -101,8 +101,7 @@ void Game::MainServerLoop() {
 	LoadExpansionsAll();
 #ifdef SERVER_PRO2_SUPPORT
 	DataManager::FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
-#endif
-#ifdef SERVER_PRO3_SUPPORT
+#elif defined(SERVER_PRO3_SUPPORT)
 	DataManager::FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
@@ -274,7 +273,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Manjushage", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Memes", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1419,8 +1418,7 @@ void Game::LoadExpansionsAll() {
 			dataManager.LoadDB(fpath);
 		}
 	});
-#endif // SERVER_PRO2_SUPPORT
-#ifdef SERVER_PRO3_SUPPORT
+#elif defined(SERVER_PRO3_SUPPORT)
 	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
@@ -1512,11 +1510,8 @@ void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const w
 	}
 	FileSystem::TraversalDir(deckpath, [additem](const wchar_t* name, bool isdir) {
 		if (!isdir && IsExtension(name, L".ydk")) {
-			size_t len = std::wcslen(name);
 			wchar_t deckname[256]{};
-			size_t count = std::min(len - 4, sizeof deckname / sizeof deckname[0] - 1);
-			std::wcsncpy(deckname, name, count);
-			deckname[count] = 0;
+			BufferIO::CopyWideString(name, deckname, std::wcslen(name) - 4);
 			additem(deckname);
 		}
 	});
@@ -2011,7 +2006,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	if (is_valid) {
 		auto& cd = cit->second;
-		if (cd.is_alternative())
+		if (is_alternative(cd.code,cd.alias))
 			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
 		else
 			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
@@ -2199,7 +2194,7 @@ void Game::AddDebugMsg(const char* msg) {
 	}
 	if (enable_log & 0x2) {
 		char msgbuf[1040];
-		std::snprintf(msgbuf, sizeof msgbuf, "[Script Error]: %s", msg);
+		mysnprintf(msgbuf, "[Script Error]: %s", msg);
 		ErrorLog(msgbuf);
 	}
 #endif //YGOPRO_SERVER_MODE
