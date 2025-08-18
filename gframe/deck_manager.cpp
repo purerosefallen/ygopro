@@ -50,8 +50,7 @@ void DeckManager::LoadLFListSingle(irr::io::IReadFile* reader, bool insert) {
 void DeckManager::LoadLFList() {
 #ifdef SERVER_PRO2_SUPPORT
 	LoadLFListSingle("config/lflist.conf");
-#endif
-#ifdef SERVER_PRO3_SUPPORT
+#elif defined(SERVER_PRO3_SUPPORT)
 	LoadLFListSingle("Data/lflist.conf");
 #endif
 	LoadLFListSingle("specials/lflist.conf");
@@ -218,8 +217,9 @@ uint32_t DeckManager::LoadDeckFromStream(Deck& deck, std::istringstream& deckStr
 		}
 		if (linebuf[0] < '0' || linebuf[0] > '9')
 			continue;
+		errno = 0;
 		auto code = std::strtoul(linebuf.c_str(), nullptr, 10);
-		if (code >= UINT32_MAX)
+		if (errno || code > UINT32_MAX)
 			continue;
 		cardlist[ct++] = code;
 		if (is_side)
@@ -363,7 +363,7 @@ bool DeckManager::SaveDeck(const Deck& deck, const wchar_t* file) {
 		return false;
 	std::stringstream deckStream;
 	SaveDeck(deck, deckStream);
-	std::fwrite(deckStream.str().c_str(), 1, deckStream.str().length(), fp);
+	std::fputs(deckStream.str().c_str(), fp);
 	std::fclose(fp);
 	return true;
 }
@@ -384,21 +384,21 @@ bool DeckManager::LoadDeckFromCode(Deck& deck, const unsigned char *code, int le
 	int decoded_len = Base64::DecodedLength(code, len);
 	if(decoded_len > 1024 || decoded_len < 8 || !Base64::Decode(code, len, data_, decoded_len))
 		return false;
-	int mainc = BufferIO::ReadInt32(pdeck);
-	int sidec = BufferIO::ReadInt32(pdeck);
+	int mainc = BufferIO::Read<int32_t>(pdeck);
+	int sidec = BufferIO::Read<int32_t>(pdeck);
 	int errorcode = LoadDeck(deck, (uint32_t*)pdeck, mainc, sidec);
 	return (errorcode == 0);
 }
 int DeckManager::SaveDeckToCode(Deck& deck, unsigned char* code) {
 	unsigned char deckbuf[1024], *pdeck = deckbuf;
-	BufferIO::WriteInt32(pdeck, deck.main.size() + deck.extra.size());
-	BufferIO::WriteInt32(pdeck, deck.side.size());
+	BufferIO::Write<int32_t>(pdeck, deck.main.size() + deck.extra.size());
+	BufferIO::Write<int32_t>(pdeck, deck.side.size());
 	for(size_t i = 0; i < deck.main.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deck.main[i]->first);
+		BufferIO::Write<int32_t>(pdeck, deck.main[i]->first);
 	for(size_t i = 0; i < deck.extra.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deck.extra[i]->first);
+		BufferIO::Write<int32_t>(pdeck, deck.extra[i]->first);
 	for(size_t i = 0; i < deck.side.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deck.side[i]->first);
+		BufferIO::Write<int32_t>(pdeck, deck.side[i]->first);
 	int len = pdeck - deckbuf;
 	int encoded_len = Base64::EncodedLength(len);
 	Base64::Encode(deckbuf, len, code, encoded_len+1);

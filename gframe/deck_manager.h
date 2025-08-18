@@ -30,10 +30,13 @@ namespace ygo {
 	constexpr int SIDE_MAX_SIZE = YGOPRO_MAX_SIDE;
 	constexpr int PACK_MAX_SIZE = 1000;
 
+	constexpr int MAINC_MAX = 250;	// the limit of card_state
+	constexpr int SIDEC_MAX = MAINC_MAX;
+
 struct LFList {
 	unsigned int hash{};
 	std::wstring listName;
-	std::unordered_map<unsigned int, int> content;
+	std::unordered_map<uint32_t, int> content;
 };
 struct Deck {
 	std::vector<code_pointer> main;
@@ -108,17 +111,16 @@ private:
 	void _LoadLFListFromLineProvider(LineProvider getLine, bool insert = false) {
 		std::vector<LFList> loadedLists;
 		auto cur = loadedLists.rend(); // 注意：在临时 list 上操作
-		char line[256]{};
+		char linebuf[256]{};
 		wchar_t strBuffer[256]{};
-		char str1[16]{};
 
-		while (getLine(line, sizeof(line))) {
-			if (line[0] == '#')
+		while (getLine(linebuf, sizeof(linebuf))) {
+			if (linebuf[0] == '#')
 				continue;
-			if (line[0] == '!') {
-				auto len = std::strcspn(line, "\r\n");
-				line[len] = 0;
-				BufferIO::DecodeUTF8(&line[1], strBuffer);
+			if (linebuf[0] == '!') {
+				auto len = std::strcspn(linebuf, "\r\n");
+				linebuf[len] = 0;
+				BufferIO::DecodeUTF8(&linebuf[1], strBuffer);
 				LFList newlist;
 				newlist.listName = strBuffer;
 				newlist.hash = 0x7dfcee6a;
@@ -128,13 +130,20 @@ private:
 			}
 			if (cur == loadedLists.rend())
 				continue;
-			unsigned int code = 0;
-			int count = -1;
-			if (std::sscanf(line, "%10s%*[ ]%1d", str1, &count) != 2)
+			char* pos = linebuf;
+			errno = 0;
+			auto result = std::strtoul(pos, &pos, 10);
+			if (errno || result > UINT32_MAX)
+				continue;
+			if (pos == linebuf || *pos != ' ')
+				continue;
+			uint32_t code = static_cast<uint32_t>(result);
+			errno = 0;
+			int count = std::strtol(pos, &pos, 10);
+			if (errno)
 				continue;
 			if (count < 0 || count > 2)
 				continue;
-			code = std::strtoul(str1, nullptr, 10);
 			cur->content[code] = count;
 			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
 		}
