@@ -189,6 +189,7 @@ bool ReplayMode::StartDuel() {
 	mainGame->dInfo.duel_rule = cur_replay.params.duel_flag >> 16;
 	set_player_info(pduel, 0, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
 	set_player_info(pduel, 1, cur_replay.params.start_lp, cur_replay.params.start_hand, cur_replay.params.draw_count);
+	preload_script(pduel, "./script/patches/entry.lua");
 	preload_script(pduel, "./script/special.lua");
 	preload_script(pduel, "./script/init.lua");
 	mainGame->dInfo.lp[0] = cur_replay.params.start_lp;
