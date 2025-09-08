@@ -192,6 +192,7 @@ bool ReplayMode::StartDuel() {
 	preload_script(pduel, "./script/patches/entry.lua");
 	preload_script(pduel, "./script/special.lua");
 	preload_script(pduel, "./script/init.lua");
+	dataManager.LoadExtraScripts(pduel);
 	mainGame->dInfo.lp[0] = cur_replay.params.start_lp;
 	mainGame->dInfo.lp[1] = cur_replay.params.start_lp;
 	mainGame->dInfo.start_lp = cur_replay.params.start_lp;

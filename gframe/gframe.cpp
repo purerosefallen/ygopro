@@ -19,8 +19,9 @@ bool auto_watch_mode = false;
 bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
-bool expansions_specified = false;
 std::vector<std::wstring> expansions_list;
+std::vector<std::wstring> specials_list;
+std::vector<std::wstring> extra_script_list;
 
 void ClickButton(irr::gui::IGUIElement* btn) {
 	irr::SEvent event;
@@ -93,6 +94,7 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
+	bool expansions_specified = false;
 	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
@@ -226,6 +228,12 @@ int main(int argc, char* argv[]) {
 					expansions_specified = true;
 				}
 				expansions_list.push_back(wargv[i]);
+			}
+			continue;
+		} else if (!std::wcscmp(wargv[i], L"--extra-script")) { // specify extra script
+			++i;
+			if(i < wargc) {
+				extra_script_list.push_back(wargv[i]);
 			}
 			continue;
 		}

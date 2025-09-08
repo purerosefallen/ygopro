@@ -602,6 +602,13 @@ unsigned char* DataManager::ReadScriptFromFile(const char* script_name, int* sle
 	*slen = (int)len;
 	return scriptBuffer;
 }
+void DataManager::LoadExtraScripts(intptr_t pduel) {
+	char sname[1024];
+	for(auto name : extra_script_list) {
+		BufferIO::EncodeUTF8(name.c_str(), sname);
+		preload_script(pduel, sname);
+	}
+}
 bool DataManager::deck_sort_lv(code_pointer p1, code_pointer p2) {
 	if ((p1->second.type & 0x7) != (p2->second.type & 0x7))
 		return (p1->second.type & 0x7) < (p2->second.type & 0x7);

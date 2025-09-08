@@ -122,7 +122,8 @@ public:
 	static uint32_t CardReader(uint32_t, card_data*);
 	static unsigned char* ScriptReaderEx(const char* script_name, int* slen);
 	static unsigned char* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 2, unsigned int use_irr = FALSE);
-	
+	void LoadExtraScripts(intptr_t pduel);
+
 	//read by IFileSystem
 	static unsigned char* ReadScriptFromIrrFS(const char* script_name, int* slen);
 	//read by fread
