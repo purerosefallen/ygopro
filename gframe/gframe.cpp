@@ -20,7 +20,6 @@ bool open_file = false;
 wchar_t open_file_name[256] = L"";
 bool bot_mode = false;
 std::vector<std::wstring> expansions_list;
-std::vector<std::wstring> specials_list;
 std::vector<std::wstring> extra_script_list;
 
 void ClickButton(irr::gui::IGUIElement* btn) {
