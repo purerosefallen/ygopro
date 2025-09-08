@@ -93,16 +93,16 @@ HostInfo game_info;
 
 void Game::MainServerLoop() {
 #ifdef SERVER_ZIP_SUPPORT
-	deckManager.FileSystem = new irr::io::CFileSystem();
+	dataManager.FileSystem = new irr::io::CFileSystem();
 #endif
 	initUtils();
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansionsAll();
 #ifdef SERVER_PRO2_SUPPORT
-	deckManager.FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
+	dataManager.FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
 #elif defined(SERVER_PRO3_SUPPORT)
-	deckManager.FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
+	dataManager.FileSystem->addFileArchive("Data/script.zip", true, false, irr::io::EFAT_ZIP);
 #endif
 
 	server_port = NetServer::StartServer(server_port);
