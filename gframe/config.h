@@ -108,7 +108,7 @@ extern bool auto_watch_mode;
 extern bool open_file;
 extern wchar_t open_file_name[256];
 extern bool bot_mode;
-extern bool expansions_specified;
 extern std::vector<std::wstring> expansions_list;
+extern std::vector<std::wstring> extra_script_list;
 
 #endif

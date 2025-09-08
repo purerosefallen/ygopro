@@ -21,8 +21,8 @@
 #endif
 
 unsigned int enable_log = 0x3;
-bool expansions_specified = false;
 std::vector<std::wstring> expansions_list;
+std::vector<std::wstring> extra_script_list;
 #ifndef YGOPRO_SERVER_MODE
 bool exit_on_return = false;
 bool auto_watch_mode = false;
@@ -85,36 +85,59 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE
 	enable_log = 1;
-	bool expansions_specified = false;
 
-	wchar_t* expansions_env_val = nullptr;
+	auto trim = [](std::wstring& s) {
+		const wchar_t* ws = L" \t\r\n";
+		auto b = s.find_first_not_of(ws);
+		auto e = s.find_last_not_of(ws);
+		if (b == std::wstring::npos) { s.clear(); return; }
+		s = s.substr(b, e - b + 1);
+	};
 
-#ifdef _WIN32
-	expansions_env_val = _wgetenv(L"YGOPRO_EXPANSIONS");
-#else
-	const char* env_utf8 = std::getenv("YGOPRO_EXPANSIONS");
-	if(env_utf8) {
-		expansions_env_val = (wchar_t*)malloc(1024 * sizeof(wchar_t));
-		BufferIO::DecodeUTF8String(env_utf8, expansions_env_val, 1024);
-	}
-#endif
-
-	if (expansions_env_val && expansions_env_val[0] != L'\0') {
-		expansions_specified = true;
-		std::wstringstream ss(expansions_env_val);
+	auto parse_wcsv = [&](const std::wstring& wcsv, std::vector<std::wstring>& out) {
+		if (wcsv.empty()) return;
+		std::wstringstream ss(wcsv);
 		std::wstring item;
 		while (std::getline(ss, item, L',')) {
-			if (!item.empty()) {
-				expansions_list.push_back(item);
-			}
+			trim(item);
+			if (!item.empty()) out.push_back(item);
 		}
-	} else {
-		expansions_specified = false;
+	};
+
+	auto get_env_wstr = [&](const char* env_name) -> std::wstring {
+#ifdef _WIN32
+		auto envname_w_len = std::strlen(env_name) + 1;
+		wchar_t* envname_w = new wchar_t[envname_w_len];
+		BufferIO::DecodeUTF8String(env_name, envname_w, envname_w_len);
+		const wchar_t* wval = _wgetenv(envname_w);
+		delete[] envname_w;
+		return (wval && wval[0]) ? std::wstring(wval) : std::wstring();
+#else
+		const char* env_utf8 = std::getenv(env_name);
+		if (!env_utf8 || !env_utf8[0]) return {};
+		auto env_w_len = std::strlen(env_utf8) + 1;
+		wchar_t* env_w = new wchar_t[env_w_len];
+		BufferIO::DecodeUTF8String(env_utf8, env_w, env_w_len);
+		auto res = std::wstring(env_w);
+		delete[] env_w;
+		return res;
+#endif
+	};
+
+	auto load_env_list = [&](const char* env_name, std::vector<std::wstring>& out) {
+		std::wstring val = get_env_wstr(env_name);
+		parse_wcsv(val, out);
+	};
+
+	load_env_list("YGOPRO_EXPANSIONS", expansions_list);
+	if (expansions_list.empty()) {
 		expansions_list.push_back(L"./expansions");
 #if defined(SERVER_PRO3_SUPPORT) && !defined(_WIN32) && !defined(__APPLE__)
 		expansions_list.push_back(L"./Expansions");
 #endif
 	}
+	load_env_list("YGOPRO_EXTRA_SCRIPT", extra_script_list);
+
 	ygo::server_port = 7911;
 	ygo::replay_mode = 0;
 	ygo::duel_flags = 0;
@@ -219,6 +242,7 @@ int main(int argc, char* argv[]) {
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
+	bool expansions_specified = false;
 	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
 		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
@@ -352,6 +376,12 @@ int main(int argc, char* argv[]) {
 					expansions_specified = true;
 				}
 				expansions_list.push_back(wargv[i]);
+			}
+			continue;
+		} else if (!std::wcscmp(wargv[i], L"--extra-script")) { // specify extra script
+			++i;
+			if(i < wargc) {
+				extra_script_list.push_back(wargv[i]);
 			}
 			continue;
 		}
