@@ -64,6 +64,7 @@ int SingleMode::SinglePlayThread() {
 	preload_script(pduel, "./script/patches/entry.lua");
 	preload_script(pduel, "./script/special.lua");
 	preload_script(pduel, "./script/init.lua");
+	dataManager.LoadExtraScripts(pduel);
 	mainGame->dInfo.lp[0] = start_lp;
 	mainGame->dInfo.lp[1] = start_lp;
 	mainGame->dInfo.start_lp = start_lp;
