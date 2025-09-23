@@ -13,41 +13,45 @@ void DeckManager::LoadLFListFromLineProvider(const std::function<bool(char*, siz
 	auto cur = loadedLists.rend();
 	char linebuf[256]{};
 	wchar_t strBuffer[256]{};
-
-	while (getLine(linebuf, sizeof(linebuf))) {
-		if (linebuf[0] == '#') continue;
-		if (linebuf[0] == '!') {
-			auto len = std::strcspn(linebuf, "\r\n");
-			linebuf[len] = 0;
-			BufferIO::DecodeUTF8(&linebuf[1], strBuffer);
-			LFList newlist;
-			newlist.listName = strBuffer;
-			newlist.hash = 0x7dfcee6a;
-			loadedLists.push_back(newlist);
-			cur = loadedLists.rbegin();
-			continue;
+	if(true) {
+		while(getLine(linebuf, sizeof linebuf)) {
+			if(linebuf[0] == '#')
+				continue;
+			if(linebuf[0] == '!') {
+				auto len = std::strcspn(linebuf, "\r\n");
+				linebuf[len] = 0;
+				BufferIO::DecodeUTF8(&linebuf[1], strBuffer);
+				LFList newlist;
+				newlist.listName = strBuffer;
+				newlist.hash = 0x7dfcee6a;
+				loadedLists.push_back(newlist);
+				cur = loadedLists.rbegin();
+				continue;
+			}
+			if (cur == loadedLists.rend())
+				continue;
+			char* pos = linebuf;
+			errno = 0;
+			auto result = std::strtoul(pos, &pos, 10);
+			if (errno || result > UINT32_MAX)
+				continue;
+			if (pos == linebuf || *pos != ' ')
+				continue;
+			uint32_t code = static_cast<uint32_t>(result);
+			errno = 0;
+			int count = std::strtol(pos, &pos, 10);
+			if (errno)
+				continue;
+			if (count < 0 || count > 2)
+				continue;
+			cur->content[code] = count;
+			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
 		}
-		if (cur == loadedLists.rend()) continue;
-		char* pos = linebuf;
-		errno = 0;
-		auto result = std::strtoul(pos, &pos, 10);
-		if (errno || result > UINT32_MAX) continue;
-		if (pos == linebuf || *pos != ' ') continue;
-		uint32_t code = static_cast<uint32_t>(result);
-		errno = 0;
-		int count = std::strtol(pos, &pos, 10);
-		if (errno) continue;
-		if (count < 0 || count > 2) continue;
-		cur->content[code] = count;
-		cur->hash = cur->hash ^ ((code << 18) | (code >> 14))
-							 ^ ((code << (27 + count)) | (code >> (5 - count)));
 	}
-
-	if (insert) {
+	if(insert)
 		_lfList.insert(_lfList.begin(), loadedLists.begin(), loadedLists.end());
-	} else {
+	else
 		_lfList.insert(_lfList.end(), loadedLists.begin(), loadedLists.end());
-	}
 }
 void DeckManager::LoadLFListSingle(const char* path, bool insert) {
 	FILE* fp = myfopen(path, "r");
