@@ -311,9 +311,6 @@ bool Game::Initialize() {
 	wCreateHost->setVisible(false);
 	env->addStaticText(dataManager.GetSysString(1226), irr::core::rect<irr::s32>(20, 30, 220, 50), false, false, wCreateHost);
 	cbHostLFlist = env->addComboBox(irr::core::rect<irr::s32>(140, 25, 300, 50), wCreateHost);
-	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
-		cbHostLFlist->addItem(deckManager._lfList[i].listName.c_str(), deckManager._lfList[i].hash);
-	cbHostLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbHostLFlist->getItemCount() - 1);
 	env->addStaticText(dataManager.GetSysString(1225), irr::core::rect<irr::s32>(20, 60, 220, 80), false, false, wCreateHost);
 	cbRule = env->addComboBox(irr::core::rect<irr::s32>(140, 55, 300, 80), wCreateHost);
 	cbRule->setMaxSelectionRows(10);
@@ -1551,6 +1548,10 @@ void Game::RefreshLFList() {
 		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
 	cbLFlist->setEnabled(gameConf.use_lflist);
 	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
+	cbHostLFlist->clear();
+	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
+		cbHostLFlist->addItem(deckManager._lfList[i].listName.c_str(), deckManager._lfList[i].hash);
+	cbHostLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbHostLFlist->getItemCount() - 1);
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
