@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <sstream>
+#include <functional>
 #include "data_manager.h"
 #include "bufferio.h"
 
@@ -43,6 +44,8 @@ struct LFList {
 	unsigned int hash{};
 	std::wstring listName;
 	std::unordered_map<uint32_t, int> content;
+	std::unordered_map<std::wstring, uint32_t> credit_limits;
+	std::unordered_map<uint32_t, std::unordered_map<std::wstring, uint32_t>> credits;
 };
 struct Deck {
 	std::vector<code_pointer> main;
@@ -114,53 +117,7 @@ public:
 #endif //YGOPRO_SERVER_MODE
 
 private:
-	template<typename LineProvider>
-	void _LoadLFListFromLineProvider(LineProvider getLine, bool insert = false) {
-		std::vector<LFList> loadedLists;
-		auto cur = loadedLists.rend(); // 注意：在临时 list 上操作
-		char linebuf[256]{};
-		wchar_t strBuffer[256]{};
-
-		while (getLine(linebuf, sizeof(linebuf))) {
-			if (linebuf[0] == '#')
-				continue;
-			if (linebuf[0] == '!') {
-				auto len = std::strcspn(linebuf, "\r\n");
-				linebuf[len] = 0;
-				BufferIO::DecodeUTF8(&linebuf[1], strBuffer);
-				LFList newlist;
-				newlist.listName = strBuffer;
-				newlist.hash = 0x7dfcee6a;
-				loadedLists.push_back(newlist);
-				cur = loadedLists.rbegin();
-				continue;
-			}
-			if (cur == loadedLists.rend())
-				continue;
-			char* pos = linebuf;
-			errno = 0;
-			auto result = std::strtoul(pos, &pos, 10);
-			if (errno || result > UINT32_MAX)
-				continue;
-			if (pos == linebuf || *pos != ' ')
-				continue;
-			uint32_t code = static_cast<uint32_t>(result);
-			errno = 0;
-			int count = std::strtol(pos, &pos, 10);
-			if (errno)
-				continue;
-			if (count < 0 || count > 3)
-				continue;
-			cur->content[code] = count;
-			cur->hash = cur->hash ^ ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
-		}
-
-		if (insert) {
-			_lfList.insert(_lfList.begin(), loadedLists.begin(), loadedLists.end());
-		} else {
-			_lfList.insert(_lfList.end(), loadedLists.begin(), loadedLists.end());
-		}
-	}
+	void LoadLFListFromLineProvider(const std::function<bool(char*, size_t)>& getLine, bool insert = false);
 };
 
 extern DeckManager deckManager;
