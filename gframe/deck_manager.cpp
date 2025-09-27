@@ -210,9 +210,6 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		}
 		return (uint32_t)0;
 	};
-	char remaining_limit[4]{};
-	for (int i = 0; i < 4; ++i)
-		remaining_limit[i] = i;
 	const unsigned int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
 	unsigned int avail = 0;
 	if (rule >= 0 && rule < (int)(sizeof rule_map / sizeof rule_map[0]))
@@ -229,14 +226,8 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end()) {
-			auto limit = it->second;
-			if(limit > 3)
-				limit = 3;
-			if(remaining_limit[limit] == 0)
-				return (DECKERROR_LFLIST << 28) | cit->first;
-				--remaining_limit[limit];
-		}
+		if(it != list.end() && dc > it->second)
+			return (DECKERROR_LFLIST << 28) | cit->first;
 		auto spend_credit_error = spend_credit(code);
 		if(spend_credit_error)
 			return spend_credit_error;
@@ -253,14 +244,8 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end()) {
-			auto limit = it->second;
-			if(limit > 3)
-				limit = 3;
-			if(remaining_limit[limit] == 0)
-				return (DECKERROR_LFLIST << 28) | cit->first;
-				--remaining_limit[limit];
-		}
+		if(it != list.end() && dc > it->second)
+			return (DECKERROR_LFLIST << 28) | cit->first;
 		auto spend_credit_error = spend_credit(code);
 		if(spend_credit_error)
 			return spend_credit_error;
@@ -277,14 +262,8 @@ unsigned int DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, int r
 		if(dc > 3)
 			return (DECKERROR_CARDCOUNT << 28) | cit->first;
 		auto it = list.find(code);
-		if(it != list.end()) {
-			auto limit = it->second;
-			if(limit > 3)
-				limit = 3;
-			if(remaining_limit[limit] == 0)
-				return (DECKERROR_LFLIST << 28) | cit->first;
-				--remaining_limit[limit];
-		}
+		if(it != list.end() && dc > it->second)
+			return (DECKERROR_LFLIST << 28) | cit->first;
 		auto spend_credit_error = spend_credit(code);
 		if(spend_credit_error)
 			return spend_credit_error;
