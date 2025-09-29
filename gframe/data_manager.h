@@ -15,6 +15,7 @@ namespace irr {
 }
 
 namespace ygo {
+
 constexpr int MAX_STRING_ID = 0x7ff;
 constexpr uint32_t MIN_CARD_ID = (uint32_t)(MAX_STRING_ID + 1) >> 4;
 constexpr uint32_t MAX_CARD_ID = 0x0fffffffU;
@@ -112,6 +113,11 @@ public:
 	char errmsg[512]{};
 	const wchar_t* unknown_string{ L"???" };
 	irr::io::IFileSystem* FileSystem{};
+
+	static constexpr int STRING_ID_ATTRIBUTE = 1010;
+	static constexpr int STRING_ID_RACE = 1020;
+	static constexpr int STRING_ID_TYPE = 1050;
+	static constexpr int TYPES_COUNT = 27;
 
 	static unsigned char scriptBuffer[0x100000];
 	static uint32_t CardReader(uint32_t, card_data*);
