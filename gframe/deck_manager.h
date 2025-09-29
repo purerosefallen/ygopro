@@ -77,7 +77,6 @@ public:
 	std::vector<LFList> _lfList;
 
 #ifndef YGOPRO_SERVER_MODE
-	static char deckBuffer[0x10000];
 	static constexpr int MAX_YDK_SIZE = 0x10000;
 #endif
 
