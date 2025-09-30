@@ -1171,7 +1171,6 @@ void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
 	if(win == wCardSelect) {
 		for(int i = 0; i < 5; ++i)
 			btnCardSelect[i]->setDrawImage(false);
-		dField.conti_selecting = false;
 		stCardListTip->setVisible(false);
 		for(auto& pcard : dField.selectable_cards)
 			dField.SetShowMark(pcard, false);
@@ -1218,18 +1217,42 @@ void Game::DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList* lf
 		otloc = irr::core::recti(pos.X + 7, pos.Y + 50 * mainGame->yScale, pos.X + 37 * mainGame->xScale, pos.Y + 65 * mainGame->yScale);
 	}
 	driver->draw2DImage(img, dragloc, irr::core::rect<irr::s32>(0, 0, size.Width, size.Height));
+	auto current_limitloc = limitloc;
+	auto credit_max_display = CARD_THUMB_WIDTH / 20;
+	auto next_limitloc = [&]() {
+		auto this_limitloc = current_limitloc;
+		auto width = current_limitloc.getWidth();
+		current_limitloc.UpperLeftCorner.X += width;
+		current_limitloc.LowerRightCorner.X += width;
+		--credit_max_display;
+		return this_limitloc;
+	};
 	auto lfit = lflist->content.find(lcode);
-	if (lfit != lflist->content.end()) {
-		switch(lfit->second) {
-		case 0:
-			driver->draw2DImage(imageManager.tLim, limitloc, irr::core::recti(0, 0, 64, 64), 0, 0, true);
-			break;
-		case 1:
-			driver->draw2DImage(imageManager.tLim, limitloc, irr::core::recti(64, 0, 128, 64), 0, 0, true);
-			break;
-		case 2:
-			driver->draw2DImage(imageManager.tLim, limitloc, irr::core::recti(0, 64, 64, 128), 0, 0, true);
-			break;
+	if (lfit != lflist->content.end() && lfit->second >= 0 && lfit->second <= 2) {
+		auto lim_texture_offset_x = 0;
+		auto lim_texture_offset_y = 0;
+		if(lfit->second == 1) {
+			lim_texture_offset_x = 64;
+		} else if(lfit->second == 2) {
+			lim_texture_offset_y = 64;
+		}
+		driver->draw2DImage(imageManager.tLim, next_limitloc(), irr::core::recti(lim_texture_offset_x, lim_texture_offset_y, lim_texture_offset_x + 64, lim_texture_offset_y + 64), 0, 0, true);
+	}
+	auto lfcredit = lflist->credits.find(lcode);
+	if(lfcredit != lflist->credits.end()) {
+		for(auto& credit_entry : lfcredit->second) {
+			if(credit_max_display <= 0)
+				break;
+			auto value = credit_entry.second;
+			if(value > 0 && value <= 100) {
+				auto cvalue = value - 1; // 1-100 => 0-99
+				// pick the first and second digit
+				auto digit1 = cvalue / 10;
+				auto digit2 = cvalue % 10;
+				auto credit_texture_offset_x = digit2 * 64;
+				auto credit_texture_offset_y = digit1 * 64;
+				driver->draw2DImage(imageManager.tLimCredit, next_limitloc(), irr::core::recti(credit_texture_offset_x, credit_texture_offset_y, credit_texture_offset_x + 64, credit_texture_offset_y + 64), 0, 0, true);
+			}
 		}
 	}
 	bool showAvail = false;
@@ -1438,8 +1461,9 @@ void Game::DrawDeckBd() {
 				else
 					myswprintf(adBuffer, L"%d/-", ptr->second.attack);
 			}
-			myswprintf(textBuffer, L"%ls/%ls %ls%d", dataManager.FormatAttribute(ptr->second.attribute).c_str(), dataManager.FormatRace(ptr->second.race).c_str(),
-				form, ptr->second.level);
+			const auto& attribute = dataManager.FormatAttribute(ptr->second.attribute);
+			const auto& race = dataManager.FormatRace(ptr->second.race);
+			myswprintf(textBuffer, L"%ls/%ls %ls%d", attribute.c_str(), race.c_str(), form, ptr->second.level);
 			DrawShadowText(textFont, textBuffer, Resize(860, 187 + i * 66, 955, 207 + i * 66), Resize(1, 1, 0, 0));
 			if(ptr->second.type & TYPE_PENDULUM) {
 				myswprintf(scaleBuffer, L" %d/%d", ptr->second.lscale, ptr->second.rscale);
@@ -1449,7 +1473,8 @@ void Game::DrawDeckBd() {
 		} else {
 			myswprintf(textBuffer, L"%ls", dataManager.GetName(ptr->first));
 			DrawShadowText(textFont, textBuffer, Resize(860, 165 + i * 66, 955, 185 + i * 66), Resize(1, 1, 0, 0));
-			myswprintf(textBuffer, L"%ls", dataManager.FormatType(ptr->second.type).c_str());
+			const auto& type = dataManager.FormatType(ptr->second.type);
+			myswprintf(textBuffer, L"%ls", type.c_str());
 			DrawShadowText(textFont, textBuffer, Resize(860, 187 + i * 66, 955, 207 + i * 66), Resize(1, 1, 0, 0));
 			myswprintf(textBuffer, L"%ls", availBuffer);
 			DrawShadowText(textFont, textBuffer, Resize(860, 209 + i * 66, 955, 229 + i * 66), Resize(1, 1, 0, 0));
