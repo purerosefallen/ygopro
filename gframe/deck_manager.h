@@ -73,7 +73,9 @@ struct DeckArray {
 
 class DeckManager {
 public:
+#ifndef YGOPRO_SERVER_MODE
 	Deck current_deck;
+#endif
 	std::vector<LFList> _lfList;
 
 #ifndef YGOPRO_SERVER_MODE
