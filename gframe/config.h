@@ -101,10 +101,14 @@ inline FILE* mywfopen(const wchar_t* filename, const char* mode) {
 #include <irrlicht.h>
 #endif
 
+#ifdef YGOPRO_SERVER_MODE
+#define SHARE_VERSION constexpr
+#else
 #if defined(_MSC_VER)
 #  define SHARE_VERSION __declspec(selectany)
 #else
 #  define SHARE_VERSION __attribute__((weak))
+#endif
 #endif
 
 extern "C" {
