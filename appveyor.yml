@@ -62,7 +62,7 @@ after_build:
   - mv ../script ygopro/
   - cd ygopro
   - mkdir gframe
-  - cp -rf ../../gframe/game.cpp gframe/ # Toss game.cpp in for version detection
+  - cp -rf ../../gframe/config.h gframe/ # Toss config.h in for version detection
   # - cp -rf config_build config
   - cd ../..
 

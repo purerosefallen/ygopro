@@ -29,8 +29,6 @@ namespace irr {
 #include <thread>
 #include "myfilesystem.h"
 
-unsigned short PRO_VERSION = 0x1362;
-
 namespace ygo {
 
 Game* mainGame;
