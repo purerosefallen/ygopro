@@ -13,6 +13,10 @@ project "lua"
         defines { "LUA_USE_LONGJMP" }
     end
 
+    if SERVER_PRO3_SUPPORT or OCGCORE_DYNAMIC then
+        defines { "LUA_USE_LONGJMP" }
+    end
+
     filter "configurations:Debug"
         defines { "LUA_USE_APICHECK" }
 
