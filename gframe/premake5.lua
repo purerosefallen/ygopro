@@ -8,7 +8,10 @@ project "YGOPro"
 
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
+    links { "ocgcore", "clzma", "cspmemvfs", "sqlite3", "irrlicht", "freetype", "event" }
+    if not OCGCORE_DYNAMIC then
+        links { LUA_LIB_NAME }
+    end
 
     if not BUILD_LUA then
         libdirs { LUA_LIB_DIR }
