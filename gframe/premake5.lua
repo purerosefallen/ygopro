@@ -13,7 +13,7 @@ project "YGOPro"
         links { LUA_LIB_NAME }
     end
 
-    if not BUILD_LUA then
+    if not BUILD_LUA and not OCGCORE_DYNAMIC then
         libdirs { LUA_LIB_DIR }
     end
 
