@@ -111,6 +111,9 @@ project "YGOPro"
     filter "system:linux"
         links { "GL", "X11", "Xxf86vm", "dl", "pthread" }
         linkoptions { "-fopenmp", "-static-libstdc++", "-static-libgcc" }
+        if OCGCORE_DYNAMIC then
+            linkoptions { "-Wl,-rpath=./" }
+        end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
