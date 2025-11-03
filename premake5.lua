@@ -27,6 +27,7 @@ IRRKLANG_PRO = false
 IRRKLANG_PRO_BUILD_IKPMP3 = false
 -- ocgcore dynamic
 OCGCORE_DYNAMIC = false
+USE_DYNAMIC = false
 
 -- Read settings from command line or environment variables
 
@@ -361,6 +362,10 @@ end
 
 if GetParam("ocgcore-dynamic") then
     OCGCORE_DYNAMIC = true
+end
+
+if OCGCORE_DYNAMIC then
+    USE_DYNAMIC = true
 end
 
 workspace "YGOPro"
