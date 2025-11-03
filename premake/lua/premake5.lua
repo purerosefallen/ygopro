@@ -8,14 +8,6 @@ project "lua"
     if not GetParam("no-lua-safe") then
         removefiles { "src/linit.c" }
     end
-    
-    if SERVER_PRO3_SUPPORT then
-        defines { "LUA_USE_LONGJMP" }
-    end
-
-    if SERVER_PRO3_SUPPORT or OCGCORE_DYNAMIC then
-        defines { "LUA_USE_LONGJMP" }
-    end
 
     filter "configurations:Debug"
         defines { "LUA_USE_APICHECK" }
@@ -28,3 +20,6 @@ project "lua"
 
     filter "system:linux"
         defines { "LUA_USE_LINUX" }
+        if USE_DYNAMIC then
+            pic "On"
+        end

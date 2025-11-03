@@ -27,6 +27,7 @@ IRRKLANG_PRO = false
 IRRKLANG_PRO_BUILD_IKPMP3 = false
 -- ocgcore dynamic
 OCGCORE_DYNAMIC = false
+USE_DYNAMIC = false
 
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
@@ -408,6 +409,14 @@ if GetParam("ocgcore-dynamic") then
     OCGCORE_DYNAMIC = true
 end
 
+if OCGCORE_DYNAMIC then
+    USE_DYNAMIC = true
+end
+
+if SERVER_PRO3_SUPPORT then
+    USE_DYNAMIC = true
+end
+
 workspace "YGOPro"
     location "build"
     language "C++"
@@ -421,6 +430,10 @@ workspace "YGOPro"
 
     for _, boolOption in ipairs(boolOptions) do
         ApplyBoolean(boolOption)
+    end
+
+    if SERVER_PRO3_SUPPORT then
+        defines { "LUA_USE_LONGJMP" }
     end
 
     filter "system:windows"

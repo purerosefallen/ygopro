@@ -166,9 +166,10 @@ end
 
     filter "system:linux"
         links { "dl", "pthread" }
-        linkoptions { "-static-libstdc++", "-static-libgcc" }
-        if OCGCORE_DYNAMIC then
+        if USE_DYNAMIC then
             linkoptions { "-Wl,-rpath=./" }
+        else
+            linkoptions { "-static-libstdc++", "-static-libgcc" }
         end
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
