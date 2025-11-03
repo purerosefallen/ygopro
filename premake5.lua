@@ -413,10 +413,6 @@ if OCGCORE_DYNAMIC or USE_AUDIO and AUDIO_LIB=='irrklang' and not IRRKLANG_PRO t
     USE_DYNAMIC = true
 end
 
-if SERVER_PRO3_SUPPORT then
-    USE_DYNAMIC = true
-end
-
 workspace "YGOPro"
     location "build"
     language "C++"
