@@ -364,7 +364,7 @@ if GetParam("ocgcore-dynamic") then
     OCGCORE_DYNAMIC = true
 end
 
-if OCGCORE_DYNAMIC then
+if OCGCORE_DYNAMIC or USE_AUDIO and AUDIO_LIB=='irrklang' and not IRRKLANG_PRO then
     USE_DYNAMIC = true
 end
 
