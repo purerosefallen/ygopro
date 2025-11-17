@@ -25,6 +25,9 @@ MINIAUDIO_BUILD_OPUS_VORBIS = os.istarget("windows")
 -- BUILD_IRRKLANG is impossible because irrKlang is not open source
 IRRKLANG_PRO = false
 IRRKLANG_PRO_BUILD_IKPMP3 = false
+-- ocgcore dynamic
+OCGCORE_DYNAMIC = false
+USE_DYNAMIC = false
 
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
@@ -92,6 +95,7 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
+newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
@@ -401,18 +405,12 @@ if os.istarget("macosx") then
     end
 end
 
-function getGlibcVersion()
-    local output = os.outputof("getconf GNU_LIBC_VERSION")
-    local major, minor, patch = output:match("glibc (%d+)%.(%d+)%.?(%d*)")
+if GetParam("ocgcore-dynamic") then
+    OCGCORE_DYNAMIC = true
+end
 
-    if major and minor then
-        major = tonumber(major)
-        minor = tonumber(minor)
-        patch = tonumber(patch) or 0
-        return (major << 16) | (minor << 8) | patch
-    end
-
-    return 0
+if OCGCORE_DYNAMIC or USE_AUDIO and AUDIO_LIB=='irrklang' and not IRRKLANG_PRO then
+    USE_DYNAMIC = true
 end
 
 workspace "YGOPro"
@@ -428,6 +426,10 @@ workspace "YGOPro"
 
     for _, boolOption in ipairs(boolOptions) do
         ApplyBoolean(boolOption)
+    end
+
+    if SERVER_PRO3_SUPPORT then
+        defines { "LUA_USE_LONGJMP" }
     end
 
     filter "system:windows"
