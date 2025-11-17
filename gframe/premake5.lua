@@ -28,7 +28,7 @@ end
         defines { "SERVER_PRO3_SUPPORT" }
     end
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "event" }
+    links { "ocgcore", "clzma", "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht", "cspmemvfs" }
@@ -50,10 +50,13 @@ project "ygopro"
 
     files { "*.cpp", "*.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
+    links { "ocgcore", "clzma", "cspmemvfs", "sqlite3", "irrlicht", "freetype", "event" }
 end
+    if not OCGCORE_DYNAMIC then
+        links { LUA_LIB_NAME }
+    end
 
-    if not BUILD_LUA then
+    if not BUILD_LUA and not OCGCORE_DYNAMIC then
         libdirs { LUA_LIB_DIR }
     end
 
@@ -163,7 +166,11 @@ end
 
     filter "system:linux"
         links { "dl", "pthread" }
-        linkoptions { "-static-libstdc++", "-static-libgcc" }
+        if USE_DYNAMIC then
+            linkoptions { "-Wl,-rpath=./" }
+        else
+            linkoptions { "-static-libstdc++", "-static-libgcc" }
+        end
 if not SERVER_MODE then
         links { "GL", "X11", "Xxf86vm" }
         linkoptions { "-fopenmp" }

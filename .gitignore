@@ -79,6 +79,9 @@ build
 /premake4.exe
 /premake5*
 /premake5.exe
+/*.so
+/*.dll
+/*.dylib
 
 # others
 *.log
