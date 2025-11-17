@@ -20,3 +20,6 @@ project "lua"
 
     filter "system:linux"
         defines { "LUA_USE_LINUX" }
+        if USE_DYNAMIC then
+            pic "On"
+        end
