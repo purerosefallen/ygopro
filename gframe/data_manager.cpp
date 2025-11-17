@@ -92,10 +92,9 @@ bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	spmembuffer_t* mem = (spmembuffer_t*)std::calloc(sizeof(spmembuffer_t), 1);
 	spmemvfs_env_init();
 	mem->total = mem->used = reader->getSize();
-	mem->data = (char*)std::malloc(mem->total + 1);
+	mem->data = (char*)std::malloc(mem->total);
 	reader->read(mem->data, mem->total);
 	reader->drop();
-	(mem->data)[mem->total] = '\0';
 	bool ret{};
 	if (spmemvfs_open_db(&db, "temp.db", mem) != SQLITE_OK)
 		ret = Error(db.handle);
