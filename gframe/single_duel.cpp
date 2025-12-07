@@ -1926,6 +1926,8 @@ void SingleDuel::EndDuel() {
 		for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 			NetServer::ReSendToPlayer(*oit);
 		NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
+	} else {
+		NetServer::ReSendToPlayer(replay_recorder);
 	}
 #else
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
