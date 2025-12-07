@@ -278,7 +278,7 @@ jobs:
         merge-multiple: true
 
     - name: GitHub Release
-      uses: salix5/action-automatic-releases@node20
+      uses: salix5/action-automatic-releases@e0545bc14e9677f38aa573f1a52563022f987356
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "server-latest"
