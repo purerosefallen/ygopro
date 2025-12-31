@@ -1954,15 +1954,17 @@ bool DeckBuilder::check_limit(code_pointer pointer) {
 		}
 		return valid;
 	};
+	auto limitcode_has_credit = filterList->credits.find(limitcode) != filterList->credits.end();
 	auto handle_card = [&](ygo::code_pointer& card) {
 		if (card->first == limitcode || card->second.alias == limitcode) {
 			limit--;
-			if(limit <= 0)
+			if(limit < 0)
 				return false;
 		}
+		if(!limitcode_has_credit)
+			return true;
 		auto code = card->second.alias ? card->second.alias : card->first;
-		spend_credit(code);
-		return true;
+		return spend_credit(code);
 	};
 	for (auto& card : deckManager.current_deck.main) {
 		if(!handle_card(card))
@@ -1976,6 +1978,6 @@ bool DeckBuilder::check_limit(code_pointer pointer) {
 		if(!handle_card(card))
 			return false;
 	}
-	return spend_credit(limitcode);
+	return handle_card(pointer);
 }
 }
