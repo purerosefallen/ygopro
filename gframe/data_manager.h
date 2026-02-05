@@ -58,6 +58,8 @@ struct CardString {
 using code_pointer = std::unordered_map<uint32_t, CardDataC>::const_iterator;
 using string_pointer = std::unordered_map<uint32_t, CardString>::const_iterator;
 
+class ClientCard;
+
 class DataManager {
 public:
 	DataManager();
@@ -109,6 +111,7 @@ public:
 	std::vector<unsigned int> GetSetCodes(std::wstring setname) const;
 	std::wstring GetNumString(int num, bool bracket = false) const;
 	const wchar_t* FormatLocation(int location, int sequence) const;
+	const wchar_t* FormatLocation(ClientCard* card) const;
 	std::wstring FormatAttribute(unsigned int attribute) const;
 	std::wstring FormatRace(unsigned int race) const;
 	std::wstring FormatType(unsigned int type) const;
@@ -127,6 +130,7 @@ public:
 	irr::io::IFileSystem* FileSystem{};
 #endif
 
+	static constexpr int STRING_ID_LOCATION = 1000;
 	static constexpr int STRING_ID_ATTRIBUTE = 1010;
 	static constexpr int STRING_ID_RACE = 1020;
 	static constexpr int STRING_ID_TYPE = 1050;

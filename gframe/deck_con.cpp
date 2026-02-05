@@ -180,10 +180,12 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				std::sort(deckManager.current_deck.main.begin(), deckManager.current_deck.main.end(), DataManager::deck_sort_lv);
 				std::sort(deckManager.current_deck.extra.begin(), deckManager.current_deck.extra.end(), DataManager::deck_sort_lv);
 				std::sort(deckManager.current_deck.side.begin(), deckManager.current_deck.side.end(), DataManager::deck_sort_lv);
+				is_modified = true;
 				break;
 			}
 			case BUTTON_SHUFFLE_DECK: {
 				std::shuffle(deckManager.current_deck.main.begin(), deckManager.current_deck.main.end(), rnd);
+				is_modified = true;
 				break;
 			}
 			case BUTTON_SAVE_DECK: {
@@ -746,17 +748,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				mainGame->ClearCardInfo();
-				unsigned char deckbuf[1024]{};
-				auto pdeck = deckbuf;
-				BufferIO::Write<int32_t>(pdeck, static_cast<int32_t>(deckManager.current_deck.main.size() + deckManager.current_deck.extra.size()));
-				BufferIO::Write<int32_t>(pdeck, static_cast<int32_t>(deckManager.current_deck.side.size()));
-				for(size_t i = 0; i < deckManager.current_deck.main.size(); ++i)
-					BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.main[i]->first);
-				for(size_t i = 0; i < deckManager.current_deck.extra.size(); ++i)
-					BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.extra[i]->first);
-				for(size_t i = 0; i < deckManager.current_deck.side.size(); ++i)
-					BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.side[i]->first);
-				DuelClient::SendBufferToServer(CTOS_UPDATE_DECK, deckbuf, pdeck - deckbuf);
+				DuelClient::SendUpdateDeck(deckManager.current_deck);
 				break;
 			}
 			case BUTTON_SIDE_RELOAD: {
@@ -794,6 +786,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					deckManager.current_deck.main.clear();
 					deckManager.current_deck.extra.clear();
 					deckManager.current_deck.side.clear();
+					is_modified = true;
 				} else if(prev_operation == BUTTON_DELETE_DECK) {
 					int sel = prev_sel;
 					mainGame->cbDBDecks->setSelected(sel);
@@ -1137,6 +1130,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			is_starting_dragging = false;
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(mainGame->showingcode, 1);
 				break;
 			}
@@ -1166,6 +1160,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_LMOUSE_DOUBLE_CLICK: {
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == root && hovered_code) {
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(hovered_code, 1);
 				break;
 			}
@@ -1425,8 +1420,6 @@ void DeckBuilder::GetHoveredCard() {
 	if(!is_draging && pre_code != hovered_code) {
 		if(hovered_code)
 			mainGame->ShowCardInfo(hovered_code);
-		if(pre_code)
-			imageManager.RemoveTexture(pre_code);
 	}
 }
 void DeckBuilder::StartFilter() {
