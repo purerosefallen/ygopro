@@ -5,6 +5,7 @@
 #include <set>
 #include <random>
 #include "config.h"
+#include "deck_manager.h"
 #include "network.h"
 
 namespace ygo {
@@ -91,6 +92,7 @@ public:
 	static void SetResponseI(int32_t respI);
 	static void SetResponseB(void* respB, size_t len);
 	static void SendResponse();
+	static void SendUpdateDeck(const Deck& deck);
 	static unsigned int LookupHost(char *host);
 	static bool LookupSRV(char *hostname, HostResult* result);
 	static bool CheckHostnameSplitter(char *hostname, HostResult *result);

@@ -4,12 +4,31 @@
 #include "config.h"
 #include "data_manager.h"
 #include <unordered_map>
+#include <vector>
+#include <string>
 #include <queue>
 #include <mutex>
 
 namespace ygo {
 
 class ImageManager {
+private:
+	void resizeImage(irr::video::IImage* src, irr::video::IImage* dest, bool use_threading);
+	irr::video::ITexture* addTexture(const char* name, irr::video::IImage* srcimg, irr::s32 width, irr::s32 height);
+	
+	// Internal implementation using void* for type erasure
+	void* LoadFromSearchPathsImpl(int code, const char* subpath, const std::vector<const char*>& extensions, void* (*callback)(void*, const char*), void* userdata);
+	
+	// Load file from search paths (expansions, locale, default) with callback
+	template<typename Func>
+	auto LoadFromSearchPaths(int code, const char* subpath, const std::vector<const char*>& extensions, Func callback) -> decltype(callback("")) {
+		using RetType = decltype(callback(""));
+		auto wrapper = [](void* userdata, const char* file) -> void* {
+			auto& func = *static_cast<Func*>(userdata);
+			return static_cast<void*>(func(file));
+		};
+		return static_cast<RetType>(LoadFromSearchPathsImpl(code, subpath, extensions, wrapper, &callback));
+	}
 public:
 	std::vector<std::wstring> ImageList[7];
 	int saved_image_id[7];
@@ -21,9 +40,10 @@ public:
 	void RefreshImageDir(std::wstring path, int image_type);
 	void SetDevice(irr::IrrlichtDevice* dev);
 	void ClearTexture();
-	void RemoveTexture(int code);
 	void ResizeTexture();
 	irr::video::ITexture* GetTextureFromFile(const char* file, irr::s32 width, irr::s32 height);
+	irr::video::IImage* GetImage(int code);
+	irr::video::ITexture* GetTexture(int code, irr::s32 width, irr::s32 height);
 	irr::video::ITexture* GetTexture(int code, bool fit = false);
 	irr::video::ITexture* GetBigPicture(int code, float zoom);
 	irr::video::ITexture* GetTextureThumb(int code);
