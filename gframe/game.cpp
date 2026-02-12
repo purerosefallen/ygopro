@@ -271,7 +271,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Loschen", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Crisis", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1257,16 +1257,13 @@ void Game::InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, i
 	scrCardText->setPos(0);
 }
 std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos) {
-	size_t pbuffer = 0;
 	irr::u32 _width = 0, _height = 0;
 	wchar_t prev = 0;
-	wchar_t strBuffer[4096]{};
-	constexpr size_t buffer_len = sizeof strBuffer / sizeof strBuffer[0] - 1;
+	std::wstring result;
+	result.reserve(4096);
 	const size_t text_len = std::wcslen(text);
 
 	for(size_t i = 0; i < text_len ; ++i) {
-		if (pbuffer >= buffer_len)
-			break;
 		wchar_t c = text[i];
 		irr::u32 w = font->getCharDimension(c).Width + font->getKerningWidth(c, prev);
 		prev = c;
@@ -1274,31 +1271,28 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 			continue;
 		}
 		if (c == L'\n') {
-			strBuffer[pbuffer++] = L'\n';
+			result.push_back(L'\n');
 			_width = 0;
 			_height++;
 			prev = 0;
 			if (_height == pos)
-				pbuffer = 0;
+				result.clear();
 			continue;
 		}
 		if (_width > 0 && _width + w > cWidth) {
-			strBuffer[pbuffer++] = L'\n';
+			result.push_back(L'\n');
 			_width = 0;
 			_height++;
 			prev = 0;
 			if (_height == pos)
-				pbuffer = 0;
+				result.clear();
 		}
-		if (pbuffer >= buffer_len)
-			break;
 		_width += w;
-		strBuffer[pbuffer++] = c;
+		result.push_back(c);
 	}
-	strBuffer[pbuffer] = 0;
 	if (pControl)
-		pControl->setText(strBuffer);
-	return std::wstring(strBuffer);
+		pControl->setText(result.c_str());
+	return result;
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansions(const wchar_t* expansions_path) {
@@ -1646,8 +1640,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 			gameConf.antialias = std::strtol(valbuf, nullptr, 10);
 		} else if(!std::strcmp(strbuf, "use_d3d")) {
 			gameConf.use_d3d = std::strtol(valbuf, nullptr, 10) > 0;
-		} else if(!std::strcmp(strbuf, "use_image_scale")) {
-			gameConf.use_image_scale = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if (!std::strcmp(strbuf, "use_image_scale_multi_thread")) {
 			gameConf.use_image_scale_multi_thread = std::strtol(valbuf, nullptr, 10) > 0;
 		} else if (!std::strcmp(strbuf, "use_image_load_background_thread")) {
@@ -1796,60 +1788,6 @@ bool Game::LoadConfigFromFile(const char* file) {
 	return true;
 }
 void Game::LoadConfig() {
-	gameConf.use_d3d = 0;
-	gameConf.use_image_scale = 1;
-	gameConf.antialias = 0;
-	gameConf.serverport = 7911;
-	gameConf.textfontsize = 14;
-	gameConf.nickname[0] = 0;
-	gameConf.gamename[0] = 0;
-	gameConf.bot_deck_path[0] = 0;
-	gameConf.lastcategory[0] = 0;
-	gameConf.lastdeck[0] = 0;
-	gameConf.numfont[0] = 0;
-	gameConf.textfont[0] = 0;
-	gameConf.lasthost[0] = 0;
-	gameConf.roompass[0] = 0;
-	//settings
-	gameConf.chkMAutoPos = 0;
-	gameConf.chkSTAutoPos = 1;
-	gameConf.chkRandomPos = 0;
-	gameConf.chkAutoChain = 0;
-	gameConf.chkWaitChain = 0;
-	gameConf.chkDefaultShowChain = 0;
-	gameConf.chkIgnore1 = 0;
-	gameConf.chkIgnore2 = 0;
-	gameConf.use_lflist = 1;
-	gameConf.default_lflist = 0;
-	gameConf.default_rule = YGOPRO_DEFAULT_DUEL_RULE;
-	gameConf.hide_setname = 0;
-	gameConf.hide_hint_button = 0;
-	gameConf.control_mode = 0;
-	gameConf.draw_field_spell = 1;
-	gameConf.separate_clear_button = 1;
-	gameConf.auto_search_limit = 0;
-	gameConf.search_multiple_keywords = 1;
-	gameConf.search_regex = 0;
-	gameConf.chkIgnoreDeckChanges = 0;
-	gameConf.defaultOT = 1;
-	gameConf.enable_bot_mode = 1;
-	gameConf.quick_animation = 0;
-	gameConf.auto_save_replay = 0;
-	gameConf.draw_single_chain = 0;
-	gameConf.hide_player_name = 0;
-	gameConf.prefer_expansion_script = 0;
-	gameConf.ask_mset = 0;
-	gameConf.enable_sound = true;
-	gameConf.sound_volume = 0.5;
-	gameConf.enable_music = true;
-	gameConf.music_volume = 0.5;
-	gameConf.music_mode = 1;
-	gameConf.window_maximized = false;
-	gameConf.window_width = 1024;
-	gameConf.window_height = 640;
-	gameConf.resize_popup_menu = false;
-	gameConf.chkEnablePScale = 1;
-	gameConf.skin_index = -1;
 	LoadConfigFromFile("system.conf"); //default config
 #ifdef YGOPRO_COMPAT_MYCARD
 	if(!gameConf.locale || wcslen(gameConf.locale) <= 0)
@@ -1910,9 +1848,6 @@ void Game::LoadConfig() {
 		}
 		*/
 #endif
-#ifndef YGOPRO_COMPAT_MYCARD
-		//SaveConfig();
-#endif
 	}
 }
 void Game::SaveConfig() {
@@ -1924,7 +1859,6 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
 	char linebuf[CONFIG_LINE_SIZE];
 	std::fprintf(fp, "use_d3d = %d\n", gameConf.use_d3d ? 1 : 0);
-	std::fprintf(fp, "use_image_scale = %d\n", gameConf.use_image_scale ? 1 : 0);
 	std::fprintf(fp, "use_image_scale_multi_thread = %d\n", gameConf.use_image_scale_multi_thread ? 1 : 0);
 	std::fprintf(fp, "use_image_load_background_thread = %d\n", gameConf.use_image_load_background_thread ? 1 : 0);
 	std::fprintf(fp, "pro_version = %d\n", PRO_VERSION);
