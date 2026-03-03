@@ -1268,7 +1268,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			return;
 		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
-#ifdef _WIN32
+#ifdef _IRR_WCHAR_FILESYSTEM
 			dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
 #else
 			char upath[1024];
@@ -1282,7 +1282,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 		auto archiveObj = dataManager.FileSystem->getFileArchive(i);
 		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
-#ifdef _WIN32
+#ifdef _IRR_WCHAR_FILESYSTEM
 			const wchar_t* fname = archive->getFullFileName(j).c_str();
 #else
 			wchar_t fname[1024];
@@ -1290,7 +1290,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			BufferIO::DecodeUTF8(uname, fname);
 #endif
 			auto createReader = [&]() {
-#ifdef _WIN32
+#ifdef _IRR_WCHAR_FILESYSTEM
 				return archiveObj->createAndOpenFile(fname);
 #else
 				return archiveObj->createAndOpenFile(uname);
