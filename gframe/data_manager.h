@@ -66,6 +66,7 @@ public:
 	DataManager();
 	bool ReadDB(sqlite3* pDB);
 	bool LoadDB(const wchar_t* wfile);
+	bool LoadDB(const char* file);
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 	bool LoadDB(irr::io::IReadFile* reader);
 #endif
@@ -109,7 +110,9 @@ public:
 	const wchar_t* GetVictoryString(uint32_t code) const;
 	const wchar_t* GetCounterName(uint32_t code) const;
 	const wchar_t* GetSetName(uint32_t code) const;
+#ifndef YGOPRO_SERVER_MODE
 	std::vector<uint32_t> GetSetCodes(std::wstring setname) const;
+#endif
 	std::wstring GetNumString(int num, bool bracket = false) const;
 	const wchar_t* FormatLocation(int location, int sequence) const;
 	const wchar_t* FormatLocation(ClientCard* card) const;

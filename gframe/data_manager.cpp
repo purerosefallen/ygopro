@@ -92,6 +92,9 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 bool DataManager::LoadDB(const wchar_t* wfile) {
 	char file[256];
 	BufferIO::EncodeUTF8(wfile, file);
+	return LoadDB(file);
+}
+bool DataManager::LoadDB(const char* file) {
 #if defined(YGOPRO_SERVER_MODE) && !defined(SERVER_ZIP_SUPPORT)
 	bool ret{};
 	sqlite3* pDB{};
@@ -102,13 +105,11 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 	sqlite3_close(pDB);
 	return ret;
 #else
-#ifdef _WIN32
-	auto reader = FileSystem->createAndOpenFile(wfile);
-#else
 	auto reader = FileSystem->createAndOpenFile(file);
-#endif
 	return LoadDB(reader);
+#endif
 }
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	if(reader == nullptr)
 		return false;
@@ -127,8 +128,8 @@ bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	spmemvfs_close_db(&db);
 	spmemvfs_env_fini();
 	return ret;
-#endif //SERVER_ZIP_SUPPORT
 }
+#endif
 #ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(const char* file) {
 	FILE* fp = myfopen(file, "r");
@@ -434,28 +435,43 @@ const wchar_t* DataManager::GetCounterName(uint32_t code) const {
 const wchar_t* DataManager::GetSetName(uint32_t code) const {
 	return GetMapString(_setnameStrings, code);
 }
+#ifndef YGOPRO_SERVER_MODE
 std::vector<uint32_t> DataManager::GetSetCodes(std::wstring setname) const {
 	std::vector<uint32_t> matchingCodes;
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
-		auto xpos = csit->second.find_first_of(L'|');//setname|another setname or extra info
-#ifndef YGOPRO_SERVER_MODE
-		if (mainGame->CheckRegEx(csit->second, setname, true)) {
+		if(mainGame->CheckRegEx(csit->second, setname, true)) {
 			matchingCodes.push_back(csit->first);
-		} else
-#endif
-		if(setname.size() < 2) {
-			if(csit->second.compare(0, xpos, setname) == 0
-				|| csit->second.compare(xpos + 1, csit->second.length(), setname) == 0)
-				matchingCodes.push_back(csit->first);
-		} else {
-			if(csit->second.substr(0, xpos).find(setname) != std::wstring::npos
-				|| csit->second.substr(xpos + 1).find(setname) != std::wstring::npos) {
-				matchingCodes.push_back(csit->first);
+			continue;
+		}
+		const std::wstring& setnameString = csit->second;
+		size_t start = 0;
+		while(start < setnameString.size()) { // handle "setname|another setname"
+			auto pos = setnameString.find(L'|', start);
+			std::wstring token;
+			if(pos == std::wstring::npos)
+				token = setnameString.substr(start);
+			else
+				token = setnameString.substr(start, pos - start);
+			if(setname.size() < 2) {
+				// exact match for short set names to avoid too many results
+				if(token == setname) {
+					matchingCodes.push_back(csit->first);
+					break;
+				}
+			} else {
+				if(token.find(setname) != std::wstring::npos) {
+					matchingCodes.push_back(csit->first);
+					break;
+				}
 			}
+			if(pos == std::wstring::npos)
+				break;
+			start = pos + 1;
 		}
 	}
 	return matchingCodes;
 }
+#endif
 std::wstring DataManager::GetNumString(int num, bool bracket) const {
 	if(!bracket)
 		return std::to_wstring(num);
@@ -605,13 +621,7 @@ unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* s
 }
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* slen) {
-#ifdef _WIN32
-	wchar_t fname[256]{};
-	BufferIO::DecodeUTF8(script_name, fname);
-	auto reader = dataManager.FileSystem->createAndOpenFile(fname);
-#else
 	auto reader = dataManager.FileSystem->createAndOpenFile(script_name);
-#endif
 	if (!reader)
 		return nullptr;
 	int size = reader->read(scriptBuffer, sizeof scriptBuffer);
