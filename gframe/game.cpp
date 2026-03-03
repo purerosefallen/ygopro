@@ -1298,48 +1298,9 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 void Game::LoadExpansions(const char* expansions_path) {
 	bool lflist_changed = false;
 	bool server_list_changed = false;
-	FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
-		if (isdir)
-			return;
-		char fpath[1024];
-		mysnprintf(fpath, "%s/%s", expansions_path, name);
-		if (IsExtension(name, ".cdb")) {
-			dataManager.LoadDB(fpath);
-			return;
-		}
-		if (IsExtension(name, ".conf")) {
-			if(!std::strcmp(name, "lflist.conf")) {
-				deckManager.LoadLFListSingle(fpath, true);
-				lflist_changed = true;
-			} else if(!std::strcmp(name, "servers.conf")) {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadServerList(fpath);
-				server_list_changed = true;
-#endif
-			} else {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadStrings(fpath);
-#endif
-			}
-			return;
-		}
-#ifndef YGOPRO_SERVER_MODE
-		if (!std::strcmp(name, "corres_srv.ini")) {
-			dataManager.LoadCorresSrvIni(fpath);
-			server_list_changed = true;
-			return;
-		}
-#endif
+
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
-		if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
-			dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
-			return;
-		}
-#endif //SERVER_ZIP_SUPPORT
-	});
-#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
-	for(irr::u32 i = 0; i < dataManager.FileSystem->getFileArchiveCount(); ++i) {
-		auto archiveObj = dataManager.FileSystem->getFileArchive(i);
+	auto processArchive = [&](irr::io::IFileArchive* archiveObj) {
 		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 			const char* name = archive->getFullFileName(j).c_str();
@@ -1380,7 +1341,60 @@ void Game::LoadExpansions(const char* expansions_path) {
 			}
 #endif // YGOPRO_SERVER_MODE
 		}
-	}
+	};
+
+	auto mountAndProcess = [&](const char* fpath) {
+		irr::u32 countBefore = dataManager.FileSystem->getFileArchiveCount();
+		dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
+		for(irr::u32 i = countBefore; i < dataManager.FileSystem->getFileArchiveCount(); ++i)
+			processArchive(dataManager.FileSystem->getFileArchive(i));
+	};
+
+	if (IsExtension(expansions_path, ".zip") || IsExtension(expansions_path, ".ypk")) {
+		mountAndProcess(expansions_path);
+	} else {
+#endif // SERVER_ZIP_SUPPORT
+	FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
+		if (isdir)
+			return;
+		char fpath[1024];
+		mysnprintf(fpath, "%s/%s", expansions_path, name);
+		if (IsExtension(name, ".cdb")) {
+			dataManager.LoadDB(fpath);
+			return;
+		}
+		if (IsExtension(name, ".conf")) {
+			if(!std::strcmp(name, "lflist.conf")) {
+				deckManager.LoadLFListSingle(fpath, true);
+				lflist_changed = true;
+			} else if(!std::strcmp(name, "servers.conf")) {
+#ifndef YGOPRO_SERVER_MODE
+				dataManager.LoadServerList(fpath);
+				server_list_changed = true;
+#endif
+			} else {
+#ifndef YGOPRO_SERVER_MODE
+				dataManager.LoadStrings(fpath);
+#endif
+			}
+			return;
+		}
+#ifndef YGOPRO_SERVER_MODE
+		if (!std::strcmp(name, "corres_srv.ini")) {
+			dataManager.LoadCorresSrvIni(fpath);
+			server_list_changed = true;
+			return;
+		}
+#endif
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+		if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
+			mountAndProcess(fpath);
+			return;
+		}
+#endif
+	});
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+	} // else
 #endif //SERVER_ZIP_SUPPORT
 #ifndef YGOPRO_SERVER_MODE
 	if(lflist_changed)
