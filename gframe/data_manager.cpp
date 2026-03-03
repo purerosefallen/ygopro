@@ -80,11 +80,10 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 bool DataManager::LoadDB(const wchar_t* wfile) {
 	char file[256];
 	BufferIO::EncodeUTF8(wfile, file);
-#ifdef _IRR_WCHAR_FILESYSTEM
-	auto reader = FileSystem->createAndOpenFile(wfile);
-#else
+	return LoadDB(file);
+}
+bool DataManager::LoadDB(const char* file) {
 	auto reader = FileSystem->createAndOpenFile(file);
-#endif
 	return LoadDB(reader);
 }
 bool DataManager::LoadDB(irr::io::IReadFile* reader) {
@@ -584,13 +583,7 @@ unsigned char* DataManager::ScriptReaderExSingle(const char* path, const char* s
 	return ReadScriptFromFile(sname, slen);
 }
 unsigned char* DataManager::ReadScriptFromIrrFS(const char* script_name, int* slen) {
-#ifdef _IRR_WCHAR_FILESYSTEM
-	wchar_t fname[256]{};
-	BufferIO::DecodeUTF8(script_name, fname);
-	auto reader = dataManager.FileSystem->createAndOpenFile(fname);
-#else
 	auto reader = dataManager.FileSystem->createAndOpenFile(script_name);
-#endif
 	if (!reader)
 		return nullptr;
 	int size = reader->read(scriptBuffer, sizeof scriptBuffer);

@@ -75,7 +75,6 @@ project "YGOPro"
 
     filter "system:windows"
         entrypoint "mainCRTStartup"
-        defines { "_IRR_WCHAR_FILESYSTEM" }
         files "ygopro.rc"
         links { "ws2_32", "Dnsapi", "iphlpapi" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then

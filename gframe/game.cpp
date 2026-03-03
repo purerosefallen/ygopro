@@ -112,8 +112,8 @@ bool Game::Initialize() {
 		return false;
 	}
 	dataManager.FileSystem = device->getFileSystem();
-	if(dataManager.LoadDB(GetLocaleDirWide("cards.cdb"))) {} else
-	if(!dataManager.LoadDB(L"cards.cdb")) {
+	if(dataManager.LoadDB(GetLocaleDir("cards.cdb"))) {} else
+	if(!dataManager.LoadDB("cards.cdb")) {
 		ErrorLog("Failed to load card database (cards.cdb)!");
 		return false;
 	}
@@ -124,7 +124,7 @@ bool Game::Initialize() {
 	}
 	if(dataManager.LoadServerList(GetLocaleDir("servers.conf"))) {} else
 	dataManager.LoadServerList("servers.conf");
-	dataManager.LoadDB(L"specials/special.cdb");
+	dataManager.LoadDB("specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	if(!numFont) {
@@ -1238,23 +1238,23 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 		pControl->setText(result.c_str());
 	return result;
 }
-void Game::LoadExpansions(const wchar_t* expansions_path) {
+void Game::LoadExpansions(const char* expansions_path) {
 	bool lflist_changed = false;
 	bool server_list_changed = false;
-	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
+	FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
 		if (isdir)
 			return;
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"%ls/%ls", expansions_path, name);
-		if (IsExtension(name, L".cdb")) {
+		char fpath[1024];
+		mysnprintf(fpath, "%s/%s", expansions_path, name);
+		if (IsExtension(name, ".cdb")) {
 			dataManager.LoadDB(fpath);
 			return;
 		}
-		if (IsExtension(name, L".conf")) {
-			if(!std::wcscmp(name, L"lflist.conf")) {
+		if (IsExtension(name, ".conf")) {
+			if(!std::strcmp(name, "lflist.conf")) {
 				deckManager.LoadLFListSingle(fpath, true);
 				lflist_changed = true;
-			} else if(!std::wcscmp(name, L"servers.conf")) {
+			} else if(!std::strcmp(name, "servers.conf")) {
 				dataManager.LoadServerList(fpath);
 				server_list_changed = true;
 			} else {
@@ -1262,19 +1262,13 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 			}
 			return;
 		}
-		if (!std::wcscmp(name, L"corres_srv.ini")) {
+		if (!std::strcmp(name, "corres_srv.ini")) {
 			dataManager.LoadCorresSrvIni(fpath);
 			server_list_changed = true;
 			return;
 		}
-		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
-#ifdef _IRR_WCHAR_FILESYSTEM
+		if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
 			dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
-#else
-			char upath[1024];
-			BufferIO::EncodeUTF8(fpath, upath);
-			dataManager.FileSystem->addFileArchive(upath, true, false, irr::io::EFAT_ZIP);
-#endif
 			return;
 		}
 	});
@@ -1282,30 +1276,20 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 		auto archiveObj = dataManager.FileSystem->getFileArchive(i);
 		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
-#ifdef _IRR_WCHAR_FILESYSTEM
-			const wchar_t* fname = archive->getFullFileName(j).c_str();
-#else
-			wchar_t fname[1024];
-			const char* uname = archive->getFullFileName(j).c_str();
-			BufferIO::DecodeUTF8(uname, fname);
-#endif
+			const char* name = archive->getFullFileName(j).c_str();
 			auto createReader = [&]() {
-#ifdef _IRR_WCHAR_FILESYSTEM
-				return archiveObj->createAndOpenFile(fname);
-#else
-				return archiveObj->createAndOpenFile(uname);
-#endif
+				return archiveObj->createAndOpenFile(name);
 			};
-			if (IsExtension(fname, L".cdb")) {
-				dataManager.LoadDB(createReader());
+			if (IsExtension(name, ".cdb")) {
+				dataManager.LoadDB(name);
 				continue;
 			}
-			if (IsExtension(fname, L".conf")) {
+			if (IsExtension(name, ".conf")) {
 				auto reader = createReader();
-				if(!std::wcscmp(fname, L"lflist.conf")) {
+				if(!std::strcmp(name, "lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
-				} else if(!std::wcscmp(fname, L"servers.conf")) {
+				} else if(!std::strcmp(name, "servers.conf")) {
 					dataManager.LoadServerList(reader);
 					server_list_changed = true;
 				} else {
@@ -1313,11 +1297,13 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				}
 				continue;
 			}
-			if (!std::wcscmp(fname, L"corres_srv.ini")) {
-					dataManager.LoadCorresSrvIni(createReader());
-					server_list_changed = true;
+			if (!std::strcmp(name, "corres_srv.ini")) {
+				dataManager.LoadCorresSrvIni(createReader());
+				server_list_changed = true;
 			}
-			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
+			if (!mystrncasecmp(name, "pack/", 5) && IsExtension(name, ".ydk")) {
+				wchar_t fname[1024];
+				BufferIO::DecodeUTF8(name, fname);
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
 			}
@@ -1329,7 +1315,7 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 		RefreshServerList();
 }
 void Game::LoadExpansionsAll() {
-	auto list = GetExpansionsList();
+	auto list = GetExpansionsListU();
 	for (const auto& exp : list) {
 		LoadExpansions(exp.c_str());
 	}
