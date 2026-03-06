@@ -1918,7 +1918,7 @@ void DeckBuilder::pop_side(int seq) {
 	GetHoveredCard();
 }
 bool DeckBuilder::check_limit(code_pointer pointer) {
-	auto limitcode = pointer->second.alias ? pointer->second.alias : pointer->first;
+	auto limitcode = get_original_code_rule(pointer->first, pointer->second.alias, DataManager::CardReader);
 	int limit = 3;
 	auto flit = filterList->content.find(limitcode);
 	if(flit != filterList->content.end())
@@ -1947,15 +1947,15 @@ bool DeckBuilder::check_limit(code_pointer pointer) {
 	};
 	auto limitcode_has_credit = filterList->credits.find(limitcode) != filterList->credits.end();
 	auto handle_card = [&](ygo::code_pointer& card) {
-		if (card->first == limitcode || card->second.alias == limitcode) {
+		auto card_code = get_original_code_rule(card->first, card->second.alias, DataManager::CardReader);
+		if (card_code == limitcode) {
 			limit--;
 			if(limit < 0)
 				return false;
 		}
 		if(!limitcode_has_credit)
 			return true;
-		auto code = card->second.alias ? card->second.alias : card->first;
-		return spend_credit(code);
+		return spend_credit(card_code);
 	};
 	for (auto& card : deckManager.current_deck.main) {
 		if(!handle_card(card))
