@@ -1868,9 +1868,8 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if (is_valid && !gameConf.hide_setname) {
 		auto& cd = cit->second;
 		auto target = cit;
-		auto orig = get_original_code_rule(cd.code, cd.alias, DataManager::CardReader);
-		if (orig != cd.code && _datas.find(orig) != _datas.end()) {
-			target = _datas.find(orig);
+		if (cd.alias && _datas.find(cd.alias) != _datas.end()) {
+			target = _datas.find(cd.alias);
 		}
 		if (target->second.setcode[0]) {
 			offset = 23;// *yScale;
