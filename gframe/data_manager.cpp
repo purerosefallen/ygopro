@@ -18,6 +18,12 @@ static const char SELECT_STMT[] = "SELECT datas.id, datas.ot, datas.alias, datas
 " texts.name, texts.desc, texts.str1, texts.str2, texts.str3, texts.str4, texts.str5, texts.str6, texts.str7, texts.str8,"
 " texts.str9, texts.str10, texts.str11, texts.str12, texts.str13, texts.str14, texts.str15, texts.str16 FROM datas INNER JOIN texts ON datas.id = texts.id";
 #endif
+static constexpr int DATAS_COUNT = 11;
+
+static constexpr int CARD_ARTWORK_VERSIONS_OFFSET = 20;
+static inline bool is_alternative(uint32_t code, uint32_t alias) {
+	return alias && (alias < code + CARD_ARTWORK_VERSIONS_OFFSET) && (code < alias + CARD_ARTWORK_VERSIONS_OFFSET);
+}
 
 DataManager::DataManager() : _datas(32768), _strings(32768) {
 	extra_setcode = { 
@@ -27,6 +33,7 @@ DataManager::DataManager() : _datas(32768), _strings(32768) {
 }
 bool DataManager::ReadDB(sqlite3* pDB) {
 	sqlite3_stmt* pStmt = nullptr;
+	int texts_offset = DATAS_COUNT;
 	if (sqlite3_prepare_v2(pDB, SELECT_STMT, -1, &pStmt, nullptr) != SQLITE_OK)
 		return Error(pDB, pStmt);
 #ifndef YGOPRO_SERVER_MODE
@@ -58,18 +65,30 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 		cd.race = static_cast<decltype(cd.race)>(sqlite3_column_int64(pStmt, 8));
 		cd.attribute = static_cast<decltype(cd.attribute)>(sqlite3_column_int64(pStmt, 9));
 		cd.category = static_cast<decltype(cd.category)>(sqlite3_column_int64(pStmt, 10));
+		// rule_code
+		if (cd.code == 5405695) {
+			cd.rule_code = cd.alias;
+			cd.alias = 0;
+		}
+		else if (cd.alias == 6218704) {
+			cd.rule_code = 13331639;
+		}
+		else if (cd.alias && !(cd.type & TYPE_TOKEN) && !is_alternative(cd.code, cd.alias)) {
+			cd.rule_code = cd.alias;
+			cd.alias = 0;
+		}
 #ifndef YGOPRO_SERVER_MODE
 		auto& cs = _strings[code];
-		if (const char* text = (const char*)sqlite3_column_text(pStmt, 11)) {
+		if (const char* text = (const char*)sqlite3_column_text(pStmt, texts_offset + 0)) {
 			BufferIO::DecodeUTF8(text, strBuffer);
 			cs.name = strBuffer;
 		}
-		if (const char* text = (const char*)sqlite3_column_text(pStmt, 12)) {
+		if (const char* text = (const char*)sqlite3_column_text(pStmt, texts_offset + 1)) {
 			BufferIO::DecodeUTF8(text, strBuffer);
 			cs.text = strBuffer;
 		}
 		for (int i = 0; i < DESC_COUNT; ++i) {
-			if (const char* text = (const char*)sqlite3_column_text(pStmt, 13 + i)) {
+			if (const char* text = (const char*)sqlite3_column_text(pStmt, (texts_offset + 2) + i)) {
 				BufferIO::DecodeUTF8(text, strBuffer);
 				cs.desc[i] = strBuffer;
 			}
@@ -77,6 +96,19 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 #endif //YGOPRO_SERVER_MODE
 	}
 	sqlite3_finalize(pStmt);
+	// Resolve one extra hop for alternative alias chains, mirroring get_original_code_rule logic:
+	// For A->B->C (all alternative), A.rule_code should be C, not B.
+	// Strictly one extra hop: look up the alias target's get_duel_code().
+	for (auto& entry : _datas) {
+		auto& cd = entry.second;
+		if (cd.rule_code != 0) continue;
+		if (!is_alternative(cd.code, cd.alias)) continue;
+		auto it = _datas.find(cd.alias);
+		if (it == _datas.end()) continue;
+		auto rule = it->second.get_duel_code();
+		if (rule != cd.alias)
+			cd.rule_code = rule;
+	}
 	for (const auto& entry : extra_setcode) {
 		const auto& code = entry.first;
 		const auto& list = entry.second;
