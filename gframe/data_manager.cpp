@@ -70,9 +70,6 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 			cd.rule_code = cd.alias;
 			cd.alias = 0;
 		}
-		else if (cd.alias == 6218704) {
-			cd.rule_code = 13331639;
-		}
 		else if (cd.alias && !(cd.type & TYPE_TOKEN) && !is_alternative(cd.code, cd.alias)) {
 			cd.rule_code = cd.alias;
 			cd.alias = 0;
@@ -96,18 +93,18 @@ bool DataManager::ReadDB(sqlite3* pDB) {
 #endif //YGOPRO_SERVER_MODE
 	}
 	sqlite3_finalize(pStmt);
-	// Resolve one extra hop for alternative alias chains, mirroring get_original_code_rule logic:
-	// For A->B->C (all alternative), A.rule_code should be C, not B.
-	// Strictly one extra hop: look up the alias target's get_duel_code().
 	for (auto& entry : _datas) {
 		auto& cd = entry.second;
-		if (cd.rule_code != 0) continue;
-		if (!is_alternative(cd.code, cd.alias)) continue;
+		if (cd.rule_code)
+			continue;
+		if (!cd.alias)
+			continue;
+		if (cd.type & TYPE_TOKEN)
+			continue;
 		auto it = _datas.find(cd.alias);
-		if (it == _datas.end()) continue;
-		auto rule = it->second.get_duel_code();
-		if (rule != cd.alias)
-			cd.rule_code = rule;
+		if (it == _datas.end())
+			continue;
+		cd.rule_code = it->second.rule_code;
 	}
 	for (const auto& entry : extra_setcode) {
 		const auto& code = entry.first;
