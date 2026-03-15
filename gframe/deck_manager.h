@@ -66,7 +66,9 @@ public:
 	void LoadLFListSingle(irr::io::IReadFile* reader, bool insert = false);
 #endif
 	void LoadLFList();
+#ifndef YGOPRO_SERVER_MODE
 	const wchar_t* GetLFListName(unsigned int lfhash);
+#endif
 	const LFList* GetLFList(unsigned int lfhash);
 	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
 #ifndef YGOPRO_SERVER_MODE

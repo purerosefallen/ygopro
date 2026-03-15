@@ -162,6 +162,7 @@ void DeckManager::LoadLFList() {
 	nolimit.hash = 0;
 	_lfList.push_back(nolimit);
 }
+#ifndef YGOPRO_SERVER_MODE
 const wchar_t* DeckManager::GetLFListName(unsigned int lfhash) {
 	auto lit = std::find_if(_lfList.begin(), _lfList.end(), [lfhash](const ygo::LFList& list) {
 		return list.hash == lfhash;
@@ -170,6 +171,7 @@ const wchar_t* DeckManager::GetLFListName(unsigned int lfhash) {
 		return lit->listName.c_str();
 	return dataManager.unknown_string;
 }
+#endif
 const LFList* DeckManager::GetLFList(unsigned int lfhash) {
 	auto lit = std::find_if(_lfList.begin(), _lfList.end(), [lfhash](const ygo::LFList& list) {
 		return list.hash == lfhash;
