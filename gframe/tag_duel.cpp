@@ -230,7 +230,6 @@ void TagDuel::LeaveGame(DuelPlayer* dp) {
 			if(replay_recorder)
 				NetServer::SendPacketToPlayer(replay_recorder, STOC_HS_PLAYER_CHANGE, scpc);
 #endif
-			NetServer::DisconnectPlayer(dp);
 		} else if(duel_stage != DUEL_STAGE_END) {
 			EndDuel();
 			DuelEndProc();

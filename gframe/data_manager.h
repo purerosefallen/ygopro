@@ -138,8 +138,8 @@ public:
 	wstring_map _setnameStrings;
 	wstring_map _sysStrings;
 	std::vector<std::pair<std::wstring, std::wstring>> _serverStrings;
-#endif
 	const wchar_t* unknown_string{ L"???" };
+#endif
 	char errmsg[512]{};
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	irr::io::IFileSystem* FileSystem{};
