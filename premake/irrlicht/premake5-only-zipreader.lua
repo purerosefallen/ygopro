@@ -37,7 +37,5 @@ project "irrlicht"
         "source/Irrlicht/CZipReader.cpp"
     }
 
-    filter { "system:windows" }
-        defines { "_IRR_WCHAR_FILESYSTEM" }
     filter { "system:macosx" }
         cppdialect "gnu++14"
