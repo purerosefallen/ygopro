@@ -271,7 +271,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Crisis", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X SstTAarR", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1335,7 +1335,9 @@ void Game::LoadExpansions(const char* expansions_path) {
 			}
 			if (!mystrncasecmp(name, "pack/", 5) && IsExtension(name, ".ydk")) {
 				wchar_t fname[1024];
-				BufferIO::DecodeUTF8(name, fname);
+				int len = BufferIO::DecodeUTF8(name, fname);
+				// TODO: zip file may contain non-UTF8 file name. DecodeUTF8 can't parse it and returns 0.
+				if (!len) continue;
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
 			}
