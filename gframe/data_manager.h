@@ -34,6 +34,9 @@ struct CardDataC {
 	uint32_t lscale{};
 	uint32_t rscale{};
 	uint32_t link_marker{};
+	uint32_t rule_code{};
+
+	// extra columns
 	uint32_t ot{};
 	uint32_t category{};
 
@@ -47,6 +50,14 @@ struct CardDataC {
 			}
 		}
 		return false;
+	}
+
+	uint32_t get_original_code() const {
+		return alias ? alias : code;
+	}
+
+	uint32_t get_duel_code() const {
+		return rule_code ? rule_code : get_original_code();
 	}
 };
 constexpr int DESC_COUNT = 16;
@@ -66,6 +77,7 @@ public:
 	DataManager();
 	bool ReadDB(sqlite3* pDB);
 	bool LoadDB(const wchar_t* wfile);
+	bool LoadDB(const char* file);
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 	bool LoadDB(irr::io::IReadFile* reader);
 #endif
@@ -109,7 +121,9 @@ public:
 	const wchar_t* GetVictoryString(uint32_t code) const;
 	const wchar_t* GetCounterName(uint32_t code) const;
 	const wchar_t* GetSetName(uint32_t code) const;
+#ifndef YGOPRO_SERVER_MODE
 	std::vector<uint32_t> GetSetCodes(std::wstring setname) const;
+#endif
 	std::wstring GetNumString(int num, bool bracket = false) const;
 	const wchar_t* FormatLocation(int location, int sequence) const;
 	const wchar_t* FormatLocation(ClientCard* card) const;
@@ -124,8 +138,8 @@ public:
 	wstring_map _setnameStrings;
 	wstring_map _sysStrings;
 	std::vector<std::pair<std::wstring, std::wstring>> _serverStrings;
-#endif
 	const wchar_t* unknown_string{ L"???" };
+#endif
 	char errmsg[512]{};
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 	irr::io::IFileSystem* FileSystem{};

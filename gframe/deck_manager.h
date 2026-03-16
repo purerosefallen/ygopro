@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <functional>
-#include "data_manager.h"
+#include "deck.h"
 #include "bufferio.h"
 
 #ifndef YGOPRO_MAX_DECK
@@ -50,28 +50,6 @@ struct LFList {
 	std::unordered_map<std::wstring, uint32_t> credit_limits;
 	std::unordered_map<uint32_t, std::unordered_map<std::wstring, uint32_t>> credits;
 };
-struct Deck {
-	std::vector<code_pointer> main;
-	std::vector<code_pointer> extra;
-	std::vector<code_pointer> side;
-	Deck() = default;
-	Deck(const Deck& ndeck) {
-		main = ndeck.main;
-		extra = ndeck.extra;
-		side = ndeck.side;
-	}
-	void clear() {
-		main.clear();
-		extra.clear();
-		side.clear();
-	}
-};
-
-struct DeckArray {
-	std::vector<uint32_t> main;
-	std::vector<uint32_t> extra;
-	std::vector<uint32_t> side;
-};
 
 class DeckManager {
 public:
@@ -90,7 +68,9 @@ public:
 	void LoadLFListSingle(irr::io::IReadFile* reader, bool insert = false);
 #endif
 	void LoadLFList();
+#ifndef YGOPRO_SERVER_MODE
 	const wchar_t* GetLFListName(unsigned int lfhash);
+#endif
 	const LFList* GetLFList(unsigned int lfhash);
 	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
 #ifndef YGOPRO_SERVER_MODE

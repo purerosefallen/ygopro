@@ -193,7 +193,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	void MainServerLoop();
 	void MainTestLoop(int code);
-	void LoadExpansions(const wchar_t* expansions_path);
+	void LoadExpansions(const char* expansions_path);
 	void LoadExpansionsAll();
 	std::vector<std::wstring> GetExpansionsList(const wchar_t * suffix = nullptr);
 	std::vector<std::string> GetExpansionsListU(const char* suffix = nullptr);
@@ -206,7 +206,7 @@ public:
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
-	void LoadExpansions(const wchar_t* expansions_path);
+	void LoadExpansions(const char* expansions_path);
 	void LoadExpansionsAll();
 	std::vector<std::wstring> GetExpansionsList(const wchar_t * suffix = nullptr);
 	std::vector<std::string> GetExpansionsListU(const char* suffix = nullptr);
