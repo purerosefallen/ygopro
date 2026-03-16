@@ -169,7 +169,8 @@ void ImageManager::ResizeTexture() {
 	irr::s32 bgWidth = 1024 * mainGame->xScale;
 	irr::s32 bgHeight = 640 * mainGame->yScale;
 	driver->removeTexture(tCover[0]);
-	driver->removeTexture(tCover[1]);
+	if(tCover[1] != tCover[0])
+		driver->removeTexture(tCover[1]);
 	tCover[0] = GetRandomImage(TEXTURE_COVER_S, imgWidth, imgHeight);
 	if(!tCover[0])
 		tCover[0] = GetTextureFromFile("textures/cover.jpg", imgWidth, imgHeight);
@@ -189,12 +190,15 @@ void ImageManager::ResizeTexture() {
 	tUnknownFit = GetTextureFromFile("textures/unknown.jpg", imgWidthFit, imgHeightFit);
 	tUnknownThumb = GetTextureFromFile("textures/unknown.jpg", imgWidthThumb, imgHeightThumb);
 	driver->removeTexture(tBackGround);
+	if(tBackGround_menu != tBackGround)
+		driver->removeTexture(tBackGround_menu);
+	if(tBackGround_deck != tBackGround)
+		driver->removeTexture(tBackGround_deck);
 	tBackGround = GetRandomImage(TEXTURE_DUEL, bgWidth, bgHeight);
 	if(!tBackGround)
 		tBackGround = GetTextureFromFile("textures/bg.jpg", bgWidth, bgHeight);
 	if(!tBackGround)
 		tBackGround = GetTextureFromFile("textures/bg_duel.jpg", bgWidth, bgHeight);
-	driver->removeTexture(tBackGround_menu);
 	tBackGround_menu = GetRandomImage(TEXTURE_MENU, bgWidth, bgHeight);
 	if(!tBackGround_menu)
 		tBackGround_menu = GetTextureFromFile("textures/bg_menu.jpg", bgWidth, bgHeight);
@@ -202,7 +206,6 @@ void ImageManager::ResizeTexture() {
 		tBackGround_menu = GetRandomImage(TEXTURE_DUEL, bgWidth, bgHeight);
 	if(!tBackGround_menu)
 		tBackGround_menu = tBackGround;
-	driver->removeTexture(tBackGround_deck);
 	tBackGround_deck = GetRandomImage(TEXTURE_DECK, bgWidth, bgHeight);
 	if(!tBackGround_deck)
 		tBackGround_deck = GetTextureFromFile("textures/bg_deck.jpg", bgWidth, bgHeight);
