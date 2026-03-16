@@ -95,7 +95,7 @@ void Game::MainServerLoop() {
 #endif
 	initUtils();
 	deckManager.LoadLFList();
-	dataManager.LoadDB(L"cards.cdb");
+	dataManager.LoadDB("cards.cdb");
 	LoadExpansionsAll();
 #ifdef SERVER_PRO2_SUPPORT
 	dataManager.FileSystem->addFileArchive("data/script.zip", true, false, irr::io::EFAT_ZIP);
@@ -167,8 +167,8 @@ bool Game::Initialize() {
 		return false;
 	}
 	dataManager.FileSystem = device->getFileSystem();
-	if(dataManager.LoadDB(GetLocaleDirWide("cards.cdb"))) {} else
-	if(!dataManager.LoadDB(L"cards.cdb")) {
+	if(dataManager.LoadDB(GetLocaleDir("cards.cdb"))) {} else
+	if(!dataManager.LoadDB("cards.cdb")) {
 		ErrorLog("Failed to load card database (cards.cdb)!");
 		return false;
 	}
@@ -179,7 +179,7 @@ bool Game::Initialize() {
 	}
 	if(dataManager.LoadServerList(GetLocaleDir("servers.conf"))) {} else
 	dataManager.LoadServerList("servers.conf");
-	dataManager.LoadDB(L"specials/special.cdb");
+	dataManager.LoadDB("specials/special.cdb");
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	if(!numFont) {
@@ -271,7 +271,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Crisis", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X SstTAarR", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1295,83 +1295,28 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 	return result;
 }
 #endif //YGOPRO_SERVER_MODE
-void Game::LoadExpansions(const wchar_t* expansions_path) {
+void Game::LoadExpansions(const char* expansions_path) {
 	bool lflist_changed = false;
 	bool server_list_changed = false;
-	FileSystem::TraversalDir(expansions_path, [&](const wchar_t* name, bool isdir) {
-		if (isdir)
-			return;
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"%ls/%ls", expansions_path, name);
-		if (IsExtension(name, L".cdb")) {
-			dataManager.LoadDB(fpath);
-			return;
-		}
-		if (IsExtension(name, L".conf")) {
-			if(!std::wcscmp(name, L"lflist.conf")) {
-				deckManager.LoadLFListSingle(fpath, true);
-				lflist_changed = true;
-			} else if(!std::wcscmp(name, L"servers.conf")) {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadServerList(fpath);
-				server_list_changed = true;
-#endif
-			} else {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadStrings(fpath);
-#endif
-			}
-			return;
-		}
-#ifndef YGOPRO_SERVER_MODE
-		if (!std::wcscmp(name, L"corres_srv.ini")) {
-			dataManager.LoadCorresSrvIni(fpath);
-			server_list_changed = true;
-			return;
-		}
-#endif
+
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
-		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
-#ifdef _WIN32
-			dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
-#else
-			char upath[1024];
-			BufferIO::EncodeUTF8(fpath, upath);
-			dataManager.FileSystem->addFileArchive(upath, true, false, irr::io::EFAT_ZIP);
-#endif
-			return;
-		}
-#endif //SERVER_ZIP_SUPPORT
-	});
-#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
-	for(irr::u32 i = 0; i < dataManager.FileSystem->getFileArchiveCount(); ++i) {
-		auto archiveObj = dataManager.FileSystem->getFileArchive(i);
+	auto processArchive = [&](irr::io::IFileArchive* archiveObj) {
 		auto archive = archiveObj->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
-#ifdef _WIN32
-			const wchar_t* fname = archive->getFullFileName(j).c_str();
-#else
-			wchar_t fname[1024];
-			const char* uname = archive->getFullFileName(j).c_str();
-			BufferIO::DecodeUTF8(uname, fname);
-#endif
+			const char* name = archive->getFullFileName(j).c_str();
 			auto createReader = [&]() {
-#ifdef _WIN32
-				return archiveObj->createAndOpenFile(fname);
-#else
-				return archiveObj->createAndOpenFile(uname);
-#endif
+				return archiveObj->createAndOpenFile(name);
 			};
-			if (IsExtension(fname, L".cdb")) {
-				dataManager.LoadDB(createReader());
+			if (IsExtension(name, ".cdb")) {
+				dataManager.LoadDB(name);
 				continue;
 			}
-			if (IsExtension(fname, L".conf")) {
+			if (IsExtension(name, ".conf")) {
 				auto reader = createReader();
-				if(!std::wcscmp(fname, L"lflist.conf")) {
+				if(!std::strcmp(name, "lflist.conf")) {
 					deckManager.LoadLFListSingle(reader, true);
 					lflist_changed = true;
-				} else if(!std::wcscmp(fname, L"servers.conf")) {
+				} else if(!std::strcmp(name, "servers.conf")) {
 #ifndef YGOPRO_SERVER_MODE
 					dataManager.LoadServerList(reader);
 					server_list_changed = true;
@@ -1384,17 +1329,74 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 				continue;
 			}
 #ifndef YGOPRO_SERVER_MODE
-			if (!std::wcscmp(fname, L"corres_srv.ini")) {
-					dataManager.LoadCorresSrvIni(createReader());
-					server_list_changed = true;
+			if (!std::strcmp(name, "corres_srv.ini")) {
+				dataManager.LoadCorresSrvIni(createReader());
+				server_list_changed = true;
 			}
-			if (!mywcsncasecmp(fname, L"pack/", 5) && IsExtension(fname, L".ydk")) {
+			if (!mystrncasecmp(name, "pack/", 5) && IsExtension(name, ".ydk")) {
+				wchar_t fname[1024];
+				int len = BufferIO::DecodeUTF8(name, fname);
+				// TODO: zip file may contain non-UTF8 file name. DecodeUTF8 can't parse it and returns 0.
+				if (!len) continue;
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
 			}
 #endif // YGOPRO_SERVER_MODE
 		}
-	}
+	};
+
+	auto mountAndProcess = [&](const char* fpath) {
+		irr::u32 countBefore = dataManager.FileSystem->getFileArchiveCount();
+		dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
+		for(irr::u32 i = countBefore; i < dataManager.FileSystem->getFileArchiveCount(); ++i)
+			processArchive(dataManager.FileSystem->getFileArchive(i));
+	};
+
+	if (IsExtension(expansions_path, ".zip") || IsExtension(expansions_path, ".ypk")) {
+		mountAndProcess(expansions_path);
+	} else {
+#endif // SERVER_ZIP_SUPPORT
+	FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
+		if (isdir)
+			return;
+		char fpath[1024];
+		mysnprintf(fpath, "%s/%s", expansions_path, name);
+		if (IsExtension(name, ".cdb")) {
+			dataManager.LoadDB(fpath);
+			return;
+		}
+		if (IsExtension(name, ".conf")) {
+			if(!std::strcmp(name, "lflist.conf")) {
+				deckManager.LoadLFListSingle(fpath, true);
+				lflist_changed = true;
+			} else if(!std::strcmp(name, "servers.conf")) {
+#ifndef YGOPRO_SERVER_MODE
+				dataManager.LoadServerList(fpath);
+				server_list_changed = true;
+#endif
+			} else {
+#ifndef YGOPRO_SERVER_MODE
+				dataManager.LoadStrings(fpath);
+#endif
+			}
+			return;
+		}
+#ifndef YGOPRO_SERVER_MODE
+		if (!std::strcmp(name, "corres_srv.ini")) {
+			dataManager.LoadCorresSrvIni(fpath);
+			server_list_changed = true;
+			return;
+		}
+#endif
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+		if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
+			mountAndProcess(fpath);
+			return;
+		}
+#endif
+	});
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+	} // else
 #endif //SERVER_ZIP_SUPPORT
 #ifndef YGOPRO_SERVER_MODE
 	if(lflist_changed)
@@ -1405,25 +1407,25 @@ void Game::LoadExpansions(const wchar_t* expansions_path) {
 }
 void Game::LoadExpansionsAll() {
 #ifdef SERVER_PRO2_SUPPORT
-	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+	FileSystem::TraversalDir("./cdb", [](const char* name, bool isdir) {
 		if (isdir)
 			return;
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./cdb/%ls", name);
-		if(IsExtension(name, L".cdb")) {
+		char fpath[1024];
+		mysnprintf(fpath, "./cdb/%s", name);
+		if(IsExtension(name, ".cdb")) {
 			dataManager.LoadDB(fpath);
 		}
 	});
 #elif defined(SERVER_PRO3_SUPPORT)
-	FileSystem::TraversalDir(L"./Data/locales/zh-CN", [](const wchar_t* name, bool isdir) {
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./Data/locales/zh-CN/%ls", name);
-		if(!isdir && IsExtension(name, L".cdb")) {
+	FileSystem::TraversalDir("./Data/locales/zh-CN", [](const char* name, bool isdir) {
+		char fpath[1024];
+		mysnprintf(fpath, "./Data/locales/zh-CN/%s", name);
+		if(!isdir && IsExtension(name, ".cdb")) {
 			dataManager.LoadDB(fpath);
 		}
 	});
 #endif // SERVER_PRO3_SUPPORT
-	auto list = GetExpansionsList();
+	auto list = GetExpansionsListU();
 	for (const auto& exp : list) {
 		LoadExpansions(exp.c_str());
 	}
@@ -1947,10 +1949,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	if (is_valid) {
 		auto& cd = cit->second;
-		if (is_alternative(cd.code,cd.alias))
-			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
-		else
-			myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
+		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.get_original_code()), cd.get_original_code());
 	}
 	else {
 		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
@@ -1964,8 +1963,8 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if (is_valid && !gameConf.hide_setname) {
 		auto& cd = cit->second;
 		auto target = cit;
-		if (cd.alias && _datas.find(cd.alias) != _datas.end()) {
-			target = _datas.find(cd.alias);
+		if (cd.rule_code && _datas.count(cd.rule_code)) {
+			target = _datas.find(cd.rule_code);
 		}
 		if (target->second.setcode[0]) {
 			offset = 23;// *yScale;
