@@ -888,13 +888,12 @@ bool Game::Initialize() {
 	ebDefense = env->addEditBox(L"", irr::core::rect<irr::s32>(260, 40 + 75 / 6, 340, 60 + 75 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebDefense->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebDefense);
-	stStar = env->addStaticText(dataManager.GetSysString(1324), irr::core::rect<irr::s32>(10, 62 + 100 / 6, 80, 82 + 100 / 6), false, false, wFilter);
-	ebStar = env->addEditBox(L"", irr::core::rect<irr::s32>(60, 60 + 100 / 6, 100, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
-	editbox_list.push_back(ebStar);
+	stStar = env->addStaticText(dataManager.GetSysString(1324), irr::core::rect<irr::s32>(10, 62 + 100 / 6, 70, 82 + 100 / 6), false, false, wFilter);
+	ebStar = env->addEditBox(L"", irr::core::rect<irr::s32>(60, 60 + 100 / 6, 95, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebStar->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebStar);
-	stScale = env->addStaticText(dataManager.GetSysString(1336), irr::core::rect<irr::s32>(101, 62 + 100 / 6, 150, 82 + 100 / 6), false, false, wFilter);
-	ebScale = env->addEditBox(L"", irr::core::rect<irr::s32>(150, 60 + 100 / 6, 195, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
+	stScale = env->addStaticText(dataManager.GetSysString(1336), irr::core::rect<irr::s32>(105, 62 + 100 / 6, 165, 82 + 100 / 6), false, false, wFilter);
+	ebScale = env->addEditBox(L"", irr::core::rect<irr::s32>(155, 60 + 100 / 6, 195, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebScale);
 	stSearch = env->addStaticText(dataManager.GetSysString(1325), irr::core::rect<irr::s32>(205, 62 + 100 / 6, 280, 82 + 100 / 6), false, false, wFilter);
@@ -907,7 +906,7 @@ bool Game::Initialize() {
 		btnStartFilter->setRelativePosition(irr::core::rect<irr::s32>(260, 80 + 125 / 6, 390, 100 + 125 / 6));
 		btnClearFilter = env->addButton(irr::core::rect<irr::s32>(205, 80 + 125 / 6, 255, 100 + 125 / 6), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
 	}
-	wCategories = env->addWindow(irr::core::rect<irr::s32>(600, 60, 1000, 305), false, L"");
+	wCategories = env->addWindow(irr::core::rect<irr::s32>(600, 55, 1000, 300), false, L"");
 	wCategories->getCloseButton()->setVisible(false);
 	wCategories->setDrawTitlebar(false);
 	wCategories->setDraggable(false);
@@ -922,7 +921,7 @@ bool Game::Initialize() {
 	for(int i = 0; i < 32; ++i)
 		chkCategory[i] = env->addCheckBox(false, irr::core::recti(10 + (i % 4) * catewidth, 5 + (i / 4) * 25, 10 + (i % 4 + 1) * catewidth, 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
 	int wcatewidth = catewidth * 4 + 16;
-	wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 60, 1000, 305));
+	wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 55, 1000, 300));
 	btnCategoryOK->setRelativePosition(irr::core::recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
 	btnMarksFilter = env->addButton(irr::core::rect<irr::s32>(60, 80 + 125 / 6, 195, 100 + 125 / 6), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
 	wLinkMarks = env->addWindow(irr::core::rect<irr::s32>(700, 30, 820, 150), false, L"");
@@ -1010,21 +1009,21 @@ bool Game::Initialize() {
 	btnRSYes = env->addButton(irr::core::rect<irr::s32>(70, 80, 140, 105), wReplaySave, BUTTON_REPLAY_SAVE, dataManager.GetSysString(1341));
 	btnRSNo = env->addButton(irr::core::rect<irr::s32>(170, 80, 240, 105), wReplaySave, BUTTON_REPLAY_CANCEL, dataManager.GetSysString(1212));
 	//replay control
-	wReplayControl = env->addStaticText(L"", irr::core::rect<irr::s32>(205, 118, 295, 273), true, false, 0, -1, true);
+	wReplayControl = env->addStaticText(L"", irr::core::rect<irr::s32>(205, 143, 295, 273), true, false, 0, -1, true);
 	wReplayControl->setVisible(false);
 	btnReplayStart = env->addButton(irr::core::rect<irr::s32>(5, 5, 85, 25), wReplayControl, BUTTON_REPLAY_START, dataManager.GetSysString(1343));
-	btnReplayPause = env->addButton(irr::core::rect<irr::s32>(5, 30, 85, 50), wReplayControl, BUTTON_REPLAY_PAUSE, dataManager.GetSysString(1344));
+	btnReplayPause = env->addButton(irr::core::rect<irr::s32>(5, 5, 85, 25), wReplayControl, BUTTON_REPLAY_PAUSE, dataManager.GetSysString(1344));
+	btnReplaySwap = env->addButton(irr::core::rect<irr::s32>(5, 30, 85, 50), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
 	btnReplayStep = env->addButton(irr::core::rect<irr::s32>(5, 55, 85, 75), wReplayControl, BUTTON_REPLAY_STEP, dataManager.GetSysString(1345));
 	btnReplayUndo = env->addButton(irr::core::rect<irr::s32>(5, 80, 85, 100), wReplayControl, BUTTON_REPLAY_UNDO, dataManager.GetSysString(1360));
-	btnReplaySwap = env->addButton(irr::core::rect<irr::s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
-	btnReplayExit = env->addButton(irr::core::rect<irr::s32>(5, 130, 85, 150), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
+	btnReplayExit = env->addButton(irr::core::rect<irr::s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
 	//chat
-	wChat = env->addWindow(irr::core::rect<irr::s32>(305, 615, 1020, 640), false, L"");
+	wChat = env->addWindow(irr::core::rect<irr::s32>(307, 615, 1024, 640), false, L"");
 	wChat->getCloseButton()->setVisible(false);
 	wChat->setDraggable(false);
 	wChat->setDrawTitlebar(false);
 	wChat->setVisible(false);
-	ebChatInput = env->addEditBox(L"", irr::core::rect<irr::s32>(3, 2, 710, 22), true, wChat, EDITBOX_CHAT);
+	ebChatInput = env->addEditBox(L"", irr::core::rect<irr::s32>(3, 2, 711, 22), true, wChat, EDITBOX_CHAT);
 	editbox_list.push_back(ebChatInput);
 	//swap
 	btnSpectatorSwap = env->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), 0, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
@@ -1098,7 +1097,7 @@ bool Game::Initialize() {
 	for (auto ptr : editbox_list)
 		ptr->setMax(LEN_CHAT_MSG - 1);
 	auto size = driver->getScreenSize();
-	if(window_size != size) {
+	if(window_size != size) { // On the first run, window_size is (0, 0), so this condition always triggers a resize
 		window_size = size;
 		xScale = window_size.Width / 1024.0;
 		yScale = window_size.Height / 640.0;
@@ -2501,9 +2500,9 @@ void Game::OnResize() {
 	wReplayControl->setRelativePosition(Resize(205, 143, 295, 273));
 	btnReplayStart->setRelativePosition(Resize(5, 5, 85, 25));
 	btnReplayPause->setRelativePosition(Resize(5, 5, 85, 25));
+	btnReplaySwap->setRelativePosition(Resize(5, 30, 85, 50));
 	btnReplayStep->setRelativePosition(Resize(5, 55, 85, 75));
 	btnReplayUndo->setRelativePosition(Resize(5, 80, 85, 100));
-	btnReplaySwap->setRelativePosition(Resize(5, 30, 85, 50));
 	btnReplayExit->setRelativePosition(Resize(5, 105, 85, 125));
 
 	btnSpectatorSwap->setRelativePosition(Resize(205, 100, 295, 135));

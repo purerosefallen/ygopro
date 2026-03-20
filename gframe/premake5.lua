@@ -1,7 +1,4 @@
 include "lzma/."
-if (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
-include "spmemvfs/."
-end
 
 if SERVER_MODE then
 if SERVER_PRO3_SUPPORT then
@@ -31,7 +28,7 @@ end
     links { "ocgcore", "clzma", "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
-        links { "irrlicht", "cspmemvfs" }
+        links { "irrlicht" }
         if BUILD_IRRLICHT then
             includedirs { "../irrlicht/source/Irrlicht" }
         end
@@ -50,7 +47,7 @@ project "ygopro"
 
     files { "*.cpp", "*.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "sqlite3", "irrlicht", "freetype", "event" }
+    links { "ocgcore", "clzma", "sqlite3", "irrlicht", "freetype", "event" }
 end
     if not OCGCORE_DYNAMIC then
         links { LUA_LIB_NAME }

@@ -17,11 +17,11 @@ mat_common:
     - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz | tar zfx -
     - mv lua-5.4.8 lua
     # sqlite3
-    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2025/sqlite-autoconf-3500100.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3500100 sqlite3
+    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3510300.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3510300 sqlite3
     # freetype
-    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.13.3.tar.gz | tar zfx -
-    # - mv freetype-2.13.3 freetype
+    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.2.tar.gz | tar zfx -
+    # - mv freetype-2.14.2 freetype
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
