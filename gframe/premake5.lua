@@ -1,5 +1,4 @@
 include "lzma/."
-include "spmemvfs/."
 
 project "YGOPro"
     kind "WindowedApp"
@@ -8,7 +7,7 @@ project "YGOPro"
 
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "sqlite3", "irrlicht", "freetype", "event" }
+    links { "ocgcore", "clzma", "sqlite3", "irrlicht", "freetype", "event" }
     if not OCGCORE_DYNAMIC then
         links { LUA_LIB_NAME }
     end
