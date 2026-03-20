@@ -67,7 +67,7 @@ public:
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
 	bool LoadCurrentDeck(std::istringstream& deckStream, bool is_packlist = false);
 	wchar_t DeckFormatBuffer[128];
-	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
+	int TypeCount(std::vector<const CardDataC*> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 
