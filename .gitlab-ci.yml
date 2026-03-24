@@ -368,8 +368,17 @@ upload_to_minio:
     - exec_macos
   tags: 
     - linux
+  variables:
+    MINIO_DIR: koishipro/server
   script:
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/koishipro/server
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/$MINIO_DIR
   only:
     - server
     - tags
+
+upload_to_minio_develop:
+  extends: upload_to_minio
+  variables:
+    MINIO_DIR: koishipro/server-develop
+  only:
+    - server-develop
