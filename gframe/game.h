@@ -76,8 +76,8 @@ struct Config {
 	//path
 	wchar_t lastcategory[256]{};
 	wchar_t lastdeck[256]{};
-	wchar_t textfont[256]{};
-	wchar_t numfont[256]{};
+	char textfont[256]{};
+	char numfont[256]{};
 	wchar_t bot_deck_path[256]{};
 	wchar_t locale[64];
 	//settings
@@ -236,7 +236,7 @@ public:
 	void HideElement(irr::gui::IGUIElement* element, bool set_action = false);
 	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0);
 	void WaitFrameSignal(int frame);
-	void DrawThumb(const CardDataC* cp, irr::core::vector2di pos, const LFList* lflist, bool drag = false);
+	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist, bool drag = false);
 	void DrawDeckBd();
 	bool LoadConfigFromFile(const char* file);
 	void LoadConfig();

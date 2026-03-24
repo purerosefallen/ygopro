@@ -128,6 +128,10 @@ bool DataManager::LoadDB(const char* file) {
 	return ret;
 #else
 	auto reader = FileSystem->createAndOpenFile(file);
+	if (reader == nullptr) {
+		mysnprintf(errmsg, "File does not exist or failed to unzip: %s", file);
+		return false;
+	}
 	return LoadDB(reader);
 #endif
 }
@@ -403,7 +407,7 @@ void DataManager::InsertServerList() {
 #endif //YGOPRO_SERVER_MODE
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	if (const char* msg = sqlite3_errmsg(pDB))
-		mysnprintf(errmsg, "%s", msg);
+		mysnprintf(errmsg, "sqlite3_errmsg: %s", msg);
 	else
 		errmsg[0] = '\0';
 	sqlite3_finalize(pStmt);
