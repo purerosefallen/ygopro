@@ -103,6 +103,8 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
 newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
+newoption { trigger = "ndk-dir", category = "YGOPro - android", description = "", value = "PATH" }
+newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL", default = "26" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
@@ -149,6 +151,23 @@ function FindHeaderWithSubDir(header, subdir)
     return result
 end
 
+function QuoteIfNeeded(value)
+    if string.find(value, " ", 1, true) then
+        return "\"" .. value .. "\""
+    end
+    return value
+end
+
+function FindAndroidToolchainBin(ndkDir)
+    local prebuiltDir = path.join(ndkDir, "toolchains/llvm/prebuilt")
+    local prebuilts = os.matchdirs(path.join(prebuiltDir, "*"))
+    table.sort(prebuilts)
+    if #prebuilts == 0 then
+        error("Android NDK toolchain not found under " .. prebuiltDir)
+    end
+    return path.join(prebuilts[1], "bin")
+end
+
 function ApplyBoolean(param)
     if GetParam(param) then
         defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
@@ -162,6 +181,35 @@ function ApplyNumber(param)
     if numberValue then
         defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
     end
+end
+
+ANDROID_ENABLED = false
+ANDROID_NDK_DIR = GetParam("ndk-dir")
+ANDROID_API_LEVEL_TEXT = GetParam("android-api-level") or "26"
+ANDROID_API_LEVEL = tonumber(ANDROID_API_LEVEL_TEXT)
+if not ANDROID_API_LEVEL then
+    error("Invalid android api level: " .. ANDROID_API_LEVEL_TEXT)
+end
+if ANDROID_NDK_DIR then
+    ANDROID_NDK_DIR = path.getabsolute(ANDROID_NDK_DIR)
+    if not os.isdir(ANDROID_NDK_DIR) then
+        error("Android NDK directory not found: " .. ANDROID_NDK_DIR)
+    end
+    ANDROID_ENABLED = true
+    ANDROID_TOOLCHAIN_BIN = FindAndroidToolchainBin(ANDROID_NDK_DIR)
+    ANDROID_TARGET = "aarch64-linux-android" .. ANDROID_API_LEVEL
+    premake.override(premake.tools.clang, "gettoolname", function(base, cfg, tool)
+        if cfg.system == premake.ANDROID then
+            if tool == "cc" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "clang")) .. " --target=" .. ANDROID_TARGET
+            elseif tool == "cxx" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "clang++")) .. " --target=" .. ANDROID_TARGET
+            elseif tool == "ar" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "llvm-ar"))
+            end
+        end
+        return base(cfg, tool)
+    end)
 end
 
 if GetParam("server-mode") then
@@ -437,6 +485,9 @@ workspace "YGOPro"
     objdir "obj"    
 
     configurations { "Release", "Debug" }
+    if ANDROID_ENABLED then
+        platforms { "android_arm64" }
+    end
 
     for _, numberOption in ipairs(numberOptions) do
         ApplyNumber(numberOption)
@@ -462,6 +513,12 @@ workspace "YGOPro"
     filter { "system:windows", "platforms:x64" }
         architecture "x86_64"
 
+    filter "platforms:android_arm64"
+        architecture "ARM64"
+        system "android"
+        toolset "clang"
+        pic "On"
+
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
         if MAC_ARM then
@@ -481,10 +538,16 @@ workspace "YGOPro"
         optimize "Speed"
         targetdir "bin/release"
 
+    filter { "platforms:android_arm64", "configurations:Release" }
+        targetdir "bin/android_arm64/release"
+
     filter "configurations:Debug"
         symbols "On"
         defines "_DEBUG"
         targetdir "bin/debug"
+
+    filter { "platforms:android_arm64", "configurations:Debug" }
+        targetdir "bin/android_arm64/debug"
 
     filter { "system:windows", "platforms:Win32", "configurations:Release" }
         targetdir "bin/release/x86"
@@ -518,6 +581,8 @@ workspace "YGOPro"
 
     filter "not action:vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
+
+    filter { "not action:vs*", "not system:android" }
         if not IS_ARM and not MAC_INTEL then
             buildoptions "-march=native"
         end
@@ -529,6 +594,9 @@ workspace "YGOPro"
             }
             pic "On"
         end
+
+    filter { "system:android", "language:C++" }
+        linkoptions { "-static-libstdc++" }
 
 if SERVER_PRO3_SUPPORT then
     filter "not action:vs*"
