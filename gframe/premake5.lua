@@ -76,11 +76,13 @@ end
         libdirs { JPEG_LIB_DIR, PNG_LIB_DIR }
     end
 
-    if BUILD_FREETYPE then
-        includedirs { "../freetype/custom", "../freetype/include" }
-    else
-        includedirs { FREETYPE_INCLUDE_DIR }
-        libdirs { FREETYPE_LIB_DIR }
+    if not SERVER_MODE then
+        if BUILD_FREETYPE then
+            includedirs { "../freetype/custom", "../freetype/include" }
+        else
+            includedirs { FREETYPE_INCLUDE_DIR }
+            libdirs { FREETYPE_LIB_DIR }
+        end
     end
 
     if BUILD_SQLITE then
