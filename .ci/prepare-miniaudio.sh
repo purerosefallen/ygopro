@@ -2,8 +2,17 @@
 set -x
 set -o errexit
 
-source .ci/prepare-repo
-prepare_repo "https://code.moenext.com/mycard/miniaudio.git" "miniaudio"
+MINIAUDIO_REPO="https://github.com/mackron/miniaudio"
+MINIAUDIO_REF="0.11.25"
+
+if [ ! -d "miniaudio/.git" ]; then
+  rm -rf miniaudio
+  git clone --depth=1 -b "$MINIAUDIO_REF" "$MINIAUDIO_REPO" miniaudio
+else
+  git -C miniaudio remote set-url origin "$MINIAUDIO_REPO"
+  git -C miniaudio fetch --depth=1 origin "refs/tags/$MINIAUDIO_REF"
+  git -C miniaudio checkout -f FETCH_HEAD
+fi
 
 cp -rf miniaudio/extras/miniaudio_split/miniaudio.* miniaudio/
 
