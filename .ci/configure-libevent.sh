@@ -2,11 +2,22 @@
 set -x
 set -o errexit
 
-cd event
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(CDPATH= cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$PROJECT_DIR/event"
 
 if [ -n "${NDK_DIR:-}" ]; then
     ANDROID_API_LEVEL="${ANDROID_API_LEVEL:-26}"
-    NDK_DIR_ABS="$(cd "$NDK_DIR" && pwd)"
+    case "$NDK_DIR" in
+        /*)
+            NDK_DIR_PATH="$NDK_DIR"
+            ;;
+        *)
+            NDK_DIR_PATH="$PROJECT_DIR/$NDK_DIR"
+            ;;
+    esac
+    NDK_DIR_ABS="$(cd "$NDK_DIR_PATH" && pwd)"
     NDK_PREBUILT_DIR="$(find "$NDK_DIR_ABS/toolchains/llvm/prebuilt" -mindepth 1 -maxdepth 1 -type d | sort | head -n 1)"
     if [ -z "$NDK_PREBUILT_DIR" ]; then
         echo "Android NDK toolchain not found under $NDK_DIR_ABS/toolchains/llvm/prebuilt" >&2
@@ -27,4 +38,3 @@ else
 fi
 
 sed -f make-event-config.sed < config.h > ./include/event2/event-config.h
-cd ..
