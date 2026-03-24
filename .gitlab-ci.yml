@@ -72,7 +72,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -85,8 +85,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
-    - 7z x -y premake-5.0.0-beta7-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
+    - 7z x -y premake-5.0.0-beta8-windows.zip
   artifacts:
     paths:
       - premake5.exe
