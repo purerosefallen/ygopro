@@ -109,6 +109,10 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 }
 bool DataManager::LoadDB(const char* file) {
 	auto reader = FileSystem->createAndOpenFile(file);
+	if (reader == nullptr) {
+		mysnprintf(errmsg, "File does not exist or failed to unzip: %s", file);
+		return false;
+	}
 	return LoadDB(reader);
 }
 bool DataManager::LoadDB(irr::io::IReadFile* reader) {
@@ -379,7 +383,7 @@ void DataManager::InsertServerList() {
 }
 bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 	if (const char* msg = sqlite3_errmsg(pDB))
-		mysnprintf(errmsg, "%s", msg);
+		mysnprintf(errmsg, "sqlite3_errmsg: %s", msg);
 	else
 		errmsg[0] = '\0';
 	sqlite3_finalize(pStmt);
