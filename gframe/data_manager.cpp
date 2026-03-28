@@ -6,7 +6,10 @@
 
 namespace ygo {
 
-unsigned char DataManager::scriptBuffer[0x100000] = {};
+namespace{
+	unsigned char scriptBuffer[0x100000]{};
+}
+
 DataManager dataManager;
 #ifdef YGOPRO_SERVER_MODE
 static const char SELECT_STMT[] = "SELECT datas.id, datas.ot, datas.alias, datas.setcode, datas.type, datas.atk, datas.def, datas.level, datas.race, datas.attribute, datas.category FROM datas";

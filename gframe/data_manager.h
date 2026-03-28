@@ -19,6 +19,7 @@ namespace ygo {
 constexpr int MAX_STRING_ID = 0x7ff;
 constexpr uint32_t MIN_CARD_ID = (uint32_t)(MAX_STRING_ID + 1) >> 4;
 constexpr uint32_t MAX_CARD_ID = 0x0fffffffU;
+constexpr int TEXT_LINE_SIZE = 256;
 
 using CardData = card_data;
 struct CardDataC {
@@ -151,7 +152,6 @@ public:
 	static constexpr uint32_t STRING_ID_TYPE = 1050;
 	static constexpr int TYPES_COUNT = 27;
 
-	static unsigned char scriptBuffer[0x100000];
 	static uint32_t CardReader(uint32_t, card_data*);
 	static unsigned char* ScriptReaderEx(const char* script_name, int* slen);
 	static unsigned char* ScriptReaderExSingle(const char* path, const char* script_name, int* slen, int pre_len = 2, unsigned int use_irr = FALSE);

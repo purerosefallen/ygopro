@@ -1369,12 +1369,12 @@ void DeckBuilder::GetHoveredCard() {
 			if(hovered_seq < 0 || hovered_seq >= mainsize) {
 				hovered_seq = -1;
 				hovered_code = 0;
-				} else {
-					hovered_code = deckManager.current_deck.main[hovered_seq]->code;
-				}
-			} else if(my >= L.ex_top && my <= L.ex_bot && mx >= L.ex_left && mx < 797.0f * xS) {
-				int n = (int)deckManager.current_deck.extra.size();
-				hovered_pos = 2;
+			} else {
+				hovered_code = deckManager.current_deck.main[hovered_seq]->code;
+			}
+		} else if(my >= L.ex_top && my <= L.ex_bot && mx >= L.ex_left && mx < 797.0f * xS) {
+			int n = (int)deckManager.current_deck.extra.size();
+			hovered_pos = 2;
 			if(n > 0) {
 				// Right limit: one full step past last card (cards are left-aligned)
 				float right_limit = L.ex_left + (float)n * L.ex_dx;
@@ -1382,11 +1382,11 @@ void DeckBuilder::GetHoveredCard() {
 					int seq = (L.ex_dx > 0.0f) ? (int)((mx - L.ex_left) / L.ex_dx) : 0;
 					if(seq < 0) seq = 0;
 					if(seq > n - 1) seq = n - 1;
-						hovered_seq = seq;
-						hovered_code = deckManager.current_deck.extra[hovered_seq]->code;
-						float last_card_cx = L.ex_left + (float)(n - 1) * L.ex_dx + L.cw * 0.5f;
-						if(mx >= last_card_cx)
-							is_lastcard = 1;
+					hovered_seq = seq;
+					hovered_code = deckManager.current_deck.extra[hovered_seq]->code;
+					float last_card_cx = L.ex_left + (float)(n - 1) * L.ex_dx + L.cw * 0.5f;
+					if(mx >= last_card_cx)
+						is_lastcard = 1;
 				}
 			}
 		} else if(my >= L.sd_top && my <= L.sd_bot && mx >= L.sd_left && mx < 797.0f * xS) {
@@ -1398,11 +1398,11 @@ void DeckBuilder::GetHoveredCard() {
 					int seq = (L.sd_dx > 0.0f) ? (int)((mx - L.sd_left) / L.sd_dx) : 0;
 					if(seq < 0) seq = 0;
 					if(seq > n - 1) seq = n - 1;
-						hovered_seq = seq;
-						hovered_code = deckManager.current_deck.side[hovered_seq]->code;
-						float last_card_cx = L.sd_left + (float)(n - 1) * L.sd_dx + L.cw * 0.5f;
-						if(mx >= last_card_cx)
-							is_lastcard = 1;
+					hovered_seq = seq;
+					hovered_code = deckManager.current_deck.side[hovered_seq]->code;
+					float last_card_cx = L.sd_left + (float)(n - 1) * L.sd_dx + L.cw * 0.5f;
+					if(mx >= last_card_cx)
+						is_lastcard = 1;
 				}
 			}
 		}
@@ -1420,12 +1420,11 @@ void DeckBuilder::GetHoveredCard() {
 			if(current_pos >= (int)results.size()) {
 				hovered_seq = -1;
 				hovered_code = 0;
-				} else {
-					hovered_code = results[current_pos]->code;
-				}
+			} else {
+				hovered_code = results[current_pos]->code;
 			}
 		}
-
+	}
 	if(is_draging) {
 		dragx = mouse_pos.X;
 		dragy = mouse_pos.Y;
