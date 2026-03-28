@@ -1199,7 +1199,7 @@ void Game::WaitFrameSignal(int frame) {
 	signalFrame = (gameConf.quick_animation && frame >= 12) ? 12 : frame;
 	frameSignal.Wait();
 }
-void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, const LFList* lflist, bool drag) {
+void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, const LFList* lflist) {
 	if(!cp)
 		return;
 	auto code = cp->code;
@@ -1601,7 +1601,7 @@ void Game::DrawDeckBd() {
 		DrawThumb(deckBuilder.draging_pointer,
 		          irr::core::vector2di((int)(deckBuilder.dragx - CARD_THUMB_WIDTH / 2.0f * mul),
 		                               (int)(deckBuilder.dragy - CARD_THUMB_HEIGHT / 2.0f * mul)),
-		          mul, deckBuilder.filterList, true);
+		          mul, deckBuilder.filterList);
 	}
 }
 }
