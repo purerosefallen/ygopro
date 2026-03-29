@@ -1616,9 +1616,11 @@ void Game::DrawDeckBd() {
 		}
 	}
 	if(deckBuilder.is_draging) {
+		int drag_half_w = (int)(CARD_THUMB_WIDTH * mul * 0.5f);
+		int drag_half_h = (int)(CARD_THUMB_HEIGHT * mul * 0.5f);
 		DrawThumb(deckBuilder.draging_pointer,
-		          irr::core::vector2di(deckBuilder.dragx - CARD_THUMB_WIDTH / 2 * xScale,
-		                               deckBuilder.dragy - CARD_THUMB_HEIGHT / 2 * yScale),
+		          irr::core::vector2di(deckBuilder.dragx - drag_half_w,
+		                               deckBuilder.dragy - drag_half_h),
 		          mul, deckBuilder.filterList);
 	}
 }
