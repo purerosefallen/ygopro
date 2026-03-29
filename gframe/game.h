@@ -228,7 +228,7 @@ public:
 	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0);
 	void SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw = true);
 	void WaitFrameSignal(int frame);
-	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist, bool drag = false);
+	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist);
 	void DrawDeckBd();
 	bool LoadConfigFromFile(const char* file);
 	void LoadConfig();

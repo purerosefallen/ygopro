@@ -1220,7 +1220,7 @@ void Game::WaitFrameSignal(int frame) {
 	signalFrame = (gameConf.quick_animation && frame >= 12) ? 12 : frame;
 	frameSignal.Wait();
 }
-void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, const LFList* lflist, bool drag) {
+void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, const LFList* lflist) {
 	if(!cp)
 		return;
 	auto code = cp->code;
@@ -1236,11 +1236,6 @@ void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, c
 	irr::core::recti limitloc(pos.X, pos.Y, pos.X + lim_sz, pos.Y + lim_sz);
 	irr::core::recti otloc(pos.X + (int)(7 * mul), pos.Y + (int)(50 * mul),
 	                       pos.X + (int)(37 * mul), pos.Y + (int)(65 * mul));
-	if(drag) {
-		dragloc = irr::core::recti(pos.X, pos.Y, pos.X + CARD_THUMB_WIDTH * xScale, pos.Y + CARD_THUMB_HEIGHT * yScale);
-		limitloc = irr::core::recti(pos.X, pos.Y, pos.X + 20 * xScale, pos.Y + 20 * yScale);
-		otloc = irr::core::recti(pos.X + 7, pos.Y + 50 * yScale, pos.X + 37 * xScale, pos.Y + 65 * yScale);
-	}
 	driver->draw2DImage(img, dragloc, irr::core::rect<irr::s32>(0, 0, size.Width, size.Height));
 	auto current_limitloc = limitloc;
 	auto credit_max_display = CARD_THUMB_WIDTH / 20;
@@ -1624,7 +1619,7 @@ void Game::DrawDeckBd() {
 		DrawThumb(deckBuilder.draging_pointer,
 		          irr::core::vector2di(deckBuilder.dragx - CARD_THUMB_WIDTH / 2 * xScale,
 		                               deckBuilder.dragy - CARD_THUMB_HEIGHT / 2 * yScale),
-		          mul, deckBuilder.filterList, true);
+		          mul, deckBuilder.filterList);
 	}
 }
 }
