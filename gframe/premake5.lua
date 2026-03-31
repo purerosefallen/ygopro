@@ -1,7 +1,4 @@
 include "lzma/."
-if (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
-include "spmemvfs/."
-end
 
 if SERVER_MODE then
 if SERVER_PRO3_SUPPORT then
@@ -31,7 +28,7 @@ end
     links { "ocgcore", "clzma", "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
-        links { "irrlicht", "cspmemvfs" }
+        links { "irrlicht" }
         if BUILD_IRRLICHT then
             includedirs { "../irrlicht/source/Irrlicht" }
         end
@@ -50,7 +47,7 @@ project "ygopro"
 
     files { "*.cpp", "*.h" }
     includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "cspmemvfs", "sqlite3", "irrlicht", "freetype", "event" }
+    links { "ocgcore", "clzma", "sqlite3", "irrlicht", "freetype", "event" }
 end
     if not OCGCORE_DYNAMIC then
         links { LUA_LIB_NAME }
@@ -75,12 +72,21 @@ end
         libdirs { IRRLICHT_LIB_DIR }
     end
 
-    if BUILD_FREETYPE then
-        includedirs { "../freetype/custom", "../freetype/include" }
-    else
-        includedirs { FREETYPE_INCLUDE_DIR }
-        libdirs { FREETYPE_LIB_DIR }
+if not SERVER_MODE then
+    if not IRRLICHT_BUILD_JPEG_PNG then
+        links { "jpeg", "png" }
+        libdirs { JPEG_LIB_DIR, PNG_LIB_DIR }
     end
+
+    if not SERVER_MODE then
+        if BUILD_FREETYPE then
+            includedirs { "../freetype/custom", "../freetype/include" }
+        else
+            includedirs { FREETYPE_INCLUDE_DIR }
+            libdirs { FREETYPE_LIB_DIR }
+        end
+    end
+end
 
     if BUILD_SQLITE then
         includedirs { "../sqlite3" }
@@ -89,7 +95,8 @@ end
         libdirs { SQLITE_LIB_DIR }
     end
 
-    if USE_AUDIO and not SERVER_MODE then
+if not SERVER_MODE then
+    if USE_AUDIO then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
@@ -115,6 +122,7 @@ end
             end
         end
     end
+end
 
     filter "system:windows"
 if not SERVER_PRO3_SUPPORT then

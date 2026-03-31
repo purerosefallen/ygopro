@@ -15,6 +15,7 @@ BUILD_FREETYPE = os.istarget("windows")
 
 BUILD_SQLITE = os.istarget("windows")
 BUILD_IRRLICHT = true -- modified Irrlicht is required, can't use the official one
+IRRLICHT_BUILD_JPEG_PNG = os.istarget("windows") -- build the bundled jpeglib and libpng from Irrlicht
 USE_DXSDK = true
 
 USE_AUDIO = true
@@ -64,6 +65,12 @@ newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", descript
 newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "build-jpeg-png", category = "YGOPro - irrlicht", description = "" }
+newoption { trigger = "no-build-jpeg-png", category = "YGOPro - irrlicht", description = "" }
+newoption { trigger = "jpeg-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "jpeg-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "png-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
+newoption { trigger = "png-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "no-dxsdk", category = "YGOPro - irrlicht", description = "" }
 
 newoption { trigger = "no-audio", category = "YGOPro", description = "" }
@@ -96,6 +103,8 @@ newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", d
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
 newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
+newoption { trigger = "ndk-dir", category = "YGOPro - android", description = "", value = "PATH" }
+newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL", default = "26" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
@@ -142,6 +151,23 @@ function FindHeaderWithSubDir(header, subdir)
     return result
 end
 
+function QuoteIfNeeded(value)
+    if string.find(value, " ", 1, true) then
+        return "\"" .. value .. "\""
+    end
+    return value
+end
+
+function FindAndroidToolchainBin(ndkDir)
+    local prebuiltDir = path.join(ndkDir, "toolchains/llvm/prebuilt")
+    local prebuilts = os.matchdirs(path.join(prebuiltDir, "*"))
+    table.sort(prebuilts)
+    if #prebuilts == 0 then
+        error("Android NDK toolchain not found under " .. prebuiltDir)
+    end
+    return path.join(prebuilts[1], "bin")
+end
+
 function ApplyBoolean(param)
     if GetParam(param) then
         defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
@@ -155,6 +181,35 @@ function ApplyNumber(param)
     if numberValue then
         defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
     end
+end
+
+ANDROID_ENABLED = false
+ANDROID_NDK_DIR = GetParam("ndk-dir")
+ANDROID_API_LEVEL_TEXT = GetParam("android-api-level") or "26"
+ANDROID_API_LEVEL = tonumber(ANDROID_API_LEVEL_TEXT)
+if not ANDROID_API_LEVEL then
+    error("Invalid android api level: " .. ANDROID_API_LEVEL_TEXT)
+end
+if ANDROID_NDK_DIR then
+    ANDROID_NDK_DIR = path.getabsolute(ANDROID_NDK_DIR)
+    if not os.isdir(ANDROID_NDK_DIR) then
+        error("Android NDK directory not found: " .. ANDROID_NDK_DIR)
+    end
+    ANDROID_ENABLED = true
+    ANDROID_TOOLCHAIN_BIN = FindAndroidToolchainBin(ANDROID_NDK_DIR)
+    ANDROID_TARGET = "aarch64-linux-android" .. ANDROID_API_LEVEL
+    premake.override(premake.tools.clang, "gettoolname", function(base, cfg, tool)
+        if cfg.system == premake.ANDROID then
+            if tool == "cc" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "clang")) .. " --target=" .. ANDROID_TARGET
+            elseif tool == "cxx" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "clang++")) .. " --target=" .. ANDROID_TARGET
+            elseif tool == "ar" then
+                return QuoteIfNeeded(path.join(ANDROID_TOOLCHAIN_BIN, "llvm-ar"))
+            end
+        end
+        return base(cfg, tool)
+    end)
 end
 
 if GetParam("server-mode") then
@@ -248,6 +303,17 @@ end
 if not BUILD_IRRLICHT then
     IRRLICHT_INCLUDE_DIR = GetParam("irrlicht-include-dir") or os.findheader("irrlicht.h")
     IRRLICHT_LIB_DIR = GetParam("irrlicht-lib-dir") or os.findlib("irrlicht")
+end
+if GetParam("no-build-jpeg-png") then
+    IRRLICHT_BUILD_JPEG_PNG = false
+elseif GetParam("build-jpeg-png") then
+    IRRLICHT_BUILD_JPEG_PNG = true
+end
+if not IRRLICHT_BUILD_JPEG_PNG then
+    JPEG_INCLUDE_DIR = GetParam("jpeg-include-dir") or os.findheader("jpeglib.h")
+    JPEG_LIB_DIR = GetParam("jpeg-lib-dir") or os.findlib("jpeg")
+    PNG_INCLUDE_DIR = GetParam("png-include-dir") or os.findheader("png.h")
+    PNG_LIB_DIR = GetParam("png-lib-dir") or os.findlib("png")
 end
 
 if GetParam("no-dxsdk") then
@@ -419,6 +485,9 @@ workspace "YGOPro"
     objdir "obj"    
 
     configurations { "Release", "Debug" }
+    if ANDROID_ENABLED then
+        platforms { "android_arm64" }
+    end
 
     for _, numberOption in ipairs(numberOptions) do
         ApplyNumber(numberOption)
@@ -444,6 +513,12 @@ workspace "YGOPro"
     filter { "system:windows", "platforms:x64" }
         architecture "x86_64"
 
+    filter "platforms:android_arm64"
+        architecture "ARM64"
+        system "android"
+        toolset "clang"
+        pic "On"
+
     filter "system:macosx"
         libdirs { "/usr/local/lib" }
         if MAC_ARM then
@@ -463,10 +538,16 @@ workspace "YGOPro"
         optimize "Speed"
         targetdir "bin/release"
 
+    filter { "platforms:android_arm64", "configurations:Release" }
+        targetdir "bin/android_arm64/release"
+
     filter "configurations:Debug"
         symbols "On"
         defines "_DEBUG"
         targetdir "bin/debug"
+
+    filter { "platforms:android_arm64", "configurations:Debug" }
+        targetdir "bin/android_arm64/debug"
 
     filter { "system:windows", "platforms:Win32", "configurations:Release" }
         targetdir "bin/release/x86"
@@ -500,6 +581,8 @@ workspace "YGOPro"
 
     filter "not action:vs*"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
+
+    filter { "not action:vs*", "not system:android" }
         if not IS_ARM and not MAC_INTEL then
             buildoptions "-march=native"
         end
@@ -511,6 +594,9 @@ workspace "YGOPro"
             }
             pic "On"
         end
+
+    filter { "system:android", "language:C++" }
+        linkoptions { "-static-libstdc++" }
 
 if SERVER_PRO3_SUPPORT then
     filter "not action:vs*"
