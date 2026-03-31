@@ -36,6 +36,13 @@ namespace ygo {
 constexpr int DEFAULT_DUEL_RULE = YGOPRO_DEFAULT_DUEL_RULE;
 constexpr int CONFIG_LINE_SIZE = 1024;
 
+constexpr int GAME_WINDOW_WIDTH = 1024;
+constexpr int GAME_WINDOW_HEIGHT = 640;
+constexpr int CARD_IMG_WIDTH = 177;
+constexpr int CARD_IMG_HEIGHT = 254;
+constexpr int CARD_THUMB_WIDTH = 44;
+constexpr int CARD_THUMB_HEIGHT = 64;
+
 template<size_t N>
 bool IsExtension(const wchar_t* filename, const wchar_t(&extension)[N]) {
 	auto flen = std::wcslen(filename);
@@ -112,8 +119,8 @@ struct Config {
 	double music_volume{ 0.5 };
 	int music_mode{ 1 };
 	bool window_maximized{ false };
-	int window_width{ 1024 };
-	int window_height{ 640 };
+	int window_width{ GAME_WINDOW_WIDTH };
+	int window_height{ GAME_WINDOW_HEIGHT };
 	bool resize_popup_menu{ false };
 	int search_regex{ 0 };
 	int chkEnablePScale{ 1 };
@@ -218,7 +225,9 @@ public:
 	void RefreshLocales();
 	void RefreshLFList();
 	void RefreshServerList();
-	void DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, float* cv);
+	void Draw2DImageQuad(irr::video::IVideoDriver* driver, irr::video::ITexture* texture, const irr::core::recti& sourceRect,
+						 const irr::core::vector2di corner[4], bool useAlphaChannel = true, irr::video::SColor color = 0xffffffff);
+	void DrawSelectionLine(irr::video::S3DVertex* vec, bool stipple, irr::video::SColor color);
 	void DrawSelectionLine(irr::gui::IGUIElement* element, int width, irr::video::SColor color);
 	void DrawBackGround();
 	void DrawLinkedZones(ClientCard* pcard);
@@ -234,6 +243,7 @@ public:
 	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0);
 	void HideElement(irr::gui::IGUIElement* element, bool set_action = false);
 	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0);
+	void SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw = true);
 	void WaitFrameSignal(int frame);
 	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist);
 	void DrawDeckBd();
@@ -316,8 +326,8 @@ public:
 	bool hideChat{};
 	int chatTiming[8]{};
 	int chatType[8]{};
-	unsigned short linePatternD3D{};
-	unsigned short linePatternGL{ 0x0f0f };
+	unsigned short linePattern{ 0 };
+	unsigned short stippleMask{ 0x0f0f };
 	int waitFrame{};
 	int signalFrame{};
 	int actionParam{};
@@ -335,7 +345,7 @@ public:
 	int lpframe{};
 	int lpd{};
 	int lpplayer{};
-	int lpccolor{};
+	irr::u32 lpccolor{};
 	std::wstring lpcstring;
 	bool always_chain{};
 	bool ignore_chain{};
@@ -739,11 +749,6 @@ extern uint32_t duel_flags;
 #else
 #define SIZE_QUERY_BUFFER	0x4000
 #endif
-
-#define CARD_IMG_WIDTH		177
-#define CARD_IMG_HEIGHT		254
-#define CARD_THUMB_WIDTH	44
-#define CARD_THUMB_HEIGHT	64
 
 #define UEVENT_EXIT			0x1
 #define UEVENT_TOWINDOW		0x2
