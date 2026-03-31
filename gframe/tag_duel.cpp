@@ -433,14 +433,14 @@ void TagDuel::StartDuel(DuelPlayer* dp) {
 	auto pbuf = deckbuff;
 #ifdef YGOPRO_SERVER_MODE
 	short extra_size[2];
-	for(int i = 0; i < 2; ++i) {
-		auto p = i * 2;
-		extra_size[i] = (short)pdeck[p].extra.size();
-		if(duel_flags & DUEL_FLAG_SIDEINS)
-			for (auto cit : pdeck[p].side)
-				if (cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
-					++extra_size[i];
-	}
+		for(int i = 0; i < 2; ++i) {
+			auto p = i * 2;
+			extra_size[i] = (short)pdeck[p].extra.size();
+			if(duel_flags & DUEL_FLAG_SIDEINS)
+				for (auto cit : pdeck[p].side)
+					if (cit->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+						++extra_size[i];
+		}
 	BufferIO::Write<uint16_t>(pbuf, (short)pdeck[0].main.size());
 	BufferIO::Write<uint16_t>(pbuf, extra_size[0]);
 	BufferIO::Write<uint16_t>(pbuf, (short)pdeck[0].side.size());
@@ -605,29 +605,29 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteInt32(host_info.draw_count, false);
 	last_replay.WriteInt32(opt, false);
 	last_replay.Flush();
-	auto load_single = [&](const std::vector<code_pointer>& deck_container, uint8_t p, uint8_t location) {
+	auto load_single = [&](const std::vector<const CardDataC*>& deck_container, uint8_t p, uint8_t location) {
 		last_replay.WriteInt32(deck_container.size(), false);
 		for (auto cit = deck_container.rbegin(); cit != deck_container.rend(); ++cit) {
-			new_card(pduel, (*cit)->first, p, p, location, 0, POS_FACEDOWN_DEFENSE);
-			last_replay.WriteInt32((*cit)->first, false);
+			new_card(pduel, (*cit)->code, p, p, location, 0, POS_FACEDOWN_DEFENSE);
+			last_replay.WriteInt32((*cit)->code, false);
 		}
 	};
-	auto load_tag = [&](const std::vector<code_pointer>& deck_container, uint8_t p, uint8_t location) {
+	auto load_tag = [&](const std::vector<const CardDataC*>& deck_container, uint8_t p, uint8_t location) {
 		last_replay.WriteInt32(deck_container.size(), false);
 		for (auto cit = deck_container.rbegin(); cit != deck_container.rend(); ++cit) {
-			new_tag_card(pduel, (*cit)->first, p, location);
-			last_replay.WriteInt32((*cit)->first, false);
+			new_tag_card(pduel, (*cit)->code, p, location);
+			last_replay.WriteInt32((*cit)->code, false);
 		}
 	};
 #ifdef YGOPRO_SERVER_MODE
-	std::vector<ygo::code_pointer> extra_cards;
+	std::vector<const CardDataC*> extra_cards;
 	auto load_extra = [&](uint8_t p) {
 		extra_cards.clear();
 		for(auto cit : pdeck[p].extra)
 			extra_cards.push_back(cit);
 		if(duel_flags & DUEL_FLAG_SIDEINS)
 			for(auto cit : pdeck[p].side)
-				if(cit->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+				if(cit->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 					extra_cards.push_back(cit);
 		return extra_cards;
 	};

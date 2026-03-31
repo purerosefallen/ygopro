@@ -36,5 +36,8 @@ project "event"
     filter "system:linux"
         files { "evthread_pthread.c", "epoll.c", "epoll_sub.c", "poll.c", "select.c" }
 
+    filter "system:android"
+        files { "evthread_pthread.c", "epoll.c", "epoll_sub.c", "poll.c", "select.c" }
+
     filter "system:macosx"
         files { "evthread_pthread.c", "kqueue.c", "poll.c", "select.c" }
