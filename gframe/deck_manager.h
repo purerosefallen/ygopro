@@ -78,7 +78,7 @@ public:
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
 	bool LoadCurrentDeck(std::istringstream& deckStream, bool is_packlist = false);
 	wchar_t DeckFormatBuffer[128];
-	int TypeCount(std::vector<code_pointer> list, unsigned int ctype);
+	int TypeCount(std::vector<const CardDataC*> list, unsigned int ctype);
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 #endif //YGOPRO_SERVER_MODE
@@ -87,12 +87,16 @@ public:
 	Deck MutateDeck(Deck deck) {
 		Deck result;
 		uint32_t imitating_code = 0;
+		const auto& data_table = dataManager.GetDataTable();
 		for(auto card : deck.main) {
 			auto use_card = card;
-			auto code = card->first;
+			auto code = card->code;
 			if(code == IMITATOR_CODE) {
-				if(imitating_code)
-					use_card = dataManager.GetCodePointer(imitating_code);
+				if(imitating_code) {
+					auto imitating_card = dataManager.GetCodePointer(imitating_code);
+					if(imitating_card != data_table.end())
+						use_card = &imitating_card->second;
+				}
 			} else
 				imitating_code = code;
 			result.main.push_back(use_card);

@@ -17,11 +17,11 @@ mat_common:
     - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz | tar zfx -
     - mv lua-5.4.8 lua
     # sqlite3
-    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2025/sqlite-autoconf-3500100.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3500100 sqlite3
+    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3510300.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3510300 sqlite3
     # freetype
-    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.13.3.tar.gz | tar zfx -
-    # - mv freetype-2.13.3 freetype
+    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.2.tar.gz | tar zfx -
+    # - mv freetype-2.14.2 freetype
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
@@ -72,7 +72,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -85,8 +85,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
-    - 7z x -y premake-5.0.0-beta7-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
+    - 7z x -y premake-5.0.0-beta8-windows.zip
   artifacts:
     paths:
       - premake5.exe
@@ -156,7 +156,9 @@ exec_windows_mdpro2:
   extends: ._exec_build
   variables:
     RELEASE_DIR: ''
+    MAKE_CONFIG: release
     TARGET_FILE: ygopro
+    TARGET_OUTPUT_DIR: bin/release
     PREMAKE5_BIN: premake5
     BUILD_EVENT: '1'
     BUILD_IRRLICHT: '1'
@@ -165,10 +167,10 @@ exec_windows_mdpro2:
     - ./.ci/configure-libevent.sh
     - $PREMAKE5_BIN gmake
     - cd build
-    - make config=release -j$(nproc)
+    - make config=$MAKE_CONFIG -j$(nproc)
     - cd ..
     - mkdir -p dist/$RELEASE_DIR
-    - mv bin/release/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
+    - mv $TARGET_OUTPUT_DIR/$TARGET_FILE dist/$RELEASE_DIR/$TARGET_FILE
     - |
       if [ "$TARGET_FILE" = "ygopro" ]; then
         strip dist/$RELEASE_DIR/$TARGET_FILE
@@ -250,6 +252,22 @@ exec_linuxarm_pro3:
     - .use_pro3_linux
   variables:
     RELEASE_DIR: linux-arm64
+
+exec_android_pro3:
+  extends:
+    - .exec_linux_common
+    - .use_pro3_linux
+  tags:
+    - noavx2
+  variables:
+    RELEASE_DIR: android-arm64
+    MAKE_CONFIG: release_android_arm64
+    TARGET_OUTPUT_DIR: bin/android_arm64/release
+    NDK_DIR: android-ndk-r23b
+    ANDROID_API_LEVEL: '26'
+  before_script:
+    - wget -O android-ndk-r23b-linux.zip https://mat-cacher.moenext.com/https://dl.google.com/android/repository/android-ndk-r23b-linux.zip
+    - 7z x -y android-ndk-r23b-linux.zip
 
 exec_debianarm:
   extends:
@@ -339,6 +357,7 @@ upload_to_minio:
     - exec_windows
     - exec_linux
     - exec_linuxarm
+    - exec_android_pro3
     - exec_windows_pro3
     - exec_windows_pro2
     - exec_windows_mdpro2
@@ -349,8 +368,17 @@ upload_to_minio:
     - exec_macos
   tags: 
     - linux
+  variables:
+    MINIO_DIR: koishipro/server
   script:
-    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/koishipro/server
+    - aws s3 --endpoint=https://minio.mycard.moe:9000 sync --delete dist/ s3://mycard/$MINIO_DIR
   only:
     - server
     - tags
+
+upload_to_minio_develop:
+  extends: upload_to_minio
+  variables:
+    MINIO_DIR: koishipro/server-develop
+  only:
+    - server-develop

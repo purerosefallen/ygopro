@@ -13,7 +13,6 @@ namespace ygo {
 
 class ImageManager {
 private:
-	void resizeImage(irr::video::IImage* src, irr::video::IImage* dest, bool use_threading);
 	irr::video::ITexture* addTexture(const char* name, irr::video::IImage* srcimg, irr::s32 width, irr::s32 height);
 	
 	// Internal implementation using void* for type erasure

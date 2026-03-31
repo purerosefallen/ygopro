@@ -91,13 +91,14 @@ void CGUISkinSystem::ParseGUIElementStyle(gui::SImageGUIElementStyle& elem, cons
 	elem.DstBorder.Left = box.UpperLeftCorner.Y;
 	elem.DstBorder.Bottom = box.LowerRightCorner.X;
 	elem.DstBorder.Right = box.LowerRightCorner.Y;	
-	if(nullcolors) elem.Color = NULL;
+	if(nullcolors)
+		elem.Color = video::SColor(0);
 	col = registry->getValueAsColor((context +"/Color").c_str());
-	if(col != NULL) 
+	if(col != video::SColor(0))
 		elem.Color = col;
 	else {
 		col = registry->getValueAsColor((context +"/Colour").c_str());
-		if(col != NULL) 
+		if(col != video::SColor(0))
 			elem.Color = col;
 	}
 }
@@ -164,9 +165,9 @@ gui::CImageGUISkin* CGUISkinSystem::loadSkinFromFile(const c8 *skinname) {
 	// If there was no progress bar colors set, set them in the config to the defaults
 	// otherwise their 0,0,0,0. This is neccicary for the old klagui.	
 
-	if(skinConfig.ProgressBar.Color == NULL) 
+	if(skinConfig.ProgressBar.Color == video::SColor(0))
 		skinConfig.ProgressBar.Color = video::SColor();	
-	if(skinConfig.ProgressBarFilled.Color == NULL) 
+	if(skinConfig.ProgressBarFilled.Color == video::SColor(0))
 		skinConfig.ProgressBarFilled.Color = video::SColor(255,255,0,0);
 
 	// Load in the Info
@@ -189,7 +190,7 @@ gui::CImageGUISkin* CGUISkinSystem::loadSkinFromFile(const c8 *skinname) {
 	video::SColor newCol = video::SColor();
 	video::SColor oldCol = newCol;
 	x = registry->getValueAsInt(L"guialpha",L"Skin/Global/");
-	if(x && x != NULL) {		
+	if(x != 0) {
 		i = gui::EGDC_COUNT;
 		while(i--) {
 			oldCol = skin->getColor((gui::EGUI_DEFAULT_COLOR)i);		
@@ -237,7 +238,7 @@ core:: stringw CGUISkinSystem::getProperty(core::stringw key) {
 
 bool CGUISkinSystem::checkSkinColor(gui::EGUI_DEFAULT_COLOR colToSet,const wchar_t *context,gui::CImageGUISkin *skin) {
 	video::SColor col = registry->getValueAsColor(context);
-	if(col != NULL) {
+	if(col != video::SColor(0)) {
 		skin->setColor(colToSet,col);
 		return true;
 	}
@@ -246,7 +247,7 @@ bool CGUISkinSystem::checkSkinColor(gui::EGUI_DEFAULT_COLOR colToSet,const wchar
 
 bool CGUISkinSystem::checkSkinSize(gui::EGUI_DEFAULT_SIZE sizeToSet,const wchar_t *context,const wchar_t *key,gui::CImageGUISkin *skin) {
 	u16 i = registry->getValueAsInt(key,context);
-	if(i != NULL) {
+	if(i != 0) {
 		skin->setSize(sizeToSet,i);
 		return true;
 	}
