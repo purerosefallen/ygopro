@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <thread>
 #include "config.h"
 #include "duelclient.h"
 #include "client_card.h"
@@ -11,7 +13,6 @@
 #ifdef _WIN32
 #include <Windns.h>
 #endif
-#include <thread>
 
 namespace ygo {
 
