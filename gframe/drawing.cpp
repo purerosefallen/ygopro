@@ -1550,9 +1550,7 @@ void Game::DrawDeckBd() {
 	// ====== Search results (mul-based row height, text right after card) ======
 	float sr_row_h   = deckBuilder.layout.sr_row_h;   // 66 * mul
 	float sr_top_px  = deckBuilder.layout.sr_top_px;  // 165 * yScale
-	float sr_panel_h = (626.0f - 165.0f) * yScale;
-	int   max_visible = (int)(sr_panel_h / sr_row_h);
-	if(max_visible < 7) max_visible = 7;
+	int   max_visible = deckBuilder.GetSearchResultMaxVisible();
 	int   max_result  = gameConf.use_image_load_background_thread ? max_visible + 2 : max_visible;
 	float tx_base  = 810.0f * xScale + cw + 6.0f * mul;  // text left: right after card + gap
 	float tx_right = 1019.0f * xScale;                    // text right: full search panel width

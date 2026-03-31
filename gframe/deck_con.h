@@ -41,6 +41,7 @@ public:
 	void Terminate();
 	void GetHoveredCard();
 	void FilterCards();
+	int GetSearchResultMaxVisible() const;
 	void StartFilter();
 	void ClearFilter();
 	void InstantSearch();

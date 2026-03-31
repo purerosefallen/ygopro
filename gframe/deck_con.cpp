@@ -1449,6 +1449,11 @@ void DeckBuilder::StartFilter() {
 	}
 	FilterCards();
 }
+int DeckBuilder::GetSearchResultMaxVisible() const {
+	float xS = mainGame->xScale, yS = mainGame->yScale;
+	float mul = (xS > yS) ? yS : xS;
+	return std::max(7, (int)(((626.0f - 165.0f) * yS) / (66.0f * mul)));
+}
 void DeckBuilder::FilterCards() {
 	results.clear();
 	struct element_t {
@@ -1632,9 +1637,7 @@ void DeckBuilder::FilterCards() {
 	}
 	myswprintf(result_string, L"%zu", results.size());
 	{
-		float xS2 = mainGame->xScale, yS2 = mainGame->yScale;
-		float mul2 = (xS2 > yS2) ? yS2 : xS2;
-		int max_vis = std::max(7, (int)(((626.0f - 165.0f) * yS2) / (66.0f * mul2)));
+		int max_vis = GetSearchResultMaxVisible();
 		if(results.size() > static_cast<size_t>(max_vis)) {
 			mainGame->scrFilter->setVisible(true);
 			mainGame->scrFilter->setMax((int)results.size() - max_vis);
