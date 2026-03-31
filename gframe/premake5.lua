@@ -71,7 +71,9 @@ end
         includedirs { IRRLICHT_INCLUDE_DIR }
         libdirs { IRRLICHT_LIB_DIR }
     end
-    if not SERVER_MODE and not IRRLICHT_BUILD_JPEG_PNG then
+
+if not SERVER_MODE then
+    if not IRRLICHT_BUILD_JPEG_PNG then
         links { "jpeg", "png" }
         libdirs { JPEG_LIB_DIR, PNG_LIB_DIR }
     end
@@ -84,6 +86,7 @@ end
             libdirs { FREETYPE_LIB_DIR }
         end
     end
+end
 
     if BUILD_SQLITE then
         includedirs { "../sqlite3" }
@@ -92,7 +95,8 @@ end
         libdirs { SQLITE_LIB_DIR }
     end
 
-    if USE_AUDIO and not SERVER_MODE then
+if not SERVER_MODE then
+    if USE_AUDIO then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
@@ -118,6 +122,7 @@ end
             end
         end
     end
+end
 
     filter "system:windows"
 if not SERVER_PRO3_SUPPORT then

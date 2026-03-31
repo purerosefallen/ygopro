@@ -184,7 +184,7 @@ bool DataManager::LoadDB(irr::io::IReadFile* reader) {
 	sqlite3_close(db_handle);
 	return ret;
 }
-#endif
+#endif // YGOPRO_SERVER_MODE
 #ifndef YGOPRO_SERVER_MODE
 bool DataManager::LoadStrings(const char* file) {
 	FILE* fp = myfopen(file, "r");
