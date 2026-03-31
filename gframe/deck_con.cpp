@@ -1377,8 +1377,7 @@ void DeckBuilder::GetHoveredCard() {
 			int n = (int)deckManager.current_deck.extra.size();
 			hovered_pos = 2;
 			if(n > 0) {
-				// Right limit: one full step past last card (cards are left-aligned)
-				float right_limit = L.ex_left + (float)n * L.ex_dx;
+				float right_limit = L.ex_left + std::max((float)n * L.ex_dx, (float)(n - 1) * L.ex_dx + L.cw);
 				if(mx < right_limit) {
 					int seq = (L.ex_dx > 0.0f) ? (int)((mx - L.ex_left) / L.ex_dx) : 0;
 					if(seq < 0) seq = 0;
@@ -1394,7 +1393,7 @@ void DeckBuilder::GetHoveredCard() {
 			int n = (int)deckManager.current_deck.side.size();
 			hovered_pos = 3;
 			if(n > 0) {
-				float right_limit = L.sd_left + (float)n * L.sd_dx;
+				float right_limit = L.sd_left + std::max((float)n * L.sd_dx, (float)(n - 1) * L.sd_dx + L.cw);
 				if(mx < right_limit) {
 					int seq = (L.sd_dx > 0.0f) ? (int)((mx - L.sd_left) / L.sd_dx) : 0;
 					if(seq < 0) seq = 0;
