@@ -137,8 +137,8 @@ irr::core::rect<u32> CXMLRegistry::getValueAsRect(const wchar_t *context) {
 // Made more robust
 irr::video::SColor CXMLRegistry::getValueAsColor(const wchar_t *context) {
 	CXMLNode *targetNode = resolveContext(context);
-	if(!targetNode) return NULL;
-	irr::u32 r,g,b,a;
+	if(!targetNode) return irr::video::SColor(0);
+	irr::u32 r = 0, g = 0, b = 0, a = 0;
 	irr::core::stringw tmp;
 	tmp = targetNode->findChildByName(L"r")->getValue();
 	if(tmp.size()) r = _wtoi(tmp.c_str());
@@ -269,7 +269,7 @@ bool CXMLRegistry::loadFile(const c8 *fname, const c8 *path) {
 	// see if this load ADDED any to decide succcessful or not
 	if(topNode == 0) return false;
 	return true;
-	
+
 }
 
 	
