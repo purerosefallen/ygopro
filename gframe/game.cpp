@@ -136,7 +136,7 @@ bool Game::Initialize() {
 		return false;
 	}
 	// Apply skin
-	if(gameConf.skin_index && gameConf.use_d3d) {
+	if(gameConf.skin_index) {
 		wchar_t skin_dir[16];
 		myswprintf(skin_dir, L"skin");
 		skinSystem = new CGUISkinSystem(skin_dir, device);
@@ -169,7 +169,9 @@ bool Game::Initialize() {
 	dataManager.FileSystem = device->getFileSystem();
 	if(dataManager.LoadDB(GetLocaleDir("cards.cdb"))) {} else
 	if(!dataManager.LoadDB("cards.cdb")) {
-		ErrorLog("Failed to load card database (cards.cdb)!");
+		std::string errmsg = "Failed to load card database (cards.cdb)! ";
+		errmsg.append(dataManager.errmsg);
+		ErrorLog(errmsg.c_str());
 		return false;
 	}
 	if(dataManager.LoadStrings(GetLocaleDir("strings.conf"))) {} else
@@ -183,20 +185,20 @@ bool Game::Initialize() {
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	if(!numFont) {
-		const wchar_t* numFontPaths[] = {
-			L"./fonts/numFont.ttf",
-			L"./fonts/numFont.ttc",
-			L"./fonts/numFont.otf",
-			L"C:/Windows/Fonts/arialbd.ttf",
-			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
-			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
-			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
-			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
-			L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
-			L"/System/Library/Fonts/SFNS.ttf",
+		const char* numFontPaths[] = {
+			"./fonts/numFont.ttf",
+			"./fonts/numFont.ttc",
+			"./fonts/numFont.otf",
+			"C:/Windows/Fonts/arialbd.ttf",
+			"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
+			"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+			"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
+			"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
+			"/System/Library/Fonts/SFNSTextCondensed-Bold.otf",
+			"/System/Library/Fonts/SFNS.ttf",
 		};
-		for(const wchar_t* path : numFontPaths) {
-			BufferIO::CopyWideString(path, gameConf.numfont);
+		for(auto path : numFontPaths) {
+			BufferIO::CopyString(path, gameConf.numfont);
 			numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 			if(numFont)
 				break;
@@ -204,25 +206,25 @@ bool Game::Initialize() {
 	}
 	textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 	if(!textFont) {
-		const wchar_t* textFontPaths[] = {
-			L"./fonts/textFont.ttf",
-			L"./fonts/textFont.ttc",
-			L"./fonts/textFont.otf",
-			L"C:/Windows/Fonts/msyh.ttc",
-			L"C:/Windows/Fonts/msyh.ttf",
-			L"C:/Windows/Fonts/simsun.ttc",
-			L"C:/Windows/Fonts/YuGothM.ttc",
-			L"C:/Windows/Fonts/meiryo.ttc",
-			L"C:/Windows/Fonts/msgothic.ttc",
-			L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
-			L"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-			L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
-			L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
-			L"/System/Library/Fonts/PingFang.ttc",
-			L"/System/Library/Fonts/STHeiti Medium.ttc",
+		const char* textFontPaths[] = {
+			"./fonts/textFont.ttf",
+			"./fonts/textFont.ttc",
+			"./fonts/textFont.otf",
+			"C:/Windows/Fonts/msyh.ttc",
+			"C:/Windows/Fonts/msyh.ttf",
+			"C:/Windows/Fonts/simsun.ttc",
+			"C:/Windows/Fonts/YuGothM.ttc",
+			"C:/Windows/Fonts/meiryo.ttc",
+			"C:/Windows/Fonts/msgothic.ttc",
+			"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf",
+			"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+			"/System/Library/Fonts/PingFang.ttc",
+			"/System/Library/Fonts/STHeiti Medium.ttc",
 		};
-		for(const wchar_t* path : textFontPaths) {
-			BufferIO::CopyWideString(path, gameConf.textfont);
+		for(auto path : textFontPaths) {
+			BufferIO::CopyString(path, gameConf.textfont);
 			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 			if(textFont)
 				break;
@@ -230,7 +232,6 @@ bool Game::Initialize() {
 	}
 	if(!numFont || !textFont) {
 		wchar_t fpath[1024]{};
-		fpath[0] = 0;
 		FileSystem::TraversalDir(L"./fonts", [&fpath](const wchar_t* name, bool isdir) {
 			if(!isdir && (IsExtension(name, L".ttf") || IsExtension(name, L".ttc") || IsExtension(name, L".otf"))) {
 				myswprintf(fpath, L"./fonts/%ls", name);
@@ -241,11 +242,11 @@ bool Game::Initialize() {
 			return false;
 		}
 		if(!numFont) {
-			BufferIO::CopyWideString(fpath, gameConf.numfont);
+			BufferIO::EncodeUTF8(fpath, gameConf.numfont);
 			numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 		}
 		if(!textFont) {
-			BufferIO::CopyWideString(fpath, gameConf.textfont);
+			BufferIO::EncodeUTF8(fpath, gameConf.textfont);
 			textFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.textfont, gameConf.textfontsize);
 		}
 	}
@@ -271,7 +272,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X SstTAarR", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X M.T.T.B.", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -888,13 +889,12 @@ bool Game::Initialize() {
 	ebDefense = env->addEditBox(L"", irr::core::rect<irr::s32>(260, 40 + 75 / 6, 340, 60 + 75 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebDefense->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebDefense);
-	stStar = env->addStaticText(dataManager.GetSysString(1324), irr::core::rect<irr::s32>(10, 62 + 100 / 6, 80, 82 + 100 / 6), false, false, wFilter);
-	ebStar = env->addEditBox(L"", irr::core::rect<irr::s32>(60, 60 + 100 / 6, 100, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
-	editbox_list.push_back(ebStar);
+	stStar = env->addStaticText(dataManager.GetSysString(1324), irr::core::rect<irr::s32>(10, 62 + 100 / 6, 70, 82 + 100 / 6), false, false, wFilter);
+	ebStar = env->addEditBox(L"", irr::core::rect<irr::s32>(60, 60 + 100 / 6, 95, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebStar->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebStar);
-	stScale = env->addStaticText(dataManager.GetSysString(1336), irr::core::rect<irr::s32>(101, 62 + 100 / 6, 150, 82 + 100 / 6), false, false, wFilter);
-	ebScale = env->addEditBox(L"", irr::core::rect<irr::s32>(150, 60 + 100 / 6, 195, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
+	stScale = env->addStaticText(dataManager.GetSysString(1336), irr::core::rect<irr::s32>(105, 62 + 100 / 6, 165, 82 + 100 / 6), false, false, wFilter);
+	ebScale = env->addEditBox(L"", irr::core::rect<irr::s32>(155, 60 + 100 / 6, 195, 80 + 100 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	editbox_list.push_back(ebScale);
 	stSearch = env->addStaticText(dataManager.GetSysString(1325), irr::core::rect<irr::s32>(205, 62 + 100 / 6, 280, 82 + 100 / 6), false, false, wFilter);
@@ -907,7 +907,7 @@ bool Game::Initialize() {
 		btnStartFilter->setRelativePosition(irr::core::rect<irr::s32>(260, 80 + 125 / 6, 390, 100 + 125 / 6));
 		btnClearFilter = env->addButton(irr::core::rect<irr::s32>(205, 80 + 125 / 6, 255, 100 + 125 / 6), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
 	}
-	wCategories = env->addWindow(irr::core::rect<irr::s32>(600, 60, 1000, 305), false, L"");
+	wCategories = env->addWindow(irr::core::rect<irr::s32>(600, 55, 1000, 300), false, L"");
 	wCategories->getCloseButton()->setVisible(false);
 	wCategories->setDrawTitlebar(false);
 	wCategories->setDraggable(false);
@@ -922,7 +922,7 @@ bool Game::Initialize() {
 	for(int i = 0; i < 32; ++i)
 		chkCategory[i] = env->addCheckBox(false, irr::core::recti(10 + (i % 4) * catewidth, 5 + (i / 4) * 25, 10 + (i % 4 + 1) * catewidth, 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
 	int wcatewidth = catewidth * 4 + 16;
-	wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 60, 1000, 305));
+	wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 55, 1000, 300));
 	btnCategoryOK->setRelativePosition(irr::core::recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
 	btnMarksFilter = env->addButton(irr::core::rect<irr::s32>(60, 80 + 125 / 6, 195, 100 + 125 / 6), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
 	wLinkMarks = env->addWindow(irr::core::rect<irr::s32>(700, 30, 820, 150), false, L"");
@@ -1010,21 +1010,21 @@ bool Game::Initialize() {
 	btnRSYes = env->addButton(irr::core::rect<irr::s32>(70, 80, 140, 105), wReplaySave, BUTTON_REPLAY_SAVE, dataManager.GetSysString(1341));
 	btnRSNo = env->addButton(irr::core::rect<irr::s32>(170, 80, 240, 105), wReplaySave, BUTTON_REPLAY_CANCEL, dataManager.GetSysString(1212));
 	//replay control
-	wReplayControl = env->addStaticText(L"", irr::core::rect<irr::s32>(205, 118, 295, 273), true, false, 0, -1, true);
+	wReplayControl = env->addStaticText(L"", irr::core::rect<irr::s32>(205, 143, 295, 273), true, false, 0, -1, true);
 	wReplayControl->setVisible(false);
 	btnReplayStart = env->addButton(irr::core::rect<irr::s32>(5, 5, 85, 25), wReplayControl, BUTTON_REPLAY_START, dataManager.GetSysString(1343));
-	btnReplayPause = env->addButton(irr::core::rect<irr::s32>(5, 30, 85, 50), wReplayControl, BUTTON_REPLAY_PAUSE, dataManager.GetSysString(1344));
+	btnReplayPause = env->addButton(irr::core::rect<irr::s32>(5, 5, 85, 25), wReplayControl, BUTTON_REPLAY_PAUSE, dataManager.GetSysString(1344));
+	btnReplaySwap = env->addButton(irr::core::rect<irr::s32>(5, 30, 85, 50), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
 	btnReplayStep = env->addButton(irr::core::rect<irr::s32>(5, 55, 85, 75), wReplayControl, BUTTON_REPLAY_STEP, dataManager.GetSysString(1345));
 	btnReplayUndo = env->addButton(irr::core::rect<irr::s32>(5, 80, 85, 100), wReplayControl, BUTTON_REPLAY_UNDO, dataManager.GetSysString(1360));
-	btnReplaySwap = env->addButton(irr::core::rect<irr::s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
-	btnReplayExit = env->addButton(irr::core::rect<irr::s32>(5, 130, 85, 150), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
+	btnReplayExit = env->addButton(irr::core::rect<irr::s32>(5, 105, 85, 125), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
 	//chat
-	wChat = env->addWindow(irr::core::rect<irr::s32>(305, 615, 1020, 640), false, L"");
+	wChat = env->addWindow(irr::core::rect<irr::s32>(307, 615, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT), false, L"");
 	wChat->getCloseButton()->setVisible(false);
 	wChat->setDraggable(false);
 	wChat->setDrawTitlebar(false);
 	wChat->setVisible(false);
-	ebChatInput = env->addEditBox(L"", irr::core::rect<irr::s32>(3, 2, 710, 22), true, wChat, EDITBOX_CHAT);
+	ebChatInput = env->addEditBox(L"", irr::core::rect<irr::s32>(3, 2, 711, 22), true, wChat, EDITBOX_CHAT);
 	editbox_list.push_back(ebChatInput);
 	//swap
 	btnSpectatorSwap = env->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), 0, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
@@ -1098,10 +1098,10 @@ bool Game::Initialize() {
 	for (auto ptr : editbox_list)
 		ptr->setMax(LEN_CHAT_MSG - 1);
 	auto size = driver->getScreenSize();
-	if(window_size != size) {
+	if(window_size != size) { // On the first run, window_size is (0, 0), so this condition always triggers a resize
 		window_size = size;
-		xScale = window_size.Width / 1024.0;
-		yScale = window_size.Height / 640.0;
+		xScale = window_size.Width / static_cast<float>(GAME_WINDOW_WIDTH);
+		yScale = window_size.Height / static_cast<float>(GAME_WINDOW_HEIGHT);
 		OnResize();
 	}
 	return true;
@@ -1126,12 +1126,12 @@ void Game::MainLoop() {
 		auto size = driver->getScreenSize();
 		if(window_size != size) {
 			window_size = size;
-			xScale = window_size.Width / 1024.0;
-			yScale = window_size.Height / 640.0;
+			xScale = window_size.Width / static_cast<float>(GAME_WINDOW_WIDTH);
+			yScale = window_size.Height / static_cast<float>(GAME_WINDOW_HEIGHT);
 			OnResize();
 		}
-		linePatternD3D = (linePatternD3D + 1) % 30;
-		linePatternGL = (linePatternGL << 1) | (linePatternGL >> 15);
+		linePattern = (linePattern + 1) % 30;
+		stippleMask = (stippleMask << 1) | (stippleMask >> 15);
 		atkframe += 0.1f;
 		atkdy = (float)sin(atkframe);
 		driver->beginScene(true, true, irr::video::SColor(0, 0, 0, 0));
@@ -1308,7 +1308,21 @@ void Game::LoadExpansions(const char* expansions_path) {
 				return archiveObj->createAndOpenFile(name);
 			};
 			if (IsExtension(name, ".cdb")) {
-				dataManager.LoadDB(name);
+				auto reader = createReader();
+				if (reader == nullptr) {
+					mysnprintf(dataManager.errmsg, "File does not exist or failed to unzip: %s", name);
+				}
+				if (reader == nullptr || !dataManager.LoadDB(reader)) {
+					std::string errmsg = "Warning: Failed to load DB file in expansion archive (";
+					errmsg.append(name);
+					errmsg.append(")! ");
+					errmsg.append(dataManager.errmsg);
+#ifdef YGOPRO_SERVER_MODE
+					AddDebugMsg(errmsg.c_str());
+#else
+					mainGame->ErrorLog(errmsg.c_str());
+#endif
+				}
 				continue;
 			}
 			if (IsExtension(name, ".conf")) {
@@ -1337,7 +1351,13 @@ void Game::LoadExpansions(const char* expansions_path) {
 				wchar_t fname[1024];
 				int len = BufferIO::DecodeUTF8(name, fname);
 				// TODO: zip file may contain non-UTF8 file name. DecodeUTF8 can't parse it and returns 0.
-				if (!len) continue;
+				if (!len) {
+					std::string errmsg = "Warning: Failed to decode deck file name in expansion archive (";
+					errmsg.append(name);
+					errmsg.append(")! Please make sure the file name is UTF-8 encoded in the archive.");
+					mainGame->ErrorLog(errmsg.c_str());
+					continue;
+				}
 				deckBuilder.expansionPacks.push_back(fname);
 				continue;
 			}
@@ -1356,48 +1376,58 @@ void Game::LoadExpansions(const char* expansions_path) {
 		mountAndProcess(expansions_path);
 	} else {
 #endif // SERVER_ZIP_SUPPORT
-	FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
-		if (isdir)
-			return;
-		char fpath[1024];
-		mysnprintf(fpath, "%s/%s", expansions_path, name);
-		if (IsExtension(name, ".cdb")) {
-			dataManager.LoadDB(fpath);
-			return;
-		}
-		if (IsExtension(name, ".conf")) {
-			if(!std::strcmp(name, "lflist.conf")) {
-				deckManager.LoadLFListSingle(fpath, true);
-				lflist_changed = true;
-			} else if(!std::strcmp(name, "servers.conf")) {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadServerList(fpath);
-				server_list_changed = true;
+		FileSystem::TraversalDir(expansions_path, [&](const char* name, bool isdir) {
+			if (isdir)
+				return;
+			char fpath[1024];
+			mysnprintf(fpath, "%s/%s", expansions_path, name);
+			if (IsExtension(name, ".cdb")) {
+				if (!dataManager.LoadDB(fpath)) {
+					std::string errmsg = "Warning: Failed to load DB file on disk (";
+					errmsg.append(fpath);
+					errmsg.append(")! ");
+					errmsg.append(dataManager.errmsg);
+#ifdef YGOPRO_SERVER_MODE
+					AddDebugMsg(errmsg.c_str());
+#else
+					mainGame->ErrorLog(errmsg.c_str());
 #endif
-			} else {
-#ifndef YGOPRO_SERVER_MODE
-				dataManager.LoadStrings(fpath);
-#endif
+				}
+				return;
 			}
-			return;
-		}
+			if (IsExtension(name, ".conf")) {
+				if(!std::strcmp(name, "lflist.conf")) {
+					deckManager.LoadLFListSingle(fpath, true);
+					lflist_changed = true;
+				} else if(!std::strcmp(name, "servers.conf")) {
 #ifndef YGOPRO_SERVER_MODE
-		if (!std::strcmp(name, "corres_srv.ini")) {
-			dataManager.LoadCorresSrvIni(fpath);
-			server_list_changed = true;
-			return;
-		}
+					dataManager.LoadServerList(fpath);
+					server_list_changed = true;
+#endif
+				} else {
+#ifndef YGOPRO_SERVER_MODE
+					dataManager.LoadStrings(fpath);
+#endif
+				}
+				return;
+			}
+#ifndef YGOPRO_SERVER_MODE
+			if (!std::strcmp(name, "corres_srv.ini")) {
+				dataManager.LoadCorresSrvIni(fpath);
+				server_list_changed = true;
+				return;
+			}
 #endif
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
-		if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
-			mountAndProcess(fpath);
-			return;
-		}
+			if (IsExtension(name, ".zip") || IsExtension(name, ".ypk")) {
+				mountAndProcess(fpath);
+				return;
+			}
 #endif
-	});
+		});
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 	} // else
-#endif //SERVER_ZIP_SUPPORT
+#endif // SERVER_ZIP_SUPPORT
 #ifndef YGOPRO_SERVER_MODE
 	if(lflist_changed)
 		RefreshLFList();
@@ -1767,9 +1797,9 @@ bool Game::LoadConfigFromFile(const char* file) {
 				if (fontsize > 0)
 					gameConf.textfontsize = fontsize;
 				*last_space = 0;
-				BufferIO::DecodeUTF8(valbuf, gameConf.textfont);
+				BufferIO::CopyString(valbuf, gameConf.textfont);
 			} else if (!std::strcmp(strbuf, "numfont")) {
-				BufferIO::DecodeUTF8(valbuf, gameConf.numfont);
+				BufferIO::CopyString(valbuf, gameConf.numfont);
 			} else if (!std::strcmp(strbuf, "nickname")) {
 				BufferIO::DecodeUTF8(valbuf, gameConf.nickname);
 			} else if (!std::strcmp(strbuf, "gamename")) {
@@ -1876,10 +1906,8 @@ void Game::SaveConfig() {
 	std::fprintf(fp, "lastcategory = %s\n", linebuf);
 	BufferIO::EncodeUTF8(gameConf.lastdeck, linebuf);
 	std::fprintf(fp, "lastdeck = %s\n", linebuf);
-	BufferIO::EncodeUTF8(gameConf.textfont, linebuf);
-	std::fprintf(fp, "textfont = %s %d\n", linebuf, gameConf.textfontsize);
-	BufferIO::EncodeUTF8(gameConf.numfont, linebuf);
-	std::fprintf(fp, "numfont = %s\n", linebuf);
+	std::fprintf(fp, "textfont = %s %d\n", gameConf.textfont, gameConf.textfontsize);
+	std::fprintf(fp, "numfont = %s\n", gameConf.numfont);
 	std::fprintf(fp, "serverport = %d\n", gameConf.serverport);
 	BufferIO::EncodeUTF8(gameConf.lasthost, linebuf);
 	std::fprintf(fp, "lasthost = %s\n", linebuf);
@@ -2121,15 +2149,17 @@ void Game::ClearChatMsg() {
 #endif //YGOPRO_SERVER_MODE
 void Game::AddDebugMsg(const char* msg) {
 #ifdef YGOPRO_LOG_IN_CHAT
-	wchar_t msgbuf_w[1024];
-	wchar_t msgbuf_w2[1024];
-	uint16_t msgbuf_u16[LEN_CHAT_MSG];
-	BufferIO::DecodeUTF8(msg, msgbuf_w);
-	myswprintf(msgbuf_w2, L"[Script Error]: %ls", msgbuf_w); // prefix for debug messages
-	auto len = BufferIO::CopyCharArray(msgbuf_w2, msgbuf_u16);
-	DuelPlayer tmp_dp;
-	tmp_dp.type = 11;
-	NetServer::duel_mode->Chat(&tmp_dp, (unsigned char*)msgbuf_u16, (len + 1) * sizeof(uint16_t)); // send to chat log
+	if(NetServer::duel_mode) {
+		wchar_t msgbuf_w[1024];
+		wchar_t msgbuf_w2[1024];
+		uint16_t msgbuf_u16[LEN_CHAT_MSG];
+		BufferIO::DecodeUTF8(msg, msgbuf_w);
+		myswprintf(msgbuf_w2, L"[Script Error]: %ls", msgbuf_w); // prefix for debug messages
+		auto len = BufferIO::CopyCharArray(msgbuf_w2, msgbuf_u16);
+		DuelPlayer tmp_dp;
+		tmp_dp.type = 11;
+		NetServer::duel_mode->Chat(&tmp_dp, (unsigned char*)msgbuf_u16, (len + 1) * sizeof(uint16_t)); // send to chat log
+	}
 #endif
 #ifdef YGOPRO_SERVER_MODE
 	std::fprintf(stderr, "%s\n", msg);
@@ -2294,7 +2324,7 @@ int Game::ChatLocalPlayer(int player) {
 	if(dInfo.isStarted || is_siding) {
 		if(dInfo.isInDuel)
 			// when in duel
-			player = mainGame->dInfo.isFirst ? player : OppositePlayer(player);
+			player = dInfo.isFirst ? player : OppositePlayer(player);
 		else {
 			// when changing side or waiting tp result
 			auto selftype_boundary = dInfo.isTag ? 2 : 1;
@@ -2501,9 +2531,9 @@ void Game::OnResize() {
 	wReplayControl->setRelativePosition(Resize(205, 143, 295, 273));
 	btnReplayStart->setRelativePosition(Resize(5, 5, 85, 25));
 	btnReplayPause->setRelativePosition(Resize(5, 5, 85, 25));
+	btnReplaySwap->setRelativePosition(Resize(5, 30, 85, 50));
 	btnReplayStep->setRelativePosition(Resize(5, 55, 85, 75));
 	btnReplayUndo->setRelativePosition(Resize(5, 80, 85, 100));
-	btnReplaySwap->setRelativePosition(Resize(5, 30, 85, 50));
 	btnReplayExit->setRelativePosition(Resize(5, 105, 85, 125));
 
 	btnSpectatorSwap->setRelativePosition(Resize(205, 100, 295, 135));
@@ -2634,8 +2664,8 @@ void Game::SetWindowsScale(float scale) {
 	GetWindowRect(hWnd, &rcWindow);
 	GetClientRect(hWnd, &rcClient);
 	MoveWindow(hWnd, rcWindow.left, rcWindow.top,
-		(rcWindow.right - rcWindow.left) - rcClient.right + 1024 * scale,
-		(rcWindow.bottom - rcWindow.top) - rcClient.bottom + 640 * scale,
+		(rcWindow.right - rcWindow.left) - rcClient.right + GAME_WINDOW_WIDTH * scale,
+		(rcWindow.bottom - rcWindow.top) - rcClient.bottom + GAME_WINDOW_HEIGHT * scale,
 		true);
 #endif
 }

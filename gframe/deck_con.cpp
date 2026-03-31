@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include "config.h"
 #include "deck_con.h"
@@ -1114,9 +1115,14 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			dragx = event.MouseInput.X;
 			dragy = event.MouseInput.Y;
-			draging_pointer = _datas.find(hovered_code);
-			if (draging_pointer == _datas.end())
+			auto dit = _datas.find(hovered_code);
+			if (dit == _datas.end()) {
+				draging_pointer = nullptr;
+				is_starting_dragging = false;
+				is_draging = false;
 				break;
+			}
+			draging_pointer = &dit->second;
 			if(hovered_pos == 4) {
 				if(!check_limit(draging_pointer))
 					break;
@@ -1173,15 +1179,16 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				auto pointer = _datas.find(hovered_code);
 				if (pointer == _datas.end())
 					break;
+				auto cd = &pointer->second;
 				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				if(hovered_pos == 1) {
-					if(push_side(pointer))
+					if(push_side(cd))
 						pop_main(hovered_seq);
 				} else if(hovered_pos == 2) {
-					if(push_side(pointer))
+					if(push_side(cd))
 						pop_extra(hovered_seq);
 				} else {
-					if(push_extra(pointer) || push_main(pointer))
+					if(push_extra(cd) || push_main(cd))
 						pop_side(hovered_seq);
 				}
 				break;
@@ -1208,10 +1215,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					auto pointer = _datas.find(hovered_code);
 					if (pointer == _datas.end())
 						break;
-					if(!check_limit(pointer))
+					auto cd = &pointer->second;
+					if(!check_limit(cd))
 						break;
-					if(!push_extra(pointer) && !push_main(pointer))
-						push_side(pointer);
+					if(!push_extra(cd) && !push_main(cd))
+						push_side(cd);
 				}
 			} else {
 				soundManager.PlaySoundEffect(SOUND_CARD_PICK);
@@ -1225,8 +1233,8 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				} else {
 					push_side(draging_pointer);
 				}
-				is_draging = false;
 			}
+			is_draging = false;
 			break;
 		}
 		case irr::EMIE_MMOUSE_LEFT_UP: {
@@ -1243,21 +1251,22 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			auto pointer = _datas.find(hovered_code);
 			if (pointer == _datas.end())
 				break;
-			if(!check_limit(pointer))
+			auto cd = &pointer->second;
+			if(!check_limit(cd))
 				break;
 			soundManager.PlaySoundEffect(SOUND_CARD_PICK);
 			if (hovered_pos == 1) {
-				if(!push_main(pointer))
-					push_side(pointer);
+				if(!push_main(cd))
+					push_side(cd);
 			} else if (hovered_pos == 2) {
-				if(!push_extra(pointer))
-					push_side(pointer);
+				if(!push_extra(cd))
+					push_side(cd);
 			} else if (hovered_pos == 3) {
-				if(!push_side(pointer) && !push_extra(pointer))
-					push_main(pointer);
+				if(!push_side(cd) && !push_extra(cd))
+					push_main(cd);
 			} else {
-				if(!push_extra(pointer) && !push_main(pointer))
-					push_side(pointer);
+				if(!push_extra(cd) && !push_main(cd))
+					push_side(cd);
 			}
 			break;
 		}
@@ -1315,100 +1324,106 @@ void DeckBuilder::GetHoveredCard() {
 	int pre_code = hovered_code;
 	hovered_pos = 0;
 	hovered_code = 0;
+	hovered_seq = -1;
 	irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 	if(root->getElementFromPoint(mouse_pos) != root)
 		return;
-	irr::core::vector2di pos = mainGame->ResizeReverse(mouse_pos.X, mouse_pos.Y);
-	int x = pos.X;
-	int y = pos.Y;
+	const DeckLayout& L = layout;
+	float mx = (float)mouse_pos.X;
+	float my = (float)mouse_pos.Y;
+	float xS = mainGame->xScale;
+	float yS = mainGame->yScale;
 	is_lastcard = 0;
-	if(x >= 314 && x <= 794) {
-		if(showing_pack) {
-			if((x <= 772 || !mainGame->scrPackCards->isVisible()) && y >= 164 && y <= 624) {
-				int mainsize = deckManager.current_deck.main.size();
-				int lx = 10;
-				int dy = 68;
-				if(mainsize > 10 * 7)
-					lx = 11;
-				if(mainsize > 11 * 7)
-					lx = 12;
-				if(mainsize > 60)
-					dy = 66;
-				int px;
-				int py = (y - 164) / dy;
-				hovered_pos = 1;
-				if(x >= 750)
-					px = lx - 1;
-				else
-					px = (x - 314) * (lx - 1) / (mainGame->scrPackCards->isVisible() ? 414.0f : 436.0f);
-				hovered_seq = py * lx + px + mainGame->scrPackCards->getPos() * lx;
-				if(hovered_seq >= mainsize) {
-					hovered_seq = -1;
-					hovered_code = 0;
-				} else {
-					hovered_code = deckManager.current_deck.main[hovered_seq]->first;
-				}
-			}
-		} else if(y >= 164 && y <= 435) {
-			int lx = 10, px, py = (y - 164) / 68;
+	if(showing_pack) {
+		// Actual right edge of the last card in the pack grid
+		float pack_right   = L.left + (float)(L.lx - 1) * L.dx + L.cw;
+		float bottom_bound = 624.0f * yS;
+		if(mx >= L.left && mx <= pack_right && my >= L.top && my <= bottom_bound) {
+			int mainsize = (int)deckManager.current_deck.main.size();
+			int col = (L.dx > 0.0f && mx < L.left + (float)(L.lx - 1) * L.dx)
+			          ? (int)((mx - L.left) / L.dx) : L.lx - 1;
+			if(col < 0) col = 0;
+			if(col > L.lx - 1) col = L.lx - 1;
+			int row = (L.dy > 0.0f) ? (int)((my - L.top) / L.dy) : 0;
 			hovered_pos = 1;
-			if(deckManager.current_deck.main.size() > DECK_MIN_SIZE)
-				lx = (deckManager.current_deck.main.size() - 41) / 4 + 11;
-			if(x >= 750)
-				px = lx - 1;
-			else
-				px = (x - 314) * (lx - 1) / 436;
-			hovered_seq = py * lx + px;
-			if(hovered_seq >= (int)deckManager.current_deck.main.size()) {
+			hovered_seq = row * L.lx + col + L.pack_scroll_pos * L.lx;
+			if(hovered_seq < 0 || hovered_seq >= mainsize) {
 				hovered_seq = -1;
 				hovered_code = 0;
 			} else {
-				hovered_code = deckManager.current_deck.main[hovered_seq]->first;
-			}
-		} else if(y >= 466 && y <= 530) {
-			int lx = deckManager.current_deck.extra.size();
-			hovered_pos = 2;
-			if(lx < 10)
-				lx = 10;
-			if(x >= 750)
-				hovered_seq = lx - 1;
-			else
-				hovered_seq = (x - 314) * (lx - 1) / 436;
-			if(hovered_seq >= (int)deckManager.current_deck.extra.size()) {
-				hovered_seq = -1;
-				hovered_code = 0;
-			} else {
-				hovered_code = deckManager.current_deck.extra[hovered_seq]->first;
-				if(x >= 772)
-					is_lastcard = 1;
-			}
-		} else if (y >= 564 && y <= 628) {
-			int lx = deckManager.current_deck.side.size();
-			hovered_pos = 3;
-			if(lx < 10)
-				lx = 10;
-			if(x >= 750)
-				hovered_seq = lx - 1;
-			else
-				hovered_seq = (x - 314) * (lx - 1) / 436;
-			if(hovered_seq >= (int)deckManager.current_deck.side.size()) {
-				hovered_seq = -1;
-				hovered_code = 0;
-			} else {
-				hovered_code = deckManager.current_deck.side[hovered_seq]->first;
-				if(x >= 772)
-					is_lastcard = 1;
+				hovered_code = deckManager.current_deck.main[hovered_seq]->code;
 			}
 		}
-	} else if(x >= 810 && x <= 995 && y >= 165 && y <= 626) {
-		hovered_pos = 4;
-		hovered_seq = (y - 165) / 66;
-		int current_pos = mainGame->scrFilter->getPos() + hovered_seq;
-		if(current_pos >= (int)results.size()) {
-			hovered_seq = -1;
-			hovered_code = 0;
-		} else {
-			hovered_code = results[current_pos]->first;
+	} else {
+		float main_right  = L.left + (float)(L.lx - 1) * L.dx + L.cw;
+		float main_bottom = L.top  + (float)(L.rows - 1) * L.dy + L.ch;
+		if(mx >= L.left && mx <= main_right && my >= L.top && my <= main_bottom) {
+			int mainsize = (int)deckManager.current_deck.main.size();
+			int col = (L.dx > 0.0f) ? (int)((mx - L.left) / L.dx) : 0;
+			if(col < 0) col = 0;
+			if(col > L.lx - 1) col = L.lx - 1;
+			int row = (L.dy > 0.0f) ? (int)((my - L.top) / L.dy) : 0;
+			if(row < 0) row = 0;
+			if(row > L.rows - 1) row = L.rows - 1;
+			hovered_pos = 1;
+			hovered_seq = row * L.lx + col;
+			if(hovered_seq < 0 || hovered_seq >= mainsize) {
+				hovered_seq = -1;
+				hovered_code = 0;
+			} else {
+				hovered_code = deckManager.current_deck.main[hovered_seq]->code;
+			}
+		} else if(my >= L.ex_top && my <= L.ex_bot && mx >= L.ex_left && mx < 797.0f * xS) {
+			int n = (int)deckManager.current_deck.extra.size();
+			hovered_pos = 2;
+			if(n > 0) {
+				// Right limit: one full step past last card (cards are left-aligned)
+				float right_limit = L.ex_left + (float)n * L.ex_dx;
+				if(mx < right_limit) {
+					int seq = (L.ex_dx > 0.0f) ? (int)((mx - L.ex_left) / L.ex_dx) : 0;
+					if(seq < 0) seq = 0;
+					if(seq > n - 1) seq = n - 1;
+					hovered_seq = seq;
+					hovered_code = deckManager.current_deck.extra[hovered_seq]->code;
+					float last_card_cx = L.ex_left + (float)(n - 1) * L.ex_dx + L.cw * 0.5f;
+					if(mx >= last_card_cx)
+						is_lastcard = 1;
+				}
+			}
+		} else if(my >= L.sd_top && my <= L.sd_bot && mx >= L.sd_left && mx < 797.0f * xS) {
+			int n = (int)deckManager.current_deck.side.size();
+			hovered_pos = 3;
+			if(n > 0) {
+				float right_limit = L.sd_left + (float)n * L.sd_dx;
+				if(mx < right_limit) {
+					int seq = (L.sd_dx > 0.0f) ? (int)((mx - L.sd_left) / L.sd_dx) : 0;
+					if(seq < 0) seq = 0;
+					if(seq > n - 1) seq = n - 1;
+					hovered_seq = seq;
+					hovered_code = deckManager.current_deck.side[hovered_seq]->code;
+					float last_card_cx = L.sd_left + (float)(n - 1) * L.sd_dx + L.cw * 0.5f;
+					if(mx >= last_card_cx)
+						is_lastcard = 1;
+				}
+			}
+		}
+	}
+
+	if(hovered_pos == 0) {
+		float sr_left  = 810.0f * xS;
+		float sr_right = 995.0f * xS;
+		float sr_top   = L.sr_top_px;
+		float sr_bot   = 626.0f * yS;
+		if(mx >= sr_left && mx <= sr_right && my >= sr_top && my <= sr_bot) {
+			hovered_pos = 4;
+			hovered_seq = (int)((my - sr_top) / L.sr_row_h);
+			int current_pos = mainGame->scrFilter->getPos() + hovered_seq;
+			if(current_pos >= (int)results.size()) {
+				hovered_seq = -1;
+				hovered_code = 0;
+			} else {
+				hovered_code = results[current_pos]->code;
+			}
 		}
 	}
 	if(is_draging) {
@@ -1510,9 +1525,9 @@ void DeckBuilder::FilterCards() {
 	}
 	auto& _datas = dataManager.GetDataTable();
 	auto& _strings = dataManager.GetStringTable();
-	for (code_pointer ptr = _datas.begin(); ptr != _datas.end(); ++ptr) {
-		auto& code = ptr->first;
-		auto& data = ptr->second;
+	for (auto& kv : _datas) {
+		auto code = kv.first;
+		auto& data = kv.second;
 		auto strpointer = _strings.find(code);
 		if (strpointer == _strings.end())
 			continue;
@@ -1575,7 +1590,7 @@ void DeckBuilder::FilterCards() {
 		if(filter_marks && (data.link_marker & filter_marks) != filter_marks)
 			continue;
 		if(filter_lm) {
-			if(filter_lm <= 3 && (!filterList->content.count(ptr->first) || filterList->content.at(ptr->first) != filter_lm - 1))
+			if(filter_lm <= 3 && (!filterList->content.count(code) || filterList->content.at(code) != filter_lm - 1))
 				continue;
 			if(filter_lm == 4 && !(data.ot & AVAIL_OCG))
 				continue;
@@ -1611,18 +1626,23 @@ void DeckBuilder::FilterCards() {
 			}
 		}
 		if(is_target)
-			results.push_back(ptr);
+			results.push_back(&data);
 		else
 			continue;
 	}
-	myswprintf(result_string, L"%d", results.size());
-	if(results.size() > 7) {
-		mainGame->scrFilter->setVisible(true);
-		mainGame->scrFilter->setMax(results.size() - 7);
-		mainGame->scrFilter->setPos(0);
-	} else {
-		mainGame->scrFilter->setVisible(false);
-		mainGame->scrFilter->setPos(0);
+	myswprintf(result_string, L"%zu", results.size());
+	{
+		float xS2 = mainGame->xScale, yS2 = mainGame->yScale;
+		float mul2 = (xS2 > yS2) ? yS2 : xS2;
+		int max_vis = std::max(7, (int)(((626.0f - 165.0f) * yS2) / (66.0f * mul2)));
+		if(results.size() > static_cast<size_t>(max_vis)) {
+			mainGame->scrFilter->setVisible(true);
+			mainGame->scrFilter->setMax((int)results.size() - max_vis);
+			mainGame->scrFilter->setPos(0);
+		} else {
+			mainGame->scrFilter->setVisible(false);
+			mainGame->scrFilter->setPos(0);
+		}
 	}
 	SortList();
 }
@@ -1668,7 +1688,7 @@ void DeckBuilder::SortList() {
 	auto left = results.begin();
 	const wchar_t* pstr = mainGame->ebCardName->getText();
 	for(auto it = results.begin(); it != results.end(); ++it) {
-		if(std::wcscmp(pstr, dataManager.GetName((*it)->first)) == 0 || mainGame->CheckRegEx(dataManager.GetName((*it)->first), pstr, true)) {
+		if(std::wcscmp(pstr, dataManager.GetName((*it)->code)) == 0 || mainGame->CheckRegEx(dataManager.GetName((*it)->code), pstr, true)) {
 			std::iter_swap(left, it);
 			++left;
 		}
@@ -1717,13 +1737,42 @@ void DeckBuilder::RefreshReadonly(int catesel) {
 }
 void DeckBuilder::RefreshPackListScroll() {
 	if(showing_pack) {
+		// Mirror the layout computation from DrawDeckBd for pack mode
+		float xS = mainGame->xScale, yS = mainGame->yScale;
+		float mul = (xS > yS) ? yS : xS;
+		float cw     = CARD_THUMB_WIDTH  * mul;
+		float dy     = 68.0f * mul;
+		float panel_w = (797.0f - 314.0f) * xS;
+		float dx_max  = (436.0f / 9.0f) * mul;
+		float panel_h = 630.0f * yS - 164.0f * yS;
+
+		int rows = (int)(panel_h / dy) + 1;
+		if(rows < 4) rows = 4;
+
+		int mainsize = (int)deckManager.current_deck.main.size();
+		// First pass without scrollbar
+		int lx_w = (int)((panel_w - cw) / dx_max) + 1;
+		if(lx_w < 10) lx_w = 10;
+		int min_lx = (mainsize + rows - 1) / (rows > 0 ? rows : 1);
+		int lx_try = lx_w > min_lx ? lx_w : min_lx;
+		int total_rows = (mainsize + lx_try - 1) / (lx_try > 0 ? lx_try : 1);
+		bool need_scroll = (total_rows > rows);
+		// Second pass with scrollbar width if needed
+		if(need_scroll) {
+			float avail_w = (775.0f - 314.0f) * xS;
+			lx_w = (int)((avail_w - cw) / dx_max) + 1;
+			if(lx_w < 10) lx_w = 10;
+		}
+		int lx = lx_w > min_lx ? lx_w : min_lx;
+		total_rows = (mainsize + lx - 1) / (lx > 0 ? lx : 1);
+		int scroll_range = total_rows - rows;
+
 		mainGame->scrPackCards->setPos(0);
-		int mainsize = deckManager.current_deck.main.size();
-		if(mainsize <= 7 * 12) {
+		if(scroll_range <= 0) {
 			mainGame->scrPackCards->setVisible(false);
 		} else {
 			mainGame->scrPackCards->setVisible(true);
-			mainGame->scrPackCards->setMax((int)ceil(((float)mainsize - 7 * 12) / 12.0f));
+			mainGame->scrPackCards->setMax(scroll_range);
 		}
 	} else {
 		mainGame->scrPackCards->setVisible(false);
@@ -1856,8 +1905,8 @@ bool DeckBuilder::CardNameContains(const wchar_t* haystack, const wchar_t* needl
 	}
 	return false;
 }
-bool DeckBuilder::push_main(code_pointer pointer, int seq) {
-	if(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+bool DeckBuilder::push_main(const CardDataC* pointer, int seq) {
+	if(pointer->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 		return false;
 	auto& container = deckManager.current_deck.main;
 	int maxc = mainGame->is_siding ? DECK_MAX_SIZE + 5 : DECK_MAX_SIZE;
@@ -1871,8 +1920,8 @@ bool DeckBuilder::push_main(code_pointer pointer, int seq) {
 	GetHoveredCard();
 	return true;
 }
-bool DeckBuilder::push_extra(code_pointer pointer, int seq) {
-	if(!(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)))
+bool DeckBuilder::push_extra(const CardDataC* pointer, int seq) {
+	if(!(pointer->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)))
 		return false;
 	auto& container = deckManager.current_deck.extra;
 	int maxc = mainGame->is_siding ? EXTRA_MAX_SIZE + 5 : EXTRA_MAX_SIZE;
@@ -1886,7 +1935,7 @@ bool DeckBuilder::push_extra(code_pointer pointer, int seq) {
 	GetHoveredCard();
 	return true;
 }
-bool DeckBuilder::push_side(code_pointer pointer, int seq) {
+bool DeckBuilder::push_side(const CardDataC* pointer, int seq) {
 	auto& container = deckManager.current_deck.side;
 	int maxc = mainGame->is_siding ? SIDE_MAX_SIZE + 5 : SIDE_MAX_SIZE;
 	if((int)container.size() >= maxc)
@@ -1917,8 +1966,8 @@ void DeckBuilder::pop_side(int seq) {
 	is_modified = true;
 	GetHoveredCard();
 }
-bool DeckBuilder::check_limit(code_pointer pointer) {
-	auto limitcode = pointer->second.get_duel_code();
+bool DeckBuilder::check_limit(const CardDataC* pointer) {
+	auto limitcode = pointer->get_duel_code();
 	int limit = 3;
 	auto flit = filterList->content.find(limitcode);
 	if(flit != filterList->content.end())
@@ -1946,15 +1995,15 @@ bool DeckBuilder::check_limit(code_pointer pointer) {
 		return valid;
 	};
 	auto limitcode_has_credit = filterList->credits.find(limitcode) != filterList->credits.end();
-	auto handle_card = [&](ygo::code_pointer& card) {
-		if (card->second.get_duel_code() == limitcode) {
+	auto handle_card = [&](const CardDataC* card) {
+		if (card->get_duel_code() == limitcode) {
 			limit--;
 			if(limit < 0)
 				return false;
 		}
 		if(!limitcode_has_credit)
 			return true;
-		auto code = card->second.get_duel_code();
+		auto code = card->get_duel_code();
 		return spend_credit(code);
 	};
 	for (auto& card : deckManager.current_deck.main) {
