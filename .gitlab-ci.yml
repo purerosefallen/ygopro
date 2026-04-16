@@ -25,6 +25,10 @@ mat_common:
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
+    # libjpeg-turbo
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz | tar zfx -
+    - mv libjpeg-turbo-3.1.4.1 jpeg
+    - cp jpeg/src/jversion.h.in jpeg/src/jversion.h
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -37,6 +41,7 @@ mat_common:
       - freetype
       - sqlite3
       - event
+      - jpeg
       - irrlicht
       - miniaudio
 
@@ -132,7 +137,8 @@ exec_windows:
     AUDIO_LIB: 'miniaudio'
     MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
     BUILD_OPUS_VORBIS: '1'
-    BUILD_JPEG_PNG: '1'
+    BUILD_JPEG: '1'
+    BUILD_PNG_IRRLICHT: '1'
   before_script:
     - ./.ci/configure-libevent.sh
 

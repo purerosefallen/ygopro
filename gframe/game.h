@@ -2,12 +2,6 @@
 #define GAME_H
 
 #include "config.h"
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else //__APPLE__
-#include <GL/gl.h>
-#endif //__APPLE__
-#include "CGUIImageButton.h"
 #include "CGUITTFont.h"
 #include "mysignal.h"
 #include "client_field.h"
@@ -65,6 +59,7 @@ struct Config {
 #endif
 	bool freever{ true };
 	unsigned short antialias{ 0 };
+	unsigned int enable_log{ 0x3 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
 	wchar_t lasthost[100]{};
@@ -218,12 +213,12 @@ public:
 	void DrawCard(ClientCard* pcard);
 	void DrawMisc();
 	void DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2);
-	void DrawGUI();
+	void DrawGUI(); // called from MainLoop with gMutex held
 	void DrawSpec();
 	void DrawBackImage(irr::video::ITexture* texture);
-	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0);
-	void HideElement(irr::gui::IGUIElement* element, bool set_action = false);
-	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0);
+	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0); // caller must hold gMutex
+	void HideElement(irr::gui::IGUIElement* element, bool set_action = false); // caller must hold gMutex
+	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0); // caller must hold gMutex
 	void SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw = true);
 	void WaitFrameSignal(int frame);
 	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist);
@@ -239,7 +234,7 @@ public:
 	void AddDebugMsg(const char* msgbuf);
 	void ErrorLog(const char* msgbuf);
 	void initUtils();
-	void ClearTextures();
+	void ClearTextures(); // caller must hold gMutex
 	void CloseGameButtons();
 	void CloseGameWindow();
 	void CloseDuelWindow();
@@ -263,8 +258,11 @@ public:
 		editbox->setText(text.c_str());
 	}
 
-	void OnResize();
+	void OnResize(); // caller must hold gMutex
 	void ResizeChatInputWindow();
+	void ResizePosSelectButtons();
+	void ResizeCardSelectButtons(irr::gui::IGUIWindow* window, irr::gui::IGUIStaticText** labels, irr::gui::IGUIButton** images,
+		irr::gui::IGUIScrollBar* scrollbar, irr::gui::IGUIButton* buttonOK, const std::vector<ClientCard*>& cards);
 	irr::core::recti Resize(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2);
 	irr::core::recti Resize(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2, irr::s32 dx, irr::s32 dy, irr::s32 dx2, irr::s32 dy2);
 	irr::core::vector2di Resize(irr::s32 x, irr::s32 y);
@@ -334,6 +332,10 @@ public:
 
 	bool is_building{};
 	bool is_siding{};
+	bool exit_on_return{ false };
+	bool open_file{ false };
+	wchar_t open_file_name[256]{};
+	bool bot_mode{ false };
 
 	irr::core::dimension2d<irr::u32> window_size;
 	float xScale{ 1.0f };
@@ -364,7 +366,14 @@ public:
 	irr::gui::CGUITTFont* numFont{};
 	irr::gui::CGUITTFont* adFont{};
 	irr::gui::CGUITTFont* lpcFont{};
-	std::unordered_map<irr::gui::CGUIImageButton*, int> imageLoading;
+	// textures must be added in the main thread which handle OpenGL context,
+	// {card_code, rotated} written in network thread, loaded in main thread's DrawGUI
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnImagePending;
+	// persistent tracking for image refresh on resize:
+	// {card_code, rotated} for buttons showing a card image from GetTextureButton
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnCardImgInfo;
+	// {cover_idx, rotated} for buttons showing a facedown card (cover) image
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnFacedownImgInfo;
 	//card image
 	irr::gui::IGUIStaticText* wCardImg{};
 	irr::gui::IGUIImage* imgCard{};
@@ -529,19 +538,19 @@ public:
 	irr::gui::IGUIScrollBar* scrOption{};
 	//pos selection
 	irr::gui::IGUIWindow* wPosSelect{};
-	irr::gui::CGUIImageButton* btnPSAU{};
-	irr::gui::CGUIImageButton* btnPSAD{};
-	irr::gui::CGUIImageButton* btnPSDU{};
-	irr::gui::CGUIImageButton* btnPSDD{};
+	irr::gui::IGUIButton* btnPSAU{};
+	irr::gui::IGUIButton* btnPSAD{};
+	irr::gui::IGUIButton* btnPSDU{};
+	irr::gui::IGUIButton* btnPSDD{};
 	//card selection
 	irr::gui::IGUIWindow* wCardSelect{};
-	irr::gui::CGUIImageButton* btnCardSelect[5]{};
+	irr::gui::IGUIButton* btnCardSelect[5]{};
 	irr::gui::IGUIStaticText *stCardPos[5]{};
 	irr::gui::IGUIScrollBar *scrCardList{};
 	irr::gui::IGUIButton* btnSelectOK{};
 	//card display
 	irr::gui::IGUIWindow* wCardDisplay{};
-	irr::gui::CGUIImageButton* btnCardDisplay[5]{};
+	irr::gui::IGUIButton* btnCardDisplay[5]{};
 	irr::gui::IGUIStaticText *stDisplayPos[5]{};
 	irr::gui::IGUIScrollBar *scrDisplayList{};
 	irr::gui::IGUIButton* btnDisplayOK{};

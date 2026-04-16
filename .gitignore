@@ -13,6 +13,7 @@ build
 /libevent*
 /freetype
 /sqlite3
+/jpeg
 /irrklang
 /irrlicht*
 /lua
