@@ -2011,6 +2011,18 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case COMBOBOX_SKIN: {
+				int selected = mainGame->cbSkin->getSelected();
+				if(selected <= 0)
+					mainGame->gameConf.skin_index = 0;
+				else if(selected == 1)
+					mainGame->gameConf.skin_index = -1;
+				else
+					mainGame->gameConf.skin_index = static_cast<int>(mainGame->cbSkin->getItemCount()) - selected;
+				mainGame->SaveConfig();
+				return true;
+				break;
+			}
 			}
 			break;
 		}

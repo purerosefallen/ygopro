@@ -551,7 +551,12 @@ bool Game::Initialize() {
 	env->addStaticText(dataManager.GetSysString(1267), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
 	cbLocale = env->addComboBox(irr::core::rect<irr::s32>(posX + 150, posY + 4, posX + 250, posY + 21), tabSystem, COMBOBOX_LOCALE);
 	RefreshLocales();
-	elmTabSystemLast = cbLocale;
+	posY += 30;
+	env->addStaticText(dataManager.GetSysString(1490), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
+	cbSkin = env->addComboBox(irr::core::rect<irr::s32>(posX + 150, posY + 4, posX + 250, posY + 21), tabSystem, COMBOBOX_SKIN);
+	cbSkin->setMaxSelectionRows(8);
+	RefreshSkins();
+	elmTabSystemLast = cbSkin;
 	//
 	wHand = env->addWindow(irr::core::rect<irr::s32>(500, 450, 825, 605), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1534,6 +1539,26 @@ void Game::RefreshLocales() {
 		}
 	}
 }
+void Game::RefreshSkins() {
+	cbSkin->clear();
+	cbSkin->addItem(dataManager.GetSysString(1310));
+	cbSkin->addItem(dataManager.GetSysString(1491));
+
+	CGUISkinSystem skinList(L"skin", device);
+	auto skins = skinList.listSkins();
+	for(size_t i = 0; i < skins.size(); ++i)
+		cbSkin->addItem(skins[i].c_str());
+
+	if(gameConf.skin_index < 0) {
+		cbSkin->setSelected(1);
+	} else if(gameConf.skin_index == 0) {
+		cbSkin->setSelected(0);
+	} else if(static_cast<size_t>(gameConf.skin_index) <= skins.size()) {
+		cbSkin->setSelected(skins.size() - gameConf.skin_index + 2);
+	} else {
+		cbSkin->setSelected(0);
+	}
+}
 void Game::RefreshLFList() {
 	cbLFlist->clear();
 	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
@@ -2428,6 +2453,7 @@ void Game::OnResize() {
 	scrSoundVolume->setRelativePosition(irr::core::recti(scrSoundVolume->getRelativePosition().UpperLeftCorner.X, scrSoundVolume->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, scrSoundVolume->getRelativePosition().LowerRightCorner.Y));
 	scrMusicVolume->setRelativePosition(irr::core::recti(scrMusicVolume->getRelativePosition().UpperLeftCorner.X, scrMusicVolume->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, scrMusicVolume->getRelativePosition().LowerRightCorner.Y));
 	cbLocale->setRelativePosition(irr::core::recti(cbLocale->getRelativePosition().UpperLeftCorner.X, cbLocale->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, cbLocale->getRelativePosition().LowerRightCorner.Y));
+	cbSkin->setRelativePosition(irr::core::recti(cbSkin->getRelativePosition().UpperLeftCorner.X, cbSkin->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, cbSkin->getRelativePosition().LowerRightCorner.Y));
 
 	irr::core::recti tabHelperPos = irr::core::recti(0, 0, 300 * xScale - 50, 365 * yScale - 65);
 	tabHelper->setRelativePosition(tabHelperPos);

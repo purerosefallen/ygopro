@@ -199,6 +199,7 @@ public:
 	void RefreshSingleplay();
 	void RefreshBot();
 	void RefreshLocales();
+	void RefreshSkins();
 	void RefreshLFList();
 	void RefreshServerList();
 	void Draw2DImageQuad(irr::video::IVideoDriver* driver, irr::video::ITexture* texture, const irr::core::recti& sourceRect,
@@ -427,6 +428,7 @@ public:
 	irr::gui::IGUIButton* btnWinResizeXL{};
 	irr::gui::IGUICheckBox* chkEnablePScale{};
 	irr::gui::IGUIComboBox* cbLocale{};
+	irr::gui::IGUIComboBox* cbSkin{};
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu{};
 	irr::gui::IGUIButton* btnLanMode{};
@@ -929,6 +931,7 @@ extern Game* mainGame;
 #define CHECKBOX_REGEX				377
 #define COMBOBOX_LOCALE				378
 #define CHECKBOX_ASK_MSET			379
+#define COMBOBOX_SKIN				384
 
 #define BUTTON_BIG_CARD_CLOSE		380
 #define BUTTON_BIG_CARD_ZOOM_IN		381
