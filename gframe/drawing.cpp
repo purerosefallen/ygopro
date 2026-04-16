@@ -920,6 +920,25 @@ void Game::DrawGUI() {
 			fadingList.erase(fthis);
 	}
 	env->drawAll();
+	DrawCardTextSearchLinks();
+}
+void Game::DrawCardTextSearchLinks() {
+	std::vector<CardTextSearchSegment> segments;
+	CollectCardTextSearchSegments(segments);
+	if(segments.empty())
+		return;
+	const irr::video::SColor link_color(255, 0, 112, 255);
+	const irr::core::recti clip = stText->getAbsolutePosition();
+	for(const auto& segment : segments) {
+		guiFont->drawUstring(segment.text, segment.rect, link_color, false, false, &clip);
+		irr::core::recti line(
+			std::max(segment.rect.UpperLeftCorner.X, clip.UpperLeftCorner.X),
+			segment.rect.LowerRightCorner.Y - 2,
+			std::min(segment.rect.LowerRightCorner.X, clip.LowerRightCorner.X),
+			segment.rect.LowerRightCorner.Y);
+		if(line.UpperLeftCorner.X < line.LowerRightCorner.X)
+			driver->draw2DRectangle(link_color, line, &clip);
+	}
 }
 void Game::DrawSpec() {
 	irr::s32 midx = 574 + (CARD_IMG_WIDTH * 0.5);

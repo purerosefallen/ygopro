@@ -1133,6 +1133,13 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_LMOUSE_LEFT_UP: {
 			is_starting_dragging = false;
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			std::wstring search_text;
+			if(!is_draging && !mainGame->is_siding && mainGame->GetCardTextSearchTextAt(mouse_pos, search_text)) {
+				mainGame->ebCardName->setText(search_text.c_str());
+				mainGame->env->setFocus(mainGame->ebCardName);
+				StartFilter();
+				break;
+			}
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
 				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(mainGame->showingcode, 1);

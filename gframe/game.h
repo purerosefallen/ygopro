@@ -182,12 +182,27 @@ struct FadingUnit {
 class Game {
 
 public:
+	struct CardTextSearchLink {
+		size_t start{};
+		size_t end{};
+		std::wstring text;
+	};
+	struct CardTextSearchSegment {
+		irr::core::recti rect;
+		size_t link_index{};
+		std::wstring text;
+	};
+
 	bool Initialize();
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
+	void RefreshCardTextSearchLinks();
+	bool ShouldShowCardTextSearchLinks() const;
+	void CollectCardTextSearchSegments(std::vector<CardTextSearchSegment>& segments) const;
+	bool GetCardTextSearchTextAt(const irr::core::vector2di& point, std::wstring& text) const;
 	void LoadExpansions(const char* expansions_path);
 	void LoadExpansionsAll();
 	std::vector<std::wstring> GetExpansionsList(const wchar_t * suffix = nullptr);
@@ -215,6 +230,7 @@ public:
 	void DrawMisc();
 	void DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2);
 	void DrawGUI(); // called from MainLoop with gMutex held
+	void DrawCardTextSearchLinks();
 	void DrawSpec();
 	void DrawBackImage(irr::video::ITexture* texture);
 	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0); // caller must hold gMutex
@@ -313,6 +329,9 @@ public:
 	int actionParam{};
 	int showingcode{};
 	const wchar_t* showingtext{};
+	std::wstring formatted_card_text;
+	std::vector<size_t> formatted_card_text_index;
+	std::vector<CardTextSearchLink> card_text_search_links;
 	int showcard{};
 	int showcardcode{};
 	int showcarddif{};

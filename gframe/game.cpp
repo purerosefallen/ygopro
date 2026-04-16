@@ -14,6 +14,7 @@
 #include <regex>
 #include <thread>
 #include <chrono>
+#include <utility>
 #ifdef _WIN32
 #include <timeapi.h>
 #endif
@@ -1270,6 +1271,21 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 	wchar_t prev = 0;
 	std::wstring result;
 	result.reserve(4096);
+	const bool track_card_text = pControl && pControl == stText;
+	std::vector<size_t> card_text_index;
+	if(track_card_text)
+		card_text_index.reserve(4096);
+	const size_t no_source_index = static_cast<size_t>(-1);
+	auto push_result = [&](wchar_t c, size_t source_index) {
+		result.push_back(c);
+		if(track_card_text)
+			card_text_index.push_back(source_index);
+	};
+	auto clear_result = [&]() {
+		result.clear();
+		if(track_card_text)
+			card_text_index.clear();
+	};
 	const size_t text_len = std::wcslen(text);
 
 	for(size_t i = 0; i < text_len ; ++i) {
@@ -1280,28 +1296,186 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cW
 			continue;
 		}
 		if (c == L'\n') {
-			result.push_back(L'\n');
+			push_result(L'\n', i);
 			_width = 0;
 			_height++;
 			prev = 0;
 			if (_height == pos)
-				result.clear();
+				clear_result();
 			continue;
 		}
 		if (_width > 0 && _width + w > cWidth) {
-			result.push_back(L'\n');
+			push_result(L'\n', no_source_index);
 			_width = 0;
 			_height++;
 			prev = 0;
 			if (_height == pos)
-				result.clear();
+				clear_result();
 		}
 		_width += w;
-		result.push_back(c);
+		push_result(c, i);
+	}
+	if(track_card_text) {
+		formatted_card_text = result;
+		formatted_card_text_index = std::move(card_text_index);
 	}
 	if (pControl)
 		pControl->setText(result.c_str());
 	return result;
+}
+
+static bool MatchAt(const std::wstring& text, size_t offset, const std::wstring& needle) {
+	if(needle.empty() || offset + needle.size() > text.size())
+		return false;
+	return text.compare(offset, needle.size(), needle) == 0;
+}
+
+static void TrimLineEnd(std::wstring& text) {
+	while(!text.empty() && (text.back() == L'\r' || text.back() == L'\n'))
+		text.pop_back();
+}
+
+void Game::RefreshCardTextSearchLinks() {
+	card_text_search_links.clear();
+	if(!showingtext)
+		return;
+	std::wstring open_quote = dataManager.GetSysString(8);
+	std::wstring close_quote = dataManager.GetSysString(9);
+	TrimLineEnd(open_quote);
+	TrimLineEnd(close_quote);
+	if(open_quote.empty() || close_quote.empty() || open_quote == dataManager.unknown_string || close_quote == dataManager.unknown_string)
+		return;
+	std::wstring text = showingtext;
+	std::vector<size_t> quote_stack;
+	const bool same_quote = open_quote == close_quote;
+	bool invalid_quote = false;
+	for(size_t i = 0; i < text.size();) {
+		if(MatchAt(text, i, open_quote)) {
+			if(same_quote && !quote_stack.empty()) {
+				size_t start = quote_stack.back();
+				quote_stack.pop_back();
+				size_t content_start = start + open_quote.size();
+				if(i > content_start) {
+					CardTextSearchLink link;
+					link.start = content_start;
+					link.end = i;
+					link.text = text.substr(content_start, i - content_start);
+					card_text_search_links.push_back(std::move(link));
+				}
+			} else {
+				quote_stack.push_back(i);
+			}
+			i += open_quote.size();
+			continue;
+		}
+		if(!same_quote && MatchAt(text, i, close_quote)) {
+			if(quote_stack.empty()) {
+				invalid_quote = true;
+				break;
+			}
+			size_t start = quote_stack.back();
+			quote_stack.pop_back();
+			size_t content_start = start + open_quote.size();
+			if(i > content_start) {
+				CardTextSearchLink link;
+				link.start = content_start;
+				link.end = i;
+				link.text = text.substr(content_start, i - content_start);
+				card_text_search_links.push_back(std::move(link));
+			}
+			i += close_quote.size();
+			continue;
+		}
+		++i;
+	}
+	if(invalid_quote || !quote_stack.empty())
+		card_text_search_links.clear();
+}
+
+bool Game::ShouldShowCardTextSearchLinks() const {
+	return is_building && !is_siding && stText && wInfos && wInfos->isVisible() && wInfos->getActiveTab() == 0
+		&& !wBigCard->isVisible() && !wQuery->isVisible() && !wCategories->isVisible() && !wLinkMarks->isVisible()
+		&& !wDeckManage->isVisible() && !wDMQuery->isVisible() && !wDeckCode->isVisible();
+}
+
+void Game::CollectCardTextSearchSegments(std::vector<CardTextSearchSegment>& segments) const {
+	segments.clear();
+	if(!ShouldShowCardTextSearchLinks() || card_text_search_links.empty() || formatted_card_text.empty()
+			|| formatted_card_text.size() != formatted_card_text_index.size())
+		return;
+	irr::core::recti text_rect = stText->getAbsolutePosition();
+	const irr::s32 line_height = guiFont->getDimension(L"A").Height;
+	const size_t no_source_index = static_cast<size_t>(-1);
+	for(size_t link_index = 0; link_index < card_text_search_links.size(); ++link_index) {
+		const auto& link = card_text_search_links[link_index];
+		irr::s32 x = text_rect.UpperLeftCorner.X;
+		irr::s32 y = text_rect.UpperLeftCorner.Y;
+		irr::s32 run_start = 0;
+		irr::s32 run_end = 0;
+		bool in_run = false;
+		std::wstring run_text;
+		wchar_t prev = 0;
+		auto flush_run = [&]() {
+			if(!in_run || run_text.empty())
+				return;
+			CardTextSearchSegment segment;
+			segment.rect = irr::core::recti(run_start, y, run_end, y + line_height);
+			segment.link_index = link_index;
+			segment.text = run_text;
+			segments.push_back(std::move(segment));
+			in_run = false;
+			run_text.clear();
+		};
+		for(size_t i = 0; i < formatted_card_text.size(); ++i) {
+			wchar_t c = formatted_card_text[i];
+			if(c == L'\n') {
+				flush_run();
+				x = text_rect.UpperLeftCorner.X;
+				y += line_height;
+				prev = 0;
+				continue;
+			}
+			irr::s32 char_start = x + guiFont->getKerningWidth(c, prev);
+			irr::s32 char_end = char_start + guiFont->getCharDimension(c).Width;
+			x = char_end;
+			size_t source_index = formatted_card_text_index[i];
+			bool in_link = source_index != no_source_index && source_index >= link.start && source_index < link.end;
+			if(in_link) {
+				if(!in_run) {
+					in_run = true;
+					run_start = char_start;
+					run_text.clear();
+				}
+				run_end = char_end;
+				run_text.push_back(c);
+			} else {
+				flush_run();
+			}
+			prev = c;
+		}
+		flush_run();
+	}
+}
+
+bool Game::GetCardTextSearchTextAt(const irr::core::vector2di& point, std::wstring& text) const {
+	std::vector<CardTextSearchSegment> segments;
+	CollectCardTextSearchSegments(segments);
+	size_t best_link = static_cast<size_t>(-1);
+	size_t best_length = static_cast<size_t>(-1);
+	for(const auto& segment : segments) {
+		if(!segment.rect.isPointInside(point))
+			continue;
+		const auto& link = card_text_search_links[segment.link_index];
+		size_t length = link.end - link.start;
+		if(length < best_length) {
+			best_length = length;
+			best_link = segment.link_index;
+		}
+	}
+	if(best_link == static_cast<size_t>(-1))
+		return false;
+	text = card_text_search_links[best_link].text;
+	return true;
 }
 void Game::LoadExpansions(const char* expansions_path) {
 	bool lflist_changed = false;
@@ -2058,6 +2232,7 @@ void Game::ShowCardInfo(int code, bool resize) {
 	}
 	showingcode = code;
 	showingtext = dataManager.GetText(code);
+	RefreshCardTextSearchLinks();
 	const auto& tsize = stText->getRelativePosition();
 	InitStaticText(stText, tsize.getWidth(), tsize.getHeight(), guiFont, showingtext);
 }
@@ -2069,6 +2244,10 @@ void Game::ClearCardInfo(int player) {
 	stDataInfo->setText(L"");
 	stSetName->setText(L"");
 	stText->setText(L"");
+	showingtext = L"";
+	formatted_card_text.clear();
+	formatted_card_text_index.clear();
+	card_text_search_links.clear();
 	scrCardText->setVisible(false);
 }
 void Game::AddLog(const wchar_t* msg, int param) {
