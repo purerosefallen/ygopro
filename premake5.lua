@@ -127,10 +127,11 @@ newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", descrip
 newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 
-newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
-newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
-newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
 newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
+
+newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compile for Apple Silicon Mac" }
+newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }
+newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
 
 -- koishipro specific
 
@@ -359,6 +360,10 @@ if USE_SIMD == "avx2" or USE_SIMD == "neon" then
     USE_SIMD = "best"
 end
 
+if os.istarget("windows") and GetParam("vs2026-win7-support") then
+    WIN7_SUPPORT = true
+end
+
 if os.istarget("macosx") then
     if GetParam("mac-arm") then
         MAC_ARM = true
@@ -370,10 +375,6 @@ end
 
 if GetParam("ocgcore-dynamic") then
     OCGCORE_DYNAMIC = true
-end
-
-if os.istarget("windows") and GetParam("vs2026-win7-support") then
-    WIN7_SUPPORT = true
 end
 
 if GetParam("use-openmp") then
