@@ -147,7 +147,7 @@ newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compi
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }
 newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
 newoption { trigger = "ndk-dir", category = "YGOPro - android", description = "", value = "PATH" }
-newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL", default = "26" }
+newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
