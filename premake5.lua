@@ -75,6 +75,8 @@ MINIAUDIO_VORBIS_INCLUDE_DIR = path.getabsolute("./miniaudio/extras/decoders/lib
 LZMA_INCLUDE_DIR = path.getabsolute("./lzma/src/liblzma/api")
 
 -- Read settings from command line or environment variables
+-- Default values should be defined at the top of the script. If any values are set in the premake options, GetParam will not
+-- read them from environment variables.
 
 newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
 newoption { trigger = "no-build-lua", category = "YGOPro - lua", description = "" }
@@ -447,10 +449,7 @@ if USE_AUDIO and not SERVER_MODE then
     end
 end
 
-local useSimd = GetParam("use-simd")
-if useSimd then
-    USE_SIMD = useSimd
-end
+USE_SIMD = GetParam("use-simd") or USE_SIMD
 
 if SERVER_MODE then
     BUILD_FREETYPE = false
