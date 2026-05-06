@@ -1,38 +1,48 @@
-include "lzma/."
-
 if SERVER_MODE then
-if SERVER_PRO3_SUPPORT then
-project "ygoserver"
-    kind "SharedLib"
-else
-project "ygopro"
-    kind "ConsoleApp"
-end
-    cppdialect "C++14"
+    if SERVER_PRO3_SUPPORT then
+        project "ygoserver"
+            kind "SharedLib"
+    else
+        project "ygopro"
+            kind "ConsoleApp"
+    end
 
+    cppdialect "C++14"
     defines { "YGOPRO_SERVER_MODE" }
 
-    files { "gframe.cpp", "config.h",
-            "game.cpp", "game.h", "myfilesystem.h",
-            "deck_manager.cpp", "deck_manager.h",
-            "data_manager.cpp", "data_manager.h",
-            "replay.cpp", "replay.h",
-            "netserver.cpp", "netserver.h",
-            "single_duel.cpp", "single_duel.h",
-            "tag_duel.cpp", "tag_duel.h" }
+    files {
+        "gframe.cpp", "config.h",
+        "game.cpp", "game.h", "myfilesystem.h",
+        "deck_manager.cpp", "deck_manager.h",
+        "data_manager.cpp", "data_manager.h",
+        "replay.cpp", "replay.h",
+        "netserver.cpp", "netserver.h",
+        "single_duel.cpp", "single_duel.h",
+        "tag_duel.cpp", "tag_duel.h"
+    }
+
     if SERVER_PRO3_SUPPORT then
         files { "gframe.h", "serverapi.cpp", "serverapi.h" }
         defines { "SERVER_PRO3_SUPPORT" }
     end
-    includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "sqlite3", "event" }
+
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
+    links { "ocgcore", "lzma", "sqlite3", "event" }
+
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht" }
         if BUILD_IRRLICHT then
-            includedirs { "../irrlicht/source/Irrlicht" }
+            includedirs { IRRLICHT_INCLUDE_DIR, "../irrlicht/source/Irrlicht", ZLIB_INCLUDE_DIR }
+        end
+        if BUILD_ZLIB then
+            links { "zlib" }
+        else
+            links { ZLIB_LIB_NAME }
+            libdirs { ZLIB_LIB_DIR }
         end
     end
+
     if SERVER_PRO2_SUPPORT then
         defines { "SERVER_PRO2_SUPPORT" }
     end
@@ -40,149 +50,138 @@ end
         defines { "SERVER_TAG_SURRENDER_CONFIRM" }
     end
 else
-project "ygopro"
+project "YGOPro"
     kind "WindowedApp"
     rtti "Off"
-    openmp "On"
+    if USE_OPENMP then
+        openmp "On"
+    end
 
-    files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", "sqlite3", "irrlicht", "freetype", "event" }
+    defines { "_IRR_STATIC_LIB_" }
+    files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
+    links { "ocgcore", "lzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
 end
     if not OCGCORE_DYNAMIC then
-        links { LUA_LIB_NAME }
+        if BUILD_LUA then
+            links { "lua" }
+        else
+            links { LUA_LIB_NAME }
+            libdirs { LUA_LIB_DIR }
+        end
     end
 
-    if not BUILD_LUA and not OCGCORE_DYNAMIC then
-        libdirs { LUA_LIB_DIR }
-    end
-
-    if BUILD_EVENT then
-        includedirs { "../event/include" }
-    else
-        includedirs { EVENT_INCLUDE_DIR }
+    if not BUILD_EVENT then
         libdirs { EVENT_LIB_DIR }
         links { "event_pthreads" }
     end
 
-    if BUILD_IRRLICHT then
-        includedirs { "../irrlicht/include" }
-    else
-        includedirs { IRRLICHT_INCLUDE_DIR }
-        libdirs { IRRLICHT_LIB_DIR }
-    end
-
 if not SERVER_MODE then
-    if not IRRLICHT_BUILD_JPEG_PNG then
-        links { "jpeg", "png" }
-        libdirs { JPEG_LIB_DIR, PNG_LIB_DIR }
-    end
-
-    if not SERVER_MODE then
-        if BUILD_FREETYPE then
-            includedirs { "../freetype/custom", "../freetype/include" }
-        else
-            includedirs { FREETYPE_INCLUDE_DIR }
-            libdirs { FREETYPE_LIB_DIR }
-        end
+    if not BUILD_IRRLICHT then
+        libdirs { IRRLICHT_LIB_DIR }
     end
 end
 
-    if BUILD_SQLITE then
-        includedirs { "../sqlite3" }
+if not SERVER_MODE then
+    if BUILD_JPEG then
+        links { "jpeg" }
     else
-        includedirs { SQLITE_INCLUDE_DIR }
+        links { JPEG_LIB_NAME }
+        libdirs { JPEG_LIB_DIR }
+    end
+
+    if not BUILD_PNG then
+        libdirs { PNG_LIB_DIR }
+    end
+
+    if BUILD_ZLIB then
+        links { "zlib" }
+    else
+        links { ZLIB_LIB_NAME }
+        libdirs { ZLIB_LIB_DIR }
+    end
+end
+
+if not SERVER_MODE then
+    if BUILD_FREETYPE then
+        includedirs { FREETYPE_CUSTOM_INCLUDE_DIR, FREETYPE_INCLUDE_DIR }
+    else
+        includedirs { FREETYPE_INCLUDE_DIR }
+        libdirs { FREETYPE_LIB_DIR }
+    end
+end
+
+    if not BUILD_SQLITE then
         libdirs { SQLITE_LIB_DIR }
     end
+
+    if not BUILD_LZMA then
+        libdirs { LZMA_LIB_DIR }
+    end
+
+if not SERVER_MODE then
+    if USE_SIMD == "none" then
+        defines { "STBIR_NO_SIMD" }
+    end
+end
 
 if not SERVER_MODE then
     if USE_AUDIO then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
-            includedirs { "../miniaudio" }
+            includedirs { MINIAUDIO_INCLUDE_DIR }
             links { "miniaudio" }
             if MINIAUDIO_SUPPORT_OPUS_VORBIS then
                 defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
-                includedirs { "../miniaudio/extras/decoders/libopus", "../miniaudio/extras/decoders/libvorbis" }
+                includedirs { MINIAUDIO_OPUS_INCLUDE_DIR, MINIAUDIO_VORBIS_INCLUDE_DIR }
                 if not MINIAUDIO_BUILD_OPUS_VORBIS then
                     links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
                     libdirs { OPUS_LIB_DIR, OPUSFILE_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
                 end
             end
         end
-        if AUDIO_LIB == "irrklang" then
-            defines { "YGOPRO_USE_IRRKLANG" }
-            includedirs { IRRKLANG_INCLUDE_DIR }
-            if not IRRKLANG_PRO then
-                libdirs { IRRKLANG_LIB_DIR }
-            end
-            if IRRKLANG_PRO_BUILD_IKPMP3 then
-                links { "ikpmp3" }
-            end
-        end
     end
 end
 
     filter "system:windows"
-if not SERVER_PRO3_SUPPORT then
-        entrypoint "mainCRTStartup"
-end
-        files "ygopro.rc"
-if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
-        targetname ("AI.Server")
-end
-if SERVER_MODE then
-        links { "ws2_32", "iphlpapi" }
-else
-        links { "ws2_32", "Dnsapi", "iphlpapi" }
-end
-        if USE_AUDIO and AUDIO_LIB == "irrklang" then
-            links { "irrKlang" }
-            if IRRKLANG_PRO then
-                defines { "IRRKLANG_STATIC" }
-                filter { "system:windows", "not configurations:Debug" }
-                    libdirs { IRRKLANG_PRO_RELEASE_LIB_DIR }
-                filter { "system:windows", "configurations:Debug" }
-                    libdirs { IRRKLANG_PRO_DEBUG_LIB_DIR }
-                filter {}
-            end
+        if not SERVER_PRO3_SUPPORT then
+            entrypoint "mainCRTStartup"
         end
+        files "ygopro.rc"
+        if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
+            targetname "AI.Server"
+        end
+        if SERVER_MODE then
+            links { "ws2_32", "iphlpapi" }
+        else
+            links { "ws2_32", "Dnsapi", "iphlpapi", "winmm" }
+        end
+
 if not SERVER_MODE then
     filter "not system:windows"
         links { "resolv" }
 end
+
     filter "not action:vs*"
         cppdialect "C++14"
 
     filter "system:macosx"
 if not SERVER_MODE then
-        openmp "Off"
-        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
+        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework", "Carbon.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
 end
-        if MAC_ARM then
-            linkoptions { "-arch arm64" }
-        end
-        if MAC_INTEL then
-            linkoptions { "-arch x86_64" }
-        end
-        if USE_AUDIO and AUDIO_LIB == "irrklang" then
-            links { "irrklang" }
-        end
 
     filter "system:linux"
         links { "dl", "pthread" }
+if not SERVER_MODE then
+        links { "GL", "X11" }
+        if USE_OPENMP then
+            linkoptions { "-fopenmp" }
+        end
+end
         if USE_DYNAMIC then
             linkoptions { "-Wl,-rpath=./" }
         else
             linkoptions { "-static-libstdc++", "-static-libgcc" }
-        end
-if not SERVER_MODE then
-        links { "GL", "X11", "Xxf86vm" }
-        linkoptions { "-fopenmp" }
-end
-        if USE_AUDIO and AUDIO_LIB == "irrklang" then
-            links { "IrrKlang" }
-            linkoptions{ IRRKLANG_LINK_RPATH }
         end

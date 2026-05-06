@@ -25,6 +25,12 @@ mat_common:
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
+    # zlib
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz | tar zfx -
+    - mv zlib-1.3.2 zlib
+    # lzma
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz | tar zfx -
+    - mv xz-5.8.3 lzma
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -37,6 +43,8 @@ mat_common:
       #- freetype
       - sqlite3
       - event
+      - zlib
+      - lzma
       - irrlicht
       #- miniaudio
 
@@ -96,6 +104,7 @@ mat_windows:
   variables:
     # NO_LUA_SAFE: '1' # on client no lua safe
     GIT_STRATEGY: clone
+    USE_SIMD: 'server'
   #cache:
   #  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
   #  paths:
@@ -106,6 +115,13 @@ mat_windows:
   extends: ._exec_build
   tags:
     - vs
+  variables:
+    BUILD_LUA: '1'
+    BUILD_SQLITE: '1'
+    BUILD_IRRLICHT: '1'
+    BUILD_EVENT: '1'
+    BUILD_ZLIB: '1'
+    BUILD_LZMA: '1'
   dependencies:
     - mat_common
     - mat_windows
@@ -119,7 +135,7 @@ mat_windows:
 exec_windows:
   extends: .exec_windows
   script:
-    - '.\premake5.exe vs2019 --server-zip-support'
+    - '.\premake5.exe vs2019 --vs2026-win7-support --server-zip-support'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -127,8 +143,10 @@ exec_windows:
 
 exec_windows_pro2:
   extends: .exec_windows
+  variables:
+    USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --server-pro2-support'
+    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro2-support'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -136,8 +154,10 @@ exec_windows_pro2:
 
 exec_windows_pro3:
   extends: .exec_windows
+  variables:
+    USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat'
+    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro3-support --log-in-chat'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -145,8 +165,10 @@ exec_windows_pro3:
 
 exec_windows_mdpro2:
   extends: .exec_windows
+  variables:
+    USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --server-pro3-support --log-in-chat --server-pro2-support'
+    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro3-support --log-in-chat --server-pro2-support'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -160,11 +182,8 @@ exec_windows_mdpro2:
     TARGET_FILE: ygopro
     TARGET_OUTPUT_DIR: bin/release
     PREMAKE5_BIN: premake5
-    BUILD_EVENT: '1'
-    BUILD_IRRLICHT: '1'
-    BUILD_SQLITE: '1'
   script:
-    - ./.ci/configure-libevent.sh
+    - if [ -z "${NO_BUILD_EVENT:-}" ]; then ./.ci/configure-libevent.sh; fi
     - $PREMAKE5_BIN gmake
     - cd build
     - make config=$MAKE_CONFIG -j$(nproc)
@@ -192,7 +211,11 @@ exec_windows_mdpro2:
 .exec_linux:
   extends: .exec_linux_common
   variables:
+    BUILD_EVENT: '1'
+    BUILD_IRRLICHT: '1'
     BUILD_SQLITE: '1'
+    BUILD_ZLIB: '1'
+    BUILD_LZMA: '1'
     SERVER_ZIP_SUPPORT: '1'
     RELEASE_DIR: linux-x64
 
@@ -200,9 +223,12 @@ exec_windows_mdpro2:
   extends: .exec_linux_common
   variables:
     LUA_DEB: '1'
+    NO_BUILD_EVENT: '1'
+    NO_BUILD_SQLITE: '1'
+    NO_BUILD_LZMA: '1'
     RELEASE_DIR: debian-x64
   before_script:
-    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev
+    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev liblzma-dev
 
 .use_arm:
   tags:
@@ -212,6 +238,7 @@ exec_windows_mdpro2:
   variables:
     SERVER_PRO3_SUPPORT: '1'
     LOG_IN_CHAT: '1'
+    USE_SIMD: 'best'
 
 .use_pro3_linux:
   extends: .use_pro3
@@ -226,14 +253,12 @@ exec_windows_mdpro2:
 exec_linux:
   extends: .exec_linux
   tags:
-    - noavx2
+    - linux
 
 exec_linux_pro3:
   extends:
     - .exec_linux
     - .use_pro3_linux
-  tags:
-    - avx2
 
 exec_debian:
   extends: .exec_debian
@@ -257,9 +282,12 @@ exec_android_pro3:
   extends:
     - .exec_linux_common
     - .use_pro3_linux
-  tags:
-    - noavx2
   variables:
+    BUILD_EVENT: '1'
+    BUILD_IRRLICHT: '1'
+    BUILD_SQLITE: '1'
+    BUILD_ZLIB: '1'
+    BUILD_LZMA: '1'
     RELEASE_DIR: android-arm64
     MAKE_CONFIG: release_android_arm64
     TARGET_OUTPUT_DIR: bin/android_arm64/release
@@ -285,8 +313,11 @@ exec_debianarm:
     - mat_submodules
   variables:
     PREMAKE5_BIN: ./premake5
+    BUILD_IRRLICHT: '1'
     BUILD_SQLITE: '1'
     BUILD_EVENT: '1'
+    BUILD_ZLIB: '1'
+    BUILD_LZMA: '1'
     SERVER_ZIP_SUPPORT: '1'
   before_script:
     - rm -rf sqlite3/VERSION sqlite3/version
