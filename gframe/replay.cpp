@@ -101,9 +101,15 @@ void Replay::EndRecord() {
 	opt.pb = 2;
 	opt.nice_len = 32;
 	opt.mf = LZMA_MF_BT4;
+#ifdef LZMA_FILTER_LZMA1EXT
 	opt.ext_flags = 0;
+#endif
 	lzma_filter filters[2];
+#ifdef LZMA_FILTER_LZMA1EXT
 	filters[0].id = LZMA_FILTER_LZMA1EXT;
+#else
+	filters[0].id = LZMA_FILTER_LZMA1;
+#endif
 	filters[0].options = &opt;
 	filters[1].id = LZMA_VLI_UNKNOWN;
 	filters[1].options = nullptr;
@@ -176,10 +182,12 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		filter.options = nullptr;
 		if (lzma_properties_decode(&filter, nullptr, pheader.base.props, 5) != LZMA_OK)
 			return false;
+#ifdef LZMA_FILTER_LZMA1EXT
 		lzma_options_lzma *lzma_opt = static_cast<lzma_options_lzma *>(filter.options);
 		lzma_set_ext_size(*lzma_opt, replay_size);
 		lzma_opt->ext_flags = LZMA_LZMA1EXT_ALLOW_EOPM;
 		filter.id = LZMA_FILTER_LZMA1EXT;
+#endif
 		lzma_filter filters[2] = { filter, { LZMA_VLI_UNKNOWN, nullptr } };
 		size_t in_pos = 0, out_pos = 0;
 		lzma_ret lret = lzma_raw_buffer_decode(filters, nullptr, comp_data, &in_pos, comp_size, replay_data, &out_pos, replay_size);

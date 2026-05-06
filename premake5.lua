@@ -44,7 +44,7 @@ SERVER_PRO2_SUPPORT = false
 SERVER_TAG_SURRENDER_CONFIRM = false
 SERVER_PRO3_SUPPORT = false
 
-BUILD_LZMA = SERVER_MODE or os.istarget("windows")
+BUILD_LZMA = os.istarget("windows")
 
 -- Available: none, server, sse2, avx2, neon, best
 -- "server" means SSE2 on x86/x64 and NEON on ARM/AArch64.
@@ -455,18 +455,12 @@ if SERVER_MODE then
     BUILD_FREETYPE = false
     BUILD_JPEG = false
     BUILD_PNG = false
-    BUILD_ZLIB = false
     USE_AUDIO = false
-    if not GetParam("no-build-lzma") then
-        BUILD_LZMA = true
-    end
     if not SERVER_ZIP_SUPPORT then
         BUILD_IRRLICHT = false
+        BUILD_ZLIB = false
     else
         BUILD_IRRLICHT = true
-        if not GetParam("no-build-zlib") then
-            BUILD_ZLIB = true
-        end
     end
 end
 
