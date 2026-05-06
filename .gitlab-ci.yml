@@ -122,6 +122,7 @@ mat_windows:
     BUILD_EVENT: '1'
     BUILD_ZLIB: '1'
     BUILD_LZMA: '1'
+    VS2026_WIN7_SUPPORT: '1'
   dependencies:
     - mat_common
     - mat_windows
@@ -135,8 +136,8 @@ mat_windows:
 exec_windows:
   extends: .exec_windows
   script:
-    - '.\premake5.exe vs2019 --vs2026-win7-support --server-zip-support'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - '.\premake5.exe vs2026 --server-zip-support'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
     - copy bin\release\x64\ygopro.exe dist\windows\ygopro.exe
@@ -146,8 +147,8 @@ exec_windows_pro2:
   variables:
     USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro2-support'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - '.\premake5.exe vs2026 --server-pro2-support'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
     - copy bin\release\x64\AI.Server.exe dist\windows\AI.Server.exe
@@ -157,8 +158,8 @@ exec_windows_pro3:
   variables:
     USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro3-support --log-in-chat'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - '.\premake5.exe vs2026 --server-pro3-support --log-in-chat'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
     - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver.dll
@@ -168,8 +169,8 @@ exec_windows_mdpro2:
   variables:
     USE_SIMD: 'best'
   script:
-    - '.\premake5.exe vs2019 --vs2026-win7-support --server-pro3-support --log-in-chat --server-pro2-support'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - '.\premake5.exe vs2026 --server-pro3-support --log-in-chat --server-pro2-support'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
     - copy bin\release\x64\ygoserver.dll dist\windows\ygoserver-mdpro2.dll
