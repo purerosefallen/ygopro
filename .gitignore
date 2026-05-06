@@ -13,7 +13,6 @@
 /WindBot
 /cards.cdb
 /error.log
-/system_user.conf
 /bot.conf
 /Bot.exe
 /bot
@@ -35,6 +34,7 @@ build
 /irrklang
 /irrlicht*
 /lua
+/lzma
 /miniaudio
 /png
 /zlib

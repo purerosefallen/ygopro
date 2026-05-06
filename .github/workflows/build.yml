@@ -402,6 +402,9 @@ jobs:
     - name: Use premake to generate Visual Studio solution
       shell: pwsh
       run: |
+        if ("${{ matrix.vs }}" -eq "vs2026") {
+          $env:VS2026_WIN7_SUPPORT = "1"
+        }
         .\premake5.exe ${{ matrix.vs }} ${{ matrix.simd && format('--use-simd={0}', matrix.simd) || '' }}
 
     - name: Add msbuild to PATH
