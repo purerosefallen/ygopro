@@ -247,7 +247,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				if(sel == -1)
 					break;
 				mainGame->gMutex.lock();
-				mainGame->wDeckCode->setText(dataManager.GetSysString(1387));
+				mainGame->wDeckCode->setText(dataManager.GetSysString(1394));
 				if(deckManager.current_deck.main.size() > 0 || deckManager.current_deck.extra.size() > 0 || deckManager.current_deck.side.size() > 0) {
 					wchar_t deck_code[2048];
 					unsigned char deck_code_utf8[1024];
@@ -273,7 +273,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen(pcode)))
 						deckManager.current_deck = new_deck;
 					else
-						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1389));
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1396));
 				}
 				prev_operation = 0;
 				prev_sel = -1;
@@ -1840,10 +1840,7 @@ void DeckBuilder::ShowBigCard(int code, float zoom) {
 	mainGame->gMutex.unlock();
 }
 void DeckBuilder::ZoomBigCard(irr::s32 centerx, irr::s32 centery) {
-	if(bigcard_zoom >= 4)
-		bigcard_zoom = 4;
-	if(bigcard_zoom <= 0.2f)
-		bigcard_zoom = 0.2f;
+	bigcard_zoom = myclamp(bigcard_zoom, 0.2f, 4.0f);
 	auto img = imageManager.GetBigPicture(bigcard_code, bigcard_zoom);
 	mainGame->imgBigCard->setImage(img);
 	auto size = img->getSize();
