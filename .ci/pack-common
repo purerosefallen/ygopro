@@ -151,9 +151,6 @@ _pack_release() {
 
   _append_release_files files
   _append_platform_files files release "$target_platform"
-  if [[ "$target_platform" == "linuxarm" ]]; then
-    _remove_files files sound
-  fi
   _append_win_locale_updater files tar
 
   _pack_tar_archive "$archive_name" "${files[@]}"

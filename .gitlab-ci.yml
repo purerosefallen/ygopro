@@ -212,7 +212,6 @@ exec_linuxarm:
     - arm
   variables:
     OPUS_FLAGS: '-fPIC' # force position independent code for arm
-    NO_AUDIO: '1'
 
 ._exec_macos_platform:
   extends: .exec_unix
