@@ -447,8 +447,9 @@ if USE_AUDIO and not SERVER_MODE then
     end
 end
 
-if GetParam("use-simd") then
-    USE_SIMD = GetParam("use-simd")
+local useSimd = GetParam("use-simd")
+if useSimd then
+    USE_SIMD = useSimd
 end
 
 if SERVER_MODE then
