@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdlib>
 #include "config.h"
 #include "replay.h"
 #include "myfilesystem.h"
@@ -191,7 +192,7 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		lzma_filter filters[2] = { filter, { LZMA_VLI_UNKNOWN, nullptr } };
 		size_t in_pos = 0, out_pos = 0;
 		lzma_ret lret = lzma_raw_buffer_decode(filters, nullptr, comp_data, &in_pos, comp_size, replay_data, &out_pos, replay_size);
-		lzma_filters_free(filters, nullptr);
+		std::free(filters[0].options);
 		if (lret != LZMA_OK || out_pos != replay_size) {
 			replay_size = 0;
 			return false;
