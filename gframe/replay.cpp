@@ -7,6 +7,9 @@
 
 #define LZMA_API_STATIC
 #include <lzma.h>
+#ifndef LZMA_FILTER_LZMA1EXT
+#include "replay_lzma_legacy.h"
+#endif
 
 namespace ygo {
 
@@ -142,21 +145,24 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		if (pheader.base.datasize > MAX_REPLAY_SIZE)
 			return false;
 		replay_size = pheader.base.datasize;
+#ifdef LZMA_FILTER_LZMA1EXT
 		lzma_filter filter;
 		filter.id = LZMA_FILTER_LZMA1;
 		filter.options = nullptr;
 		if (lzma_properties_decode(&filter, nullptr, pheader.base.props, 5) != LZMA_OK)
 			return false;
-#ifdef LZMA_FILTER_LZMA1EXT
 		lzma_options_lzma *lzma_opt = static_cast<lzma_options_lzma *>(filter.options);
 		lzma_set_ext_size(*lzma_opt, replay_size);
 		lzma_opt->ext_flags = LZMA_LZMA1EXT_ALLOW_EOPM;
 		filter.id = LZMA_FILTER_LZMA1EXT;
-#endif
 		lzma_filter filters[2] = { filter, { LZMA_VLI_UNKNOWN, nullptr } };
 		size_t in_pos = 0, out_pos = 0;
 		lzma_ret lret = lzma_raw_buffer_decode(filters, nullptr, comp_data, &in_pos, comp_size, replay_data, &out_pos, replay_size);
 		std::free(filters[0].options);
+#else
+		size_t out_pos = 0;
+		lzma_ret lret = DecodeLegacyReplayLzmaAlone(pheader.base.props, comp_data, comp_size, replay_data, replay_size, out_pos);
+#endif
 		if (lret != LZMA_OK || out_pos != replay_size) {
 			replay_size = 0;
 			return false;
