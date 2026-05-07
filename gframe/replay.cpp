@@ -161,7 +161,7 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		std::free(filters[0].options);
 #else
 		size_t out_pos = 0;
-		lzma_ret lret = DecodeLegacyReplayLzmaAlone(pheader.base.props, comp_data, comp_size, replay_data, replay_size, out_pos);
+		lzma_ret lret = DecodeLegacyReplayLzmaLegacy(pheader.base.props, comp_data, comp_size, replay_data, replay_size, out_pos);
 #endif
 		if (lret != LZMA_OK || out_pos != replay_size) {
 			replay_size = 0;

@@ -9,7 +9,7 @@
 namespace ygo {
 
 #ifndef LZMA_FILTER_LZMA1EXT
-inline lzma_ret DecodeLegacyReplayLzmaAlone(const uint8_t* props, const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size, size_t& output_pos) {
+inline lzma_ret DecodeLegacyReplayLzmaLegacy(const uint8_t* props, const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size, size_t& output_pos) {
 	output_pos = 0;
 	std::vector<uint8_t> lzma_data(13 + input_size);
 	std::memcpy(lzma_data.data(), props, 5);
