@@ -6,6 +6,7 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(CDPATH= cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$PROJECT_DIR/event"
+chmod +x configure build-aux/* || true
 
 if [ -n "${NDK_DIR:-}" ]; then
     ANDROID_API_LEVEL="${ANDROID_API_LEVEL:-26}"

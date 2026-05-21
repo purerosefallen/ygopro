@@ -1,5 +1,6 @@
 #include "config.h"
 #include "menu_handler.h"
+#include "data_manager.h"
 #include "myfilesystem.h"
 #include "netserver.h"
 #include "duelclient.h"
@@ -52,7 +53,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_JOIN_HOST: {
-				bot_mode = false;
+				mainGame->bot_mode = false;
 				mainGame->TrimText(mainGame->ebJoinHost);
 				char hostname_tag[100];
 				wchar_t pstr[100];
@@ -83,7 +84,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->HideElement(mainGame->wLanWindow);
 				mainGame->HideElement(mainGame->wServerList);
 				mainGame->ShowElement(mainGame->wMainMenu);
-				if(exit_on_return)
+				if(mainGame->exit_on_return)
 					mainGame->device->closeDevice();
 				break;
 			}
@@ -100,7 +101,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_HOST_CONFIRM: {
-				bot_mode = false;
+				mainGame->bot_mode = false;
 				BufferIO::CopyWideString(mainGame->ebServerName->getText(), mainGame->gameConf.gamename);
 				if(!NetServer::StartServer(mainGame->gameConf.serverport)) {
 					soundManager.PlaySoundEffect(SOUND_INFO);
@@ -180,12 +181,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnStartBot->setEnabled(true);
 				mainGame->btnBotCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wHostPrepare);
-				if(bot_mode)
+				if(mainGame->bot_mode)
 					mainGame->ShowElement(mainGame->wSinglePlay);
 				else
 					mainGame->ShowElement(mainGame->wLanWindow);
 				mainGame->wChat->setVisible(false);
-				if(exit_on_return)
+				if(mainGame->exit_on_return)
 					mainGame->device->closeDevice();
 				break;
 			}
@@ -206,10 +207,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_LOAD_REPLAY: {
 				int start_turn = 1;
-				if(open_file) {
-					open_file = false;
-					if (!ReplayMode::cur_replay.OpenReplay(open_file_name)) {
-						if (exit_on_return)
+				if(mainGame->open_file) {
+					mainGame->open_file = false;
+					if (!ReplayMode::cur_replay.OpenReplay(mainGame->open_file_name)) {
+						if (mainGame->exit_on_return)
 							mainGame->device->closeDevice();
 						break;
 					}
@@ -304,7 +305,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				int sel = mainGame->lstBotList->getSelected();
 				if(sel == -1)
 					break;
-				bot_mode = true;
+				mainGame->bot_mode = true;
 #ifdef _WIN32
 				if(!NetServer::StartServer(mainGame->gameConf.serverport)) {
 					soundManager.PlaySoundEffect(SOUND_INFO);
@@ -381,7 +382,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_LOAD_SINGLEPLAY: {
-				if(!open_file && mainGame->lstSinglePlayList->getSelected() == -1)
+				if(!mainGame->open_file && mainGame->lstSinglePlayList->getSelected() == -1)
 					break;
 				mainGame->singleSignal.SetNoWait(false);
 				SingleMode::StartPlay();
@@ -394,13 +395,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_DECK_EDIT: {
 				mainGame->RefreshCategoryDeck(mainGame->cbDBCategory, mainGame->cbDBDecks);
-				if(open_file && deckManager.LoadCurrentDeck(open_file_name)) {
+				if(mainGame->open_file && deckManager.LoadCurrentDeck(mainGame->open_file_name)) {
 #ifdef _WIN32
-					wchar_t *dash = std::wcsrchr(open_file_name, L'\\');
+					wchar_t *dash = std::wcsrchr(mainGame->open_file_name, L'\\');
 #else
-					wchar_t *dash = std::wcsrchr(open_file_name, L'/');
+					wchar_t *dash = std::wcsrchr(mainGame->open_file_name, L'/');
 #endif
-					wchar_t *dot = std::wcsrchr(open_file_name, L'.');
+					wchar_t *dot = std::wcsrchr(mainGame->open_file_name, L'.');
 					if(dash && dot && !mywcsncasecmp(dot, L".ydk", 4)) { // full path
 						wchar_t deck_name[256];
 						BufferIO::CopyWideString(dash + 1, deck_name, dot - dash - 1);
@@ -422,14 +423,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 						}
 					} else { // only deck name
 						for(size_t i = 0; i < mainGame->cbDBDecks->getItemCount(); ++i) {
-							if(!std::wcscmp(mainGame->cbDBDecks->getItem(i), open_file_name)) {
-								BufferIO::CopyWideString(open_file_name, mainGame->gameConf.lastdeck);
+							if(!std::wcscmp(mainGame->cbDBDecks->getItem(i), mainGame->open_file_name)) {
+								BufferIO::CopyWideString(mainGame->open_file_name, mainGame->gameConf.lastdeck);
 								mainGame->cbDBDecks->setSelected(i);
 								break;
 							}
 						}
 					}
-					open_file = false;
+					mainGame->open_file = false;
 				} 
 				else if(mainGame->cbDBCategory->getSelected() != -1 && mainGame->cbDBDecks->getSelected() != -1) {
 					deckManager.LoadCurrentDeck(mainGame->cbDBCategory->getSelected(), mainGame->cbDBCategory->getText(), mainGame->cbDBDecks->getText());
