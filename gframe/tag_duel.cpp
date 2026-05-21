@@ -372,25 +372,19 @@ void TagDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 		return;
 	LeaveGame(players[pos]);
 }
-void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
+void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
 	if(dp->type > 3 || ready[dp->type])
 		return;
-	if (len < 8 || len > sizeof(CTOS_DeckData))
+	if (len < sizeof(uint32_t) * 2)
 		return;
 	bool valid = true;
-	const int deck_size = len - 2 * sizeof(int32_t);
-	CTOS_DeckData deckbuf;
-	std::memcpy(&deckbuf, pdata, len);
-	if (deckbuf.mainc < 0 || deckbuf.mainc > MAINC_MAX)
+	uint32_t mainc = BufferIO::Read<uint32_t>(pdata);
+	uint32_t sidec = BufferIO::Read<uint32_t>(pdata);
+	if (mainc > MAINC_MAX)
 		valid = false;
-	else if (deckbuf.sidec < 0 || deckbuf.sidec > SIDEC_MAX)
+	else if (sidec > SIDEC_MAX)
 		valid = false;
-	else if
-#ifdef YGOPRO_SERVER_MODE
-(deck_size < (deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
-#else
-(len < (2 + deckbuf.mainc + deckbuf.sidec) * (int)sizeof(int32_t))
-#endif
+	else if (len < (2 + mainc + sidec) * sizeof(uint32_t))
 		valid = false;
 	if (!valid) {
 #ifdef YGOPRO_SERVER_MODE
@@ -404,7 +398,9 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		NetServer::SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
 		return;
 	}
-	deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf.list, deckbuf.mainc, deckbuf.sidec);
+	uint32_t deckbuf[MAINC_MAX + SIDEC_MAX];
+	std::memcpy(deckbuf, pdata, (mainc + sidec) * sizeof(uint32_t));
+	deck_error[dp->type] = DeckManager::LoadDeck(pdeck[dp->type], deckbuf, mainc, sidec);
 #ifdef YGOPRO_SERVER_MODE
 	PlayerReady(dp, true);
 #endif

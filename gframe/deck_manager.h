@@ -24,6 +24,12 @@
 #define YGOPRO_MAX_SIDE					15
 #endif
 
+namespace irr {
+	namespace io {
+		class IReadFile;
+	}
+}
+
 namespace ygo {
 
 constexpr int DECK_MAX_SIZE = YGOPRO_MAX_DECK;
@@ -81,8 +87,8 @@ public:
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 #endif //YGOPRO_SERVER_MODE
 
-	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
-	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);
+	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], uint32_t mainc, uint32_t sidec, bool is_packlist = false);
+	static bool LoadSide(Deck& deck, uint32_t dbuf[], uint32_t mainc, uint32_t sidec);
 #ifndef YGOPRO_SERVER_MODE
 	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
 	static void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);
