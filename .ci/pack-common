@@ -69,6 +69,44 @@ _pack_tar_archive() {
   tar -acf "dist/${archive_name}" --exclude='.git*' "${files[@]}"
 }
 
+_get_memory_limit_kib() {
+  local mem_total_kib
+  mem_total_kib=$(awk '/MemTotal:/ {print $2}' /proc/meminfo)
+
+  local limit_kib="$mem_total_kib"
+  local cgroup_limit
+  local cgroup_limit_kib
+  if [[ -r /sys/fs/cgroup/memory.max ]]; then
+    cgroup_limit=$(cat /sys/fs/cgroup/memory.max)
+    if [[ "$cgroup_limit" != "max" && "$cgroup_limit" =~ ^[0-9]+$ ]]; then
+      cgroup_limit_kib=$((cgroup_limit / 1024))
+      if (( cgroup_limit_kib > 0 && cgroup_limit_kib < limit_kib )); then
+        limit_kib="$cgroup_limit_kib"
+      fi
+    fi
+  elif [[ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]]; then
+    cgroup_limit=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
+    if [[ "$cgroup_limit" =~ ^[0-9]+$ ]]; then
+      cgroup_limit_kib=$((cgroup_limit / 1024))
+      if (( cgroup_limit_kib > 0 && cgroup_limit_kib < limit_kib )); then
+        limit_kib="$cgroup_limit_kib"
+      fi
+    fi
+  fi
+
+  echo $((limit_kib / 2))
+}
+
+_run_7z_with_memory_limit() {
+  local limit_kib
+  limit_kib=$(_get_memory_limit_kib)
+  echo "Limiting 7z address space to ${limit_kib} KiB"
+  (
+    ulimit -v "$limit_kib"
+    exec 7z "$@"
+  )
+}
+
 _pack_7z_archive() {
   local archive_name="$1"
   shift
@@ -76,7 +114,7 @@ _pack_7z_archive() {
   local files
   _prepare_pack_dirs
   mapfile -t files < <(_collect_existing_files "$@")
-  7z a -mx9 -xr!.git* "dist/${archive_name}" "${files[@]}"
+  _run_7z_with_memory_limit a -mx9 -xr!.git* "dist/${archive_name}" "${files[@]}"
 }
 
 _append_base_files() {
