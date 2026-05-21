@@ -1,34 +1,18 @@
 #ifndef NETSERVER_H
 #define NETSERVER_H
 
-#include <unordered_map>
-#include "config.h"
+#include "bufferio.h"
 #include "network.h"
 
 namespace ygo {
 
 class NetServer {
 private:
-	static std::unordered_map<bufferevent*, DuelPlayer> users;
-	static unsigned short server_port;
-#ifndef YGOPRO_SERVER_MODE
-	static event_base* net_evbase;
-#endif
-	static event* broadcast_ev;
-	static evconnlistener* listener;
-#ifndef YGOPRO_LOG_IN_CHAT
-	static DuelMode* duel_mode;
-#endif
 	static unsigned char net_server_write[SIZE_NETWORK_BUFFER];
-	static unsigned char net_server_read[SIZE_NETWORK_BUFFER];
 	static size_t last_sent;
 
 public:
-#ifdef YGOPRO_LOG_IN_CHAT
-	static DuelMode* duel_mode;
-#endif
 #ifdef YGOPRO_SERVER_MODE
-	static event_base* net_evbase;
 	static void InitDuel();
 	static void InitTestCard(int code);
 	static unsigned short StartServer(unsigned short port);
@@ -36,6 +20,8 @@ public:
 #else
 	static bool StartServer(unsigned short port);
 #endif //YGOPRO_SERVER_MODE
+	static bool IsRunning();
+	static DuelMode* GetDuelMode();
 	static bool StartBroadcast();
 	static void StopServer();
 	static void StopBroadcast();
@@ -47,7 +33,7 @@ public:
 	static void ServerEchoEvent(bufferevent* bev, short events, void* ctx);
 	static int ServerThread();
 	static void DisconnectPlayer(DuelPlayer* dp);
-	static void HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len);
+	static void HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, size_t len);
 	static size_t CreateChatPacket(unsigned char* src, int src_size, unsigned char* dst, uint16_t dst_player_type);
 	static void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
 		auto p = net_server_write;
