@@ -1,9 +1,15 @@
 #include <algorithm>
+#include <cstdlib>
 #include "config.h"
 #include "replay.h"
 #include "myfilesystem.h"
 #include "deck_manager.h"
-#include "lzma/LzmaLib.h"
+
+#define LZMA_API_STATIC
+#include <lzma.h>
+#ifndef LZMA_FILTER_LZMA1EXT
+#include "replay_lzma_legacy.h"
+#endif
 
 namespace ygo {
 	
@@ -57,7 +63,7 @@ void Replay::WriteHeader(ExtendedReplayHeader& header) {
 void Replay::WriteData(const void* data, size_t length, bool flush) {
 	if(!is_recording)
 		return;
-	if (replay_size + length > MAX_REPLAY_SIZE)
+	if (length > MAX_REPLAY_SIZE - replay_size)
 		return;
 	std::memcpy(replay_data + replay_size, data, length);
 	replay_size += length;
@@ -91,12 +97,34 @@ void Replay::EndRecord() {
 #endif
 	pheader.base.datasize = replay_size;
 	pheader.base.flag |= REPLAY_COMPRESSED;
-	size_t propsize = 5;
-	comp_size = MAX_COMP_SIZE;
-	int ret = LzmaCompress(comp_data, &comp_size, replay_data, replay_size, pheader.base.props, &propsize, 5, 0x1U << 24, 3, 0, 2, 32, 1);
-	if (ret != SZ_OK) {
-		std::memcpy(comp_data, &ret, sizeof ret);
-		comp_size = sizeof ret;
+	lzma_options_lzma opt;
+	lzma_lzma_preset(&opt, 5);
+	opt.dict_size = 0x1U << 24;
+	opt.lc = 3;
+	opt.lp = 0;
+	opt.pb = 2;
+	opt.nice_len = 32;
+	opt.mf = LZMA_MF_BT4;
+#ifdef LZMA_FILTER_LZMA1EXT
+	opt.ext_flags = 0;
+#endif
+	lzma_filter filters[2];
+#ifdef LZMA_FILTER_LZMA1EXT
+	filters[0].id = LZMA_FILTER_LZMA1EXT;
+#else
+	filters[0].id = LZMA_FILTER_LZMA1;
+#endif
+	filters[0].options = &opt;
+	filters[1].id = LZMA_VLI_UNKNOWN;
+	filters[1].options = nullptr;
+	lzma_properties_encode(&filters[0], pheader.base.props);
+	size_t out_pos = 0;
+	lzma_ret lret = lzma_raw_buffer_encode(filters, nullptr, replay_data, replay_size, comp_data, &out_pos, MAX_COMP_SIZE);
+	if (lret != LZMA_OK) {
+		std::memcpy(comp_data, &lret, sizeof lret);
+		comp_size = sizeof lret;
+	} else {
+		comp_size = out_pos;
 	}
 	is_recording = false;
 }
@@ -153,9 +181,25 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		if (pheader.base.datasize > MAX_REPLAY_SIZE)
 			return false;
 		replay_size = pheader.base.datasize;
-		if (LzmaUncompress(replay_data, &replay_size, comp_data, &comp_size, pheader.base.props, 5) != SZ_OK)
+#ifdef LZMA_FILTER_LZMA1EXT
+		lzma_filter filter;
+		filter.id = LZMA_FILTER_LZMA1;
+		filter.options = nullptr;
+		if (lzma_properties_decode(&filter, nullptr, pheader.base.props, 5) != LZMA_OK)
 			return false;
-		if (replay_size != pheader.base.datasize) {
+		lzma_options_lzma *lzma_opt = static_cast<lzma_options_lzma *>(filter.options);
+		lzma_set_ext_size(*lzma_opt, replay_size);
+		lzma_opt->ext_flags = LZMA_LZMA1EXT_ALLOW_EOPM;
+		filter.id = LZMA_FILTER_LZMA1EXT;
+		lzma_filter filters[2] = { filter, { LZMA_VLI_UNKNOWN, nullptr } };
+		size_t in_pos = 0, out_pos = 0;
+		lzma_ret lret = lzma_raw_buffer_decode(filters, nullptr, comp_data, &in_pos, comp_size, replay_data, &out_pos, replay_size);
+		std::free(filters[0].options);
+#else
+		size_t out_pos = 0;
+		lzma_ret lret = DecodeLegacyReplayLzmaLegacy(pheader.base.props, comp_data, comp_size, replay_data, replay_size, out_pos);
+#endif
+		if (lret != LZMA_OK || out_pos != replay_size) {
 			replay_size = 0;
 			return false;
 		}
@@ -193,12 +237,7 @@ bool Replay::RenameReplay(const wchar_t* oldname, const wchar_t* newname) {
 		return false;
 	if (myswprintf(new_path, L"./replay/%ls", newname) <= 0)
 		return false;
-	char oldfilefn[1024];
-	char newfilefn[1024];
-	BufferIO::EncodeUTF8(old_path, oldfilefn);
-	BufferIO::EncodeUTF8(new_path, newfilefn);
-	int result = std::rename(oldfilefn, newfilefn);
-	return result == 0;
+	return FileSystem::Rename(old_path, new_path);
 }
 bool Replay::ReadNextResponse(unsigned char resp[]) {
 	unsigned char len{};
@@ -222,12 +261,12 @@ void Replay::ReadHeader(ExtendedReplayHeader& header) {
 bool Replay::ReadData(void* data, size_t length) {
 	if (!is_replaying || !can_read)
 		return false;
-	if (data_position + length > replay_size) {
+	if (length > replay_size - data_position) {
 		can_read = false;
 		return false;
 	}
 	if (length)
-		std::memcpy(data, &replay_data[data_position], length);
+		std::memcpy(data, replay_data + data_position, length);
 	data_position += length;
 	return true;
 }
