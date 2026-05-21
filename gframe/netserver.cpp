@@ -2,19 +2,31 @@
 #include "netserver.h"
 #include "single_duel.h"
 #include "tag_duel.h"
-#include "deck_manager.h"
 #include <thread>
+#include <unordered_map>
 
 namespace ygo {
-std::unordered_map<bufferevent*, DuelPlayer> NetServer::users;
-unsigned short NetServer::server_port = 0;
-event_base* NetServer::net_evbase = 0;
-event* NetServer::broadcast_ev = 0;
-evconnlistener* NetServer::listener = 0;
-DuelMode* NetServer::duel_mode = 0;
-unsigned char NetServer::net_server_write[SIZE_NETWORK_BUFFER];
-unsigned char NetServer::net_server_read[SIZE_NETWORK_BUFFER];
-size_t NetServer::last_sent = 0;
+
+namespace{
+	std::unordered_map<bufferevent*, DuelPlayer> users{};
+	unsigned short server_port{};
+	event_base* net_evbase{};
+	event* broadcast_ev {};
+	evconnlistener* listener{};
+	DuelMode* duel_mode{};
+	unsigned char net_server_read[SIZE_NETWORK_BUFFER]{};
+}
+
+unsigned char NetServer::net_server_write[SIZE_NETWORK_BUFFER]{};
+size_t NetServer::last_sent{};
+
+bool NetServer::IsRunning() {
+	return net_evbase != nullptr;
+}
+
+DuelMode* NetServer::GetDuelMode() {
+	return duel_mode;
+}
 
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short replay_mode;
@@ -106,7 +118,7 @@ bool NetServer::StartServer(unsigned short port) {
 	                                   LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
 	if(!listener) {
 		event_base_free(net_evbase);
-		net_evbase = 0;
+		net_evbase = nullptr;
 		return false;
 	}
 	evconnlistener_set_error_cb(listener, ServerAcceptError);
@@ -161,7 +173,7 @@ void NetServer::StopBroadcast() {
 	event_get_assignment(broadcast_ev, 0, &fd, 0, 0, 0);
 	evutil_closesocket(fd);
 	event_free(broadcast_ev);
-	broadcast_ev = 0;
+	broadcast_ev = nullptr;
 }
 void NetServer::StopListen() {
 	evconnlistener_disable(listener);
@@ -211,7 +223,7 @@ void NetServer::ServerAcceptError(evconnlistener* listener, void* ctx) {
 */
 void NetServer::ServerEchoRead(bufferevent *bev, void *ctx) {
 	evbuffer* input = bufferevent_get_input(bev);
-	int len = evbuffer_get_length(input);
+	size_t len = evbuffer_get_length(input);
 	if (len < 2)
 		return;
 	uint16_t packet_len = 0;
@@ -243,21 +255,21 @@ int NetServer::ServerThread() {
 	}
 	users.clear();
 	evconnlistener_free(listener);
-	listener = 0;
+	listener = nullptr;
 	if(broadcast_ev) {
 		evutil_socket_t fd;
 		event_get_assignment(broadcast_ev, 0, &fd, 0, 0, 0);
 		evutil_closesocket(fd);
 		event_free(broadcast_ev);
-		broadcast_ev = 0;
+		broadcast_ev = nullptr;
 	}
 	if(duel_mode) {
 		event_free(duel_mode->etimer);
 		delete duel_mode;
 	}
-	duel_mode = 0;
+	duel_mode = nullptr;
 	event_base_free(net_evbase);
-	net_evbase = 0;
+	net_evbase = nullptr;
 	return 0;
 }
 void NetServer::DisconnectPlayer(DuelPlayer* dp) {
@@ -269,7 +281,7 @@ void NetServer::DisconnectPlayer(DuelPlayer* dp) {
 		users.erase(bit);
 	}
 }
-void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
+void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, size_t len) {
 	auto pdata = data;
 	unsigned char pktType = BufferIO::Read<uint8_t>(pdata);
 #ifdef YGOPRO_SERVER_MODE
@@ -282,7 +294,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_RESPONSE: {
 		if(!dp->game || !duel_mode->pduel)
 			return;
-		if (len < 1 + (int)sizeof(unsigned char))
+		if (len < 1 + sizeof(unsigned char))
 			return;
 		duel_mode->GetResponse(dp, pdata, len - 1);
 		break;
@@ -308,9 +320,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_UPDATE_DECK: {
 		if(!dp->game)
 			return;
-		if (len < 1 + (int)sizeof(int32_t) + (int)sizeof(int32_t))
-			return;
-		if (len > 1 + (int)sizeof(CTOS_DeckData))
+		if (len < 1 + sizeof(uint32_t) * 2)
 			return;
 		duel_mode->UpdateDeck(dp, pdata, len - 1);
 		break;
@@ -318,7 +328,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_HAND_RESULT: {
 		if(!dp->game)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_HandResult))
+		if (len < 1 + sizeof(CTOS_HandResult))
 			return;
 		CTOS_HandResult packet;
 		std::memcpy(&packet, pdata, sizeof packet);
@@ -329,7 +339,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_TP_RESULT: {
 		if(!dp->game)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_TPResult))
+		if (len < 1 + sizeof(CTOS_TPResult))
 			return;
 		CTOS_TPResult packet;
 		std::memcpy(&packet, pdata, sizeof packet);
@@ -338,7 +348,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		break;
 	}
 	case CTOS_PLAYER_INFO: {
-		if (len < 1 + (int)sizeof(CTOS_PlayerInfo))
+		if (len < 1 + sizeof(CTOS_PlayerInfo))
 			return;
 		CTOS_PlayerInfo packet;
 		std::memcpy(&packet, pdata, sizeof packet);
@@ -359,7 +369,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_CREATE_GAME: {
 		if(dp->game || duel_mode)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_CreateGame))
+		if (len < 1 + sizeof(CTOS_CreateGame))
 			return;
 		CTOS_CreateGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
@@ -407,7 +417,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_JOIN_GAME: {
 		if (!duel_mode)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_JoinGame))
+		if (len < 1 + sizeof(CTOS_JoinGame))
 			return;
 		duel_mode->JoinGame(dp, pdata, false);
 		break;
@@ -455,7 +465,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	case CTOS_HS_KICK: {
 		if (!duel_mode || duel_mode->pduel)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_Kick))
+		if (len < 1 + sizeof(CTOS_Kick))
 			return;
 		CTOS_Kick packet;
 		std::memcpy(&packet, pdata, sizeof packet);

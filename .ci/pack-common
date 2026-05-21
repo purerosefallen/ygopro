@@ -1,0 +1,182 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+set -x
+
+_prepare_pack_dirs() {
+  mkdir -p dist replay
+}
+
+_apply_locale_overlay() {
+  cp -rf "locales/$TARGET_LOCALE/"* .
+}
+
+_collect_existing_files() {
+  local existing=()
+  local path
+  for path in "$@"; do
+    if [[ -e "$path" ]]; then
+      existing+=("$path")
+    fi
+  done
+
+  printf '%s\n' "${existing[@]}"
+}
+
+_append_files() {
+  local array_name="$1"
+  shift
+  local value
+  for value in "$@"; do
+    eval "$array_name+=(\"\$value\")"
+  done
+}
+
+_remove_files() {
+  local array_name="$1"
+  shift
+  local removals=("$@")
+  local filtered=()
+  local value
+  local removal
+  local skip
+
+  eval "local current=(\"\${${array_name}[@]}\")"
+  for value in "${current[@]}"; do
+    skip=0
+    for removal in "${removals[@]}"; do
+      if [[ "$value" == "$removal" ]]; then
+        skip=1
+        break
+      fi
+    done
+    if [[ "$skip" -eq 0 ]]; then
+      filtered+=("$value")
+    fi
+  done
+
+  eval "$array_name=(\"\${filtered[@]}\")"
+}
+
+_pack_tar_archive() {
+  local archive_name="$1"
+  shift
+
+  local files
+  _prepare_pack_dirs
+  mapfile -t files < <(_collect_existing_files "$@")
+  tar -acf "dist/${archive_name}" --exclude='.git*' "${files[@]}"
+}
+
+_pack_7z_archive() {
+  local archive_name="$1"
+  shift
+
+  local files
+  _prepare_pack_dirs
+  mapfile -t files < <(_collect_existing_files "$@")
+  7z a -mx9 -xr!.git* "dist/${archive_name}" "${files[@]}"
+}
+
+_append_base_files() {
+  local array_name="$1"
+  _append_files "$array_name" \
+    strings.conf system.conf servers.conf \
+    cards.cdb textures locales fonts pack skin
+}
+
+_append_dlc_files() {
+  local array_name="$1"
+  _append_base_files "$array_name"
+  _append_files "$array_name" sound
+}
+
+_append_release_files() {
+  local array_name="$1"
+  _append_dlc_files "$array_name"
+  _append_files "$array_name" \
+    LICENSE README.md lflist.conf \
+    script deck single pics replay bot.conf
+}
+
+_append_win_locale_updater() {
+  local array_name="$1"
+  local archive_kind="$2"
+  if [[ "$TARGET_LOCALE" != "zh-CN" ]]; then
+    return
+  fi
+
+  if [[ "$archive_kind" == "7z" || "$ARCHIVE_SUFFIX" != "zst" ]]; then
+    _append_files "$array_name" update-koishipro
+  fi
+}
+
+_append_platform_files() {
+  local array_name="$1"
+  local package_kind="$2"
+  local target_platform="$3"
+
+  case "$target_platform" in
+    darwin)
+      _append_files "$array_name" ygopro.app
+      if [[ "$package_kind" == "release" ]]; then
+        _append_files "$array_name" windbot bot
+      fi
+      ;;
+    linux|linuxarm)
+      _append_files "$array_name" ygopro
+      if [[ "$package_kind" == "release" ]]; then
+        _append_files "$array_name" windbot bot
+      fi
+      ;;
+    win32)
+      _append_files "$array_name" ygopro.exe vcomp140.dll
+      if [[ "$package_kind" == "release" ]]; then
+        _append_files "$array_name" Bot.exe WindBot
+      fi
+      ;;
+    *)
+      echo "Unsupported platform: $target_platform" >&2
+      exit 1
+      ;;
+  esac
+}
+
+_pack_release() {
+  local default_platform="$1"
+  local target_platform="${TARGET_PLATFORM:-$default_platform}"
+  local archive_name="KoishiPro-${CI_COMMIT_REF_NAME}-${target_platform}-${TARGET_LOCALE}.tar.${ARCHIVE_SUFFIX}"
+  local files=()
+
+  _append_release_files files
+  _append_platform_files files release "$target_platform"
+  _append_win_locale_updater files tar
+
+  _pack_tar_archive "$archive_name" "${files[@]}"
+}
+
+_pack_dlc() {
+  local default_platform="$1"
+  local target_platform="${TARGET_PLATFORM:-$default_platform}"
+  local archive_name="KoishiPro-dlc-${CI_COMMIT_REF_NAME}-${target_platform}-${TARGET_LOCALE}.tar.${ARCHIVE_SUFFIX}"
+  local files=()
+
+  _apply_locale_overlay
+  _append_dlc_files files
+  _append_platform_files files dlc "$target_platform"
+
+  _pack_tar_archive "$archive_name" "${files[@]}"
+}
+
+_pack_7z() {
+  local target_platform="${TARGET_PLATFORM:-win32}"
+  local archive_name="KoishiPro-${CI_COMMIT_REF_NAME}-${target_platform}-${TARGET_LOCALE}.7z"
+  local files=()
+
+  _append_release_files files
+  _append_platform_files files release "$target_platform"
+  _append_win_locale_updater files 7z
+
+  _pack_7z_archive "$archive_name" "${files[@]}"
+}

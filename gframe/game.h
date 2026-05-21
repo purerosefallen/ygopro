@@ -10,7 +10,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #endif //__APPLE__
-#include "CGUIImageButton.h"
 #include "CGUITTFont.h"
 #include "mysignal.h"
 #include "client_field.h"
@@ -72,6 +71,7 @@ struct Config {
 #endif
 	bool freever{ true };
 	unsigned short antialias{ 0 };
+	unsigned int enable_log{ 0x3 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
 	wchar_t lasthost[100]{};
@@ -88,7 +88,7 @@ struct Config {
 	wchar_t locale[64];
 	//settings
 	int chkMAutoPos{ 0 };
-	int chkSTAutoPos{ 1 };
+	int chkSTAutoPos{ 0 };
 	int chkRandomPos{ 0 };
 	int chkAutoChain{ 0 };
 	int chkWaitChain{ 0 };
@@ -115,13 +115,15 @@ struct Config {
 	int prefer_expansion_script{ 0 };
 	bool enable_sound{ true };
 	bool enable_music{ true };
-	double sound_volume{ 0.5 };
-	double music_volume{ 0.5 };
+	int sound_volume{ 50 };
+	int music_volume{ 50 };
 	int music_mode{ 1 };
 	bool window_maximized{ false };
 	int window_width{ GAME_WINDOW_WIDTH };
 	int window_height{ GAME_WINDOW_HEIGHT };
-	bool resize_popup_menu{ false };
+	int resize_popup_menu{ 0 };
+	bool resize_select_window{ true };
+	bool swap_yes_no_button{ false };
 	int search_regex{ 0 };
 	int chkEnablePScale{ 1 };
 	int skin_index { -1 };
@@ -207,11 +209,26 @@ public:
 	void initUtils();
 	void InjectEnvToRegistry(intptr_t pduel);
 #else
+	struct CardTextSearchLink {
+		size_t start{};
+		size_t end{};
+		std::wstring text;
+	};
+	struct CardTextSearchSegment {
+		irr::core::recti rect;
+		size_t link_index{};
+		std::wstring text;
+	};
+
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
+	void RefreshCardTextSearchLinks();
+	bool ShouldShowCardTextSearchLinks() const;
+	void CollectCardTextSearchSegments(std::vector<CardTextSearchSegment>& segments) const;
+	bool GetCardTextSearchTextAt(const irr::core::vector2di& point, std::wstring& text) const;
 	void LoadExpansions(const char* expansions_path);
 	void LoadExpansionsAll();
 	std::vector<std::wstring> GetExpansionsList(const wchar_t * suffix = nullptr);
@@ -223,6 +240,7 @@ public:
 	void RefreshSingleplay();
 	void RefreshBot();
 	void RefreshLocales();
+	void RefreshSkins();
 	void RefreshLFList();
 	void RefreshServerList();
 	void Draw2DImageQuad(irr::video::IVideoDriver* driver, irr::video::ITexture* texture, const irr::core::recti& sourceRect,
@@ -237,12 +255,13 @@ public:
 	void DrawCard(ClientCard* pcard);
 	void DrawMisc();
 	void DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2);
-	void DrawGUI();
+	void DrawGUI(); // called from MainLoop with gMutex held
+	void DrawCardTextSearchLinks();
 	void DrawSpec();
 	void DrawBackImage(irr::video::ITexture* texture);
-	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0);
-	void HideElement(irr::gui::IGUIElement* element, bool set_action = false);
-	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0);
+	void ShowElement(irr::gui::IGUIElement* element, int autoframe = 0); // caller must hold gMutex
+	void HideElement(irr::gui::IGUIElement* element, bool set_action = false); // caller must hold gMutex
+	void PopupElement(irr::gui::IGUIElement* element, int hideframe = 0); // caller must hold gMutex
 	void SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw = true);
 	void WaitFrameSignal(int frame);
 	void DrawThumb(const CardDataC* cp, irr::core::vector2di screen_pos, float mul, const LFList* lflist);
@@ -258,7 +277,7 @@ public:
 	void AddDebugMsg(const char* msgbuf);
 	void ErrorLog(const char* msgbuf);
 	void initUtils();
-	void ClearTextures();
+	void ClearTextures(); // caller must hold gMutex
 	void CloseGameButtons();
 	void CloseGameWindow();
 	void CloseDuelWindow();
@@ -271,6 +290,23 @@ public:
 	const wchar_t* GetLocaleDirWide(const char* dir);
 	bool CheckRegEx(const std::wstring& text, const std::wstring& exp, bool exact = false);
 
+	irr::s32 GetPopupMenuButtonWidth() const {
+		if(gameConf.resize_popup_menu > 0) {
+			return (xScale >= 0.7f) ? 100 * xScale : 70;
+		} else {
+			return 100;
+		}
+	}
+
+	irr::s32 GetPopupMenuButtonHeight() const {
+		if(gameConf.resize_popup_menu > 0) {
+			float yScaleForMenu = yScale * (1 + (gameConf.resize_popup_menu - 1) * 0.33f);
+			return (yScaleForMenu >= 0.7f) ? 24 * yScaleForMenu : 16;
+		} else {
+			return 24;
+		}
+	}
+
 	bool HasFocus(irr::gui::EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
 		return focus && focus->hasType(type);
@@ -282,8 +318,14 @@ public:
 		editbox->setText(text.c_str());
 	}
 
-	void OnResize();
+	void SwapYesNoButtons(bool no_first);
+
+	void OnResize(); // caller must hold gMutex
 	void ResizeChatInputWindow();
+	void ResizeCmdMenu();
+	void ResizePosSelectButtons();
+	void ResizeCardSelectButtons(irr::gui::IGUIWindow* window, irr::gui::IGUIStaticText** labels, irr::gui::IGUIButton** images,
+		irr::gui::IGUIScrollBar* scrollbar, irr::gui::IGUIButton* buttonOK, const std::vector<ClientCard*>& cards);
 	irr::core::recti Resize(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2);
 	irr::core::recti Resize(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2, irr::s32 dx, irr::s32 dy, irr::s32 dx2, irr::s32 dy2);
 	irr::core::vector2di Resize(irr::s32 x, irr::s32 y);
@@ -333,6 +375,9 @@ public:
 	int actionParam{};
 	int showingcode{};
 	const wchar_t* showingtext{};
+	std::wstring formatted_card_text;
+	std::vector<size_t> formatted_card_text_index;
+	std::vector<CardTextSearchLink> card_text_search_links;
 	int showcard{};
 	int showcardcode{};
 	int showcarddif{};
@@ -353,6 +398,10 @@ public:
 
 	bool is_building{};
 	bool is_siding{};
+	bool exit_on_return{ false };
+	bool open_file{ false };
+	wchar_t open_file_name[256]{};
+	bool bot_mode{ false };
 
 	irr::core::dimension2d<irr::u32> window_size;
 	float xScale{ 1.0f };
@@ -383,7 +432,14 @@ public:
 	irr::gui::CGUITTFont* numFont{};
 	irr::gui::CGUITTFont* adFont{};
 	irr::gui::CGUITTFont* lpcFont{};
-	std::unordered_map<irr::gui::CGUIImageButton*, int> imageLoading;
+	// textures must be added in the main thread which handle OpenGL context,
+	// {card_code, rotated} written in network thread, loaded in main thread's DrawGUI
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnImagePending;
+	// persistent tracking for image refresh on resize:
+	// {card_code, rotated} for buttons showing a card image from GetTextureButton
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnCardImgInfo;
+	// {cover_idx, rotated} for buttons showing a facedown card (cover) image
+	std::unordered_map<irr::gui::IGUIButton*, std::pair<int, bool>> btnFacedownImgInfo;
 	//card image
 	irr::gui::IGUIStaticText* wCardImg{};
 	irr::gui::IGUIImage* imgCard{};
@@ -424,6 +480,7 @@ public:
 	irr::gui::IGUICheckBox* chkMultiKeywords{};
 	irr::gui::IGUICheckBox* chkPreferExpansionScript{};
 	irr::gui::IGUICheckBox* chkRegex{};
+	irr::gui::IGUICheckBox* chkSwapYesNoButton{};
 	irr::gui::IGUICheckBox* chkLFlist{};
 	irr::gui::IGUIComboBox* cbLFlist{};
 	irr::gui::IGUICheckBox* chkEnableSound{};
@@ -431,12 +488,16 @@ public:
 	irr::gui::IGUIScrollBar* scrSoundVolume{};
 	irr::gui::IGUIScrollBar* scrMusicVolume{};
 	irr::gui::IGUICheckBox* chkMusicMode{};
+	irr::gui::IGUICheckBox* chkResizeSelectWindow{};
+	irr::gui::IGUICheckBox* chkResizePopupMenu{};
+	irr::gui::IGUIScrollBar* scrResizePopupMenu{};
 	irr::gui::IGUIButton* btnWinResizeS{};
 	irr::gui::IGUIButton* btnWinResizeM{};
 	irr::gui::IGUIButton* btnWinResizeL{};
 	irr::gui::IGUIButton* btnWinResizeXL{};
 	irr::gui::IGUICheckBox* chkEnablePScale{};
 	irr::gui::IGUIComboBox* cbLocale{};
+	irr::gui::IGUIComboBox* cbSkin{};
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu{};
 	irr::gui::IGUIButton* btnLanMode{};
@@ -548,19 +609,19 @@ public:
 	irr::gui::IGUIScrollBar* scrOption{};
 	//pos selection
 	irr::gui::IGUIWindow* wPosSelect{};
-	irr::gui::CGUIImageButton* btnPSAU{};
-	irr::gui::CGUIImageButton* btnPSAD{};
-	irr::gui::CGUIImageButton* btnPSDU{};
-	irr::gui::CGUIImageButton* btnPSDD{};
+	irr::gui::IGUIButton* btnPSAU{};
+	irr::gui::IGUIButton* btnPSAD{};
+	irr::gui::IGUIButton* btnPSDU{};
+	irr::gui::IGUIButton* btnPSDD{};
 	//card selection
 	irr::gui::IGUIWindow* wCardSelect{};
-	irr::gui::CGUIImageButton* btnCardSelect[5]{};
+	irr::gui::IGUIButton* btnCardSelect[5]{};
 	irr::gui::IGUIStaticText *stCardPos[5]{};
 	irr::gui::IGUIScrollBar *scrCardList{};
 	irr::gui::IGUIButton* btnSelectOK{};
 	//card display
 	irr::gui::IGUIWindow* wCardDisplay{};
-	irr::gui::CGUIImageButton* btnCardDisplay[5]{};
+	irr::gui::IGUIButton* btnCardDisplay[5]{};
 	irr::gui::IGUIStaticText *stDisplayPos[5]{};
 	irr::gui::IGUIScrollBar *scrDisplayList{};
 	irr::gui::IGUIButton* btnDisplayOK{};
@@ -954,11 +1015,16 @@ extern uint32_t duel_flags;
 #define CHECKBOX_REGEX				377
 #define COMBOBOX_LOCALE				378
 #define CHECKBOX_ASK_MSET			379
+#define COMBOBOX_SKIN				384
 
 #define BUTTON_BIG_CARD_CLOSE		380
 #define BUTTON_BIG_CARD_ZOOM_IN		381
 #define BUTTON_BIG_CARD_ZOOM_OUT	382
 #define BUTTON_BIG_CARD_ORIG_SIZE	383
+#define CHECKBOX_RESIZE_POPUP_MENU	384
+#define SCROLL_RESIZE_POPUP_MENU	385
+#define CHECKBOX_RESIZE_SELECT_WINDOW	386
+#define CHECKBOX_SWAP_YES_NO_BUTTON	387
 
 #define BUTTON_DECK_CODE			389
 #define BUTTON_DECK_CODE_SAVE		390
