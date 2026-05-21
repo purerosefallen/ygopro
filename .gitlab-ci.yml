@@ -306,6 +306,7 @@ assets:
   only:
     - tags
     - master
+    - develop
 
 assets_nonwindows:
   stage: prepare
@@ -322,6 +323,7 @@ assets_nonwindows:
   only:
     - tags
     - master
+    - develop
 
 assets_windows:
   stage: prepare
@@ -341,6 +343,7 @@ assets_windows:
   only:
     - tags
     - master
+    - develop
 
 ._locale_zh-CN:
   variables:
@@ -365,6 +368,7 @@ assets_windows:
   only:
     - tags
     - master
+    - develop
 
 assets_zh-CN:
   extends: 
@@ -386,6 +390,7 @@ assets_en-US:
   only:
     - tags
     - master
+    - develop
 
 
 ._pack_format_gz:
@@ -402,6 +407,7 @@ assets_en-US:
   extends: ._pack_format_zst
   only:
     - tags
+    - develop
 
 ._pack_script_windows_non7z:
   extends: ._pack
