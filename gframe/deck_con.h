@@ -1,12 +1,11 @@
 #ifndef DECK_CON_H
 #define DECK_CON_H
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 #include <random>
 #include <irrlicht.h>
-#include "data_manager.h"
-#include "deck_manager.h"
 
 namespace ygo {
 
@@ -32,6 +31,9 @@ struct DeckLayout {
 	float sr_row_h{66.0f};
 	float sr_top_px{165.0f};
 };
+
+struct CardDataC;
+struct LFList;
 
 class DeckBuilder: public irr::IEventReceiver {
 public:
