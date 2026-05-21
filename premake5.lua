@@ -1,9 +1,13 @@
 -- Supported systems: Windows, Linux, MacOS
 
+-- Windows (Visual Studio) build supports x86, x86_64, and ARM64.
+-- Linux build supports x86_64 and ARM64.
+-- MacOS build supports x86_64 and ARM64, and it supports cross-compilation.
+
 -- Global settings
 
--- Default: Build Lua, Irrlicht from source on all systems.
---          Don't build event, freetype, sqlite, opus, vorbis on Linux or MacOS, use apt or homebrew,
+-- Default: Build Lua, Irrlicht, miniaudio from source on all systems.
+--          Don't build event, freetype, sqlite, jpeg, png, zlib, opus, vorbis on Linux or MacOS, use package manager,
 --          but build them on Windows, due to the lack of package manager on Windows.
 
 BUILD_LUA = true
@@ -15,17 +19,21 @@ BUILD_FREETYPE = os.istarget("windows")
 
 BUILD_SQLITE = os.istarget("windows")
 BUILD_IRRLICHT = true -- modified Irrlicht is required, can't use the official one
-IRRLICHT_BUILD_JPEG_PNG = os.istarget("windows") -- build the bundled jpeglib and libpng from Irrlicht
 USE_DXSDK = true
 
+BUILD_JPEG = os.istarget("windows") -- libjpeg-turbo is required, can't use the bundled IJG jpeglib from Irrlicht
+JPEG_LIB_NAME = "jpeg" -- use the libjpeg API of libjpeg-turbo, the lib name should always be "jpeg", just in case
+
+BUILD_PNG = os.istarget("windows")
+
+BUILD_ZLIB = os.istarget("windows")
+ZLIB_LIB_NAME = "z" -- the lib name should always be "z", just in case
+
 USE_AUDIO = true
-AUDIO_LIB = "miniaudio" -- can be "miniaudio" or "irrklang"
+AUDIO_LIB = "miniaudio" -- only miniaudio is supported for now
 -- BUILD_MINIAUDIO is always true
 MINIAUDIO_SUPPORT_OPUS_VORBIS = true
 MINIAUDIO_BUILD_OPUS_VORBIS = os.istarget("windows")
--- BUILD_IRRKLANG is impossible because irrKlang is not open source
-IRRKLANG_PRO = false
-IRRKLANG_PRO_BUILD_IKPMP3 = false
 -- ocgcore dynamic
 OCGCORE_DYNAMIC = false
 USE_DYNAMIC = false
@@ -35,16 +43,47 @@ SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
 SERVER_TAG_SURRENDER_CONFIRM = false
 SERVER_PRO3_SUPPORT = false
-USE_IRRKLANG = false
+
+BUILD_LZMA = os.istarget("windows")
+
+-- Available: none, server, sse2, avx2, neon, best
+-- "server" means SSE2 on x86/x64 and NEON on ARM/AArch64.
+-- "best" means AVX2 on x86/x64 and NEON on ARM/AArch64.
+USE_SIMD = "server"
+
+-- Variable indicating whether we are building for Apple Silicon, will be detected automatically if not specified.
+local MAC_ARM = false
+local MAC_INTEL = false
+
+-- os.hostarch() actually returns the architecture of Premake5, and the official Windows build of Premake5 is 32-bit,
+-- so we can only distinguish between AARCH64 and x86, and must use the ARM build of Premake5 on ARM platforms.
+PREMAKE_ARCH = os.hostarch()
+
+-- Default include dirs, those values are ONLY used in static builds, WILL BE IGNORED if set corresponding BUILD_* to false
+LUA_INCLUDE_DIR = path.getabsolute("./lua/src")
+EVENT_INCLUDE_DIR = path.getabsolute("./event/include")
+IRRLICHT_INCLUDE_DIR = path.getabsolute("./irrlicht/include")
+JPEG_INCLUDE_DIR = path.getabsolute("./jpeg/src")
+PNG_INCLUDE_DIR = path.getabsolute("./png")
+ZLIB_INCLUDE_DIR = path.getabsolute("./zlib")
+FREETYPE_CUSTOM_INCLUDE_DIR = path.getabsolute("./freetype/custom")
+FREETYPE_INCLUDE_DIR = path.getabsolute("./freetype/include")
+SQLITE_INCLUDE_DIR = path.getabsolute("./sqlite3")
+MINIAUDIO_INCLUDE_DIR = path.getabsolute("./miniaudio")
+MINIAUDIO_OPUS_INCLUDE_DIR = path.getabsolute("./miniaudio/extras/decoders/libopus")
+MINIAUDIO_VORBIS_INCLUDE_DIR = path.getabsolute("./miniaudio/extras/decoders/libvorbis")
+LZMA_INCLUDE_DIR = path.getabsolute("./lzma/src/liblzma/api")
 
 -- Read settings from command line or environment variables
+-- Default values should be defined at the top of the script. If any values are set in the premake options, GetParam will not
+-- read them from environment variables.
 
 newoption { trigger = "build-lua", category = "YGOPro - lua", description = "" }
 newoption { trigger = "no-build-lua", category = "YGOPro - lua", description = "" }
 newoption { trigger = "lua-include-dir", category = "YGOPro - lua", description = "", value = "PATH" }
 newoption { trigger = "lua-lib-dir", category = "YGOPro - lua", description = "", value = "PATH" }
-newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME", default = LUA_LIB_NAME }
-newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "Use Debian lua package" }
+newoption { trigger = "lua-lib-name", category = "YGOPro - lua", description = "", value = "NAME" }
+newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "" }
 
 newoption { trigger = "build-event", category = "YGOPro - event", description = "" }
 newoption { trigger = "no-build-event", category = "YGOPro - event", description = "" }
@@ -65,16 +104,27 @@ newoption { trigger = "build-irrlicht", category = "YGOPro - irrlicht", descript
 newoption { trigger = "no-build-irrlicht", category = "YGOPro - irrlicht", description = "" }
 newoption { trigger = "irrlicht-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "irrlicht-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-newoption { trigger = "build-jpeg-png", category = "YGOPro - irrlicht", description = "" }
-newoption { trigger = "no-build-jpeg-png", category = "YGOPro - irrlicht", description = "" }
-newoption { trigger = "jpeg-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-newoption { trigger = "jpeg-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-newoption { trigger = "png-include-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
-newoption { trigger = "png-lib-dir", category = "YGOPro - irrlicht", description = "", value = "PATH" }
 newoption { trigger = "no-dxsdk", category = "YGOPro - irrlicht", description = "" }
 
+newoption { trigger = "build-jpeg", category = "YGOPro - jpeg", description = "" }
+newoption { trigger = "no-build-jpeg", category = "YGOPro - jpeg", description = "" }
+newoption { trigger = "jpeg-include-dir", category = "YGOPro - jpeg", description = "", value = "PATH" }
+newoption { trigger = "jpeg-lib-dir", category = "YGOPro - jpeg", description = "", value = "PATH" }
+newoption { trigger = "jpeg-lib-name", category = "YGOPro - jpeg", description = "", value = "NAME" }
+
+newoption { trigger = "build-png", category = "YGOPro - png", description = "" }
+newoption { trigger = "no-build-png", category = "YGOPro - png", description = "" }
+newoption { trigger = "png-include-dir", category = "YGOPro - png", description = "", value = "PATH" }
+newoption { trigger = "png-lib-dir", category = "YGOPro - png", description = "", value = "PATH" }
+
+newoption { trigger = "build-zlib", category = "YGOPro - zlib", description = "" }
+newoption { trigger = "no-build-zlib", category = "YGOPro - zlib", description = "" }
+newoption { trigger = "zlib-include-dir", category = "YGOPro - zlib", description = "", value = "PATH" }
+newoption { trigger = "zlib-lib-dir", category = "YGOPro - zlib", description = "", value = "PATH" }
+newoption { trigger = "zlib-lib-name", category = "YGOPro - zlib", description = "", value = "NAME" }
+
 newoption { trigger = "no-audio", category = "YGOPro", description = "" }
-newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "miniaudio, irrklang", default = AUDIO_LIB }
+newoption { trigger = "audio-lib", category = "YGOPro", description = "", value = "" }
 
 newoption { trigger = "miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
 newoption { trigger = "no-miniaudio-support-opus-vorbis", category = "YGOPro - miniaudio", description = "" }
@@ -89,28 +139,25 @@ newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", descrip
 newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 
-newoption { trigger = "use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use audio-lib=irrklang" }
-newoption { trigger = "no-use-irrklang", category = "YGOPro - irrklang", description = "Deprecated, use no-audio" }
-newoption { trigger = "irrklang-include-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
-newoption { trigger = "irrklang-lib-dir", category = "YGOPro - irrklang", description = "", value = "PATH" }
+newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
+newoption { trigger = "build-lzma", category = "YGOPro - lzma", description = "" }
+newoption { trigger = "no-build-lzma", category = "YGOPro - lzma", description = "" }
+newoption { trigger = "lzma-include-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
+newoption { trigger = "lzma-lib-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
 
-newoption { trigger = "irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
-newoption { trigger = "no-irrklang-pro", category = "YGOPro - irrklang - pro", description = "" }
-newoption { trigger = "irrklang-pro-release-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
-newoption { trigger = "irrklang-pro-debug-lib-dir", category = "YGOPro - irrklang - pro", description = "", value = "PATH" }
-newoption { trigger = 'build-ikpmp3', category = "YGOPro - irrklang - ikpmp3", description = "" }
-
-newoption { trigger = "mac-arm", category = "YGOPro", description = "Compile for Apple Silicon Mac" }
-newoption { trigger = "mac-intel", category = "YGOPro", description = "Compile for Intel Mac" }
+newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compile for Apple Silicon Mac" }
+newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }
 newoption { trigger = "ocgcore-dynamic", category = "YGOPro - ocgcore", description = "Build ocgcore as dynamic library" }
 newoption { trigger = "ndk-dir", category = "YGOPro - android", description = "", value = "PATH" }
-newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL", default = "26" }
+newoption { trigger = "android-api-level", category = "YGOPro - android", description = "", value = "LEVEL" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro3-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
+
+-- koishipro specific
 
 boolOptions = {
     "compat-mycard",
@@ -139,8 +186,27 @@ for _, numberOption in ipairs(numberOptions) do
     newoption { trigger = numberOption, category = "YGOPro - options", description = "", value = "NUMBER" }
 end
 
+newoption { trigger = "use-openmp", category = "YGOPro", description = "Enable OpenMP support (edge case)" }
+
+newoption { trigger = "use-simd", category = "YGOPro", description = "", value = "none, server, sse2, avx2, neon, best" }
+
 function GetParam(param)
     return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
+end
+
+function ApplyBoolean(param)
+    if GetParam(param) then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
+    end
+end
+
+function ApplyNumber(param)
+    local value = GetParam(param)
+    if not value then return end
+    local numberValue = tonumber(value)
+    if numberValue then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
+    end
 end
 
 function FindHeaderWithSubDir(header, subdir)
@@ -166,21 +232,6 @@ function FindAndroidToolchainBin(ndkDir)
         error("Android NDK toolchain not found under " .. prebuiltDir)
     end
     return path.join(prebuilts[1], "bin")
-end
-
-function ApplyBoolean(param)
-    if GetParam(param) then
-        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
-    end
-end
-
-function ApplyNumber(param)
-    local value = GetParam(param)
-    if not value then return end
-    local numberValue = tonumber(value)
-    if numberValue then
-        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
-    end
 end
 
 ANDROID_ENABLED = false
@@ -280,7 +331,7 @@ if GetParam("build-freetype") then
 elseif GetParam("no-build-freetype") then
     BUILD_FREETYPE = false
 end
-if not BUILD_FREETYPE then
+if not BUILD_FREETYPE and not SERVER_MODE then
     FREETYPE_INCLUDE_DIR = GetParam("freetype-include-dir") or FindHeaderWithSubDir("freetype2/ft2build.h", "freetype2")
     FREETYPE_LIB_DIR = GetParam("freetype-lib-dir") or os.findlib("freetype")
 end
@@ -295,25 +346,56 @@ if not BUILD_SQLITE then
     SQLITE_LIB_DIR = GetParam("sqlite-lib-dir") or os.findlib("sqlite3")
 end
 
+if GetParam("build-lzma") then
+    BUILD_LZMA = true
+elseif GetParam("no-build-lzma") then
+    BUILD_LZMA = false
+end
+if not BUILD_LZMA then
+    LZMA_INCLUDE_DIR = GetParam("lzma-include-dir") or os.findheader("lzma.h")
+    LZMA_LIB_DIR = GetParam("lzma-lib-dir") or os.findlib("lzma")
+end
+
 if GetParam("build-irrlicht") then
     BUILD_IRRLICHT = true
 elseif GetParam("no-build-irrlicht") then
     BUILD_IRRLICHT = false
 end
-if not BUILD_IRRLICHT then
+if not BUILD_IRRLICHT and not SERVER_MODE then
     IRRLICHT_INCLUDE_DIR = GetParam("irrlicht-include-dir") or os.findheader("irrlicht.h")
     IRRLICHT_LIB_DIR = GetParam("irrlicht-lib-dir") or os.findlib("irrlicht")
 end
-if GetParam("no-build-jpeg-png") then
-    IRRLICHT_BUILD_JPEG_PNG = false
-elseif GetParam("build-jpeg-png") then
-    IRRLICHT_BUILD_JPEG_PNG = true
+
+if GetParam("build-jpeg") then
+    BUILD_JPEG = true
+elseif GetParam("no-build-jpeg") then
+    BUILD_JPEG = false
 end
-if not IRRLICHT_BUILD_JPEG_PNG then
+if not BUILD_JPEG and not SERVER_MODE then
+    JPEG_LIB_NAME = GetParam("jpeg-lib-name") or JPEG_LIB_NAME
     JPEG_INCLUDE_DIR = GetParam("jpeg-include-dir") or os.findheader("jpeglib.h")
-    JPEG_LIB_DIR = GetParam("jpeg-lib-dir") or os.findlib("jpeg")
+    JPEG_LIB_DIR = GetParam("jpeg-lib-dir") or os.findlib(JPEG_LIB_NAME)
+end
+
+if GetParam("build-png") then
+    BUILD_PNG = true
+elseif GetParam("no-build-png") then
+    BUILD_PNG = false
+end
+if not BUILD_PNG and not SERVER_MODE then
     PNG_INCLUDE_DIR = GetParam("png-include-dir") or os.findheader("png.h")
     PNG_LIB_DIR = GetParam("png-lib-dir") or os.findlib("png")
+end
+
+if GetParam("build-zlib") then
+    BUILD_ZLIB = true
+elseif GetParam("no-build-zlib") then
+    BUILD_ZLIB = false
+end
+if not BUILD_ZLIB and not SERVER_MODE then
+    ZLIB_LIB_NAME = GetParam("zlib-lib-name") or ZLIB_LIB_NAME
+    ZLIB_INCLUDE_DIR = GetParam("zlib-include-dir") or os.findheader("zlib.h")
+    ZLIB_LIB_DIR = GetParam("zlib-lib-dir") or os.findlib(ZLIB_LIB_NAME)
 end
 
 if GetParam("no-dxsdk") then
@@ -335,13 +417,6 @@ elseif GetParam("use-miniaudio") then
     print("Warning: --use-miniaudio is deprecated, use --audio-lib=miniaudio")
     USE_AUDIO = true
     AUDIO_LIB = "miniaudio"
-elseif GetParam("no-use-irrklang") then
-    print("Warning: --no-use-irrklang is deprecated, use --no-audio")
-    USE_AUDIO = false
-elseif GetParam("use-irrklang") then
-    print("Warning: --use-irrklang is deprecated, use --audio-lib=irrklang")
-    USE_AUDIO = true
-    AUDIO_LIB = "irrklang"
 end
 
 if USE_AUDIO and not SERVER_MODE then
@@ -369,94 +444,48 @@ if USE_AUDIO and not SERVER_MODE then
                 OGG_LIB_DIR = GetParam("ogg-lib-dir") or os.findlib("ogg")
             end
         end
-    elseif AUDIO_LIB == "irrklang" then
-        print("Warning: irrKlang is deprecated and may be removed in future, please consider switching to miniaudio")
-        IRRKLANG_INCLUDE_DIR = GetParam("irrklang-include-dir") or "../irrklang/include"
-        if os.istarget("windows") then
-            IRRKLANG_LIB_DIR = "../irrklang/lib/Win32-visualStudio"
-        elseif os.istarget("linux") then
-            IRRKLANG_LIB_DIR = "../irrklang/bin/linux-gcc-64"
-            IRRKLANG_LINK_RPATH = "-Wl,-rpath=./irrklang/bin/linux-gcc-64/"
-        elseif os.istarget("macosx") then
-            IRRKLANG_LIB_DIR = "../irrklang/bin/macosx-gcc"
-        end
-        IRRKLANG_LIB_DIR = GetParam("irrklang-lib-dir") or IRRKLANG_LIB_DIR
-        if GetParam("irrklang-pro") and os.istarget("windows") then
-            IRRKLANG_PRO = true
-        elseif GetParam("no-irrklang-pro") then
-            IRRKLANG_PRO = false
-        end
-        if IRRKLANG_PRO then
-            -- irrklang pro can't use the pro lib to debug
-            IRRKLANG_PRO_RELEASE_LIB_DIR = GetParam("irrklang-pro-release-lib-dir") or "../irrklang/lib/Win32-vs2019"
-            IRRKLANG_PRO_DEBUG_LIB_DIR = GetParam("irrklang-pro-debug-lib-dir") or "../irrklang/lib/Win32-visualStudio-debug"
-        end
-        IRRKLANG_PRO_BUILD_IKPMP3 = GetParam("build-ikpmp3") or IRRKLANG_PRO
     else
         error("Unknown audio library: " .. AUDIO_LIB)
     end
 end
 
-IS_ARM=false
-
-function spawn(cmd)
-    local handle = io.popen(cmd)
-    if not handle then
-        return nil
-    end
-    local result = handle:read("*a")
-    handle:close()
-    if result and #result > 0 then
-        return result
-    else
-        return nil
-    end
-end
+USE_SIMD = GetParam("use-simd") or USE_SIMD
 
 if SERVER_MODE then
     BUILD_FREETYPE = false
-    BUILD_IKPMP3 = false
-    USE_IRRKLANG = false
-    IRRKLANG_PRO = false
+    BUILD_JPEG = false
+    BUILD_PNG = false
+    USE_AUDIO = false
     if not SERVER_ZIP_SUPPORT then
         BUILD_IRRLICHT = false
+        BUILD_ZLIB = false
     else
         BUILD_IRRLICHT = true
     end
 end
 
-function IsRunningUnderARM()
-    -- os.hostarch() is over premake5 beta3,
-    if os.hostarch then
-        local host_arch = os.hostarch()
-        local possible_archs = { "ARM", "ARM64", "loongarch64", "armv5", "armv7", "aarch64" }
-        for _, arch in ipairs(possible_archs) do
-            if host_arch:lower():match(arch:lower()) then
-                return true
-            end
-        end
-    else
-        -- use command 'arch' to detect the architecture on macOS or Linux
-        local arch_result = spawn("arch 2>/dev/null")
-        if arch_result then
-            arch_result = arch_result:lower():gsub("%s+", "")
-            if arch_result == "arm64" or arch_result == "aarch64" then
-                return true
-            elseif arch_result == "arm" or arch_result == "armv7" or arch_result == "armv5" then
-                return true -- for ARMv5, ARMv7, etc.
-            elseif arch_result == "loongarch64" then
-                return true -- for loongarch64
-            end
-        end
-    end
-    return false
+if not BUILD_ZLIB and SERVER_MODE and SERVER_ZIP_SUPPORT then
+    ZLIB_LIB_NAME = GetParam("zlib-lib-name") or ZLIB_LIB_NAME
+    ZLIB_INCLUDE_DIR = GetParam("zlib-include-dir") or os.findheader("zlib.h")
+    ZLIB_LIB_DIR = GetParam("zlib-lib-dir") or os.findlib(ZLIB_LIB_NAME)
 end
 
-function isARM()
-    return IsRunningUnderARM()
+if table.indexof({ "none", "server", "sse2", "avx2", "neon", "best" }, USE_SIMD) == nil then
+    error("Unknown SIMD setting: " .. USE_SIMD)
 end
 
-IS_ARM=isARM()
+if not MAC_ARM and not MAC_INTEL and table.indexof({ "x86", "x86_64", "ARM", "ARM64", "arm64", "aarch64" }, PREMAKE_ARCH) == nil then
+    print("Warning: Detected architecture " .. PREMAKE_ARCH .. " seems not supported, trying to build anyway, SIMD will be disabled.")
+    USE_SIMD = "none"
+end
+
+if USE_SIMD == "avx2" or USE_SIMD == "neon" then
+    USE_SIMD = "best"
+end
+
+if os.istarget("windows") and GetParam("vs2026-win7-support") then
+    WIN7_SUPPORT = true
+end
 
 if os.istarget("macosx") then
     if GetParam("mac-arm") then
@@ -465,17 +494,20 @@ if os.istarget("macosx") then
     if GetParam("mac-intel") then
         MAC_INTEL = true
     end
-    if MAC_ARM or (not MAC_INTEL and os.hostarch() == "ARM64") then
-        -- building on ARM CPU will target ARM automatically
-        TARGET_MAC_ARM = true
-    end
 end
 
 if GetParam("ocgcore-dynamic") then
     OCGCORE_DYNAMIC = true
 end
 
-if OCGCORE_DYNAMIC or USE_AUDIO and AUDIO_LIB=='irrklang' and not IRRKLANG_PRO then
+if GetParam("use-openmp") then
+    USE_OPENMP = true
+    if os.istarget("macosx") then
+        print("Warning: OpenMP is not supported on Clang provided by Xcode.")
+    end
+end
+
+if OCGCORE_DYNAMIC then
     USE_DYNAMIC = true
 end
 
@@ -485,6 +517,7 @@ workspace "YGOPro"
     objdir "obj"    
 
     configurations { "Release", "Debug" }
+
     if ANDROID_ENABLED then
         platforms { "android_arm64" }
     end
@@ -505,13 +538,37 @@ workspace "YGOPro"
         systemversion "latest"
         startproject "YGOPro"
         defines { "WINVER=0x0601" } -- WIN7
-        platforms { "Win32", "x64" }
 
-    filter { "system:windows", "platforms:Win32" }
+    if WIN7_SUPPORT then
+        filter { "system:windows", "action:vs2026" }
+            toolset "v143"
+    end
+
+    filter { "system:windows", "action:vs*" }
+        platforms { "Win32", "x64", "ARM64" }
+        defaultplatform "x64"
+
+    filter { "system:windows", "action:vs*", "platforms:Win32" }
         architecture "x86"
+        if USE_SIMD == "none" then
+            vectorextensions "IA32"
+        end
+        if USE_SIMD == "server" or USE_SIMD == "sse2" then
+            vectorextensions "SSE2"
+        end
+        if USE_SIMD == "best" then
+            vectorextensions "AVX2"
+        end
 
-    filter { "system:windows", "platforms:x64" }
+    filter { "system:windows", "action:vs*", "platforms:x64" }
         architecture "x86_64"
+        -- x86_64 must have SSE2, so we shouldn't check USE_SIMD for SSE2
+        if USE_SIMD == "best" then
+            vectorextensions "AVX2"
+        end
+
+    filter { "system:windows", "action:vs*", "platforms:ARM64" }
+        architecture "AARCH64"
 
     filter "platforms:android_arm64"
         architecture "ARM64"
@@ -520,19 +577,32 @@ workspace "YGOPro"
         pic "On"
 
     filter "system:macosx"
-        libdirs { "/usr/local/lib" }
+        systemversion "11"
+        if MAC_ARM and MAC_INTEL then
+            print("Warning: Universal binary is no longer supported, please choose either --mac-arm or --mac-intel, and combine the binaries with lipo manually.")
+            MAC_ARM = false
+            MAC_INTEL = false
+        end
+        if not MAC_ARM and not MAC_INTEL then
+            if PREMAKE_ARCH == "ARM64" then
+                MAC_ARM = true
+            else
+                MAC_INTEL = true
+            end
+        end
         if MAC_ARM then
-            buildoptions { "-arch arm64" }
+            architecture "AARCH64"
         end
         if MAC_INTEL then
-            buildoptions { "-arch x86_64", "-mavx", "-mfma" }
-        end
-        if MAC_ARM and MAC_INTEL then
-            architecture "universal"
+            architecture "x86_64"
         end
 
     filter "system:linux"
-        buildoptions { "-U_FORTIFY_SOURCE" }
+        if PREMAKE_ARCH == "ARM64" or PREMAKE_ARCH == "arm64" or PREMAKE_ARCH == "aarch64" then
+            architecture "AARCH64"
+        else
+            architecture "x86_64"
+        end
 
     filter "configurations:Release"
         optimize "Speed"
@@ -561,6 +631,12 @@ workspace "YGOPro"
     filter { "system:windows", "platforms:x64", "configurations:Debug" }
         targetdir "bin/debug/x64"
 
+    filter { "system:windows", "platforms:ARM64", "configurations:Release" }
+        targetdir "bin/release/arm64"
+
+    filter { "system:windows", "platforms:ARM64", "configurations:Debug" }
+        targetdir "bin/debug/arm64"
+
     filter { "configurations:Release", "action:vs*" }
         linktimeoptimization "On"
         staticruntime "On"
@@ -575,25 +651,21 @@ workspace "YGOPro"
     filter "action:vs*"
         cdialect "C11"
         conformancemode "On" 
-        vectorextensions "SSE2"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
 
-    filter "not action:vs*"
+    filter "action:gmake"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
 
-    filter { "not action:vs*", "not system:android" }
-        if not IS_ARM and not MAC_INTEL then
-            buildoptions "-march=native"
+    filter { "action:gmake", "architecture:x86_64" }
+        if USE_SIMD == "best" then
+            vectorextensions "AVX2"
+            isaextensions { "FMA" }
         end
-        if IS_ARM and not MAC_ARM then
-            buildoptions {
-                "-march=armv8-a",
-                "-mtune=cortex-a72",
-                "-Wno-psabi"
-            }
-            pic "On"
-        end
+
+    filter { "action:gmake", "architecture:AARCH64" }
+        buildoptions { "-Wno-psabi" }
+        pic "On"
 
     filter { "system:android", "language:C++" }
         linkoptions { "-static-libstdc++" }
@@ -622,14 +694,23 @@ end
     if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
         include "irrlicht/premake5-only-zipreader.lua"
     end
+    if BUILD_JPEG and not SERVER_MODE then
+        include "jpeg"
+    end
+    if BUILD_PNG and not SERVER_MODE then
+        include "png"
+    end
+    if BUILD_ZLIB and (not SERVER_MODE or SERVER_ZIP_SUPPORT) then
+        include "zlib"
+    end
     if BUILD_SQLITE then
         include "sqlite3"
+    end
+    if BUILD_LZMA then
+        include "lzma/."
     end
     if USE_AUDIO and not SERVER_MODE then
         if AUDIO_LIB=="miniaudio" then
             include "miniaudio"
-        end
-        if IRRKLANG_PRO_BUILD_IKPMP3 then
-            include "ikpmp3"
         end
     end
