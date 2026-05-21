@@ -1,5 +1,19 @@
 #include "CGUISkinSystem.h"
 
+namespace {
+class ScopedWorkingDirectory {
+public:
+	ScopedWorkingDirectory(io::IFileSystem* fs) : fs(fs), oldpath(fs->getWorkingDirectory()) {}
+	~ScopedWorkingDirectory() {
+		fs->changeWorkingDirectoryTo(oldpath);
+	}
+
+private:
+	io::IFileSystem* fs;
+	io::path oldpath;
+};
+}
+
 CGUISkinSystem::CGUISkinSystem(core::string<wchar_t> path,IrrlichtDevice *dev) {
 	device = dev;
 	skinsPath = path;
@@ -20,8 +34,9 @@ core::array<core::stringw> CGUISkinSystem::listSkins() {
 bool CGUISkinSystem::loadSkinList() {
 	io::IFileList *fileList;
 	int i;
-	io::path oldpath = fs->getWorkingDirectory();
-	fs->changeWorkingDirectoryTo(skinsPath);
+	ScopedWorkingDirectory cwd(fs);
+	if(!fs->changeWorkingDirectoryTo(skinsPath))
+		return false;
 	fileList = fs->createFileList();
 	i = fileList->getFileCount();
 	core::stringw tmp;
@@ -37,7 +52,6 @@ bool CGUISkinSystem::loadSkinList() {
 		}
 	}	
 	fileList->drop();
-	fs->changeWorkingDirectoryTo(oldpath);
 	if(skinsList.size() > 0) 
 		return true;
 	else 
@@ -54,16 +68,18 @@ gui::CGUIProgressBar *CGUISkinSystem::addProgressBar(gui::IGUIElement *parent,co
 
 bool CGUISkinSystem::populateTreeView(gui::IGUITreeView *control,const core::stringc& skinname) {
 	bool ret = false;
-	io::path oldpath = fs->getWorkingDirectory();
-	fs->changeWorkingDirectoryTo(skinsPath);
+	ScopedWorkingDirectory cwd(fs);
+	if(!fs->changeWorkingDirectoryTo(skinsPath))
+		return ret;
 	registry = new CXMLRegistry(fs);	
 	if(!registry->loadFile(SKINSYSTEM_SKINFILE,skinname.c_str())) {
+		delete registry;
+		registry = NULL;
 		return ret;
 	}
 	ret = registry->populateTreeView(control);
 	delete registry;
 	registry = NULL;
-	fs->changeWorkingDirectoryTo(oldpath);	
 	return ret;
 }
 
@@ -265,19 +281,23 @@ bool CGUISkinSystem::loadProperty(core::stringw key,gui::CImageGUISkin *skin) {
 	return false;
 }
 bool CGUISkinSystem::applySkin(const wchar_t *skinname) {
-	io::path oldpath = fs->getWorkingDirectory();
+	ScopedWorkingDirectory cwd(fs);
 	core::stringc tmp = skinname;
-	fs->changeWorkingDirectoryTo(skinsPath);
+	if(!fs->changeWorkingDirectoryTo(skinsPath))
+		return false;
 	registry = new CXMLRegistry(fs);
 	gui::CImageGUISkin* skin = loadSkinFromFile(tmp.c_str());
-    if(skin == NULL) return false;
+    if(skin == NULL) {
+		delete registry;
+		registry = NULL;
+		return false;
+	}
 	
     device->getGUIEnvironment()->setSkin(skin);
 	// If we're going to switch skin we need to find all the progress bars and overwrite their colors	
     skin->drop();	
 	delete registry;
 	registry = NULL;
-	fs->changeWorkingDirectoryTo(oldpath);
 	
 	return true;
 }

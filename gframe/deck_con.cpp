@@ -2,6 +2,8 @@
 #include <array>
 #include "config.h"
 #include "deck_con.h"
+#include "data_manager.h"
+#include "deck_manager.h"
 #include "myfilesystem.h"
 #include "image_manager.h"
 #include "sound_manager.h"
@@ -136,7 +138,7 @@ void DeckBuilder::Terminate() {
 	int decksel = mainGame->cbDBDecks->getSelected();
 	if (decksel >= 0)
 		BufferIO::CopyWideString(mainGame->cbDBDecks->getItem(decksel), mainGame->gameConf.lastdeck);
-	if(exit_on_return)
+	if(mainGame->exit_on_return)
 		mainGame->device->closeDevice();
 }
 bool DeckBuilder::OnEvent(const irr::SEvent& event) {
@@ -247,7 +249,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				if(sel == -1)
 					break;
 				mainGame->gMutex.lock();
-				mainGame->wDeckCode->setText(dataManager.GetSysString(1387));
+				mainGame->wDeckCode->setText(dataManager.GetSysString(1394));
 				if(deckManager.current_deck.main.size() > 0 || deckManager.current_deck.extra.size() > 0 || deckManager.current_deck.side.size() > 0) {
 					wchar_t deck_code[2048];
 					unsigned char deck_code_utf8[1024];
@@ -273,7 +275,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					if(deckManager.LoadDeckFromCode(new_deck, deck_code, strlen(pcode)))
 						deckManager.current_deck = new_deck;
 					else
-						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1389));
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1396));
 				}
 				prev_operation = 0;
 				prev_sel = -1;
@@ -1133,6 +1135,13 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_LMOUSE_LEFT_UP: {
 			is_starting_dragging = false;
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
+			std::wstring search_text;
+			if(!is_draging && !mainGame->is_siding && mainGame->GetCardTextSearchTextAt(mouse_pos, search_text)) {
+				mainGame->ebCardName->setText(search_text.c_str());
+				mainGame->env->setFocus(mainGame->ebCardName);
+				StartFilter();
+				break;
+			}
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
 				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(mainGame->showingcode, 1);
@@ -1377,8 +1386,7 @@ void DeckBuilder::GetHoveredCard() {
 			int n = (int)deckManager.current_deck.extra.size();
 			hovered_pos = 2;
 			if(n > 0) {
-				// Right limit: one full step past last card (cards are left-aligned)
-				float right_limit = L.ex_left + (float)n * L.ex_dx;
+				float right_limit = L.ex_left + std::max((float)n * L.ex_dx, (float)(n - 1) * L.ex_dx + L.cw);
 				if(mx < right_limit) {
 					int seq = (L.ex_dx > 0.0f) ? (int)((mx - L.ex_left) / L.ex_dx) : 0;
 					if(seq < 0) seq = 0;
@@ -1394,7 +1402,7 @@ void DeckBuilder::GetHoveredCard() {
 			int n = (int)deckManager.current_deck.side.size();
 			hovered_pos = 3;
 			if(n > 0) {
-				float right_limit = L.sd_left + (float)n * L.sd_dx;
+				float right_limit = L.sd_left + std::max((float)n * L.sd_dx, (float)(n - 1) * L.sd_dx + L.cw);
 				if(mx < right_limit) {
 					int seq = (L.sd_dx > 0.0f) ? (int)((mx - L.sd_left) / L.sd_dx) : 0;
 					if(seq < 0) seq = 0;
@@ -1612,13 +1620,13 @@ void DeckBuilder::FilterCards() {
 		for (auto elements_iterator = query_elements.begin(); elements_iterator != query_elements.end(); ++elements_iterator) {
 			bool match = false;
 			if (elements_iterator->type == element_t::type_t::name) {
-				match = CardNameContains(strings.name.c_str(), elements_iterator->keyword.c_str());
+				match = DataManager::CardNameContains(strings.name.c_str(), elements_iterator->keyword.c_str());
 			} else if (elements_iterator->type == element_t::type_t::setcode) {
 				match = data.is_setcodes(elements_iterator->setcodes);
 			} else if (trycode && data.get_original_code() == trycode) {
 				match = true;
 			} else {
-				match = CardNameContains(strings.name.c_str(), elements_iterator->keyword.c_str())
+				match = DataManager::CardNameContains(strings.name.c_str(), elements_iterator->keyword.c_str())
 					|| strings.text.find(elements_iterator->keyword) != std::wstring::npos
 					|| mainGame->CheckRegEx(strings.text, elements_iterator->keyword)
 					|| data.is_setcodes(elements_iterator->setcodes);
@@ -1834,10 +1842,7 @@ void DeckBuilder::ShowBigCard(int code, float zoom) {
 	mainGame->gMutex.unlock();
 }
 void DeckBuilder::ZoomBigCard(irr::s32 centerx, irr::s32 centery) {
-	if(bigcard_zoom >= 4)
-		bigcard_zoom = 4;
-	if(bigcard_zoom <= 0.2f)
-		bigcard_zoom = 0.2f;
+	bigcard_zoom = myclamp(bigcard_zoom, 0.2f, 4.0f);
 	auto img = imageManager.GetBigPicture(bigcard_code, bigcard_zoom);
 	mainGame->imgBigCard->setImage(img);
 	auto size = img->getSize();
@@ -1861,53 +1866,6 @@ void DeckBuilder::CloseBigCard() {
 	mainGame->btnBigCardClose->setVisible(false);
 }
 
-static inline wchar_t NormalizeChar(wchar_t c) {
-	/*
-	// Convert all symbols and punctuations to space.
-	if (c != 0 && c < 128 && !isalnum(c)) {
-		return ' ';
-	}
-	*/
-	// Convert latin chararacters to uppercase to ignore case.
-	if (c < 128 && isalpha(c)) {
-		return toupper(c);
-	}
-	// Remove some accentued characters that are not supported by the editbox.
-	if (c >= 232 && c <= 235) {
-		return 'E';
-	}
-	if (c >= 238 && c <= 239) {
-		return 'I';
-	}
-	return c;
-}
-bool DeckBuilder::CardNameContains(const wchar_t* haystack, const wchar_t* needle) {
-	if(!needle[0]) {
-		return true;
-	}
-	if(!haystack) {
-		return false;
-	}
-	if(mainGame->CheckRegEx(haystack, needle))
-		return true;
-	int i = 0;
-	int j = 0;
-	while(haystack[i]) {
-		wchar_t ca = NormalizeChar(haystack[i]);
-		wchar_t cb = NormalizeChar(needle[j]);
-		if(ca == cb) {
-			j++;
-			if(!needle[j]) {
-				return true;
-			}
-		} else {
-			i -= j;
-			j = 0;
-		}
-		i++;
-	}
-	return false;
-}
 bool DeckBuilder::push_main(const CardDataC* pointer, int seq) {
 	if(pointer->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
 		return false;
