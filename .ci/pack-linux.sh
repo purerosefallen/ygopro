@@ -1,20 +1,7 @@
 #!/bin/bash
-set -x
 set -o errexit
+set -x
 
-ARCHIVE_FILES=(ygopro LICENSE README.md lflist.conf strings.conf system.conf servers.conf cards.cdb script textures deck single pics replay windbot bot bot.conf locales fonts pack)
+source .ci/pack-common
 
-# TARGET_LOCALE
-# ARCHIVE_SUFFIX
-if [[ -z "$TARGET_PLATFORM" ]]; then
-    TARGET_PLATFORM=linux
-fi
-
-if [[ "$TARGET_PLATFORM" != "linuxarm" ]]; then
-    ARCHIVE_FILES+=(sound)
-fi
-
-apt update && apt -y install tar git zstd
-mkdir dist replay
-
-tar -acf "dist/KoishiPro-$CI_COMMIT_REF_NAME-$TARGET_PLATFORM-$TARGET_LOCALE.tar.$ARCHIVE_SUFFIX" --exclude='.git*' "${ARCHIVE_FILES[@]}"
+_pack_release linux

@@ -26,6 +26,12 @@
 
 #define IMITATOR_CODE 4392470
 
+namespace irr {
+	namespace io {
+		class IReadFile;
+	}
+}
+
 namespace ygo {
 
 constexpr int DECK_MAX_SIZE = YGOPRO_MAX_DECK;
@@ -72,7 +78,7 @@ public:
 	const wchar_t* GetLFListName(unsigned int lfhash);
 #endif
 	const LFList* GetLFList(unsigned int lfhash);
-	unsigned int CheckDeck(const Deck& deck, unsigned int lfhash, int rule);
+	uint32_t CheckDeck(const Deck& deck, unsigned int lfhash, size_t rule);
 #ifndef YGOPRO_SERVER_MODE
 	bool LoadCurrentDeck(const wchar_t* file, bool is_packlist = false);
 	bool LoadCurrentDeck(int category_index, const wchar_t* category_name, const wchar_t* deckname);
@@ -82,7 +88,6 @@ public:
 	bool LoadDeckFromCode(Deck& deck, const unsigned char *code, int len);
 	int SaveDeckToCode(Deck &deck, unsigned char *code);
 #endif //YGOPRO_SERVER_MODE
-
 
 	Deck MutateDeck(Deck deck) {
 		Deck result;
@@ -111,8 +116,8 @@ public:
 			result[i] = MutateDeck(originalDecks[i]);
 	}
 
-	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], int mainc, int sidec, bool is_packlist = false);
-	static bool LoadSide(Deck& deck, uint32_t dbuf[], int mainc, int sidec);
+	static uint32_t LoadDeck(Deck& deck, uint32_t dbuf[], uint32_t mainc, uint32_t sidec, bool is_packlist = false);
+	static bool LoadSide(Deck& deck, uint32_t dbuf[], uint32_t mainc, uint32_t sidec);
 #ifndef YGOPRO_SERVER_MODE
 	static uint32_t LoadDeckFromStream(Deck& deck, std::istringstream& deckStream, bool is_packlist = false);
 	static void GetCategoryPath(wchar_t* ret, int index, const wchar_t* text);

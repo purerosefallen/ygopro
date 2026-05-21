@@ -1,7 +1,13 @@
 #include "game.h"
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
 #include "client_card.h"
 #include "materials.h"
 #include "image_manager.h"
+#include "data_manager.h"
 #include "deck_manager.h"
 #include "sound_manager.h"
 #include "duelclient.h"
@@ -46,7 +52,7 @@ void Game::Draw2DImageQuad(irr::video::IVideoDriver* driver, irr::video::ITextur
 	}
 
 	material.Lighting = false;
-	material.ZWriteEnable = false;
+	material.ZWriteEnable = irr::video::EZW_OFF;
 	material.TextureLayer[0].Texture = texture;
 	material.MaterialType = useAlphaChannel ?
 		irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL : irr::video::EMT_SOLID;
@@ -853,10 +859,15 @@ void Game::DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2) {
 	}
 }
 void Game::DrawGUI() {
-	while (imageLoading.size()) {
-		auto mit = imageLoading.cbegin();
-		mit->first->setImage(imageManager.GetTexture(mit->second));
-		imageLoading.erase(mit);
+	while(btnImagePending.size()) {
+		auto mit = btnImagePending.cbegin();
+		auto button = mit->first;
+		int code = mit->second.first;
+		bool rotated = mit->second.second;
+		button->setImage(imageManager.GetTextureButton(code, rotated));
+		btnCardImgInfo[button] = {code, rotated};
+		btnFacedownImgInfo.erase(button);
+		btnImagePending.erase(mit);
 	}
 	for(auto fit = fadingList.begin(); fit != fadingList.end();) {
 		auto fthis = fit++;
@@ -910,6 +921,25 @@ void Game::DrawGUI() {
 			fadingList.erase(fthis);
 	}
 	env->drawAll();
+	DrawCardTextSearchLinks();
+}
+void Game::DrawCardTextSearchLinks() {
+	std::vector<CardTextSearchSegment> segments;
+	CollectCardTextSearchSegments(segments);
+	if(segments.empty())
+		return;
+	const irr::video::SColor link_color(255, 0, 112, 255);
+	const irr::core::recti clip = stText->getAbsolutePosition();
+	for(const auto& segment : segments) {
+		guiFont->drawUstring(segment.text, segment.rect, link_color, false, false, &clip);
+		irr::core::recti line(
+			std::max(segment.rect.UpperLeftCorner.X, clip.UpperLeftCorner.X),
+			segment.rect.LowerRightCorner.Y - 2,
+			std::min(segment.rect.LowerRightCorner.X, clip.LowerRightCorner.X),
+			segment.rect.LowerRightCorner.Y);
+		if(line.UpperLeftCorner.X < line.LowerRightCorner.X)
+			driver->draw2DRectangle(link_color, line, &clip);
+	}
 }
 void Game::DrawSpec() {
 	irr::s32 midx = 574 + (CARD_IMG_WIDTH * 0.5);
@@ -1208,6 +1238,8 @@ void Game::PopupElement(irr::gui::IGUIElement * element, int hideframe) {
 	else ShowElement(element, hideframe);
 }
 void Game::SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw) {
+// YGOPro was hiding the image of buttons during fading (animation), but this feature is not meaningful, and the official CGUIButton don't support to setDrawImage.
+#if false
 	if(element == wPosSelect) {
 		btnPSAU->setDrawImage(draw);
 		btnPSAD->setDrawImage(draw);
@@ -1222,6 +1254,7 @@ void Game::SetImageButtonDrawing(irr::gui::IGUIElement* element, bool draw) {
 		for(int i = 0; i < 5; ++i)
 			btnCardDisplay[i]->setDrawImage(draw);
 	}
+#endif
 }
 void Game::WaitFrameSignal(int frame) {
 	frameSignal.Reset();
@@ -1550,9 +1583,7 @@ void Game::DrawDeckBd() {
 	// ====== Search results (mul-based row height, text right after card) ======
 	float sr_row_h   = deckBuilder.layout.sr_row_h;   // 66 * mul
 	float sr_top_px  = deckBuilder.layout.sr_top_px;  // 165 * yScale
-	float sr_panel_h = (626.0f - 165.0f) * yScale;
-	int   max_visible = (int)(sr_panel_h / sr_row_h);
-	if(max_visible < 7) max_visible = 7;
+	int   max_visible = deckBuilder.GetSearchResultMaxVisible();
 	int   max_result  = gameConf.use_image_load_background_thread ? max_visible + 2 : max_visible;
 	float tx_base  = 810.0f * xScale + cw + 6.0f * mul;  // text left: right after card + gap
 	float tx_right = 1019.0f * xScale;                    // text right: full search panel width
