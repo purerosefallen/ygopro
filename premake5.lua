@@ -49,7 +49,26 @@ BUILD_LZMA = os.istarget("windows")
 -- Available: none, server, sse2, avx2, neon, best
 -- "server" means SSE2 on x86/x64 and NEON on ARM/AArch64.
 -- "best" means AVX2 on x86/x64 and NEON on ARM/AArch64.
-USE_SIMD = "server"
+USE_SIMD = "best"
+if os.istarget("linux") then
+    local arch = os.hostarch()
+    local is_arm = arch == "ARM64" or arch == "AARCH64" or arch == "arm64" or arch == "aarch64" or arch == "ARM" or arch == "arm"
+    if not is_arm then
+        USE_SIMD = "sse2"
+        local cpuinfo = io.popen("grep -m1 '^flags' /proc/cpuinfo 2>/dev/null")
+        local flags = ""
+        local ok = false
+        if cpuinfo then
+            flags = cpuinfo:read("*a") or ""
+            local result = cpuinfo:close()
+            ok = result == true or result == 0
+        end
+        if ok and flags:find("%f[%w_]avx2%f[^%w_]") then
+            USE_SIMD = "best"
+        end
+    end
+end
+
 
 -- Variable indicating whether we are building for Apple Silicon, will be detected automatically if not specified.
 local MAC_ARM = false
