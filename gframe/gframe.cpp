@@ -5,10 +5,6 @@
 #include <clocale>
 #include <memory>
 
-#ifdef __APPLE__
-#import <CoreFoundation/CoreFoundation.h>
-#endif
-
 #if defined(_WIN32) && (!defined(WDK_NTDDI_VERSION) || (WDK_NTDDI_VERSION < 0x0A000005)) // Redstone 4, Version 1803, Build 17134.
 #error "This program requires the Windows 10 SDK version 1803 or above to compile on Windows. Otherwise, non-ASCII characters will not be displayed or processed correctly."
 #endif
@@ -39,19 +35,7 @@ int main(int argc, char* argv[]) {
 	std::setlocale(LC_CTYPE, "");
 #endif
 #ifdef __APPLE__
-	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-	CFURLRef bundle_base_url = CFURLCreateCopyDeletingLastPathComponent(nullptr, bundle_url);
-	CFStringRef bundle_ext = CFURLCopyPathExtension(bundle_url);
-	if (bundle_ext) {
-		char path[PATH_MAX];
-		if (CFStringCompare(bundle_ext, CFSTR("app"), kCFCompareCaseInsensitive) == kCFCompareEqualTo
-			&& CFURLGetFileSystemRepresentation(bundle_base_url, true, (UInt8*)path, PATH_MAX)) {
-			chdir(path);
-		}
-		CFRelease(bundle_ext);
-	}
-	CFRelease(bundle_url);
-	CFRelease(bundle_base_url);
+	ygo::Game::FixMacOSBundleWorkingDirectory();
 #endif //__APPLE__
 #ifdef _WIN32
 	if (argc == 2 && (ygo::IsExtension(argv[1], ".ydk") || ygo::IsExtension(argv[1], ".yrp"))) { // open file from explorer
