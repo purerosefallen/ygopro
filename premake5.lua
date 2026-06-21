@@ -158,11 +158,12 @@ newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", descrip
 newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 
-newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
 newoption { trigger = "build-lzma", category = "YGOPro - lzma", description = "" }
 newoption { trigger = "no-build-lzma", category = "YGOPro - lzma", description = "" }
 newoption { trigger = "lzma-include-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
 newoption { trigger = "lzma-lib-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
+
+newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
 
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }

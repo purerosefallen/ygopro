@@ -339,6 +339,9 @@ public:
 	irr::core::vector2di ResizeCardMid(irr::s32 x, irr::s32 y, irr::s32 midx, irr::s32 midy);
 	irr::core::recti ResizeFit(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2);
 
+#if defined(__APPLE__) && !defined(YGOPRO_SERVER_MODE)
+	static void FixMacOSBundleWorkingDirectory();
+#endif
 	void SetWindowsIcon();
 	void SetWindowsScale(float scale);
 	void FlashWindow();
