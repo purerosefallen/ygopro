@@ -325,11 +325,14 @@ irr::video::IImage* ImageManager::GetImage(int code, irr::s32 targetWidth, irr::
 		if(reader == nullptr)
 			return static_cast<irr::video::IImage*>(nullptr);
 		irr::video::IImage* img = nullptr;
-		if(IsExtension(file, ".jpg") || IsExtension(file, ".jpeg"))
+		const bool isJpeg = IsExtension(file, ".jpg") || IsExtension(file, ".jpeg");
+		if(isJpeg)
 			img = ImageUtility::LoadJpegImage(driver, reader, targetWidth, targetHeight);
 		else
 			img = driver->createImageFromFile(reader);
 		reader->drop();
+		if(img == nullptr && isJpeg)
+			img = driver->createImageFromFile(file);
 		return img;
 	});
 }

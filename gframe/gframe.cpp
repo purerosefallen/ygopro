@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 	ygo::Game _game;
 	ygo::mainGame = &_game;
 	if(!ygo::mainGame->Initialize())
-		return 0;
+		return EXIT_FAILURE;
 
 #ifdef _WIN32
 	int wargc = 0;
@@ -80,16 +80,15 @@ int main(int argc, char* argv[]) {
 	bool expansions_specified = false;
 	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
-		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
-			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
-			if (!mywcsncasecmp(pstrext, L".ydk", 4)) {
+		if (wargc == 2) {
+			if (ygo::IsExtension(wargv[1], L".ydk")) {
 				ygo::mainGame->open_file = true;
 				BufferIO::CopyWideString(wargv[1], ygo::mainGame->open_file_name);
 				ygo::mainGame->exit_on_return = true;
 				ClickButton(ygo::mainGame->btnDeckEdit);
 				break;
 			}
-			if (!mywcsncasecmp(pstrext, L".yrp", 4)) {
+			if (ygo::IsExtension(wargv[1], L".yrp")) {
 				ygo::mainGame->open_file = true;
 				BufferIO::CopyWideString(wargv[1], ygo::mainGame->open_file_name);
 				ygo::mainGame->exit_on_return = true;
