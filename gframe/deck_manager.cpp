@@ -13,7 +13,7 @@ DeckManager deckManager;
 void DeckManager::LoadLFListFromLineProvider(const std::function<bool(char*, size_t)>& getLine, bool insert) {
 	std::vector<LFList> loadedLists;
 	auto cur = loadedLists.rend();
-	char linebuf[256]{};
+	char linebuf[1024]{};
 	wchar_t strBuffer[256]{};
 	auto credit_hash = [](const char* s) -> uint32_t {
 		uint32_t h = 2166136261u;

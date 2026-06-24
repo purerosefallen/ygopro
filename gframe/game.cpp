@@ -33,6 +33,9 @@ namespace irr {
 #ifdef _WIN32
 #include <timeapi.h>
 #endif
+#if defined(__APPLE__) && !defined(YGOPRO_SERVER_MODE)
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 #if defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || \
 	defined(__x86_64__) || defined(_M_X64) || defined(__x86_64) || defined(_M_AMD64)
@@ -292,7 +295,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Emma", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X vs.VIGVANGS", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -501,34 +504,35 @@ bool Game::Initialize() {
 	scrTabHelper->setVisible(false);
 	int posX = 0;
 	int posY = 0;
-	chkMAutoPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1274));
+	int chkBoxLabelWidth = 520;
+	chkMAutoPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1274));
 	chkMAutoPos->setChecked(gameConf.chkMAutoPos != 0);
 	posY += 30;
-	chkSTAutoPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1278));
+	chkSTAutoPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1278));
 	chkSTAutoPos->setChecked(gameConf.chkSTAutoPos != 0);
 	posY += 30;
-	chkRandomPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX + 20, posY, posX + 20 + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1275));
+	chkRandomPos = env->addCheckBox(false, irr::core::rect<irr::s32>(posX + 20, posY, posX + 20 + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1275));
 	chkRandomPos->setChecked(gameConf.chkRandomPos != 0);
 	posY += 30;
-	chkAutoChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1276));
+	chkAutoChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1276));
 	chkAutoChain->setChecked(gameConf.chkAutoChain != 0);
 	posY += 30;
-	chkWaitChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1277));
+	chkWaitChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1277));
 	chkWaitChain->setChecked(gameConf.chkWaitChain != 0);
 	posY += 30;
-	chkDefaultShowChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1354));
+	chkDefaultShowChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1354));
 	chkDefaultShowChain->setChecked(gameConf.chkDefaultShowChain != 0);
 	posY += 30;
-	chkQuickAnimation = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
+	chkQuickAnimation = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
 	chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
 	posY += 30;
-	chkDrawSingleChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_DRAW_SINGLE_CHAIN, dataManager.GetSysString(1287));
+	chkDrawSingleChain = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, CHECKBOX_DRAW_SINGLE_CHAIN, dataManager.GetSysString(1287));
 	chkDrawSingleChain->setChecked(gameConf.draw_single_chain != 0);
 	posY += 30;
-	chkAskMSet = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, CHECKBOX_ASK_MSET, dataManager.GetSysString(1268));
+	chkAskMSet = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, CHECKBOX_ASK_MSET, dataManager.GetSysString(1268));
 	chkAskMSet->setChecked(gameConf.ask_mset != 0);
 	posY += 30;
-	chkAutoSaveReplay = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabHelper, -1, dataManager.GetSysString(1366));
+	chkAutoSaveReplay = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabHelper, -1, dataManager.GetSysString(1366));
 	chkAutoSaveReplay->setChecked(gameConf.auto_save_replay != 0);
 	elmTabHelperLast = chkAutoSaveReplay;
 	//system
@@ -544,34 +548,34 @@ bool Game::Initialize() {
 	scrTabSystem->setSmallStep(1);
 	scrTabSystem->setVisible(false);
 	posY = 0;
-	chkIgnore1 = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
+	chkIgnore1 = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
 	chkIgnore1->setChecked(gameConf.chkIgnore1 != 0);
 	posY += 30;
-	chkIgnore2 = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1291));
+	chkIgnore2 = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, -1, dataManager.GetSysString(1291));
 	chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
 	posY += 30;
-	chkHidePlayerName = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
+	chkHidePlayerName = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
 	chkHidePlayerName->setChecked(gameConf.hide_player_name != 0);
 	posY += 30;
-	chkIgnoreDeckChanges = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1357));
+	chkIgnoreDeckChanges = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, -1, dataManager.GetSysString(1357));
 	chkIgnoreDeckChanges->setChecked(gameConf.chkIgnoreDeckChanges != 0);
 	posY += 30;
-	chkAutoSearch = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
+	chkAutoSearch = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
 	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
 	posY += 30;
-	chkMultiKeywords = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1378));
+	chkMultiKeywords = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1378));
 	chkMultiKeywords->setChecked(gameConf.search_multiple_keywords > 0);
 	posY += 30;
-	chkRegex = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_REGEX, dataManager.GetSysString(1393));
+	chkRegex = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_REGEX, dataManager.GetSysString(1393));
 	chkRegex->setChecked(gameConf.search_regex > 0);
 	posY += 30;
-	chkPreferExpansionScript = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
+	chkPreferExpansionScript = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
 	chkPreferExpansionScript->setChecked(gameConf.prefer_expansion_script != 0);
 	posY += 30;
-	chkSwapYesNoButton = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_SWAP_YES_NO_BUTTON, dataManager.GetSysString(1388));
+	chkSwapYesNoButton = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_SWAP_YES_NO_BUTTON, dataManager.GetSysString(1388));
 	chkSwapYesNoButton->setChecked(gameConf.swap_yes_no_button);
 	posY += 30;
-	chkResizeSelectWindow = env->addCheckBox(gameConf.resize_select_window, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_RESIZE_SELECT_WINDOW, dataManager.GetSysString(1387));
+	chkResizeSelectWindow = env->addCheckBox(gameConf.resize_select_window, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, CHECKBOX_RESIZE_SELECT_WINDOW, dataManager.GetSysString(1387));
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1282), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 110, posY + 28), false, false, tabSystem);
 	btnWinResizeS = env->addButton(irr::core::rect<irr::s32>(posX + 115, posY, posX + 145, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
@@ -579,8 +583,8 @@ bool Game::Initialize() {
 	btnWinResizeL = env->addButton(irr::core::rect<irr::s32>(posX + 185, posY, posX + 215, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
 	btnWinResizeXL = env->addButton(irr::core::rect<irr::s32>(posX + 220, posY, posX + 250, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
 	posY += 30;
-	chkResizePopupMenu = env->addCheckBox(gameConf.resize_popup_menu > 0, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_RESIZE_POPUP_MENU, dataManager.GetSysString(1386));
-	scrResizePopupMenu = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_RESIZE_POPUP_MENU);
+	chkResizePopupMenu = env->addCheckBox(gameConf.resize_popup_menu > 0, irr::core::rect<irr::s32>(posX, posY, posX + 110, posY + 25), tabSystem, CHECKBOX_RESIZE_POPUP_MENU, dataManager.GetSysString(1386));
+	scrResizePopupMenu = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 115, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_RESIZE_POPUP_MENU);
 	scrResizePopupMenu->setMax(5);
 	scrResizePopupMenu->setMin(1);
 	scrResizePopupMenu->setPos(gameConf.resize_popup_menu > 0 ? gameConf.resize_popup_menu : 3);
@@ -595,7 +599,7 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnableSound = env->addCheckBox(gameConf.enable_sound, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1279));
 	chkEnableSound->setChecked(gameConf.enable_sound);
-	scrSoundVolume = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrSoundVolume = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 115, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrSoundVolume->setMax(100);
 	scrSoundVolume->setMin(0);
 	scrSoundVolume->setPos(gameConf.sound_volume);
@@ -604,17 +608,17 @@ bool Game::Initialize() {
 	posY += 30;
 	chkEnableMusic = env->addCheckBox(gameConf.enable_music, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
 	chkEnableMusic->setChecked(gameConf.enable_music);
-	scrMusicVolume = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
+	scrMusicVolume = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 115, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_VOLUME);
 	scrMusicVolume->setMax(100);
 	scrMusicVolume->setMin(0);
 	scrMusicVolume->setPos(gameConf.music_volume);
 	scrMusicVolume->setLargeStep(1);
 	scrMusicVolume->setSmallStep(1);
 	posY += 30;
-	chkMusicMode = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1281));
+	chkMusicMode = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, -1, dataManager.GetSysString(1281));
 	chkMusicMode->setChecked(gameConf.music_mode != 0);
 	posY += 30;
-	chkEnablePScale = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, -1, dataManager.GetSysString(1269));
+	chkEnablePScale = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + chkBoxLabelWidth, posY + 25), tabSystem, -1, dataManager.GetSysString(1269));
 	chkEnablePScale->setChecked(gameConf.chkEnablePScale != 0);
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1267), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 160, posY + 28), false, false, tabSystem);
@@ -3053,6 +3057,35 @@ irr::core::recti Game::ResizeFit(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y
 	y2 = y2 * mul;
 	return irr::core::recti(x, y, x2, y2);
 }
+
+#if defined(__APPLE__) && !defined(YGOPRO_SERVER_MODE)
+void Game::FixMacOSBundleWorkingDirectory() {
+	CFBundleRef main_bundle = CFBundleGetMainBundle();
+	if(!main_bundle) {
+		return;
+	}
+	CFURLRef bundle_url = CFBundleCopyBundleURL(main_bundle);
+	if(!bundle_url) {
+		return;
+	}
+	CFURLRef bundle_base_url = CFURLCreateCopyDeletingLastPathComponent(nullptr, bundle_url);
+	if(!bundle_base_url) {
+		CFRelease(bundle_url);
+		return;
+	}
+	CFStringRef bundle_ext = CFURLCopyPathExtension(bundle_url);
+	if(bundle_ext) {
+		char path[PATH_MAX];
+		if(CFStringCompare(bundle_ext, CFSTR("app"), kCFCompareCaseInsensitive) == kCFCompareEqualTo
+			&& CFURLGetFileSystemRepresentation(bundle_base_url, true, (UInt8*)path, PATH_MAX)) {
+			chdir(path);
+		}
+		CFRelease(bundle_ext);
+	}
+	CFRelease(bundle_url);
+	CFRelease(bundle_base_url);
+}
+#endif // defined(__APPLE__) && !defined(YGOPRO_SERVER_MODE)
 void Game::SetWindowsIcon() {
 #ifdef _WIN32
 	HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(nullptr);

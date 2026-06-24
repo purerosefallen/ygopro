@@ -5,14 +5,8 @@
 #include <clocale>
 #include <memory>
 
-#ifdef __APPLE__
-#import <CoreFoundation/CoreFoundation.h>
-#endif
 #ifdef YGOPRO_SERVER_MODE
 #include "base64.h"
-#endif
-
-#ifdef YGOPRO_SERVER_MODE
 #include <sstream>
 #endif
 
@@ -47,20 +41,8 @@ int main(int argc, char* argv[]) {
 #else
 	std::setlocale(LC_CTYPE, "");
 #endif
-#if defined __APPLE__ && !defined YGOPRO_SERVER_MODE
-	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-	CFURLRef bundle_base_url = CFURLCreateCopyDeletingLastPathComponent(nullptr, bundle_url);
-	CFStringRef bundle_ext = CFURLCopyPathExtension(bundle_url);
-	if (bundle_ext) {
-		char path[PATH_MAX];
-		if (CFStringCompare(bundle_ext, CFSTR("app"), kCFCompareCaseInsensitive) == kCFCompareEqualTo
-			&& CFURLGetFileSystemRepresentation(bundle_base_url, true, (UInt8*)path, PATH_MAX)) {
-			chdir(path);
-		}
-		CFRelease(bundle_ext);
-	}
-	CFRelease(bundle_url);
-	CFRelease(bundle_base_url);
+#if defined(__APPLE__) && !defined(YGOPRO_SERVER_MODE)
+	ygo::Game::FixMacOSBundleWorkingDirectory();
 #endif //__APPLE__
 #ifdef _WIN32
 	if (argc == 2 && (ygo::IsExtension(argv[1], ".ydk") || ygo::IsExtension(argv[1], ".yrp"))) { // open file from explorer
@@ -225,7 +207,7 @@ int main(int argc, char* argv[]) {
 #else //YGOPRO_SERVER_MODE
 	ygo::mainGame = &_game;
 	if(!ygo::mainGame->Initialize())
-		return 0;
+		return EXIT_FAILURE;
 
 #ifdef _WIN32
 	int wargc = 0;
@@ -245,16 +227,15 @@ int main(int argc, char* argv[]) {
 	bool expansions_specified = false;
 	expansions_list.push_back(L"./expansions");
 	for(int i = 1; i < wargc; ++i) {
-		if (wargc == 2 && std::wcslen(wargv[1]) >= 4) {
-			wchar_t* pstrext = wargv[1] + std::wcslen(wargv[1]) - 4;
-			if (!mywcsncasecmp(pstrext, L".ydk", 4)) {
+		if (wargc == 2) {
+			if (ygo::IsExtension(wargv[1], L".ydk")) {
 				ygo::mainGame->open_file = true;
 				BufferIO::CopyWideString(wargv[1], ygo::mainGame->open_file_name);
 				ygo::mainGame->exit_on_return = true;
 				ClickButton(ygo::mainGame->btnDeckEdit);
 				break;
 			}
-			if (!mywcsncasecmp(pstrext, L".yrp", 4)) {
+			if (ygo::IsExtension(wargv[1], L".yrp")) {
 				ygo::mainGame->open_file = true;
 				BufferIO::CopyWideString(wargv[1], ygo::mainGame->open_file_name);
 				ygo::mainGame->exit_on_return = true;
