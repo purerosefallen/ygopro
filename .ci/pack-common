@@ -69,14 +69,159 @@ _pack_tar_archive() {
   tar -acf "dist/${archive_name}" --exclude='.git*' "${files[@]}"
 }
 
+_get_cpu_count() {
+  local cpu_count
+  cpu_count=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+  if [[ ! "$cpu_count" =~ ^[0-9]+$ || "$cpu_count" -lt 1 ]]; then
+    cpu_count=1
+  fi
+
+  echo "$cpu_count"
+}
+
+_get_memory_limit_kib() {
+  local mem_total_kib
+  mem_total_kib=$(awk '/MemTotal:/ {print $2}' /proc/meminfo)
+
+  local limit_kib="$mem_total_kib"
+  local cgroup_limit
+  local cgroup_limit_kib
+  if [[ -r /sys/fs/cgroup/memory.max ]]; then
+    cgroup_limit=$(cat /sys/fs/cgroup/memory.max)
+    if [[ "$cgroup_limit" != "max" && "$cgroup_limit" =~ ^[0-9]+$ ]]; then
+      cgroup_limit_kib=$((cgroup_limit / 1024))
+      if (( cgroup_limit_kib > 0 && cgroup_limit_kib < limit_kib )); then
+        limit_kib="$cgroup_limit_kib"
+      fi
+    fi
+  elif [[ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]]; then
+    cgroup_limit=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
+    if [[ "$cgroup_limit" =~ ^[0-9]+$ ]]; then
+      cgroup_limit_kib=$((cgroup_limit / 1024))
+      if (( cgroup_limit_kib > 0 && cgroup_limit_kib < limit_kib )); then
+        limit_kib="$cgroup_limit_kib"
+      fi
+    fi
+  fi
+
+  echo "$limit_kib"
+}
+
+_parse_7z_dict_mib() {
+  local value="${1,,}"
+  local number
+  local unit
+  if [[ ! "$value" =~ ^([0-9]+)([kmg]?)b?$ ]]; then
+    return 1
+  fi
+
+  number="${BASH_REMATCH[1]}"
+  unit="${BASH_REMATCH[2]}"
+  case "$unit" in
+    k)
+      echo $(((number + 1023) / 1024))
+      ;;
+    g)
+      echo $((number * 1024))
+      ;;
+    *)
+      echo "$number"
+      ;;
+  esac
+}
+
+_estimate_7z_memory_kib() {
+  local threads="$1"
+  local dict_mib="$2"
+
+  echo $(((128 + threads * dict_mib * 12) * 1024))
+}
+
+_choose_7z_settings() {
+  local cpu_count
+  local memory_limit_kib
+  local memory_budget_kib
+  local max_threads
+  local threads
+  local dict_mib
+  local estimated_kib
+  local dict_candidates=(64 32 16 8)
+
+  cpu_count=$(_get_cpu_count)
+  max_threads=$((cpu_count / 2))
+  if (( max_threads < 1 )); then
+    max_threads=1
+  fi
+
+  threads="$max_threads"
+  if [[ -n "${PACK_7Z_THREADS:-}" ]]; then
+    if [[ ! "$PACK_7Z_THREADS" =~ ^[0-9]+$ || "$PACK_7Z_THREADS" -lt 1 ]]; then
+      echo "Invalid PACK_7Z_THREADS: $PACK_7Z_THREADS" >&2
+      exit 1
+    fi
+    threads="$PACK_7Z_THREADS"
+    if (( threads > max_threads )); then
+      echo "Capping PACK_7Z_THREADS=${threads} to half of available CPUs: ${max_threads}" >&2
+      threads="$max_threads"
+    fi
+  fi
+
+  memory_limit_kib=$(_get_memory_limit_kib)
+  memory_budget_kib=$((memory_limit_kib / 2))
+
+  if [[ -n "${PACK_7Z_DICT_SIZE:-}" ]]; then
+    dict_mib=$(_parse_7z_dict_mib "$PACK_7Z_DICT_SIZE") || {
+      echo "Invalid PACK_7Z_DICT_SIZE: $PACK_7Z_DICT_SIZE" >&2
+      exit 1
+    }
+    while (( threads > 1 )); do
+      estimated_kib=$(_estimate_7z_memory_kib "$threads" "$dict_mib")
+      if (( estimated_kib <= memory_budget_kib )); then
+        break
+      fi
+      threads=$((threads - 1))
+    done
+
+    estimated_kib=$(_estimate_7z_memory_kib "$threads" "$dict_mib")
+    if (( estimated_kib > memory_budget_kib )); then
+      echo "PACK_7Z_DICT_SIZE=${PACK_7Z_DICT_SIZE} does not fit in half of available memory" >&2
+      exit 1
+    fi
+
+    printf '%s %sm\n' "$threads" "$dict_mib"
+    return
+  fi
+
+  while true; do
+    for dict_mib in "${dict_candidates[@]}"; do
+      estimated_kib=$(_estimate_7z_memory_kib "$threads" "$dict_mib")
+      if (( estimated_kib <= memory_budget_kib )); then
+        printf '%s %sm\n' "$threads" "$dict_mib"
+        return
+      fi
+    done
+
+    if (( threads <= 1 )); then
+      printf '1 8m\n'
+      return
+    fi
+    threads=$((threads - 1))
+  done
+}
+
 _pack_7z_archive() {
   local archive_name="$1"
   shift
 
   local files
+  local dict_size
+  local threads
+
   _prepare_pack_dirs
   mapfile -t files < <(_collect_existing_files "$@")
-  7z a -mx9 -xr!.git* "dist/${archive_name}" "${files[@]}"
+  read -r threads dict_size < <(_choose_7z_settings)
+  echo "Running 7z with -mx9, -md=${dict_size}, -mmt=${threads}"
+  7z a -m0=lzma2 -mx9 "-md=${dict_size}" "-mmt=${threads}" -xr!.git* "dist/${archive_name}" "${files[@]}"
 }
 
 _append_base_files() {
