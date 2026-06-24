@@ -43,6 +43,25 @@ BUILD_LZMA = os.istarget("windows")
 -- Available: none, sse2, avx2, neon, best
 -- "best" means avx2 on x86 and neon on ARM
 USE_SIMD = "best"
+if os.istarget("linux") then
+    local arch = os.hostarch()
+    local is_arm = arch == "ARM64" or arch == "AARCH64" or arch == "arm64" or arch == "aarch64" or arch == "ARM" or arch == "arm"
+    if not is_arm then
+        USE_SIMD = "sse2"
+        local cpuinfo = io.popen("grep -m1 '^flags' /proc/cpuinfo 2>/dev/null")
+        local flags = ""
+        local ok = false
+        if cpuinfo then
+            flags = cpuinfo:read("*a") or ""
+            local result = cpuinfo:close()
+            ok = result == true or result == 0
+        end
+        if ok and flags:find("%f[%w_]avx2%f[^%w_]") then
+            USE_SIMD = "best"
+        end
+    end
+end
+
 
 -- Variable indicating whether we are building for Apple Silicon, will be detected automatically if not specified.
 local MAC_ARM = false
@@ -132,11 +151,12 @@ newoption { trigger = "vorbis-lib-dir", category = "YGOPro - miniaudio", descrip
 newoption { trigger = "ogg-include-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 newoption { trigger = "ogg-lib-dir", category = "YGOPro - miniaudio", description = "", value = "PATH" }
 
-newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
 newoption { trigger = "build-lzma", category = "YGOPro - lzma", description = "" }
 newoption { trigger = "no-build-lzma", category = "YGOPro - lzma", description = "" }
 newoption { trigger = "lzma-include-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
 newoption { trigger = "lzma-lib-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
+
+newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
 
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }

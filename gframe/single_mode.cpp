@@ -222,7 +222,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 		}
 		case MSG_HINT: {
 			/*int type = */BufferIO::Read<uint8_t>(pbuf);
-			int player = BufferIO::Read<uint8_t>(pbuf);
+			player = BufferIO::Read<uint8_t>(pbuf);
 			/*int data = */BufferIO::Read<int32_t>(pbuf);
 			if(player == 0)
 				DuelClient::ClientAnalyze(offset, pbuf - offset);
@@ -414,7 +414,7 @@ bool SingleMode::SinglePlayAnalyze(unsigned char* msg, unsigned int len) {
 		}
 		case MSG_SHUFFLE_HAND: {
 			/*int oplayer = */BufferIO::Read<uint8_t>(pbuf);
-			int count = BufferIO::Read<uint8_t>(pbuf);
+			count = BufferIO::Read<uint8_t>(pbuf);
 			pbuf += count * 4;
 			DuelClient::ClientAnalyze(offset, pbuf - offset);
 			break;
