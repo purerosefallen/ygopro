@@ -293,9 +293,8 @@ uint32_t DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, size_t ru
 }
 int DeckManager::CheckSpellCount(const Deck& deck) {
 	int spellcount = 0;
-	CardData cd;
 	for (auto cit : deck.main) {
-		if (cit->second.type & (TYPE_SPELL | TYPE_TRAP))
+		if (cit->type & (TYPE_SPELL | TYPE_TRAP))
 			spellcount++;
 	}
 	return spellcount;
