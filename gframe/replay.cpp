@@ -77,6 +77,31 @@ void Replay::WriteData(const void* data, size_t length, bool flush) {
 void Replay::WriteInt32(int32_t data, bool flush) {
 	Write<int32_t>(data, flush);
 }
+size_t Replay::WriteResponse(const void* data, size_t length) {
+	if(!is_recording || !data)
+		return 0;
+	const size_t response_length = std::min<size_t>(length, UINT8_MAX);
+	if(!response_length)
+		return 0;
+	const size_t total_length = sizeof(uint8_t) + response_length;
+	if(total_length > MAX_REPLAY_SIZE - replay_size)
+		return 0;
+	Write<uint8_t>(static_cast<uint8_t>(response_length), false);
+	WriteData(data, response_length);
+	return total_length;
+}
+bool Replay::RemoveData(size_t length) {
+	if(!is_recording)
+		return false;
+	if(length > replay_size)
+		return false;
+	replay_size -= length;
+	if(fp) {
+		std::fflush(fp);
+		std::fseek(fp, -static_cast<long>(length), SEEK_CUR);
+	}
+	return true;
+}
 void Replay::Flush() {
 	if(!is_recording)
 		return;
@@ -194,7 +219,7 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		lzma_filter filters[2] = { filter, { LZMA_VLI_UNKNOWN, nullptr } };
 		size_t in_pos = 0, out_pos = 0;
 		lzma_ret lret = lzma_raw_buffer_decode(filters, nullptr, comp_data, &in_pos, comp_size, replay_data, &out_pos, replay_size);
-		std::free(filters[0].options);
+		lzma_filters_free(filters, nullptr);
 #else
 		size_t out_pos = 0;
 		lzma_ret lret = DecodeLegacyReplayLzmaLegacy(pheader.base.props, comp_data, comp_size, replay_data, replay_size, out_pos);
@@ -240,7 +265,7 @@ bool Replay::RenameReplay(const wchar_t* oldname, const wchar_t* newname) {
 	return FileSystem::Rename(old_path, new_path);
 }
 bool Replay::ReadNextResponse(unsigned char resp[]) {
-	unsigned char len{};
+	uint8_t len{};
 	if (!ReadData(&len, sizeof len))
 		return false;
 	if (!ReadData(resp, len))

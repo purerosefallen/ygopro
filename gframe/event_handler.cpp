@@ -902,7 +902,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			}
 			case SCROLL_CARD_SELECT: {
 				int pos = mainGame->scrCardList->getPos() / 10;
-				mainGame->gMutex.lock();
 				for(int i = 0; i < 5; ++i) {
 					// draw selectable_cards[i + pos] in btnCardSelect[i]
 					mainGame->stCardPos[i]->enableOverrideColor(false);
@@ -972,12 +971,10 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 							mainGame->stCardPos[i]->setBackgroundColor(0xffffffff);
 					}
 				}
-				mainGame->gMutex.unlock();
 				break;
 			}
 			case SCROLL_CARD_DISPLAY: {
 				int pos = mainGame->scrDisplayList->getPos() / 10;
-				mainGame->gMutex.lock();
 				for(int i = 0; i < 5; ++i) {
 					// draw display_cards[i + pos] in btnCardDisplay[i]
 					mainGame->stDisplayPos[i]->enableOverrideColor(false);
@@ -1022,7 +1019,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 							mainGame->stDisplayPos[i]->setBackgroundColor(0xffffffff);
 					}
 				}
-				mainGame->gMutex.unlock();
 				break;
 			}
 			break;
