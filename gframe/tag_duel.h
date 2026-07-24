@@ -31,7 +31,9 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	void RequestField(DuelPlayer* dp) override;
 #endif
+	void TimerTick() override;
 	void EndDuel() override;
+	void OnPlayerDisconnected(DuelPlayer* dp) override;
 #ifdef YGOPRO_SERVER_MODE
 	void TestCard(int code) override;
 #endif
@@ -55,15 +57,13 @@ public:
 	void RefreshSingle(int player, int location, int sequence, int flag = 0xf81fff);
 
 	static uint32_t MessageHandler(intptr_t fduel, uint32_t type);
-	static void TagTimer(evutil_socket_t fd, short events, void* arg);
-
 private:
 	int WriteUpdateData(int player, int location, unsigned int flag, unsigned char*& qbuf, int use_cache);
 	
 protected:
-	DuelPlayer* players[4];
-	DuelPlayer* pplayer[4];
-	DuelPlayer* cur_player[2];
+	DuelPlayer* players[4]{};
+	DuelPlayer* pplayer[4]{};
+	DuelPlayer* cur_player[2]{};
 	std::set<DuelPlayer*> observers;
 #ifdef YGOPRO_SERVER_MODE
 	DuelPlayer* cache_recorder{};
@@ -72,20 +72,20 @@ protected:
 	unsigned short phase{ 0 };
 	bool deck_reversed{ false };
 #endif
-	bool ready[4];
-	bool surrender[4];
+	bool ready[4]{};
+	bool surrender[4]{};
 	Deck pdeck[4];
-	int deck_error[4];
-	unsigned char hand_result[2];
-	unsigned char last_response;
+	int deck_error[4]{};
+	unsigned char hand_result[2]{};
+	unsigned char last_response{ 0 };
 	Replay last_replay;
 	size_t last_replay_response_size{ 0 };
-	unsigned char turn_count;
-	short time_limit[2];
-	short time_elapsed;
+	unsigned char turn_count{ 0 };
+	uint16_t time_limit[2]{};
+	uint16_t time_elapsed{ 0 };
 #ifdef YGOPRO_SERVER_MODE
-	short time_compensator[2]{};
-	short time_backed[2]{};
+	uint32_t time_compensator[2]{};
+	uint16_t time_backed[2]{};
 	unsigned char last_game_msg{ 0 };
 #endif
 };
