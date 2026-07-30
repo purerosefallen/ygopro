@@ -19,6 +19,11 @@
 #define YGOPRO_DEFAULT_DUEL_RULE			CURRENT_RULE
 #endif
 
+#ifdef _WIN32
+struct HWND__;
+using HWND = HWND__*;
+#endif
+
 namespace ygo {
 
 constexpr int DEFAULT_DUEL_RULE = YGOPRO_DEFAULT_DUEL_RULE;
