@@ -1,7 +1,7 @@
 #include "image_manager.h"
 #include "image_utility.h"
 #include "game.h"
-#include "myfilesystem.h"
+#include "file_system.h"
 #include <thread>
 
 namespace ygo {
@@ -392,7 +392,7 @@ irr::video::ITexture* ImageManager::GetBigPicture(int code, float zoom) {
 	tBigPicture = addTexture(name, img, origsize.Width * zoom, origsize.Height * zoom);
 	return tBigPicture;
 }
-int ImageManager::LoadThumbThread() {
+void ImageManager::LoadThumbThread() {
 	while(true) {
 		imageManager.tThumbLoadingMutex.lock();
 		imageManager.tThumbLoadingThreadRunning = !imageManager.tThumbLoadingCodes.empty();
@@ -432,7 +432,6 @@ int ImageManager::LoadThumbThread() {
 			imageManager.tThumbLoadingMutex.unlock();
 		}
 	}
-	return 0;
 }
 /** Load managed card thumbnail texture.
  * @return Texture pointer. Should NOT be removed nor dropped. */
