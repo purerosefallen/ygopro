@@ -4,6 +4,7 @@
 #ifdef YGOPRO_SERVER_MODE
 #include "data_manager.h"
 #include "deck_manager.h"
+#include "mysocket.h"
 #include "replay.h"
 #ifdef SERVER_ZIP_SUPPORT
 #include "CFileSystem.h"
@@ -31,6 +32,7 @@ namespace irr {
 #include <chrono>
 #include <utility>
 #ifdef _WIN32
+#include <windows.h>
 #include <timeapi.h>
 #else
 #include <spawn.h>
@@ -315,7 +317,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X vs.VIGVANGS", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X ChaosTime", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -735,7 +737,7 @@ bool Game::Initialize() {
 	wCardSelect->setVisible(false);
 	for(int i = 0; i < 5; ++i) {
 		stCardPos[i] = env->addStaticText(L"", irr::core::rect<irr::s32>(30 + 125 * i, 30, 150 + 125 * i, 50), true, false, wCardSelect, -1, true);
-		stCardPos[i]->setBackgroundColor(0xffffffff);
+		stCardPos[i]->setBackgroundColor(CARD_LIST_DEFAULT_BACKGROUND_COLOR);
 		stCardPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 		btnCardSelect[i] = env->addButton(irr::core::rect<irr::s32>(30 + 125 * i, 55, 150 + 125 * i, 225), wCardSelect, BUTTON_CARD_0 + i);
 		btnCardSelect[i]->setUseAlphaChannel(true);
@@ -748,7 +750,7 @@ bool Game::Initialize() {
 	wCardDisplay->setVisible(false);
 	for(int i = 0; i < 5; ++i) {
 		stDisplayPos[i] = env->addStaticText(L"", irr::core::rect<irr::s32>(30 + 125 * i, 30, 150 + 125 * i, 50), true, false, wCardDisplay, -1, true);
-		stDisplayPos[i]->setBackgroundColor(0xffffffff);
+		stDisplayPos[i]->setBackgroundColor(CARD_LIST_DEFAULT_BACKGROUND_COLOR);
 		stDisplayPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 		btnCardDisplay[i] = env->addButton(irr::core::rect<irr::s32>(30 + 125 * i, 55, 150 + 125 * i, 225), wCardDisplay, BUTTON_DISPLAY_0 + i);
 		btnCardDisplay[i]->setUseAlphaChannel(true);
