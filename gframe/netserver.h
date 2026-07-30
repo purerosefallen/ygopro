@@ -3,6 +3,7 @@
 
 #include "bufferio.h"
 #include "network.h"
+#include "../ocgcore/ocgapi.h"
 
 namespace ygo {
 
@@ -10,15 +11,19 @@ class NetServer {
 private:
 	static unsigned char net_server_write[SIZE_NETWORK_BUFFER];
 	static size_t last_sent;
+	static bufferevent* disconnecting_bev;
+	static int WriteBufferEvent(bufferevent* bufev, const void* data, size_t size);
+
+	static bool CanWriteToPlayer(DuelPlayer* dp) {
+		return dp && dp->bev && dp->bev != disconnecting_bev;
+	}
 
 public:
+	static bool StartServer(unsigned short port, unsigned int ip = 0, unsigned short* out_actual_port = nullptr, bool enable_broadcast = true);
 #ifdef YGOPRO_SERVER_MODE
 	static void InitDuel();
 	static void InitTestCard(int code);
-	static unsigned short StartServer(unsigned short port);
-	static bool IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len);
-#else
-	static bool StartServer(unsigned short port);
+	static bool IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len);
 #endif //YGOPRO_SERVER_MODE
 	static bool IsRunning();
 	static DuelMode* GetDuelMode();
@@ -26,12 +31,14 @@ public:
 	static void StopServer();
 	static void StopBroadcast();
 	static void StopListen();
-	static void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
-	static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
+	static void StartDuelTimer();
+	static void StopDuelTimer();
+	static void BroadcastEvent(EventSocket fd, short events, void* arg);
+	static void ServerAccept(evconnlistener* listener, EventSocket fd, sockaddr* address, int socklen, void* ctx);
 	static void ServerAcceptError(evconnlistener *listener, void* ctx);
 	static void ServerEchoRead(bufferevent* bev, void* ctx);
 	static void ServerEchoEvent(bufferevent* bev, short events, void* ctx);
-	static int ServerThread();
+	static void ServerThread();
 	static void DisconnectPlayer(DuelPlayer* dp);
 	static void HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, size_t len);
 	static size_t CreateChatPacket(unsigned char* src, int src_size, unsigned char* dst, uint16_t dst_player_type);
@@ -51,8 +58,8 @@ public:
 		BufferIO::Write<uint16_t>(p, 1);
 		BufferIO::Write<uint8_t>(p, proto);
 		last_sent = 3;
-		if (dp)
-			bufferevent_write(dp->bev, net_server_write, 3);
+		if (CanWriteToPlayer(dp))
+			WriteBufferEvent(dp->bev, net_server_write, 3);
 	}
 	template<typename ST>
 	static void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, const ST& st) {
@@ -62,8 +69,8 @@ public:
 		BufferIO::Write<uint8_t>(p, proto);
 		std::memcpy(p, &st, sizeof(ST));
 		last_sent = sizeof(ST) + 3;
-		if (dp)
-			bufferevent_write(dp->bev, net_server_write, sizeof(ST) + 3);
+		if (CanWriteToPlayer(dp))
+			WriteBufferEvent(dp->bev, net_server_write, sizeof(ST) + 3);
 	}
 	static void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len) {
 		auto p = net_server_write;
@@ -73,19 +80,19 @@ public:
 		BufferIO::Write<uint8_t>(p, proto);
 		std::memcpy(p, buffer, len);
 		last_sent = len + 3;
-		if (dp)
-			bufferevent_write(dp->bev, net_server_write, len + 3);
+		if (CanWriteToPlayer(dp))
+			WriteBufferEvent(dp->bev, net_server_write, len + 3);
 	}
 	static void ReSendToPlayer(DuelPlayer* dp) {
-		if(dp)
-			bufferevent_write(dp->bev, net_server_write, last_sent);
+		if (CanWriteToPlayer(dp))
+			WriteBufferEvent(dp->bev, net_server_write, last_sent);
 	}
 #ifdef YGOPRO_SERVER_MODE
 	static void ReSendToPlayers(DuelPlayer* dp1, DuelPlayer* dp2) {
-		if(dp1)
-			bufferevent_write(dp1->bev, net_server_write, last_sent);
-		if(dp2)
-			bufferevent_write(dp2->bev, net_server_write, last_sent);
+		if(CanWriteToPlayer(dp1))
+			WriteBufferEvent(dp1->bev, net_server_write, last_sent);
+		if(CanWriteToPlayer(dp2))
+			WriteBufferEvent(dp2->bev, net_server_write, last_sent);
 	}
 #endif //YGOPRO_SERVER_MODE
 };

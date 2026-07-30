@@ -1,11 +1,15 @@
 #ifndef SOUNDMANAGER_H
 #define SOUNDMANAGER_H
 
-#include "game.h"
 #include <random>
-#ifdef YGOPRO_USE_MINIAUDIO
-#include <miniaudio.h>
-#endif
+#include <string>
+#include <vector>
+
+namespace irr {
+	namespace gui {
+		class IGUIElement;
+	}
+}
 
 namespace ygo {
 
@@ -17,20 +21,17 @@ private:
 	bool bgm_process { false };
 	std::mt19937 rnd;
 #ifdef YGOPRO_USE_MINIAUDIO
-	ma_engine_config engineConfig;
-#ifdef YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS
-	ma_resource_manager_config resourceManagerConfig;
-	ma_resource_manager resourceManager;
+	struct MiniAudioImpl;
+	MiniAudioImpl* miniAudio{};
 #endif
-	ma_engine engineSound;
-	ma_engine engineMusic;
-	ma_sound soundBGM;
-	wchar_t currentPlayingMusic[1024]{};
-	ma_sound* playingSoundEffect[10]{};
-#endif
-	void RefershBGMDir(std::wstring path, int scene);
+	void RefreshBGMDir(std::wstring path, int scene);
 
 public:
+	SoundManager() = default;
+	SoundManager(const SoundManager&) = delete;
+	SoundManager& operator=(const SoundManager&) = delete;
+	~SoundManager();
+
 	bool Init();
 	void RefreshBGMList();
 	void PlaySound(wchar_t* sound);
@@ -40,7 +41,7 @@ public:
 	void PlayMusic(wchar_t* music, bool loop);
 	void PlayBGM(int scene);
 	void PlayCustomBGM(wchar_t* BGMName);
-	void PlayCustomSound(wchar_t* SoundName);	
+	void PlayCustomSound(wchar_t* SoundName);
 	void StopBGM();
 	void StopSound();
 	void SetSoundVolume(int volume);

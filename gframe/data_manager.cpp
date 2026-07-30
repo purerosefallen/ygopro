@@ -3,6 +3,8 @@
 #ifndef YGOPRO_SERVER_MODE
 #include "client_card.h"
 #endif
+#include "file_system.h"
+#include <sqlite3.h>
 
 namespace ygo {
 
