@@ -12,7 +12,7 @@ if SERVER_MODE then
 
     files {
         "gframe.cpp", "config.h",
-        "game.cpp", "game.h", "myfilesystem.h",
+        "game.cpp", "game.h", "file_system.cpp", "file_system.h",
         "deck_manager.cpp", "deck_manager.h",
         "data_manager.cpp", "data_manager.h",
         "replay.cpp", "replay.h",
@@ -26,20 +26,10 @@ if SERVER_MODE then
         defines { "SERVER_PRO3_SUPPORT" }
     end
 
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
-    links { "ocgcore", "lzma", "sqlite3", "event" }
-
     if SERVER_ZIP_SUPPORT then
-        defines { "SERVER_ZIP_SUPPORT" }
-        links { "irrlicht" }
+        defines { "SERVER_ZIP_SUPPORT", "_IRR_STATIC_LIB_" }
         if BUILD_IRRLICHT then
-            includedirs { IRRLICHT_INCLUDE_DIR, "../irrlicht/source/Irrlicht", ZLIB_INCLUDE_DIR }
-        end
-        if BUILD_ZLIB then
-            links { "zlib" }
-        else
-            links { ZLIB_LIB_NAME }
-            libdirs { ZLIB_LIB_DIR }
+            includedirs { "../irrlicht/source/Irrlicht" }
         end
     end
 
@@ -50,82 +40,51 @@ if SERVER_MODE then
         defines { "SERVER_TAG_SURRENDER_CONFIRM" }
     end
 else
-project "YGOPro"
-    kind "WindowedApp"
-    rtti "Off"
-    if USE_OPENMP then
-        openmp "On"
-    end
+    project "YGOPro"
+        kind "WindowedApp"
+        rtti "Off"
+        if USE_OPENMP then
+            openmp "On"
+        end
 
-    defines { "_IRR_STATIC_LIB_" }
-    files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
-    links { "ocgcore", "lzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
+        defines { "_IRR_STATIC_LIB_" }
+        files {
+            "*.cpp", "*.h",
+            "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h",
+            "CXMLRegistry/*.cpp", "CXMLRegistry/*.h"
+        }
 end
-    if not OCGCORE_DYNAMIC then
-        if BUILD_LUA then
-            links { "lua" }
-        else
-            links { LUA_LIB_NAME }
-            libdirs { LUA_LIB_DIR }
+
+    includedirs { "../ocgcore" }
+    links { "ocgcore" }
+
+    for _, dep in ipairs(DEPENDENCIES_METADATA) do
+        if DependencyEnabled(dep) and (dep.name ~= "lua" or not OCGCORE_DYNAMIC) then
+            local upper = string.upper(dep.name)
+            if dep.name == "freetype" and BUILD_FREETYPE then
+                -- Add custom include directory for FreeType before the default include directory.
+                includedirs { FREETYPE_CUSTOM_INCLUDE_DIR }
+            end
+            includedirs { _G[upper .. "_INCLUDE_DIR"] }
+            if _G["BUILD_" .. upper] then
+                -- Source-built dependencies are linked by their Premake project names.
+                links { dep.name }
+            else
+                links { _G[upper .. "_LIB_NAME"] }
+                libdirs { _G[upper .. "_LIB_DIR"] }
+            end
         end
     end
 
-    if not BUILD_EVENT then
-        libdirs { EVENT_LIB_DIR }
-        links { "event_pthreads" }
-    end
-
-if not SERVER_MODE then
-    if not BUILD_IRRLICHT then
-        libdirs { IRRLICHT_LIB_DIR }
-    end
-end
-
-if not SERVER_MODE then
-    if BUILD_JPEG then
-        links { "jpeg" }
-    else
-        links { JPEG_LIB_NAME }
-        libdirs { JPEG_LIB_DIR }
-    end
-
-    if not BUILD_PNG then
-        libdirs { PNG_LIB_DIR }
-    end
-
-    if BUILD_ZLIB then
-        links { "zlib" }
-    else
-        links { ZLIB_LIB_NAME }
-        libdirs { ZLIB_LIB_DIR }
-    end
-end
-
-if not SERVER_MODE then
-    if BUILD_FREETYPE then
-        includedirs { FREETYPE_CUSTOM_INCLUDE_DIR, FREETYPE_INCLUDE_DIR }
-    else
-        includedirs { FREETYPE_INCLUDE_DIR }
-        libdirs { FREETYPE_LIB_DIR }
-    end
-end
-
-    if not BUILD_SQLITE then
-        libdirs { SQLITE_LIB_DIR }
-    end
-
-    if not BUILD_LZMA then
-        libdirs { LZMA_LIB_DIR }
+    if not BUILD_EVENT and not os.istarget("windows") then
+        links { EVENT_PTHREADS_LIB_NAME }
     end
 
 if not SERVER_MODE then
     if USE_SIMD == "none" then
         defines { "STBIR_NO_SIMD" }
     end
-end
 
-if not SERVER_MODE then
     if USE_AUDIO then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
@@ -136,8 +95,8 @@ if not SERVER_MODE then
                 defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
                 includedirs { MINIAUDIO_OPUS_INCLUDE_DIR, MINIAUDIO_VORBIS_INCLUDE_DIR }
                 if not MINIAUDIO_BUILD_OPUS_VORBIS then
-                    links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
-                    libdirs { OPUS_LIB_DIR, OPUSFILE_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
+                    links { OPUSFILE_LIB_NAME, VORBISFILE_LIB_NAME, OPUS_LIB_NAME, VORBIS_LIB_NAME, OGG_LIB_NAME }
+                    libdirs { OPUSFILE_LIB_DIR, OPUS_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
                 end
             end
         end
@@ -149,6 +108,7 @@ end
             entrypoint "mainCRTStartup"
         end
         files "ygopro.rc"
+        defines { "NOMINMAX=1", "WIN32_LEAN_AND_MEAN" }
         if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
             targetname "AI.Server"
         end
