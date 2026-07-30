@@ -4,6 +4,13 @@
 #include <event2/thread.h>
 #include <clocale>
 #include <memory>
+#ifdef _WIN32
+#include <WinSock2.h>
+#include <windows.h>
+#include <shellapi.h>
+#else
+#include <signal.h>
+#endif
 
 #ifdef YGOPRO_SERVER_MODE
 #include "base64.h"
@@ -63,6 +70,7 @@ int main(int argc, char* argv[]) {
 	evthread_use_windows_threads();
 #else
 	evthread_use_pthreads();
+	signal(SIGCHLD, SIG_IGN);
 #endif //_WIN32
 	ygo::Game _game;
 #ifdef YGOPRO_SERVER_MODE

@@ -14,22 +14,30 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz?sha256sum=4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae | tar zfx -
     - mv lua-5.4.8 lua
     # sqlite3
-    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3510300.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3510300 sqlite3
+    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3530300.tar.gz?sha256sum=c917d7db16648ec95f714974ace5e5dcf46b7dc70e26600a0a102a3141125db0 | tar zfx -
+    - mv sqlite-autoconf-3530300 sqlite3
     # freetype
-    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.2.tar.gz | tar zfx -
-    # - mv freetype-2.14.2 freetype
+    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.3.tar.gz?sha256sum=e61b31ab26358b946e767ed7eb7f4bb2e507da1cfefeb7a8861ace7fd5c899a1 | tar zfx -
+    # - mv freetype-2.14.3 freetype
     # event
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
-    - mv libevent-2.1.12-stable event
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz?sha256sum=f7e9383b8c0baa81b687e5b5eecc01beefaf1b19b64151d95ed61647fe7a315c | tar zfx -
+    - mv libevent-2.1.13-stable event
+    # libjpeg-turbo
+    # - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz?sha256sum=6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e | tar zfx -
+    # - mv libjpeg-turbo-3.2.0 jpeg
+    # - cp jpeg/src/jversion.h.in jpeg/src/jversion.h
+    # libpng
+    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/libpng/libpng-1.6.58.tar.gz?sha256sum=8c9b05b675ca7301a458df2c2e46f26e1d41ff36b8863f8c33530bc58c2e6225 | tar zfx -
+    # - mv libpng-1.6.58 png
+    # - cp png/scripts/pnglibconf.h.prebuilt png/pnglibconf.h
     # zlib
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz?sha256sum=bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16 | tar zfx -
     - mv zlib-1.3.2 zlib
     # lzma
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz?sha256sum=3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0 | tar zfx -
     - mv xz-5.8.3 lzma
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
@@ -43,6 +51,8 @@ mat_common:
       #- freetype
       - sqlite3
       - event
+      #- jpeg
+      #- png
       - zlib
       - lzma
       - irrlicht
@@ -95,9 +105,14 @@ mat_windows:
     # premake5.exe
     - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
     - 7z x -y premake-5.0.0-beta8-windows.zip
+    # nasm.exe
+    # - wget -O nasm-3.02-win64.zip https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.02/win64/nasm-3.02-win64.zip?sha256sum=161d0bfaff53c2f9e9f3e69fd0672323ebabafd1268976a5cec11be92a19aee7
+    # - 7z x -y nasm-3.02-win64.zip
+    # - cp nasm-3.02/nasm.exe .
   artifacts:
     paths:
       - premake5.exe
+      #- nasm.exe
 
 ._exec_build:
   stage: build
@@ -105,6 +120,7 @@ mat_windows:
     # NO_LUA_SAFE: '1' # on client no lua safe
     GIT_STRATEGY: clone
     USE_SIMD: 'server'
+    BUILD_ALL: '1'
   #cache:
   #  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
   #  paths:
@@ -116,12 +132,6 @@ mat_windows:
   tags:
     - vs
   variables:
-    BUILD_LUA: '1'
-    BUILD_SQLITE: '1'
-    BUILD_IRRLICHT: '1'
-    BUILD_EVENT: '1'
-    BUILD_ZLIB: '1'
-    BUILD_LZMA: '1'
     VS2026_WIN7_SUPPORT: '1'
   dependencies:
     - mat_common
@@ -135,8 +145,10 @@ mat_windows:
 
 exec_windows:
   extends: .exec_windows
+  variables:
+    SERVER_ZIP_SUPPORT: '1'
   script:
-    - '.\premake5.exe vs2026 --server-zip-support'
+    - '.\premake5.exe vs2026'
     - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -146,8 +158,9 @@ exec_windows_pro2:
   extends: .exec_windows
   variables:
     USE_SIMD: 'best'
+    SERVER_PRO2_SUPPORT: '1'
   script:
-    - '.\premake5.exe vs2026 --server-pro2-support'
+    - '.\premake5.exe vs2026'
     - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -157,8 +170,10 @@ exec_windows_pro3:
   extends: .exec_windows
   variables:
     USE_SIMD: 'best'
+    SERVER_PRO3_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
   script:
-    - '.\premake5.exe vs2026 --server-pro3-support --log-in-chat'
+    - '.\premake5.exe vs2026'
     - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -168,8 +183,11 @@ exec_windows_mdpro2:
   extends: .exec_windows
   variables:
     USE_SIMD: 'best'
+    SERVER_PRO3_SUPPORT: '1'
+    SERVER_PRO2_SUPPORT: '1'
+    LOG_IN_CHAT: '1'
   script:
-    - '.\premake5.exe vs2026 --server-pro3-support --log-in-chat --server-pro2-support'
+    - '.\premake5.exe vs2026'
     - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
     - mkdir dist\windows
@@ -212,17 +230,13 @@ exec_windows_mdpro2:
 .exec_linux:
   extends: .exec_linux_common
   variables:
-    BUILD_EVENT: '1'
-    BUILD_IRRLICHT: '1'
-    BUILD_SQLITE: '1'
-    BUILD_ZLIB: '1'
-    BUILD_LZMA: '1'
     SERVER_ZIP_SUPPORT: '1'
     RELEASE_DIR: linux-x64
 
 .exec_debian:
   extends: .exec_linux_common
   variables:
+    BUILD_ALL: '0'
     LUA_DEB: '1'
     NO_BUILD_EVENT: '1'
     NO_BUILD_SQLITE: '1'
@@ -284,18 +298,13 @@ exec_android_pro3:
     - .exec_linux_common
     - .use_pro3_linux
   variables:
-    BUILD_EVENT: '1'
-    BUILD_IRRLICHT: '1'
-    BUILD_SQLITE: '1'
-    BUILD_ZLIB: '1'
-    BUILD_LZMA: '1'
     RELEASE_DIR: android-arm64
     MAKE_CONFIG: release_android_arm64
     TARGET_OUTPUT_DIR: bin/android_arm64/release
     NDK_DIR: android-ndk-r23b
     ANDROID_API_LEVEL: '26'
   before_script:
-    - wget -O android-ndk-r23b-linux.zip https://mat-cacher.moenext.com/https://dl.google.com/android/repository/android-ndk-r23b-linux.zip
+    - wget -O android-ndk-r23b-linux.zip https://mat-cacher.moenext.com/https://dl.google.com/android/repository/android-ndk-r23b-linux.zip?sha256sum=c6e97f9c8cfe5b7be0a9e6c15af8e7a179475b7ded23e2d1c1fa0945d6fb4382
     - 7z x -y android-ndk-r23b-linux.zip
 
 exec_debianarm:
@@ -314,11 +323,6 @@ exec_debianarm:
     - mat_submodules
   variables:
     PREMAKE5_BIN: ./premake5
-    BUILD_IRRLICHT: '1'
-    BUILD_SQLITE: '1'
-    BUILD_EVENT: '1'
-    BUILD_ZLIB: '1'
-    BUILD_LZMA: '1'
     SERVER_ZIP_SUPPORT: '1'
   before_script:
     - rm -rf sqlite3/VERSION sqlite3/version
