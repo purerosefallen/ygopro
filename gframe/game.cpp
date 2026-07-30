@@ -3229,7 +3229,7 @@ void Game::InjectEnvToRegistry(intptr_t pduel) {
 	FreeEnvironmentStringsW(env_block);
 #else
 	const std::string prefix = "YGOPRO_ENV_";
-	for (char** env = environ; *env != nullptr; ++env) {
+	for (char** env = GetEnviron(); *env != nullptr; ++env) {
 		std::string entry(*env);
 		if (entry.compare(0, prefix.size(), prefix) == 0) {  // 以 prefix 开头
 			auto eq_pos = entry.find('=');
