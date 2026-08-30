@@ -1,18 +1,13 @@
 #ifndef YGOPRO_CONFIG_H
 #define YGOPRO_CONFIG_H
 
-#define IRR_COMPILE_WITH_DX9_DEV_PACK
-
-#include <cerrno>
 #include <cstdio>
 #include <string>
 #include <vector>
 #include "bufferio.h"
-#include "../ocgcore/ocgapi.h"
+#include "../ocgcore/common.h"
 
 #ifdef _WIN32
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
 #define mywcsncasecmp _wcsnicmp
 #define mystrncasecmp _strnicmp
 #else
@@ -20,16 +15,12 @@
 #define mystrncasecmp strncasecmp
 #endif
 
-#else //_WIN32
-
-#define mywcsncasecmp wcsncasecmp
-#define mystrncasecmp strncasecmp
-
+#ifndef _WIN32
 #include <wchar.h>
 inline int _wtoi(const wchar_t * str){
 	return (int)wcstol(str, 0, 10);
 }
-#endif // _WIN32
+#endif
 
 template<size_t N, typename... TR>
 inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
@@ -43,8 +34,6 @@ template<typename T>
 inline T myclamp(T v, T lo, T hi) {
 	return (v < lo) ? lo : (hi < v) ? hi : v;
 }
-
-#include <irrlicht.h>
 
 #if defined(_MSC_VER)
 #  define SHARE_VERSION __declspec(selectany)
