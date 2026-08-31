@@ -166,6 +166,8 @@ exec_windows:
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
+  variables:
+    DISPLAY_BACKEND: 'x11,wayland'
   dependencies:
     - mat_common
     #- mat_linux

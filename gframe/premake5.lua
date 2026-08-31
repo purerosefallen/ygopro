@@ -5,7 +5,7 @@ project "YGOPro"
         openmp "On"
     end
 
-    defines { "_IRR_STATIC_LIB_" }
+    dofile("../irrlicht/defines.lua")
     files { "*.cpp", "*.h", "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h", "CXMLRegistry/*.cpp", "CXMLRegistry/*.h" }
     includedirs { "../ocgcore" }
     links { "ocgcore" }
@@ -55,10 +55,14 @@ project "YGOPro"
     end
 
     filter "system:windows"
-        entrypoint "mainCRTStartup"
         files "ygopro.rc"
         links { "ws2_32", "Dnsapi", "iphlpapi", "winmm" }
         defines { "NOMINMAX=1", "WIN32_LEAN_AND_MEAN" }
+        if USE_DXSDK then
+            defines { "IRR_COMPILE_WITH_DX9_DEV_PACK" }
+        else
+            defines { "NO_IRR_COMPILE_WITH_DIRECT3D_9_" }
+        end
 
     filter "not system:windows"
         links { "resolv" }
@@ -71,7 +75,14 @@ project "YGOPro"
         defines { "GL_SILENCE_DEPRECATION" }
 
     filter "system:linux"
-        links { "GL", "X11", "dl", "pthread" }
+        defines { "YGOPRO_FONT_WINDOW_SCALED" }
+        links { "GL", "dl", "pthread" }
+        if IRR_BUILD_X11 then
+            links { "X11" }
+        end
+        if IRR_WAYLAND_DIRECT_LINK then
+            links { "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon", "EGL", "decor-0" }
+        end
         if USE_OPENMP then
             linkoptions { "-fopenmp" }
         end

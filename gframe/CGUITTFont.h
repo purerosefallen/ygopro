@@ -31,15 +31,37 @@
 #ifndef __C_GUI_TTFONT_H_INCLUDED__
 #define __C_GUI_TTFONT_H_INCLUDED__
 
-#include <irrlicht.h>
 #include <ft2build.h>
-#include "irrUString.h"
 #include FT_FREETYPE_H
+
+#include <IGUIFont.h>
+#include <irrArray.h>
+#include <irrMap.h>
+#include <path.h>
+#include "irrUString.h"
+
+namespace irr {
+	class IrrlichtDevice;
+	namespace scene {
+		class IMesh;
+		class ISceneManager;
+		class ISceneNode;
+		struct SMesh;
+	}
+	namespace video {
+		class IImage;
+		class ITexture;
+		class IVideoDriver;
+	}
+	namespace gui {
+		class IGUIEnvironment;
+		struct SGUITTFace;
+		class CGUITTFont;
+	}
+}
 
 namespace irr {
 namespace gui {
-struct SGUITTFace;
-class CGUITTFont;
 
 //! Class to assist in deleting glyphs.
 class CGUITTAssistDelete {
@@ -100,38 +122,11 @@ struct SGUITTGlyph {
 //! Holds a sheet of glyphs.
 class CGUITTGlyphPage {
 public:
-	CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name) :  driver(Driver), name(texture_name) {}
-	~CGUITTGlyphPage() {
-		if (texture) {
-			if (driver)
-				driver->removeTexture(texture);
-			else texture->drop();
-		}
-	}
+	CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name);
+	~CGUITTGlyphPage();
 
 	//! Create the actual page texture,
-	bool createPageTexture(const u8& pixel_mode, const core::dimension2du& texture_size) {
-		if( texture )
-			return false;
-
-		bool flgmip = driver->getTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS);
-		driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-
-		// Set the texture color format.
-		switch (pixel_mode) {
-		case FT_PIXEL_MODE_MONO:
-			texture = driver->addTexture(texture_size, name, video::ECF_A1R5G5B5);
-			break;
-		case FT_PIXEL_MODE_GRAY:
-		default:
-			texture = driver->addTexture(texture_size, name, video::ECF_A8R8G8B8);
-			break;
-		}
-
-		// Restore our texture creation flags.
-		driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, flgmip);
-		return texture ? true : false;
-	}
+	bool createPageTexture(const u8& pixel_mode, const core::dimension2du& texture_size);
 
 	//! Add the glyph to a list of glyphs to be paged.
 	//! This collection will be cleared after updateTexture is called.
@@ -140,39 +135,7 @@ public:
 	}
 
 	//! Updates the texture atlas with new glyphs.
-	void updateTexture() {
-		if (!dirty) return;
-
-		if (!texture) {
-			if (!createPageTexture(pixel_mode, texture_size))
-				// TODO: add error message?
-				return;
-		}
-
-		void* ptr = texture->lock();
-		video::ECOLOR_FORMAT format = texture->getColorFormat();
-		core::dimension2du size = texture->getOriginalSize();
-		video::IImage* pageholder = driver->createImageFromData(format, size, ptr, true, false);
-
-		for (u32 i = 0; i < glyph_to_be_paged.size(); ++i) {
-			const SGUITTGlyph* glyph = glyph_to_be_paged[i];
-			if (glyph && glyph->isLoaded) {
-				if (glyph->surface) {
-					glyph->surface->copyTo(pageholder, glyph->source_rect.UpperLeftCorner);
-					glyph->surface->drop();
-					glyph->surface = 0;
-				} else {
-					; // TODO: add error message?
-					//currently, if we failed to create the image, just ignore this operation.
-				}
-			}
-		}
-
-		pageholder->drop();
-		texture->unlock();
-		glyph_to_be_paged.clear();
-		dirty = false;
-	}
+	void updateTexture();
 
 	video::ITexture* texture{};
 	u32 available_slots{};
@@ -345,6 +308,11 @@ private:
 	explicit CGUITTFont(IGUIEnvironment *env);
 	bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
 	void reset_images();
+#ifdef YGOPRO_FONT_WINDOW_SCALED
+	void ensureScale() const;
+	s32 toLogical(s32 value) const;
+	u32 toLogical(u32 value) const;
+#endif
 	void update_glyph_pages() const;
 	void update_load_flags() {
 		// Set up our loading flags.
@@ -373,6 +341,10 @@ private:
 	FT_Face tt_face;
 	FT_Size_Metrics font_metrics;
 	FT_Int32 load_flags;
+#ifdef YGOPRO_FONT_WINDOW_SCALED
+	f32 glyph_scale;
+	u32 raster_size;
+#endif
 
 	mutable core::array<CGUITTGlyphPage*> Glyph_Pages;
 	mutable core::array<SGUITTGlyph> Glyphs;

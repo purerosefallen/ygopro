@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include "config.h"
-#include "CGUITTFont.h"
 #include "mysignal.h"
 #include "client_field.h"
 #include "deck_con.h"
@@ -14,6 +13,7 @@
 #include <list>
 #include <mutex>
 #include <functional>
+#include <irrlicht.h>
 
 #ifndef YGOPRO_DEFAULT_DUEL_RULE
 #define YGOPRO_DEFAULT_DUEL_RULE			CURRENT_RULE
@@ -23,6 +23,12 @@
 struct HWND__;
 using HWND = HWND__*;
 #endif
+
+namespace irr {
+	namespace gui {
+		class CGUITTFont;
+	}
+}
 
 namespace ygo {
 
@@ -206,6 +212,8 @@ public:
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
+	void FixFontGlitch();
+	irr::core::dimension2d<irr::u32> GetGUIFontDimension(const wchar_t* text) const;
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
 	void RefreshCardTextSearchLinks();
