@@ -6,6 +6,7 @@
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "../ocgcore/mtrandom.h"
+#include "../ocgcore/ocgapi.h"
 
 namespace ygo {
 

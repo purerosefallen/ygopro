@@ -3,20 +3,13 @@
 
 #include "config.h"
 #ifndef YGOPRO_SERVER_MODE
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else //__APPLE__
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif //__APPLE__
-#include "CGUITTFont.h"
 #include "mysignal.h"
 #include "client_field.h"
 #include "deck_con.h"
 #include "menu_handler.h"
 #include "CGUISkinSystem/CGUISkinSystem.h"
 #include <ctime>
+#include <irrlicht.h>
 #else
 #include "netserver.h"
 #endif //YGOPRO_SERVER_MODE
@@ -34,6 +27,12 @@
 struct HWND__;
 using HWND = HWND__*;
 #endif
+
+namespace irr {
+	namespace gui {
+		class CGUITTFont;
+	}
+}
 
 namespace ygo {
 
@@ -230,6 +229,8 @@ public:
 	void MainLoop();
 	void RefreshTimeDisplay();
 	void BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
+	void FixFontGlitch();
+	irr::core::dimension2d<irr::u32> GetGUIFontDimension(const wchar_t* text) const;
 	void InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text);
 	std::wstring SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos = 0);
 	void RefreshCardTextSearchLinks();

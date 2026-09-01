@@ -222,6 +222,7 @@ exec_windows_mdpro2:
   tags:
     - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
+  # DISPLAY_BACKEND: 'x11,wayland'  # client-only; server builds do not use a display backend
   dependencies:
     - mat_common
     #- mat_linux
