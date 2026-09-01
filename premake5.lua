@@ -23,6 +23,11 @@ SERVER_PRO2_SUPPORT = false
 SERVER_TAG_SURRENDER_CONFIRM = false
 SERVER_PRO3_SUPPORT = false
 
+DISPLAY_BACKEND = "auto"
+IRR_BUILD_X11 = false
+IRR_BUILD_WAYLAND = false
+IRR_WAYLAND_DIRECT_LINK = false
+
 BUILD_LZMA = os.istarget("windows")
 
 -- Available: none, server, sse2, avx2, neon, best
@@ -244,6 +249,13 @@ newoption { trigger = "build-all", category = "YGOPro", description = "Build all
 newoption { trigger = "lua-deb", category = "YGOPro - lua", description = "Use the system lua-c++ package" }
 
 newoption { trigger = "no-dxsdk", category = "YGOPro - irrlicht", description = "Do not use DirectX SDK, disable D3D9 support" }
+newoption { trigger = "display-backend", category = "YGOPro - Wayland", description = "Linux display backend(s); default: auto", value = "BACKEND", allowed = {
+    { "x11", "Build the X11 device" },
+    { "wayland", "Build the Wayland device" },
+    { "x11,wayland", "Build both Linux display devices" },
+    { "auto", "Build every Linux display device whose headers are available" },
+}}
+newoption { trigger = "wayland-direct-link", category = "YGOPro - Wayland", description = "Directly link all six Wayland runtime libraries" }
 
 newoption { trigger = "no-audio", category = "YGOPro", description = "Disable audio support" }
 newoption { trigger = "audio-lib", category = "YGOPro", description = "Specify audio library (only miniaudio is supported for now)", value = "NAME" }
@@ -515,6 +527,96 @@ end
 if GetBooleanParam("no-dxsdk") then
     USE_DXSDK = false
 end
+
+if not SERVER_MODE then
+    local requested = GetParam("display-backend")
+    DISPLAY_BACKEND = requested or DISPLAY_BACKEND
+
+    if not os.istarget("linux") then
+        if requested and requested ~= "auto" then
+            error("--display-backend is only supported for Linux targets")
+        end
+        if GetParam("wayland-direct-link") ~= nil then
+            error("--wayland-direct-link is only supported for Linux targets")
+        end
+    else
+        local valid = DISPLAY_BACKEND == "x11" or DISPLAY_BACKEND == "wayland" or
+            DISPLAY_BACKEND == "x11,wayland" or DISPLAY_BACKEND == "auto"
+        if not valid then
+            error("Unknown display backend: " .. tostring(DISPLAY_BACKEND))
+        end
+
+        local x11_header = os.findheader("X11/Xlib.h")
+        local wayland_client_header = os.findheader("wayland-client.h")
+        local wayland_egl_header = os.findheader("wayland-egl.h")
+        local wayland_cursor_header = os.findheader("wayland-cursor.h")
+        local xkb_header = os.findheader("xkbcommon/xkbcommon.h")
+        local egl_header = os.findheader("EGL/egl.h")
+        local x11_library = os.findlib("X11")
+        local wayland_client_library = os.findlib("wayland-client")
+        local wayland_egl_library = os.findlib("wayland-egl")
+        local wayland_cursor_library = os.findlib("wayland-cursor")
+        local xkb_library = os.findlib("xkbcommon")
+        local egl_library = os.findlib("EGL")
+        local x11_available = x11_header ~= nil and x11_library ~= nil
+        local decor_library = os.findlib("decor-0")
+        local wayland_available = wayland_client_header ~= nil and wayland_egl_header ~= nil and
+            wayland_cursor_header ~= nil and xkb_header ~= nil and egl_header ~= nil
+
+        if DISPLAY_BACKEND == "auto" then
+            IRR_BUILD_X11 = x11_available
+            IRR_BUILD_WAYLAND = wayland_available
+            print("display-backend auto: X11 " .. (IRR_BUILD_X11 and "enabled" or "disabled (missing X11 headers or library)"))
+            if IRR_BUILD_WAYLAND then
+                print("display-backend auto: Wayland enabled")
+            else
+                local missing = {}
+                if not wayland_client_header then table.insert(missing, "wayland-client.h") end
+                if not wayland_egl_header then table.insert(missing, "wayland-egl.h") end
+                if not wayland_cursor_header then table.insert(missing, "wayland-cursor.h") end
+                if not xkb_header then table.insert(missing, "xkbcommon/xkbcommon.h") end
+                if not egl_header then table.insert(missing, "EGL/egl.h") end
+                print("display-backend auto: Wayland disabled (missing " .. table.concat(missing, ", ") .. ")")
+            end
+        else
+            IRR_BUILD_X11 = DISPLAY_BACKEND == "x11" or DISPLAY_BACKEND == "x11,wayland"
+            IRR_BUILD_WAYLAND = DISPLAY_BACKEND == "wayland" or DISPLAY_BACKEND == "x11,wayland"
+            if IRR_BUILD_X11 and not x11_available then
+                error("X11 display backend requested, but its headers or library were not found")
+            end
+            if IRR_BUILD_WAYLAND and not wayland_available then
+                error("Wayland display backend requested, but required headers were not found")
+            end
+            print("display-backend " .. DISPLAY_BACKEND .. ": X11 " .. (IRR_BUILD_X11 and "enabled" or "disabled") ..
+                ", Wayland " .. (IRR_BUILD_WAYLAND and "enabled" or "disabled"))
+        end
+
+        if not IRR_BUILD_X11 and not IRR_BUILD_WAYLAND then
+            error("No usable Linux display backend was found")
+        end
+
+        local direct_link_requested = GetParam("wayland-direct-link") ~= nil
+        if direct_link_requested and not IRR_BUILD_WAYLAND then
+            error("--wayland-direct-link requires a Wayland display backend")
+        end
+        IRR_WAYLAND_DIRECT_LINK = IRR_BUILD_WAYLAND and direct_link_requested
+        if IRR_WAYLAND_DIRECT_LINK then
+            local missing = {}
+            if not wayland_client_library then table.insert(missing, "libwayland-client") end
+            if not wayland_egl_library then table.insert(missing, "libwayland-egl") end
+            if not wayland_cursor_library then table.insert(missing, "libwayland-cursor") end
+            if not xkb_library then table.insert(missing, "libxkbcommon") end
+            if not egl_library then table.insert(missing, "libEGL") end
+            if not decor_library then table.insert(missing, "libdecor-0") end
+            if #missing > 0 then
+                error("Direct-linked Wayland requested, but required libraries were not found: " .. table.concat(missing, ", "))
+            end
+        end
+        print("Wayland libraries: " .. (IRR_WAYLAND_DIRECT_LINK and
+            "all six directly linked" or
+            (IRR_BUILD_WAYLAND and "all six loaded at runtime" or "not used")))
+    end
+end
 if USE_DXSDK and os.istarget("windows") then
     if not os.getenv("DXSDK_DIR") then
         print("::warning:: DXSDK_DIR environment variable not set, it seems you don't have the DirectX SDK installed. DirectX mode will be disabled.")
@@ -742,19 +844,22 @@ workspace "YGOPro"
     filter { "configurations:Release", "action:vs*" }
         linktimeoptimization "On"
         staticruntime "On"
-        disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
+        disablewarnings {
+            "4996", -- Currently only some dependencies use deprecated functions.
+        }
 
     filter { "configurations:Release", "not action:vs*" }
         defines "NDEBUG"
-
-    filter { "configurations:Debug", "action:vs*" }
-        disablewarnings { "6011", "6031", "6054", "6262" }
 
     filter "action:vs*"
         cdialect "C11"
         conformancemode "On"
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
+        disablewarnings {
+            "4244", -- Intentional narrowing conversions are pervasive in the program and dependencies.
+            "4267", -- The 32-bit APIs frequently consume container sizes represented by size_t on 64-bit builds.
+        }
 
     filter "action:gmake"
         buildoptions { "-fno-strict-aliasing", "-Wno-multichar", "-Wno-format-security" }
