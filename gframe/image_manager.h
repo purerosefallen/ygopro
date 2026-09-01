@@ -1,12 +1,24 @@
 #ifndef IMAGEMANAGER_H
 #define IMAGEMANAGER_H
 
-#include "config.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <queue>
 #include <mutex>
+#include <irrTypes.h>
+
+namespace irr {
+	class IrrlichtDevice;
+	namespace io {
+		class IFileSystem;
+	}
+	namespace video {
+		class IImage;
+		class ITexture;
+		class IVideoDriver;
+	}
+}
 
 namespace ygo {
 
