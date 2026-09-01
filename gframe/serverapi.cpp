@@ -1,3 +1,5 @@
+#ifdef YGOPRO_SERVER_MODE
+
 #include "serverapi.h"
 #include "game.h"
 #include "netserver.h"
@@ -33,7 +35,7 @@ namespace ygo {
 			}
 		}
 
-		int result = main(argc, argv);
+		int result = RunServer(argc, argv);
 		for (int i = 1; i < argc; ++i) {
 			if (argv[i]) {
 				delete[] argv[i];
@@ -48,3 +50,5 @@ namespace ygo {
 		NetServer::StopServer();
 	}
 }
+
+#endif // YGOPRO_SERVER_MODE

@@ -6,5 +6,17 @@
 #ifdef __APPLE__
 #import <CoreFoundation/CoreFoundation.h>
 #endif
- 
-int main(int argc, char* argv[]);
+
+#ifdef YGOPRO_SERVER_MODE
+#ifdef _WIN32
+#define YGOPRO_SERVER_INTERNAL
+#else
+#define YGOPRO_SERVER_INTERNAL __attribute__((visibility("hidden")))
+#endif
+
+namespace ygo {
+	YGOPRO_SERVER_INTERNAL int RunServer(int argc, const char* const argv[]);
+}
+
+#undef YGOPRO_SERVER_INTERNAL
+#endif // YGOPRO_SERVER_MODE
