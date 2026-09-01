@@ -14,6 +14,7 @@
 #endif
 
 #ifdef YGOPRO_SERVER_MODE
+#include "gframe.h"
 #include "base64.h"
 #include <sstream>
 #endif
@@ -42,7 +43,7 @@ void ClickButton(irr::gui::IGUIElement* btn) {
 #endif //YGOPRO_SERVER_MODE
 
 #ifdef YGOPRO_SERVER_MODE
-static int servermain(int argc, const char* const argv[]) {
+int ygo::RunServer(int argc, const char* const argv[]) {
 #else
 static int mymain(int wargc, const wchar_t* const wargv[]) {
 #endif
@@ -376,6 +377,8 @@ static int mymain(int wargc, const wchar_t* const wargv[]) {
 	return EXIT_SUCCESS;
 }
 
+#if !defined(YGOPRO_SERVER_MODE) || !defined(SERVER_PRO3_SUPPORT)
+
 #ifdef _WIN32
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
@@ -395,7 +398,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
 	argv.reserve(wargc);
 	for(const auto& argument : utf8_arguments)
 		argv.emplace_back(argument.c_str());
-	return servermain(wargc, argv.data());
+	return ygo::RunServer(wargc, argv.data());
 #else
 	return mymain(wargc, wargv.get());
 #endif
@@ -410,7 +413,7 @@ int main(int argc, char* argv[]) {
 	std::setlocale(LC_CTYPE, "");
 #endif
 #ifdef YGOPRO_SERVER_MODE
-	return servermain(argc, argv);
+	return ygo::RunServer(argc, argv);
 #else
 	std::vector<std::wstring> wide_arguments;
 	wide_arguments.reserve(argc);
@@ -425,3 +428,5 @@ int main(int argc, char* argv[]) {
 }
 
 #endif //_WIN32
+
+#endif //!YGOPRO_SERVER_MODE || !SERVER_PRO3_SUPPORT
