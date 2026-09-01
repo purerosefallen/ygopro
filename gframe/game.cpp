@@ -1,6 +1,7 @@
 #include "config.h"
 #include "game.h"
 #include "file_system.h"
+#include "../ocgcore/ocgapi.h"
 #ifdef YGOPRO_SERVER_MODE
 #include "data_manager.h"
 #include "deck_manager.h"
@@ -16,11 +17,11 @@ namespace irr {
 }
 #endif
 #else
+#include "CGUITTFont.h"
 #include "image_manager.h"
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "sound_manager.h"
-#include "replay.h"
 #include "materials.h"
 #include "duelclient.h"
 #include "netserver.h"
@@ -317,7 +318,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X ChaosTime", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Mesmerizer", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1352,6 +1353,14 @@ void Game::BuildProjectionMatrix(irr::core::matrix4& mProjection, irr::f32 left,
 	mProjection[10] = zfar / (zfar - znear);
 	mProjection[11] = 1.0f;
 	mProjection[14] = znear * zfar / (znear - zfar);
+}
+void Game::FixFontGlitch() {
+	textFont->setTransparency(true);
+	guiFont->setTransparency(true);
+}
+// Wrapper for source files which don't include CGUITTFont.
+irr::core::dimension2d<irr::u32> Game::GetGUIFontDimension(const wchar_t* text) const {
+	return guiFont->getDimension(text);
 }
 void Game::InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::u32 cHeight, irr::gui::CGUITTFont* font, const wchar_t* text) {
 	std::wstring format_text;
@@ -3229,7 +3238,7 @@ void Game::InjectEnvToRegistry(intptr_t pduel) {
 	FreeEnvironmentStringsW(env_block);
 #else
 	const std::string prefix = "YGOPRO_ENV_";
-	for (char** env = environ; *env != nullptr; ++env) {
+	for (char** env = GetEnviron(); *env != nullptr; ++env) {
 		std::string entry(*env);
 		if (entry.compare(0, prefix.size(), prefix) == 0) {  // 以 prefix 开头
 			auto eq_pos = entry.find('=');

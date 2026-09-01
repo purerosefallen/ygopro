@@ -4,7 +4,11 @@ if SERVER_MODE then
             kind "SharedLib"
     else
         project "ygopro"
-            kind "ConsoleApp"
+            filter "system:windows"
+                kind "WindowedApp"
+            filter "system:not windows"
+                kind "ConsoleApp"
+            filter {}
     end
 
     cppdialect "C++14"
@@ -47,7 +51,7 @@ else
             openmp "On"
         end
 
-        defines { "_IRR_STATIC_LIB_" }
+        dofile("../irrlicht/defines.lua")
         files {
             "*.cpp", "*.h",
             "CGUISkinSystem/*.cpp", "CGUISkinSystem/*.h",
@@ -104,9 +108,6 @@ if not SERVER_MODE then
 end
 
     filter "system:windows"
-        if not SERVER_PRO3_SUPPORT then
-            entrypoint "mainCRTStartup"
-        end
         files "ygopro.rc"
         defines { "NOMINMAX=1", "WIN32_LEAN_AND_MEAN" }
         if SERVER_PRO2_SUPPORT and not SERVER_PRO3_SUPPORT then
@@ -116,6 +117,11 @@ end
             links { "ws2_32", "iphlpapi" }
         else
             links { "ws2_32", "Dnsapi", "iphlpapi", "winmm" }
+            if USE_DXSDK then
+                defines { "IRR_COMPILE_WITH_DX9_DEV_PACK" }
+            else
+                defines { "NO_IRR_COMPILE_WITH_DIRECT3D_9_" }
+            end
         end
 
 if not SERVER_MODE then
@@ -135,7 +141,14 @@ end
     filter "system:linux"
         links { "dl", "pthread" }
 if not SERVER_MODE then
-        links { "GL", "X11" }
+        defines { "YGOPRO_FONT_WINDOW_SCALED" }
+        links { "GL" }
+        if IRR_BUILD_X11 then
+            links { "X11" }
+        end
+        if IRR_WAYLAND_DIRECT_LINK then
+            links { "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon", "EGL", "decor-0" }
+        end
         if USE_OPENMP then
             linkoptions { "-fopenmp" }
         end
