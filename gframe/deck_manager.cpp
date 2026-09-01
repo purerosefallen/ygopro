@@ -6,6 +6,9 @@
 #include "file_system.h"
 #include "network.h"
 #include "base64.h"
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
+#include <IReadFile.h>
+#endif
 
 namespace ygo {
 
