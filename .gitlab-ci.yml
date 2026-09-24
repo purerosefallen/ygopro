@@ -308,12 +308,13 @@ exec_android_pro3:
     - wget -O android-ndk-r23b-linux.zip https://mat-cacher.moenext.com/https://dl.google.com/android/repository/android-ndk-r23b-linux.zip?sha256sum=c6e97f9c8cfe5b7be0a9e6c15af8e7a179475b7ded23e2d1c1fa0945d6fb4382
     - 7z x -y android-ndk-r23b-linux.zip
 
-exec_debianarm:
-  extends:
-    - .exec_debian
-    - .use_arm
-  variables:
-    RELEASE_DIR: debian-arm
+# TODO: Re-enable exec_debianarm during the next update after the Debian 11 builder is fixed.
+#exec_debianarm:
+#  extends:
+#    - .exec_debian
+#    - .use_arm
+#  variables:
+#    RELEASE_DIR: debian-arm
 
 
 .exec_macos_platform:
@@ -401,7 +402,7 @@ upload_to_minio:
     - exec_linux_pro3
     - exec_linuxarm_pro3
     - exec_debian
-    - exec_debianarm
+    #- exec_debianarm
     - exec_macos
   tags: 
     - linux
