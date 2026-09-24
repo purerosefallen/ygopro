@@ -244,7 +244,8 @@ exec_windows_mdpro2:
     NO_BUILD_LZMA: '1'
     RELEASE_DIR: debian-x64
   before_script:
-    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev liblzma-dev
+    - sed -i 's#http://deb.debian.org/debian-security#https://mat-cacher.moenext.com/http://deb.debian.org/debian-security#g' /etc/apt/sources.list
+    - apt-get update && apt-get -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev liblzma-dev
 
 .use_arm:
   tags:
