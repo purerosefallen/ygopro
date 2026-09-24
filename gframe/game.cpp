@@ -318,7 +318,7 @@ bool Game::Initialize() {
 	SetWindowsIcon();
 	//main menu
 	wchar_t strbuf[256];
-	myswprintf(strbuf, L"KoishiPro %X.0%X.%X Mesmerizer", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
+	myswprintf(strbuf, L"KoishiPro %X.0%X.%X OperateMe", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
 	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
@@ -1903,11 +1903,14 @@ void Game::RefreshLFList() {
 	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
 		cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
 	cbLFlist->setEnabled(gameConf.use_lflist);
-	cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
+	const int selected = gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1;
+	cbLFlist->setSelected(selected);
 	cbHostLFlist->clear();
 	for(unsigned int i = 0; i < deckManager._lfList.size(); ++i)
 		cbHostLFlist->addItem(deckManager._lfList[i].listName.c_str(), deckManager._lfList[i].hash);
-	cbHostLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbHostLFlist->getItemCount() - 1);
+	cbHostLFlist->setSelected(selected);
+	if(is_building)
+		deckBuilder.filterList = &deckManager._lfList[selected];
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
@@ -2645,7 +2648,6 @@ void Game::CloseDuelWindow() {
 	lstLog->clear();
 	logParam.clear();
 	lstHostList->clear();
-	lstServerList->clear();
 	DuelClient::hosts.clear();
 	DuelClient::hosts_srvpro.clear();
 	ClearTextures();
