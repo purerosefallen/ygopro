@@ -168,18 +168,13 @@ exec_windows:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
   variables:
     DISPLAY_BACKEND: 'x11,wayland'
-    PREMAKE_PLATFORM: 'linux'
-    PREMAKE_SHA256: 'eae0b5b0451a936d467ce0e34ea33aa53d2538e7711e12bb296b625e1e06e640'
   dependencies:
     - mat_common
     #- mat_linux
     - mat_submodules
   script:
     - ./.ci/configure-audio.sh
-    - wget -O - "https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-${PREMAKE_PLATFORM}.tar.gz?sha256sum=${PREMAKE_SHA256}" | tar zfx -
-    - chmod +x premake5
-    - ./premake5 --version
-    - ./premake5 gmake
+    - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -200,8 +195,6 @@ exec_linuxarm:
     - arm
   variables:
     OPUS_FLAGS: '-fPIC' # force position independent code for arm
-    PREMAKE_PLATFORM: 'linux-arm64'
-    PREMAKE_SHA256: 'c7e0e3a9385a89e92228e0cfa5955082df07b5997611d27c3014a5a60ee363aa'
 
 ._exec_macos_platform:
   extends: .exec_unix
