@@ -149,9 +149,6 @@ if not SERVER_MODE then
         if IRR_WAYLAND_DIRECT_LINK then
             links { "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon", "EGL", "decor-0" }
         end
-        if USE_OPENMP then
-            linkoptions { "-fopenmp" }
-        end
 end
         if USE_DYNAMIC then
             linkoptions { "-Wl,-rpath=./" }
