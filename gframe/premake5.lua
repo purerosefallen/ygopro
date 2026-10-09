@@ -83,9 +83,6 @@ project "YGOPro"
         if IRR_WAYLAND_DIRECT_LINK then
             links { "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon", "EGL", "decor-0" }
         end
-        if USE_OPENMP then
-            linkoptions { "-fopenmp" }
-        end
         if USE_DYNAMIC then
             linkoptions { "-Wl,-rpath=./" }
         else

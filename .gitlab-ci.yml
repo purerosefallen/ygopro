@@ -90,7 +90,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-macosx.tar.gz?sha256sum=81e5ca1e61101e3598182de066b3dbde03a200b0dcac69f058ec090a0471ed87 | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -103,8 +103,8 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
-    - 7z x -y premake-5.0.0-beta8-windows.zip
+    - wget -O premake-5.0.0-windows.zip https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-windows.zip?sha256sum=15e63506eed5dfd526b96c8e957a7feff2be6cfe70f46e353bfe4813b82e2fdc
+    - 7z x -y premake-5.0.0-windows.zip
     # nasm.exe
     - wget -O nasm-3.02-win64.zip https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.02/win64/nasm-3.02-win64.zip?sha256sum=161d0bfaff53c2f9e9f3e69fd0672323ebabafd1268976a5cec11be92a19aee7
     - 7z x -y nasm-3.02-win64.zip
@@ -168,13 +168,18 @@ exec_windows:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder
   variables:
     DISPLAY_BACKEND: 'x11,wayland'
+    PREMAKE_PLATFORM: 'linux'
+    PREMAKE_SHA256: 'eae0b5b0451a936d467ce0e34ea33aa53d2538e7711e12bb296b625e1e06e640'
   dependencies:
     - mat_common
     #- mat_linux
     - mat_submodules
   script:
     - ./.ci/configure-audio.sh
-    - premake5 gmake
+    - wget -O - "https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-${PREMAKE_PLATFORM}.tar.gz?sha256sum=${PREMAKE_SHA256}" | tar zfx -
+    - chmod +x premake5
+    - ./premake5 --version
+    - ./premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -195,6 +200,8 @@ exec_linuxarm:
     - arm
   variables:
     OPUS_FLAGS: '-fPIC' # force position independent code for arm
+    PREMAKE_PLATFORM: 'linux-arm64'
+    PREMAKE_SHA256: 'c7e0e3a9385a89e92228e0cfa5955082df07b5997611d27c3014a5a60ee363aa'
 
 ._exec_macos_platform:
   extends: .exec_unix
