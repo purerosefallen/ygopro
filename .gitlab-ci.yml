@@ -90,7 +90,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-macosx.tar.gz?sha256sum=81e5ca1e61101e3598182de066b3dbde03a200b0dcac69f058ec090a0471ed87 | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -103,7 +103,7 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget -O premake-5.0.0-windows.zip https://mat-cacher.moenext.com/https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-windows.zip?sha256sum=15e63506eed5dfd526b96c8e957a7feff2be6cfe70f46e353bfe4813b82e2fdc
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-windows.zip
     - 7z x -y premake-5.0.0-windows.zip
     # nasm.exe
     - wget -O nasm-3.02-win64.zip https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.02/win64/nasm-3.02-win64.zip?sha256sum=161d0bfaff53c2f9e9f3e69fd0672323ebabafd1268976a5cec11be92a19aee7
