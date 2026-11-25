@@ -1439,7 +1439,7 @@ void Game::DrawThumb(const CardDataC* cp, irr::core::vector2di pos, float mul, c
 		--credit_max_display;
 		return this_limitloc;
 	};
-	auto lfit = lflist->content.find(lcode);
+	auto lfit = lflist->content.find(cp->get_original_code());
 	if (lfit != lflist->content.end() && lfit->second >= 0 && lfit->second <= 2) {
 		auto lim_texture_offset_x = 0;
 		auto lim_texture_offset_y = 0;

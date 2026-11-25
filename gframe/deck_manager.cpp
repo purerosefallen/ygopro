@@ -186,7 +186,6 @@ static unsigned int checkAvail(unsigned int ot, unsigned int avail) {
 	return DECKERROR_NOTAVAIL;
 }
 uint32_t DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, size_t rule) {
-	std::unordered_map<uint32_t, int> ccount;
 	// rule
 	if(deck.main.size() < DECK_MIN_SIZE || deck.main.size() > DECK_MAX_SIZE)
 		return (DECKERROR_MAINCOUNT << 28) | (unsigned)deck.main.size();
@@ -198,6 +197,8 @@ uint32_t DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, size_t ru
 	if (!lflist)
 		return 0;
 	auto& list = lflist->content;
+	std::unordered_map<uint32_t, int> duel_counts;
+	std::unordered_map<uint32_t, int> limit_counts;
 	std::unordered_map<std::wstring, uint32_t> credit_used;
 	auto spend_credit = [&](uint32_t code) {
 		auto code_credit_it = lflist->credits.find(code);
@@ -223,61 +224,35 @@ uint32_t DeckManager::CheckDeck(const Deck& deck, unsigned int lfhash, size_t ru
 	unsigned int avail = 0;
 	if (rule < sizeof rule_map / sizeof rule_map[0])
 		avail = rule_map[rule];
-	for (auto& cit : deck.main) {
-		auto gameruleDeckError = checkAvail(cit->ot, avail);
-		if(gameruleDeckError)
-			return (gameruleDeckError << 28) | cit->code;
-		if (cit->type & (TYPES_EXTRA_DECK | TYPE_TOKEN))
-			return (DECKERROR_MAINCOUNT << 28);
-		auto code = cit->get_duel_code();
-		ccount[code]++;
-		int dc = ccount[code];
-		if(dc > 3)
-			return (DECKERROR_CARDCOUNT << 28) | cit->code;
-		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->code;
-		auto spend_credit_error = spend_credit(code);
-		if(spend_credit_error)
-			return spend_credit_error;
-	}
-	for (auto& cit : deck.extra) {
-		auto gameruleDeckError = checkAvail(cit->ot, avail);
-		if(gameruleDeckError)
-			return (gameruleDeckError << 28) | cit->code;
-		if (!(cit->type & TYPES_EXTRA_DECK) || cit->type & TYPE_TOKEN)
-			return (DECKERROR_EXTRACOUNT << 28);
-		auto code = cit->get_duel_code();
-		ccount[code]++;
-		int dc = ccount[code];
-		if(dc > 3)
-			return (DECKERROR_CARDCOUNT << 28) | cit->code;
-		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->code;
-		auto spend_credit_error = spend_credit(code);
-		if(spend_credit_error)
-			return spend_credit_error;
-	}
-	for (auto& cit : deck.side) {
-		auto gameruleDeckError = checkAvail(cit->ot, avail);
-		if(gameruleDeckError)
-			return (gameruleDeckError << 28) | cit->code;
-		if (cit->type & TYPE_TOKEN)
-			return (DECKERROR_SIDECOUNT << 28);
-		auto code = cit->get_duel_code();
-		ccount[code]++;
-		int dc = ccount[code];
-		if(dc > 3)
-			return (DECKERROR_CARDCOUNT << 28) | cit->code;
-		auto it = list.find(code);
-		if(it != list.end() && dc > it->second)
-			return (DECKERROR_LFLIST << 28) | cit->code;
-		auto spend_credit_error = spend_credit(code);
-		if(spend_credit_error)
-			return spend_credit_error;
-	}
-	return 0;
+	auto check_section = [&](const std::vector<const CardDataC*>& cards, uint32_t type_error, auto invalid_type) -> uint32_t {
+		for (const auto* card : cards) {
+			if (auto error = checkAvail(card->ot, avail))
+				return (error << 28) | card->code;
+			if (invalid_type(card->type))
+				return type_error << 28;
+			auto duel_code = card->get_duel_code();
+			if (++duel_counts[duel_code] > 3)
+				return (DECKERROR_CARDCOUNT << 28) | card->code;
+			auto original_code = card->get_original_code();
+			auto limit = list.find(original_code);
+			if (limit != list.end() && ++limit_counts[original_code] > limit->second)
+				return (DECKERROR_LFLIST << 28) | card->code;
+			if (auto error = spend_credit(duel_code))
+				return error;
+		}
+		return 0;
+	};
+	if (auto error = check_section(deck.main, DECKERROR_MAINCOUNT, [](uint32_t type) {
+		return type & (TYPES_EXTRA_DECK | TYPE_TOKEN);
+	}))
+		return error;
+	if (auto error = check_section(deck.extra, DECKERROR_EXTRACOUNT, [](uint32_t type) {
+		return !(type & TYPES_EXTRA_DECK) || (type & TYPE_TOKEN);
+	}))
+		return error;
+	return check_section(deck.side, DECKERROR_SIDECOUNT, [](uint32_t type) {
+		return type & TYPE_TOKEN;
+	});
 }
 uint32_t DeckManager::LoadDeck(Deck& deck, uint32_t dbuf[], uint32_t mainc, uint32_t sidec, bool is_packlist) {
 	deck.clear();
