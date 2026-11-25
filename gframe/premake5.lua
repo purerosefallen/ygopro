@@ -132,6 +132,10 @@ end
     filter "not action:vs*"
         cppdialect "C++14"
 
+    filter { "system:windows", "action:gmake" }
+        links { "opengl32", "imm32" }
+        linkoptions { "-static" }
+
     filter "system:macosx"
 if not SERVER_MODE then
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework", "Carbon.framework" }

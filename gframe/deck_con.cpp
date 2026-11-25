@@ -58,7 +58,7 @@ static inline void load_current_deck(irr::gui::IGUIComboBox* cbCategory, irr::gu
 
 DeckBuilder::DeckBuilder() {
 	std::random_device rd;
-	std::array<uint32_t, 8> seed{};
+	std::array<uint32_t, SEED_COUNT> seed{};
 	for (auto& x : seed)
 		x = rd();
 	std::seed_seq seq(seed.begin(), seed.end());
@@ -1598,8 +1598,11 @@ void DeckBuilder::FilterCards() {
 		if(filter_marks && (data.link_marker & filter_marks) != filter_marks)
 			continue;
 		if(filter_lm) {
-			if(filter_lm <= 3 && (!filterList->content.count(code) || filterList->content.at(code) != filter_lm - 1))
-				continue;
+			if (filter_lm <= 3) {
+				auto limit = filterList->content.find(data.get_original_code());
+				if (limit == filterList->content.end() || limit->second != filter_lm - 1)
+					continue;
+			}
 			if(filter_lm == 4 && !(data.ot & AVAIL_OCG))
 				continue;
 			if(filter_lm == 5 && !(data.ot & AVAIL_TCG))
@@ -1928,11 +1931,11 @@ void DeckBuilder::pop_side(int seq) {
 	GetHoveredCard();
 }
 bool DeckBuilder::check_limit(const CardDataC* pointer) {
-	auto limitcode = pointer->get_duel_code();
-	int limit = 3;
-	auto flit = filterList->content.find(limitcode);
-	if(flit != filterList->content.end())
-		limit = flit->second;
+	auto duel_code = pointer->get_duel_code();
+	auto original_code = pointer->get_original_code();
+	auto limit = filterList->content.find(original_code);
+	int duel_count = 0;
+	int limit_count = 0;
 	std::unordered_map<std::wstring, uint32_t> credit_used;
 	auto spend_credit = [&](uint32_t code) {
 		auto code_credit_it = filterList->credits.find(code);
@@ -1955,17 +1958,14 @@ bool DeckBuilder::check_limit(const CardDataC* pointer) {
 		}
 		return valid;
 	};
-	auto limitcode_has_credit = filterList->credits.find(limitcode) != filterList->credits.end();
+	auto has_credit = filterList->credits.find(duel_code) != filterList->credits.end();
 	auto handle_card = [&](const CardDataC* card) {
-		if (card->get_duel_code() == limitcode) {
-			limit--;
-			if(limit < 0)
-				return false;
-		}
-		if(!limitcode_has_credit)
-			return true;
 		auto code = card->get_duel_code();
-		return spend_credit(code);
+		if (code == duel_code && ++duel_count > 3)
+			return false;
+		if (limit != filterList->content.end() && card->get_original_code() == original_code && ++limit_count > limit->second)
+			return false;
+		return !has_credit || spend_credit(code);
 	};
 	for (auto& card : deckManager.current_deck.main) {
 		if(!handle_card(card))
