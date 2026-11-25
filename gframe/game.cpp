@@ -13,6 +13,7 @@
 #include "../ocgcore/ocgapi.h"
 #include <sstream>
 #include <regex>
+#include <algorithm>
 #include <thread>
 #include <chrono>
 #include <utility>
@@ -1534,6 +1535,7 @@ void Game::LoadExpansions(const char* expansions_path) {
 
 	auto processArchive = [&](irr::io::IFileArchive* archiveObj) {
 		auto archive = archiveObj->getFileList();
+		auto packStart = deckBuilder.expansionPacks.size();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 			const char* name = archive->getFullFileName(j).c_str();
 			auto createReader = [&]() {
@@ -1594,11 +1596,12 @@ void Game::LoadExpansions(const char* expansions_path) {
 				continue;
 			}
 		}
+		std::sort(deckBuilder.expansionPacks.begin() + packStart, deckBuilder.expansionPacks.end());
 	};
 
 	auto mountAndProcess = [&](const char* fpath) {
 		irr::u32 countBefore = dataManager.IrrFileSystem->getFileArchiveCount();
-		dataManager.IrrFileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
+		dataManager.IrrFileSystem->addFileArchive(fpath, false, false, irr::io::EFAT_ZIP);
 		for(irr::u32 i = countBefore; i < dataManager.IrrFileSystem->getFileArchiveCount(); ++i)
 			processArchive(dataManager.IrrFileSystem->getFileArchive(i));
 	};
@@ -1725,19 +1728,27 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBo
 	RefreshDeck(catepath, [cbDeck](const wchar_t* item) { cbDeck->addItem(item); });
 }
 void Game::RefreshDeck(const wchar_t* deckpath, const std::function<void(const wchar_t*)>& additem) {
-	if(!mywcsncasecmp(deckpath, L"./pack", 6)) {
+	bool isPack = !mywcsncasecmp(deckpath, L"pack", 5); // match 4 chars + 1 null terminator
+	if(isPack) {
 		for(auto& pack : deckBuilder.expansionPacks) {
 			// add pack/xxx.ydk
 			additem(pack.substr(5, pack.size() - 9).c_str());
 		}
 	}
-	FileSystem::TraversalDir(deckpath, [additem](const wchar_t* name, bool isdir) {
+	std::vector<std::wstring> localPacks;
+	FileSystem::TraversalDir(deckpath, [additem, isPack, &localPacks](const wchar_t* name, bool isdir) {
 		if (!isdir && IsExtension(name, L".ydk")) {
 			wchar_t deckname[256]{};
 			BufferIO::CopyWideString(name, deckname, std::wcslen(name) - 4);
-			additem(deckname);
+			if(isPack)
+				localPacks.emplace_back(deckname);
+			else
+				additem(deckname);
 		}
 	});
+	std::sort(localPacks.rbegin(), localPacks.rend());
+	for(const auto& pack : localPacks)
+		additem(pack.c_str());
 }
 void Game::RefreshReplay() {
 	lstReplayList->clear();
