@@ -3,7 +3,7 @@ set -x
 set -o errexit
 
 MINIAUDIO_REPO="https://github.com/mackron/miniaudio"
-MINIAUDIO_REF="0.11.25"
+MINIAUDIO_REF="0.11.26"
 
 if [ ! -d "miniaudio/.git" ]; then
   rm -rf miniaudio
@@ -29,6 +29,6 @@ install_external() {
 }
 
 install_external "ogg" "https://mat-cacher.moenext.com/https://github.com/xiph/ogg/releases/download/v1.3.6/libogg-1.3.6.tar.gz"
-install_external "opus" "https://mat-cacher.moenext.com/https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz"
+install_external "opus" "https://mat-cacher.moenext.com/https://downloads.xiph.org/releases/opus/opus-1.6.1.tar.gz"
 install_external "opusfile" "https://mat-cacher.moenext.com/https://github.com/xiph/opusfile/releases/download/v0.12/opusfile-0.12.tar.gz"
 install_external "vorbis" "https://mat-cacher.moenext.com/https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7.tar.gz"
