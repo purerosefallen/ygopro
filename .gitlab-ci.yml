@@ -20,8 +20,8 @@ mat_common:
     - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz?sha256sum=926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e | tar zfx -
     - mv sqlite-autoconf-3540100 sqlite3
     # freetype
-    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.3.tar.gz?sha256sum=e61b31ab26358b946e767ed7eb7f4bb2e507da1cfefeb7a8861ace7fd5c899a1 | tar zfx -
-    # - mv freetype-2.14.3 freetype
+    # - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.15.0.tar.gz?sha256sum=9186627467a616d9a9e3e574748ac0c45fa77398e6364edef3041a8ba8d92f64 | tar zfx -
+    # - mv freetype-2.15.0 freetype
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz?sha256sum=f7e9383b8c0baa81b687e5b5eecc01beefaf1b19b64151d95ed61647fe7a315c | tar zfx -
     - mv libevent-2.1.13-stable event
@@ -34,8 +34,8 @@ mat_common:
     # - mv libpng-1.6.59 png
     # - cp png/scripts/pnglibconf.h.prebuilt png/pnglibconf.h
     # zlib
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz?sha256sum=bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16 | tar zfx -
-    - mv zlib-1.3.2 zlib
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.4/zlib-1.4.tar.gz?sha256sum=02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584 | tar zfx -
+    - mv zlib-1.4 zlib
     # lzma
     - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz?sha256sum=0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9 | tar zfx -
     - mv xz-5.8.4 lzma
